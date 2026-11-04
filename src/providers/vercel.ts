@@ -54,13 +54,24 @@ class VercelBox implements ProviderSandbox {
     const t0 = Date.now();
     const signal = AbortSignal.timeout((opts.timeoutSeconds ?? 60) * 1000);
     try {
-      const r = await this.sbx.runCommand({
-        cmd: "sh",
-        args: ["-c", wrapCommand(cmd)],
-        cwd: opts.cwd,
-        env: opts.env,
-        signal,
-      });
+      const params = { cmd: "sh", args: ["-c", wrapCommand(cmd)], cwd: opts.cwd, env: opts.env, signal };
+      if (opts.onStdout || opts.onStderr) {
+        const running = await this.sbx.runCommand({ ...params, detached: true });
+        let stdout = "";
+        let stderr = "";
+        for await (const line of running.logs({ signal })) {
+          if (line.stream === "stdout") {
+            stdout += line.data;
+            opts.onStdout?.(line.data);
+          } else {
+            stderr += line.data;
+            opts.onStderr?.(line.data);
+          }
+        }
+        const done = await running.wait({ signal });
+        return { exitCode: done.exitCode, stdout, stderr, durationMs: Date.now() - t0 };
+      }
+      const r = await this.sbx.runCommand(params);
       const [stdout, stderr] = await Promise.all([r.stdout(), r.stderr()]);
       return { exitCode: r.exitCode, stdout, stderr, durationMs: Date.now() - t0 };
     } catch (err: any) {

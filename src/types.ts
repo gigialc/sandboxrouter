@@ -3,6 +3,7 @@ export type ProviderId = "maritime" | "e2b" | "daytona" | "modal" | "vercel";
 /** Things a caller can require of a provider. The router skips providers that lack one. */
 export type Capability =
   | "gpu" // GPU attached to the sandbox
+  | "pause" // pause() keeps the sandbox's disk; the next call or router.get() resumes it
   | "custom-image"; // start from your own image/template via spec.image
 
 /** What the caller wants. Every field is optional; providers map it to their own knobs. */
@@ -44,6 +45,10 @@ export interface ExecOptions {
   env?: Record<string, string>;
   /** Per-command timeout in seconds (default 60). */
   timeoutSeconds?: number;
+  /** Called with each chunk of stdout as it arrives. The full output is still returned. */
+  onStdout?: (chunk: string) => void;
+  /** Called with each chunk of stderr as it arrives. */
+  onStderr?: (chunk: string) => void;
 }
 
 export interface ExecResult {
@@ -60,6 +65,8 @@ export interface ProviderSandbox {
   writeFile(path: string, content: string | Uint8Array): Promise<void>;
   readFile(path: string): Promise<Uint8Array>;
   kill(): Promise<void>;
+  /** Present only on adapters with the "pause" capability. */
+  pause?(): Promise<void>;
 }
 
 export interface Provider {

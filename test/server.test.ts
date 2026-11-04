@@ -47,6 +47,15 @@ describe("HTTP API", () => {
     const ex = await (await api(`/v1/sandboxes/${id}/exec`, { method: "POST", body: JSON.stringify({ cmd: "ls" }) })).json();
     expect(ex).toMatchObject({ exitCode: 0, stdout: "ran: ls\n" });
 
+    const streamed = await (await api(`/v1/sandboxes/${id}/exec`, { method: "POST", body: JSON.stringify({ cmd: "ls", stream: true }) })).text();
+    const events = [...streamed.matchAll(/event: (\w+)\ndata: (.*)\n\n/g)].map((m) => [m[1], JSON.parse(m[2])]);
+    expect(events.slice(0, 3)).toEqual([["stdout", "ran: "], ["stderr", "warn\n"], ["stdout", "ls\n"]]);
+    expect(events[3][0]).toBe("result");
+    expect(events[3][1]).toMatchObject({ exitCode: 0, stdout: "ran: ls\n" });
+
+    expect((await api(`/v1/sandboxes/${id}/pause`, { method: "POST" })).status).toBe(200);
+    expect(fakes[1].live.get(sbx.id.split(":")[1])!.paused).toBe(true);
+
     expect((await api(`/v1/sandboxes/${id}/files?path=/a.bin`, { method: "PUT", body: new Uint8Array([1, 2, 255]) })).status).toBe(200);
     const got = new Uint8Array(await (await api(`/v1/sandboxes/${id}/files?path=/a.bin`)).arrayBuffer());
     expect([...got]).toEqual([1, 2, 255]);

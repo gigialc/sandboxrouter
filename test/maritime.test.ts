@@ -1,8 +1,8 @@
-import { execFile } from "node:child_process";
-import { mkdtempSync, rmSync } from "node:fs";
+import { execFile, spawn } from "node:child_process";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { createServer, type Server } from "node:http";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { promisify } from "node:util";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { MaritimeProvider } from "../src/providers/maritime.js";
@@ -22,10 +22,12 @@ const seen: { method: string; path: string; auth?: string; token?: string; body?
 beforeAll(async () => {
   root = mkdtempSync(join(tmpdir(), "sbr-maritime-"));
   server = createServer(async (req, res) => {
-    let raw = "";
-    for await (const c of req) raw += c;
-    const body = raw ? JSON.parse(raw) : undefined;
+    const chunks: Buffer[] = [];
+    for await (const c of req) chunks.push(c as Buffer);
+    const rawBuf = Buffer.concat(chunks);
     const url = new URL(req.url!, base);
+    const isJson = req.headers["content-type"]?.includes("json");
+    const body = isJson && rawBuf.length ? JSON.parse(rawBuf.toString()) : undefined;
     seen.push({
       method: req.method!,
       path: url.pathname,
@@ -46,10 +48,43 @@ beforeAll(async () => {
     }
     if (url.pathname === "/v1/sandboxes/sbx-test1" && req.method === "GET") return send(200, sandbox);
     if (url.pathname === "/api/sandboxes/ephemeral/sbx-test1" && req.method === "DELETE") return send(200, { ...sandbox, state: "ended" });
-    if (url.pathname === "/dp/sbx-test1/v1/commands" && req.method === "POST") {
-      if (req.headers["x-maritime-token"] !== "s3cret") return send(401, { code: "unauthorized" });
+    if (url.pathname === "/v1/sandboxes/sbx-test1/pause" && req.method === "POST") return send(200, { ...sandbox, state: "paused" });
+    const dp = url.pathname.startsWith("/dp/sbx-test1/v1/");
+    if (dp && req.headers["x-maritime-token"] !== "s3cret") return send(401, { code: "unauthenticated", message: "bad secret" });
+    if (dp && url.pathname.endsWith("/files")) {
+      const path = url.searchParams.get("path")!;
+      if (req.method === "PUT") {
+        mkdirSync(dirname(path), { recursive: true });
+        writeFileSync(path, rawBuf);
+        res.writeHead(204);
+        return res.end();
+      }
       try {
-        const { stdout, stderr } = await run("sh", ["-c", body.cmd], { cwd: body.cwd ?? root, maxBuffer: 64 * 1024 * 1024 });
+        const data = readFileSync(path);
+        res.writeHead(200, { "Content-Type": "application/octet-stream" });
+        return res.end(data);
+      } catch {
+        return send(404, { code: "file_not_found", message: path });
+      }
+    }
+    if (dp && url.pathname.endsWith("/commands") && req.method === "POST") {
+      const env = { ...process.env, ...(body.env ?? {}) };
+      if (req.headers.accept === "text/event-stream") {
+        res.writeHead(200, { "Content-Type": "text/event-stream" });
+        const child = spawn("sh", ["-c", body.cmd], { cwd: body.cwd ?? root, env });
+        let stdout = "";
+        let stderr = "";
+        const emit = (event: string, data: unknown) => res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+        child.stdout.on("data", (d) => ((stdout += d), emit("stdout", String(d))));
+        child.stderr.on("data", (d) => ((stderr += d), emit("stderr", String(d))));
+        child.on("close", (code) => {
+          emit("result", { id: "cmd-1", state: "exited", exitCode: code, stdout, stderr });
+          res.end();
+        });
+        return;
+      }
+      try {
+        const { stdout, stderr } = await run("sh", ["-c", body.cmd], { cwd: body.cwd ?? root, env, maxBuffer: 64 * 1024 * 1024 });
         return send(200, { exitCode: 0, stdout, stderr });
       } catch (e: any) {
         return send(200, { exitCode: e.code ?? 1, stdout: e.stdout ?? "", stderr: e.stderr ?? "" });
@@ -98,10 +133,11 @@ describe("MaritimeProvider", () => {
     expect(r.stdout).toBe("it's me from tmp\n");
     expect(r.stderr).toBe("err\n");
     expect(seen.at(-1)!.token).toBe("s3cret");
+    expect(seen.at(-1)!.body.env).toEqual({ GREETING: "it's me" });
     expect((await sbx.exec("exit 3")).exitCode).toBe(3);
   });
 
-  it("round-trips text and binary files, including multi-chunk ones", async () => {
+  it("round-trips text and binary files through the files endpoint", async () => {
     const sbx = await p().create({});
     const path = join(root, "nested", "dir", "a file.txt");
     await sbx.writeFile(path, "héllo 'quoted' \n world");
@@ -110,6 +146,26 @@ describe("MaritimeProvider", () => {
     const big = new Uint8Array(300 * 1024).map((_, i) => (i * 31) % 256);
     await sbx.writeFile(join(root, "big.bin"), big);
     expect(Buffer.from(await sbx.readFile(join(root, "big.bin"))).equals(Buffer.from(big))).toBe(true);
+    expect(seen.filter((s) => s.path.endsWith("/files")).map((s) => s.method)).toEqual(["PUT", "GET", "PUT", "GET"]);
+    await expect(sbx.readFile(join(root, "missing"))).rejects.toMatchObject({ status: 404 });
+  });
+
+  it("streams stdout and stderr chunks as they happen", async () => {
+    const sbx = await p().create({});
+    const events: string[] = [];
+    const r = await sbx.exec("echo one; sleep 0.2; echo two >&2; sleep 0.2; echo three; exit 4", {
+      onStdout: (c) => events.push(`out:${c.trim()}`),
+      onStderr: (c) => events.push(`err:${c.trim()}`),
+    });
+    expect(events).toEqual(["out:one", "err:two", "out:three"]);
+    expect(r).toMatchObject({ exitCode: 4, stdout: "one\nthree\n", stderr: "two\n" });
+    expect(seen.at(-1)!.body.env).toBeUndefined();
+  });
+
+  it("pauses through the control plane", async () => {
+    const sbx = await p().create({});
+    await sbx.pause!();
+    expect(seen.at(-1)).toMatchObject({ method: "POST", path: "/v1/sandboxes/sbx-test1/pause", auth: "Bearer mk_test" });
   });
 
   it("reconnects by id and ends the sandbox", async () => {

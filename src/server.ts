@@ -10,7 +10,10 @@ import { ProviderError, RouterError, type RouteOptions, type SandboxSpec } from 
  *   GET    /v1/providers
  *   POST   /v1/route                      dry run: which providers would be tried, in order
  *   POST   /v1/sandboxes                  { vcpu, memoryGb, ..., provider, strategy, fallback, require }
- *   POST   /v1/sandboxes/:id/exec         { cmd, cwd, env, timeoutSeconds }
+ *   POST   /v1/sandboxes/:id/exec         { cmd, cwd, env, timeoutSeconds, stream }
+ *          stream: true answers text/event-stream: `stdout`/`stderr` events (JSON string chunks),
+ *          then one `result` event (the ExecResult), or an `error` event
+ *   POST   /v1/sandboxes/:id/pause        keeps the disk; the next call resumes it
  *   PUT    /v1/sandboxes/:id/files?path=  raw body
  *   GET    /v1/sandboxes/:id/files?path=  raw body
  *   DELETE /v1/sandboxes/:id
@@ -67,8 +70,27 @@ export function createApp(router = new Router(), token = process.env.SANDBOXROUT
     if (req.method === "POST" && parts[3] === "exec") {
       const body = await readJson(req);
       if (typeof body.cmd !== "string" || !body.cmd) return json(res, 400, { error: "cmd (string) is required" });
-      const r = await (await box(id)).exec(body.cmd, { cwd: body.cwd, env: body.env, timeoutSeconds: body.timeoutSeconds });
-      return json(res, 200, r);
+      const sbx = await box(id);
+      const opts = { cwd: body.cwd, env: body.env, timeoutSeconds: body.timeoutSeconds };
+      if (body.stream !== true) return json(res, 200, await sbx.exec(body.cmd, opts));
+
+      res.writeHead(200, { "Content-Type": "text/event-stream", "Cache-Control": "no-cache", Connection: "keep-alive" });
+      const emit = (event: string, data: unknown) => res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+      try {
+        const r = await sbx.exec(body.cmd, { ...opts, onStdout: (c) => emit("stdout", c), onStderr: (c) => emit("stderr", c) });
+        emit("result", r);
+      } catch (err) {
+        emit("error", { error: (err as Error).message });
+      }
+      return res.end();
+    }
+
+    // POST /v1/sandboxes/:id/pause
+    if (req.method === "POST" && parts[3] === "pause" && parts.length === 4) {
+      await (await box(id)).pause();
+      // Drop the cached handle so the next call reattaches through router.get(), which resumes.
+      live.delete(id);
+      return json(res, 200, { id, paused: true });
     }
 
     // /v1/sandboxes/:id/files?path=

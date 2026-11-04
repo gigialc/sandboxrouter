@@ -150,6 +150,16 @@ export class RoutedSandbox {
     return this.box.kill();
   }
 
+  /** Pause, keeping the disk. Resume with router.get(id) or, on Maritime, any call. */
+  async pause(): Promise<void> {
+    if (!this.box.pause) throw new RouterError(`${this.provider} does not support pause; create with require: ["pause"]`);
+    await this.box.pause();
+  }
+
+  get canPause(): boolean {
+    return typeof this.box.pause === "function";
+  }
+
   async [Symbol.asyncDispose]() {
     await this.kill();
   }

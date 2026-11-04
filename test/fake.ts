@@ -1,4 +1,4 @@
-import type { ExecResult, Provider, ProviderId, ProviderSandbox, SandboxSpec } from "../src/types.js";
+import type { ExecOptions, ExecResult, Provider, ProviderId, ProviderSandbox, SandboxSpec } from "../src/types.js";
 
 /** In-memory provider for router/server tests. */
 export class FakeProvider implements Provider {
@@ -8,7 +8,7 @@ export class FakeProvider implements Provider {
 
   constructor(
     readonly id: ProviderId,
-    public opts: { configured?: boolean; fail?: string } = {},
+    public opts: { configured?: boolean; fail?: string; pause?: boolean } = {},
   ) {}
 
   configured() {
@@ -19,6 +19,7 @@ export class FakeProvider implements Provider {
     if (this.opts.fail) throw new Error(this.opts.fail);
     this.created.push(spec);
     const box = new FakeBox(`${this.id}-${++this.n}`);
+    if (this.opts.pause === false) (box as { pause?: unknown }).pause = undefined;
     this.live.set(box.nativeId, box);
     return box;
   }
@@ -33,11 +34,19 @@ export class FakeProvider implements Provider {
 export class FakeBox implements ProviderSandbox {
   files = new Map<string, Uint8Array>();
   killed = false;
+  paused = false;
   constructor(readonly nativeId: string) {}
 
-  async exec(cmd: string): Promise<ExecResult> {
+  async exec(cmd: string, opts: ExecOptions = {}): Promise<ExecResult> {
+    this.paused = false;
     if (cmd.startsWith("exit ")) return { exitCode: Number(cmd.slice(5)), stdout: "", stderr: "", durationMs: 1 };
-    return { exitCode: 0, stdout: `ran: ${cmd}\n`, stderr: "", durationMs: 1 };
+    opts.onStdout?.("ran: ");
+    opts.onStderr?.("warn\n");
+    opts.onStdout?.(`${cmd}\n`);
+    return { exitCode: 0, stdout: `ran: ${cmd}\n`, stderr: "warn\n", durationMs: 1 };
+  }
+  async pause() {
+    this.paused = true;
   }
   async writeFile(path: string, content: string | Uint8Array) {
     this.files.set(path, typeof content === "string" ? new TextEncoder().encode(content) : content);

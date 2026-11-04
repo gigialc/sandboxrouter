@@ -45,6 +45,8 @@ class E2BBox implements ProviderSandbox {
         cwd: opts.cwd,
         envs: opts.env,
         timeoutMs: (opts.timeoutSeconds ?? 60) * 1000,
+        onStdout: opts.onStdout,
+        onStderr: opts.onStderr,
       });
       return { exitCode: r.exitCode, stdout: r.stdout, stderr: r.stderr, durationMs: Date.now() - t0 };
     } catch (err: any) {
@@ -62,6 +64,11 @@ class E2BBox implements ProviderSandbox {
 
   async readFile(path: string): Promise<Uint8Array> {
     return await this.sbx.files.read(path, { format: "bytes" });
+  }
+
+  /** Snapshot memory and disk. Sandbox.connect (router.get) resumes it. */
+  async pause(): Promise<void> {
+    await this.sbx.pause();
   }
 
   async kill(): Promise<void> {

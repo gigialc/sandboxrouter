@@ -1,11 +1,15 @@
 import { DEFAULT_MEMORY_GB, DEFAULT_VCPU } from "../catalog.js";
 import { ProviderError, type ExecOptions, type ExecResult, type Provider, type ProviderSandbox, type SandboxSpec } from "../types.js";
-import { dirname, shq, toBytes, wrapCommand } from "../util.js";
+import { toBytes } from "../util.js";
+import { readSSE } from "../sse.js";
 
 /**
  * Maritime over plain REST (no SDK needed).
  * Control plane: https://api.maritime.sh  (Bearer mk_ key)
  * Data plane:    sandbox.dataPlaneUrl      (X-Maritime-Token: sandbox.secret)
+ *   POST /commands         run; with Accept: text/event-stream it streams stdout/stderr events
+ *   GET|PUT /files?path=   raw bytes
+ * Any data plane call resumes a paused sandbox.
  * Docs: https://maritime.sh/docs/ephemeral-sandboxes
  */
 export class MaritimeProvider implements Provider {
@@ -20,32 +24,42 @@ export class MaritimeProvider implements Provider {
     return !!this.apiKey;
   }
 
-  private async call<T>(method: string, url: string, body?: unknown, headers: Record<string, string> = {}): Promise<T> {
-    const res = await fetch(url, {
-      method,
-      headers: {
-        ...(body !== undefined ? { "Content-Type": "application/json" } : {}),
-        ...headers,
-      },
-      body: body !== undefined ? JSON.stringify(body) : undefined,
-    });
-    const text = await res.text();
-    let json: any = undefined;
-    try {
-      json = text ? JSON.parse(text) : {};
-    } catch {
-      /* non-JSON body */
+  /** @internal */
+  async request(method: string, url: string, init: { json?: unknown; bytes?: Uint8Array; headers?: Record<string, string> } = {}): Promise<Response> {
+    const headers: Record<string, string> = { ...init.headers };
+    let body: BodyInit | undefined;
+    if (init.json !== undefined) {
+      headers["Content-Type"] = "application/json";
+      body = JSON.stringify(init.json);
+    } else if (init.bytes) {
+      headers["Content-Type"] = "application/octet-stream";
+      body = init.bytes as unknown as BodyInit;
     }
+    const res = await fetch(url, { method, headers, body });
     if (!res.ok) {
-      const detail = json?.code ? `${json.code}: ${json.message ?? ""}` : (json?.detail ? JSON.stringify(json.detail) : text.slice(0, 300));
+      const text = await res.text();
+      let detail = text.slice(0, 300);
+      try {
+        const j = JSON.parse(text);
+        detail = j?.code ? `${j.code}: ${j.message ?? ""}` : j?.detail ? JSON.stringify(j.detail) : detail;
+      } catch {
+        /* non-JSON body */
+      }
       throw new ProviderError(this.id, `${method} ${new URL(url).pathname} -> ${res.status} ${detail}`, res.status);
     }
-    return json as T;
+    return res;
   }
 
-  private auth() {
+  /** @internal */
+  async json<T>(method: string, url: string, init: { json?: unknown; headers?: Record<string, string> } = {}): Promise<T> {
+    const text = await (await this.request(method, url, init)).text();
+    return (text ? JSON.parse(text) : {}) as T;
+  }
+
+  /** @internal */
+  control<T>(method: string, path: string, json?: unknown): Promise<T> {
     if (!this.apiKey) throw new ProviderError(this.id, "MARITIME_API_KEY is not set");
-    return { Authorization: `Bearer ${this.apiKey}` };
+    return this.json<T>(method, `${this.baseUrl}${path}`, { json, headers: { Authorization: `Bearer ${this.apiKey}` } });
   }
 
   async create(spec: SandboxSpec): Promise<ProviderSandbox> {
@@ -60,24 +74,13 @@ export class MaritimeProvider implements Provider {
     };
     if (spec.env) body.env = spec.env;
     if (spec.metadata) body.metadata = spec.metadata;
-    const sbx = await this.call<MaritimeSandboxObject>("POST", `${this.baseUrl}/api/sandboxes/ephemeral`, body, this.auth());
-    return new MaritimeSandbox(this, sbx);
+    return new MaritimeSandbox(this, await this.control<MaritimeSandboxObject>("POST", "/api/sandboxes/ephemeral", body));
   }
 
   async connect(nativeId: string): Promise<ProviderSandbox> {
-    const sbx = await this.call<MaritimeSandboxObject>("GET", `${this.baseUrl}/v1/sandboxes/${encodeURIComponent(nativeId)}`, undefined, this.auth());
+    const sbx = await this.control<MaritimeSandboxObject>("GET", `/v1/sandboxes/${encodeURIComponent(nativeId)}`);
     if (!sbx.dataPlaneUrl || !sbx.secret) throw new ProviderError(this.id, `sandbox ${nativeId} has no data plane (state: ${sbx.state})`);
     return new MaritimeSandbox(this, sbx);
-  }
-
-  /** @internal */
-  dataPlane<T>(sbx: MaritimeSandboxObject, path: string, body: unknown): Promise<T> {
-    return this.call<T>("POST", `${sbx.dataPlaneUrl}${path}`, body, { "X-Maritime-Token": sbx.secret! });
-  }
-
-  /** @internal */
-  end(id: string): Promise<unknown> {
-    return this.call("DELETE", `${this.baseUrl}/api/sandboxes/ephemeral/${encodeURIComponent(id)}`, undefined, this.auth());
   }
 }
 
@@ -85,7 +88,7 @@ interface MaritimeSandboxObject {
   id: string;
   state?: string;
   dataPlaneUrl?: string;
-  secret?: string;
+  secret?: string | null;
 }
 
 interface MaritimeCommand {
@@ -94,54 +97,75 @@ interface MaritimeCommand {
   stderr?: string;
 }
 
-// Keep each command body well under typical request limits.
-const CHUNK_B64 = 96 * 1024;
-
 class MaritimeSandbox implements ProviderSandbox {
   readonly nativeId: string;
 
   constructor(
-    private provider: MaritimeProvider,
+    private p: MaritimeProvider,
     private sbx: MaritimeSandboxObject,
   ) {
     this.nativeId = sbx.id;
   }
 
-  async exec(cmd: string, opts: ExecOptions = {}): Promise<ExecResult> {
-    const t0 = Date.now();
-    const body: Record<string, unknown> = {
-      cmd: wrapCommand(cmd, { env: opts.env }),
-      timeoutSeconds: opts.timeoutSeconds ?? 60,
-    };
-    if (opts.cwd) body.cwd = opts.cwd;
-    const r = await this.provider.dataPlane<MaritimeCommand>(this.sbx, "/commands", body);
-    return { exitCode: r.exitCode ?? -1, stdout: r.stdout ?? "", stderr: r.stderr ?? "", durationMs: Date.now() - t0 };
+  /** Data plane call; on 401 re-reads the sandbox once in case the secret was rotated. */
+  private async data(method: string, path: string, init: { json?: unknown; bytes?: Uint8Array; headers?: Record<string, string> } = {}) {
+    const go = () =>
+      this.p.request(method, `${this.sbx.dataPlaneUrl}${path}`, {
+        ...init,
+        headers: { ...init.headers, "X-Maritime-Token": this.sbx.secret ?? "" },
+      });
+    try {
+      return await go();
+    } catch (err) {
+      if (!(err instanceof ProviderError && err.status === 401)) throw err;
+      this.sbx = await this.p.control<MaritimeSandboxObject>("GET", `/v1/sandboxes/${encodeURIComponent(this.nativeId)}`);
+      return go();
+    }
   }
 
-  // The public data plane documents /commands only, so files move as base64 through the shell.
-  async writeFile(path: string, content: string | Uint8Array): Promise<void> {
-    const b64 = Buffer.from(toBytes(content)).toString("base64");
-    const tmp = `${path}.sbr-${Date.now()}`;
-    await this.must(`mkdir -p ${shq(dirname(path))} && : > ${shq(tmp)}`);
-    for (let i = 0; i < b64.length; i += CHUNK_B64) {
-      await this.must(`printf %s ${shq(b64.slice(i, i + CHUNK_B64))} >> ${shq(tmp)}`);
+  async exec(cmd: string, opts: ExecOptions = {}): Promise<ExecResult> {
+    const t0 = Date.now();
+    const body = { cmd, cwd: opts.cwd, env: opts.env, timeoutSeconds: opts.timeoutSeconds ?? 60 };
+    const streaming = !!(opts.onStdout || opts.onStderr);
+    const res = await this.data("POST", "/commands", {
+      json: body,
+      headers: streaming ? { Accept: "text/event-stream" } : {},
+    });
+
+    let result: MaritimeCommand | undefined;
+    if (streaming && res.headers.get("content-type")?.includes("text/event-stream")) {
+      for await (const ev of readSSE(res)) {
+        const payload = JSON.parse(ev.data);
+        if (ev.event === "stdout") opts.onStdout?.(payload);
+        else if (ev.event === "stderr") opts.onStderr?.(payload);
+        else if (ev.event === "result") result = payload;
+        else if (ev.event === "error") throw new ProviderError("maritime", `${payload?.code ?? "error"}: ${payload?.message ?? ev.data}`);
+      }
+      if (!result) throw new ProviderError("maritime", "output stream closed before the command finished");
+    } else {
+      result = JSON.parse(await res.text()) as MaritimeCommand;
+      // Server answered without streaming: deliver the output in one chunk.
+      if (result.stdout) opts.onStdout?.(result.stdout);
+      if (result.stderr) opts.onStderr?.(result.stderr);
     }
-    await this.must(`base64 -d < ${shq(tmp)} > ${shq(path)} && rm -f ${shq(tmp)}`);
+    return { exitCode: result.exitCode ?? -1, stdout: result.stdout ?? "", stderr: result.stderr ?? "", durationMs: Date.now() - t0 };
+  }
+
+  async writeFile(path: string, content: string | Uint8Array): Promise<void> {
+    await this.data("PUT", `/files?path=${encodeURIComponent(path)}`, { bytes: toBytes(content) });
   }
 
   async readFile(path: string): Promise<Uint8Array> {
-    const r = await this.must(`base64 < ${shq(path)} | tr -d '\\n'`);
-    return new Uint8Array(Buffer.from(r.stdout.trim(), "base64"));
+    const res = await this.data("GET", `/files?path=${encodeURIComponent(path)}`);
+    return new Uint8Array(await res.arrayBuffer());
+  }
+
+  async pause(): Promise<void> {
+    await this.p.control("POST", `/v1/sandboxes/${encodeURIComponent(this.nativeId)}/pause`);
   }
 
   async kill(): Promise<void> {
-    await this.provider.end(this.nativeId);
-  }
-
-  private async must(cmd: string): Promise<ExecResult> {
-    const r = await this.exec(cmd);
-    if (r.exitCode !== 0) throw new ProviderError("maritime", `command failed (${r.exitCode}): ${r.stderr.slice(0, 300)}`);
-    return r;
+    await this.p.control("DELETE", `/api/sandboxes/ephemeral/${encodeURIComponent(this.nativeId)}`);
   }
 }
 

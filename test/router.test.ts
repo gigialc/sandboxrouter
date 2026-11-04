@@ -89,6 +89,31 @@ describe("routing", () => {
   });
 });
 
+describe("streaming and pause", () => {
+  it("passes chunks through and still returns full output", async () => {
+    const r = new Router({ providers: fakes() });
+    const sbx = await r.create();
+    const out: string[] = [];
+    const res = await sbx.exec("ls", { onStdout: (c) => out.push(c) });
+    expect(out.join("")).toBe(res.stdout);
+  });
+
+  it("pauses where supported and explains where not", async () => {
+    const r = new Router({ providers: fakes({ maritime: { pause: false } }) });
+    const a = await r.create({}, { provider: "maritime" });
+    expect(a.canPause).toBe(false);
+    await expect(a.pause()).rejects.toThrow(/maritime does not support pause/);
+    const b = await r.create({}, { provider: "e2b" });
+    await b.pause();
+    expect(b.canPause).toBe(true);
+  });
+
+  it("require pause filters to pause-capable adapters", () => {
+    const r = new Router({ providers: fakes() });
+    expect(r.plan({}, { require: ["pause"] }).filter((c) => !c.skip).map((c) => c.provider)).toEqual(["maritime", "e2b", "daytona"]);
+  });
+});
+
 describe("ids and prices", () => {
   it("parses provider:id and keeps colons in the native id", () => {
     expect(parseId("modal:sb-1:2")).toEqual({ provider: "modal", nativeId: "sb-1:2" });

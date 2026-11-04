@@ -47,6 +47,18 @@ export class ModalProvider implements Provider {
   }
 }
 
+/** Read a text stream to the end, passing each chunk to `on`. */
+async function drain(stream: ReadableStream<string>, on?: (chunk: string) => void): Promise<string> {
+  const reader = stream.getReader();
+  let out = "";
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) return out;
+    out += value;
+    on?.(value);
+  }
+}
+
 class ModalBox implements ProviderSandbox {
   readonly nativeId: string;
   constructor(private sb: ModalSandbox) {
@@ -61,7 +73,7 @@ class ModalBox implements ProviderSandbox {
         env: opts.env,
         timeoutMs: (opts.timeoutSeconds ?? 60) * 1000,
       });
-      const [stdout, stderr, exitCode] = await Promise.all([p.stdout.readText(), p.stderr.readText(), p.wait()]);
+      const [stdout, stderr, exitCode] = await Promise.all([drain(p.stdout, opts.onStdout), drain(p.stderr, opts.onStderr), p.wait()]);
       return { exitCode, stdout, stderr, durationMs: Date.now() - t0 };
     } catch (err: any) {
       throw new ProviderError("modal", err?.message ?? String(err));

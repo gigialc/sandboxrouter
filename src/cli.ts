@@ -97,9 +97,11 @@ async function main() {
     for (const a of sbx.attempts.filter((a) => !a.ok)) console.error(`! ${a.provider} failed, fell back: ${a.error}`);
     console.error(`> ${sbx.id} on ${sbx.provider} (~$${sbx.estimatedHourlyUsd}/hr, started in ${sbx.attempts.at(-1)?.ms} ms)`);
     try {
-      const r = await sbx.exec(command, { timeoutSeconds: 600 });
-      process.stdout.write(r.stdout);
-      process.stderr.write(r.stderr);
+      const r = await sbx.exec(command, {
+        timeoutSeconds: 600,
+        onStdout: (c) => process.stdout.write(c),
+        onStderr: (c) => process.stderr.write(c),
+      });
       process.exitCode = r.exitCode;
     } finally {
       if (values.keep) console.error(`> kept alive: ${sbx.id}`);
