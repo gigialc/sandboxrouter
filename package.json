@@ -1,0 +1,75 @@
+{
+  "name": "sandboxrouter",
+  "version": "0.1.0",
+  "description": "OpenRouter for sandboxes: one API for Maritime, E2B, Daytona, Modal and Vercel Sandbox, with price/latency routing and automatic fallback.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "bin": {
+    "sandboxrouter": "dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "dev": "tsx src/cli.ts",
+    "prepublishOnly": "npm run build && npm test"
+  },
+  "keywords": [
+    "sandbox",
+    "ai-agents",
+    "code-execution",
+    "router",
+    "maritime",
+    "e2b",
+    "daytona",
+    "modal",
+    "vercel-sandbox",
+    "openrouter"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "peerDependencies": {
+    "e2b": ">=2",
+    "@daytonaio/sdk": ">=0.200",
+    "modal": ">=0.11",
+    "@vercel/sandbox": ">=3"
+  },
+  "peerDependenciesMeta": {
+    "e2b": {
+      "optional": true
+    },
+    "@daytonaio/sdk": {
+      "optional": true
+    },
+    "modal": {
+      "optional": true
+    },
+    "@vercel/sandbox": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@daytonaio/sdk": "^0.227.3",
+    "@types/node": "^26.6.6",
+    "@vercel/sandbox": "^3.9.1",
+    "e2b": "^2.63.0",
+    "modal": "^0.11.1",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3",
+    "vitest": "^5.1.0"
+  }
+}
