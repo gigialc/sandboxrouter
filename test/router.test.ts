@@ -154,8 +154,16 @@ describe("ids and prices", () => {
     expect(hourlyCost("runloop")).toBeCloseTo(0.3168, 4);
     expect(hourlyCost("hopx")).toBeCloseTo(0.1656, 4);
     expect(hourlyCost("northflank")).toBeCloseTo(0.0667, 4);
+    expect(hourlyCost("boat")).toBeCloseTo(0.018, 4);
+    expect(hourlyCost("exedev")).toBeCloseTo(0.105, 4);
     // 2 vCPU / 4 GB rents Cloudflare's standard-3 (2 vCPU, 8 GiB)
     expect(hourlyCost("cloudflare")).toBeCloseTo(2 * 0.072 + 8 * 0.009, 4);
+  });
+
+  it("prices fixed-size providers by the size they actually rent", () => {
+    expect(hourlyCost("boat", { vcpu: 3, memoryGb: 4 })).toBeCloseTo(0.036, 4); // needs the 4 vCPU size
+    expect(hourlyCost("boat", { vcpu: 1, memoryGb: 2 })).toBeCloseTo(0.018, 4); // smallest is 2 / 4
+    expect(hourlyCost("exedev", { vcpu: 1, memoryGb: 8 })).toBeCloseTo(4 * 0.0525, 4); // 2 GiB per vCPU
   });
 
   it("prices non-linear shapes the way each provider bills", () => {

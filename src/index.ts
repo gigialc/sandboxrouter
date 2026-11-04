@@ -29,4 +29,6 @@ export { DockerProvider } from "./providers/docker.js";
 export { HopxProvider } from "./providers/hopx.js";
 export { CloudflareProvider } from "./providers/cloudflare.js";
 export { NorthflankProvider } from "./providers/northflank.js";
+export { BoatProvider } from "./providers/boat.js";
+export { ExeDevProvider } from "./providers/exedev.js";
 export * from "./types.js";

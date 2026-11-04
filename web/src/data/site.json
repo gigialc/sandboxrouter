@@ -1,6 +1,6 @@
 {
-  "version": "0.1.0",
-  "generatedAt": "2026-11-04T22:23:11.410Z",
+  "version": "0.2.0",
+  "generatedAt": "2026-11-04T22:28:20.495Z",
   "shapes": [
     "1x2",
     "2x4",
@@ -61,6 +61,59 @@
         "32x128": {
           "usd": 5.2992,
           "unfit": "max 8 vCPU"
+        }
+      }
+    },
+    {
+      "id": "boat",
+      "name": "Boat",
+      "local": false,
+      "capabilities": [
+        "pause",
+        "custom-image"
+      ],
+      "limits": {
+        "maxVcpu": 16,
+        "maxMemoryGb": 32
+      },
+      "credentials": [
+        [
+          "BOAT_API_KEY"
+        ]
+      ],
+      "docs": "https://docs.boat.dev",
+      "pricing": {
+        "vcpuHour": 0.009,
+        "gbHour": 0,
+        "note": "fixed sizes billed per second ($0.018/h for 2 vCPU / 4 GB up to $0.20/h for 16 / 32); needs a plan from $20/mo, paid back as VM time",
+        "source": "https://docs.boat.dev/pricing.md",
+        "checked": "2026-11-04"
+      },
+      "computers": [],
+      "prices": {
+        "1x2": {
+          "usd": 0.018,
+          "unfit": null
+        },
+        "2x4": {
+          "usd": 0.018,
+          "unfit": null
+        },
+        "4x8": {
+          "usd": 0.036,
+          "unfit": null
+        },
+        "8x16": {
+          "usd": 0.072,
+          "unfit": null
+        },
+        "16x32": {
+          "usd": 0.2,
+          "unfit": null
+        },
+        "32x128": {
+          "usd": 0.2,
+          "unfit": "max 16 vCPU"
         }
       }
     },
@@ -267,6 +320,58 @@
         "32x128": {
           "usd": 3.6864,
           "unfit": "max 8 vCPU"
+        }
+      }
+    },
+    {
+      "id": "exedev",
+      "name": "exe.dev",
+      "local": false,
+      "capabilities": [
+        "custom-image"
+      ],
+      "limits": {
+        "maxVcpu": 16,
+        "maxMemoryGb": 32
+      },
+      "credentials": [
+        [
+          "EXE_TOKEN"
+        ]
+      ],
+      "docs": "https://exe.dev/docs/https-api.md",
+      "pricing": {
+        "vcpuHour": 0.0525,
+        "gbHour": 0,
+        "note": "$0.105/h per 2 vCPU + 4 GiB, per second, up to 2 GiB per vCPU; needs an exe.dev subscription",
+        "source": "https://exe.dev/docs/standalone-vms.md",
+        "checked": "2026-11-04"
+      },
+      "computers": [],
+      "prices": {
+        "1x2": {
+          "usd": 0.0525,
+          "unfit": null
+        },
+        "2x4": {
+          "usd": 0.105,
+          "unfit": null
+        },
+        "4x8": {
+          "usd": 0.21,
+          "unfit": null
+        },
+        "8x16": {
+          "usd": 0.42,
+          "unfit": null
+        },
+        "16x32": {
+          "usd": 0.84,
+          "unfit": null
+        },
+        "32x128": {
+          "usd": 3.36,
+          "unfit": "max 16 vCPU"
         }
       }
     },

@@ -193,6 +193,37 @@ const ENTRIES: ProviderInfo[] = [
 
 ENTRIES.push(
   {
+    id: "boat",
+    name: "Boat",
+    pricing: {
+      vcpuHour: 0.009,
+      gbHour: 0,
+      note: "fixed sizes billed per second ($0.018/h for 2 vCPU / 4 GB up to $0.20/h for 16 / 32); needs a plan from $20/mo, paid back as VM time",
+      source: "https://docs.boat.dev/pricing.md",
+      checked: "2026-11-04",
+    },
+    // "pause" here is Boat's stop: the disk is kept, running processes end.
+    capabilities: ["pause", "custom-image"],
+    limits: { maxVcpu: 16, maxMemoryGb: 32 },
+    credentials: [["BOAT_API_KEY"]],
+    docs: "https://docs.boat.dev",
+  },
+  {
+    id: "exedev",
+    name: "exe.dev",
+    pricing: {
+      vcpuHour: 0.0525,
+      gbHour: 0,
+      note: "$0.105/h per 2 vCPU + 4 GiB, per second, up to 2 GiB per vCPU; needs an exe.dev subscription",
+      source: "https://exe.dev/docs/standalone-vms.md",
+      checked: "2026-11-04",
+    },
+    capabilities: ["custom-image"],
+    limits: { maxVcpu: 16, maxMemoryGb: 32 },
+    credentials: [["EXE_TOKEN"]],
+    docs: "https://exe.dev/docs/https-api.md",
+  },
+  {
     id: "northflank",
     name: "Northflank",
     pricing: {
@@ -252,6 +283,14 @@ export const CLOUDFLARE_INSTANCES = [
   { name: "standard-4", vcpu: 4, memoryGb: 12 },
 ] as const;
 
+/** Boat's fixed machine sizes and hourly prices: https://docs.boat.dev/machines.md */
+export const BOAT_SIZES = [
+  { type: "small", vcpu: 2, memoryGb: 4, usdHour: 0.018 },
+  { type: "default", vcpu: 4, memoryGb: 8, usdHour: 0.036 },
+  { type: "large", vcpu: 8, memoryGb: 16, usdHour: 0.072 },
+  { type: "xlarge", vcpu: 16, memoryGb: 32, usdHour: 0.2 },
+] as const;
+
 export function cloudflareInstance(vcpu: number, memoryGb: number) {
   return CLOUDFLARE_INSTANCES.find((t) => t.vcpu >= vcpu && t.memoryGb >= memoryGb) ?? CLOUDFLARE_INSTANCES[CLOUDFLARE_INSTANCES.length - 1];
 }
@@ -274,6 +313,13 @@ export function hourlyCost(id: ProviderId, spec: SandboxSpec = {}): number {
   if (id === "vercel") mem = Math.max(mem, vcpu * 2);
   // Blaxel sizes by memory, about 2 GB per core.
   if (id === "blaxel") mem = Math.max(mem, vcpu * 2);
+  // Boat rents the smallest fixed size that fits.
+  if (id === "boat") {
+    const s = BOAT_SIZES.find((b) => b.vcpu >= vcpu && b.memoryGb >= mem) ?? BOAT_SIZES[BOAT_SIZES.length - 1];
+    return s.usdHour;
+  }
+  // exe.dev bills per vCPU with up to 2 GiB each, so memory beyond that adds vCPUs.
+  if (id === "exedev") return Math.max(Math.ceil(vcpu), Math.ceil(mem / 2)) * pricing.vcpuHour;
   // Cloudflare bills the instance type that fits, not the exact request.
   if (id === "cloudflare") {
     const t = cloudflareInstance(vcpu, mem);

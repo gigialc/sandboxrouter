@@ -12,6 +12,8 @@ export type ProviderId =
   | "hopx"
   | "cloudflare"
   | "northflank"
+  | "boat"
+  | "exedev"
   | "docker";
 
 /** Things a caller can require of a provider. The router skips providers that lack one. */

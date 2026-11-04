@@ -1,6 +1,6 @@
 # sandboxrouter
 
-**One API for every sandbox.** A free, open-source router for the places an AI agent can run code: Blaxel, Cloudflare, Daytona, E2B, Fly.io Sprites, HOPX, Maritime, Modal, Morph, Northflank, Runloop, Tensorlake and Vercel, plus Docker on your own machine. It picks a provider by price, speed or capability, and falls back to the next one when a provider is down or rate-limited.
+**One API for every sandbox.** A free, open-source router for the places an AI agent can run code: Blaxel, Boat, Cloudflare, Daytona, E2B, exe.dev, Fly.io Sprites, HOPX, Maritime, Modal, Morph, Northflank, Runloop, Tensorlake and Vercel, plus Docker on your own machine. It picks a provider by price, speed or capability, and falls back to the next one when a provider is down or rate-limited.
 
 ```ts
 import { Router } from "@sandboxrouter/sdk";
@@ -48,9 +48,11 @@ Estimated list price while running, 2 vCPU / 4 GB (`npx @sandboxrouter/sdk provi
 
 | Provider | $/hr | Notes | Source |
 |---|---|---|---|
+| Boat | $0.018 | Fixed sizes billed per second ($0.018/h for 2 vCPU / 4 GB up to $0.20/h for 16 / 32); needs a plan from $20/mo, paid back as VM time | [pricing](https://docs.boat.dev/pricing.md) |
 | Maritime | $0.022 | Per second, disk included | [pricing](https://maritime.sh/pricing) |
 | Northflank | $0.067 | Per second on Northflank Cloud, ephemeral disk included; sandboxes run as deployment services (microVMs) | [pricing](https://northflank.com/pricing) |
 | Morph Cloud | $0.100 | $0.05/MCU; MCU-hours = max(vCPU, RAM/4 GB, disk/16 GB); snapshots extra | [pricing](https://cloud.morph.so/web/pricing) |
+| exe.dev | $0.105 | $0.105/h per 2 vCPU + 4 GiB, per second, up to 2 GiB per vCPU; needs an exe.dev subscription | [pricing](https://exe.dev/docs/standalone-vms.md) |
 | Fly.io Sprites | $0.164 | Bills actual CPU and memory use; this is the full-use price; storage extra | [pricing](https://fly.io/sprites) |
 | Blaxel | $0.166 | Billed on memory only ($0.0000115/GB-s), CPU scales with memory (~2 GB per core) | [pricing](https://blaxel.ai/pricing) |
 | Daytona | $0.166 | Per second, plus disk above 5 GiB | [pricing](https://www.daytona.io/pricing) |
@@ -69,7 +71,7 @@ Checked 2026-11-04.
 
 ```bash
 npm i @sandboxrouter/sdk
-# then the SDK of each provider you use (Maritime, Cloudflare and Docker need none):
+# then the SDK of each provider you use (Boat, Cloudflare, exe.dev, Maritime and Docker need none):
 npm i e2b                       # E2B
 npm i @daytonaio/sdk            # Daytona
 npm i modal                     # Modal
@@ -90,10 +92,12 @@ Set the keys for the providers you want. Providers without keys are skipped.
 | Provider | Env |
 |---|---|
 | Blaxel | `BL_API_KEY` + `BL_WORKSPACE` |
+| Boat | `BOAT_API_KEY` |
 | Cloudflare Sandbox | `CLOUDFLARE_SANDBOX_URL` + `CLOUDFLARE_SANDBOX_TOKEN` |
 | Daytona | `DAYTONA_API_KEY` |
 | Docker (local) | none: Docker running locally |
 | E2B | `E2B_API_KEY` |
+| exe.dev | `EXE_TOKEN` |
 | Fly.io Sprites | `SPRITES_TOKEN` |
 | HOPX | `HOPX_API_KEY` |
 | Maritime | `MARITIME_API_KEY` |
@@ -244,13 +248,15 @@ with sr.create(vcpu=2, memory_gb=4, strategy="cheapest") as sbx:
 | HOPX | set by the template | timeout | template | yes (memory + disk) | Size requests aren't applied, so the router only sends default-size work. |
 | Northflank | cheapest `nf-compute` plan that fits | `expiryTime` (5 min to 7 days) | any public image | no | Runs as a deployment service; files move as base64 over exec. |
 | Cloudflare | smallest instance type that fits | alarm in the bridge Worker | Dockerfile in the bridge | no | Through the bridge Worker you deploy ([`bridges/cloudflare`](bridges/cloudflare)). |
+| Boat | smallest of 4 fixed sizes that fits | auto-stop timer | saved snapshot | yes (stop: disk kept, processes end) | Plain REST. Commands that wait are capped at 600 s; files API up to 5 MiB. |
+| exe.dev | `--cpu`, `--memory` (2 GiB per vCPU max) | none: `kill()` deletes | `--image` | no | Plain REST over exe.dev's `/exec`; long commands run detached and are polled. |
 | Docker (local) | `--cpus`, `--memory` | container exits at the lifetime | any image | yes (`docker pause`) | Your machine, shared kernel. Never auto-routed; use `{ provider: "docker" }`. |
 
 Capabilities in the catalog describe what each **adapter** implements, not everything a provider sells. Size limits are self-serve defaults and may be higher on your plan.
 
 ## Roadmap
 
-- [x] More providers: Morph, Fly.io Sprites, Blaxel, Tensorlake, Runloop, HOPX, Northflank, Cloudflare (via a bridge Worker), Docker (local)
+- [x] More providers: Morph, Fly.io Sprites, Blaxel, Tensorlake, Runloop, HOPX, Northflank, Boat, exe.dev, Cloudflare (via a bridge Worker), Docker (local)
 - [x] Neutral routing: price decides, ties alphabetical, no privileged slot
 - [x] Desktops and phones (Maritime: Linux, Windows, Android)
 - [x] Streaming exec output

@@ -15,6 +15,8 @@ import { DockerProvider } from "./providers/docker.js";
 import { HopxProvider } from "./providers/hopx.js";
 import { CloudflareProvider } from "./providers/cloudflare.js";
 import { NorthflankProvider } from "./providers/northflank.js";
+import { BoatProvider } from "./providers/boat.js";
+import { ExeDevProvider } from "./providers/exedev.js";
 import {
   RouterError,
   type Attempt,
@@ -57,6 +59,8 @@ export function defaultProviders(): Provider[] {
     new HopxProvider(),
     new CloudflareProvider(),
     new NorthflankProvider(),
+    new BoatProvider(),
+    new ExeDevProvider(),
     new DockerProvider(),
   ];
 }
