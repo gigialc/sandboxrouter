@@ -64,7 +64,8 @@
     "@vercel/sandbox": ">=3",
     "e2b": ">=2",
     "modal": ">=0.11",
-    "morphcloud": ">=0.0.20"
+    "morphcloud": ">=0.0.20",
+    "@e2b/desktop": ">=2.5"
   },
   "peerDependenciesMeta": {
     "e2b": {
@@ -98,6 +99,9 @@
       "optional": true
     },
     "@northflank/js-client": {
+      "optional": true
+    },
+    "@e2b/desktop": {
       "optional": true
     }
   },

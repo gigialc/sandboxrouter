@@ -3,6 +3,7 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { CATALOG, hourlyCost, unfit } from "../src/catalog.js";
 import { aggregate, loadReports } from "../src/leaderboard.js";
+import { computerCatalog } from "../src/computers.js";
 
 const SHAPES = [
   { vcpu: 1, memoryGb: 2 },
@@ -29,14 +30,15 @@ const data = {
     credentials: c.credentials,
     docs: c.docs,
     pricing: c.pricing,
-    computers: c.id === "maritime" ? ["linux", "windows", "android"] : [],
+    computers: Object.keys(computerCatalog().find((d) => d.id === c.id)?.os ?? {}),
     prices: Object.fromEntries(
       SHAPES.map((s) => [`${s.vcpu}x${s.memoryGb}`, { usd: Math.round(hourlyCost(c.id, s) * 10000) / 10000, unfit: unfit(c.id, s) }]),
     ),
   })),
+  desktops: computerCatalog(),
   leaderboard: aggregate(reports),
   submissions: reports.map((r) => ({ date: r.date, label: r.label ?? null, platform: r.platform, runs: r.runs, providers: r.rows.length })),
 };
 
 writeFileSync("web/src/data/site.json", JSON.stringify(data, null, 2) + "\n");
-console.log(`site.json: ${data.providers.length} providers, ${reports.length} reports`);
+console.log(`site.json: ${data.providers.length} providers, ${data.desktops.length} desktop providers, ${reports.length} reports`);

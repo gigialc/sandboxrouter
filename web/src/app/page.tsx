@@ -1,6 +1,7 @@
 import { Button, SectionTitle } from "@/components/chrome";
 import { CodeTabs, InstallChip } from "@/components/code";
 import { ProviderTable } from "@/components/ProviderTable";
+import { DesktopTable } from "@/components/DesktopTable";
 import { NPM, REPO, site } from "@/lib/site";
 
 const TS = `import { Router } from "${NPM}";
@@ -62,6 +63,15 @@ export default function Home() {
         </SectionTitle>
         <div className="mt-6">
           <ProviderTable />
+        </div>
+      </section>
+
+      <section className="mt-24">
+        <SectionTitle id="desktops" kicker="Desktops & phones">
+          Computers your model can see and click
+        </SectionTitle>
+        <div className="mt-6">
+          <DesktopTable />
         </div>
       </section>
 

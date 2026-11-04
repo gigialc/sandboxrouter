@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { CAPABILITY_LABEL, DEFAULT_SHAPE, ranked, shapeLabel, site, usd } from "@/lib/site";
 
-const NEEDS = ["pause", "gpu", "custom-image", "computers"] as const;
+const NEEDS = ["pause", "gpu", "custom-image"] as const;
 
 export function ProviderTable() {
   const [shape, setShape] = useState(DEFAULT_SHAPE);
@@ -12,7 +12,7 @@ export function ProviderTable() {
   const speed = new Map(site.leaderboard.map((r) => [r.provider, r.medianCreateMs]));
   const showSpeed = speed.size > 0;
 
-  const has = (p: (typeof site.providers)[number], c: string) => (c === "computers" ? p.computers.length > 0 : p.capabilities.includes(c));
+  const has = (p: (typeof site.providers)[number], c: string) => p.capabilities.includes(c);
   const rows = ranked(shape).filter((p) => !need || has(p, need));
   const cloud = rows.filter((r) => !r.local && !r.prices[shape].unfit);
   const max = Math.max(0.0001, ...cloud.map((r) => r.prices[shape].usd));
@@ -77,7 +77,7 @@ export function ProviderTable() {
                   <td className="hidden py-3 pr-4 font-mono tnum text-ink-2 sm:table-cell">{speed.get(p.id) ? `${speed.get(p.id)} ms` : "—"}</td>
                 )}
                 <td className="hidden py-3 text-ink-2 md:table-cell">
-                  {[...p.capabilities, ...(p.computers.length ? ["computers"] : [])].map((c) => CAPABILITY_LABEL[c] ?? c).join(" · ") || "—"}
+                  {p.capabilities.map((c) => CAPABILITY_LABEL[c] ?? c).join(" · ") || "—"}
                 </td>
               </tr>
             );

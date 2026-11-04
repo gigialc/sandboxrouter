@@ -1,6 +1,6 @@
 {
   "version": "0.2.0",
-  "generatedAt": "2026-11-04T22:28:20.495Z",
+  "generatedAt": "2026-11-04T23:16:09.378Z",
   "shapes": [
     "1x2",
     "2x4",
@@ -193,7 +193,9 @@
         "source": "https://www.daytona.io/pricing",
         "checked": "2026-11-04"
       },
-      "computers": [],
+      "computers": [
+        "linux"
+      ],
       "prices": {
         "1x2": {
           "usd": 0.0828,
@@ -295,7 +297,9 @@
         "source": "https://e2b.dev/pricing",
         "checked": "2026-11-04"
       },
-      "computers": [],
+      "computers": [
+        "linux"
+      ],
       "prices": {
         "1x2": {
           "usd": 0.0828,
@@ -855,6 +859,64 @@
           "unfit": "max 8 vCPU"
         }
       }
+    }
+  ],
+  "desktops": [
+    {
+      "id": "daytona",
+      "name": "Daytona",
+      "os": {
+        "linux": 0.0666
+      },
+      "note": "per second while running; default container snapshot is 1 vCPU / 1 GiB / 3 GiB (daytona-small in daytona.io/docs/en/sandboxes), larger snapshots cost more; stopped keeps the disk ($0.000108/GiB-h past 5 GiB); live view is a signed noVNC preview URL, watch mode is client-side view-only; Windows needs a Tier 3 org, not routed",
+      "source": "https://www.daytona.io/pricing",
+      "checked": "2026-11-04",
+      "takeover": true,
+      "size": "1 vCPU · 1 GB",
+      "credentials": [
+        [
+          "DAYTONA_API_KEY"
+        ]
+      ],
+      "docs": "https://www.daytona.io/docs/en/computer-use"
+    },
+    {
+      "id": "e2b",
+      "name": "E2B",
+      "os": {
+        "linux": 0.5328
+      },
+      "note": "per second while running; the public `desktop` template is 8 vCPU / 8 GiB (cpu_count=8, memory_mb=8192 in github.com/e2b-dev/desktop template/build_prod.py); live view is noVNC with a password in the URL, watch mode is client-side view-only; Hobby caps a session at 1 h, Pro at 24 h",
+      "source": "https://e2b.dev/pricing",
+      "checked": "2026-11-04",
+      "takeover": true,
+      "size": "8 vCPU · 8 GB",
+      "credentials": [
+        [
+          "E2B_API_KEY"
+        ]
+      ],
+      "docs": "https://docs.e2b.dev/use-cases/computer-use"
+    },
+    {
+      "id": "maritime",
+      "name": "Maritime",
+      "os": {
+        "linux": 0.12,
+        "windows": 0.18,
+        "android": 0.15
+      },
+      "note": "per second while awake; asleep pays $0.08/GB-month of disk; Windows needs the Growth plan",
+      "source": "https://maritime.sh/pricing",
+      "checked": "2026-11-04",
+      "takeover": true,
+      "size": "2 vCPU · 4 GB",
+      "credentials": [
+        [
+          "MARITIME_API_KEY"
+        ]
+      ],
+      "docs": "https://maritime.sh/docs/computers"
     }
   ],
   "leaderboard": [],

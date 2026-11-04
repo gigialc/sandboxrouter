@@ -25,11 +25,25 @@ export interface LeaderRow {
   hourlyUsd: number;
 }
 
+export interface SiteDesktop {
+  id: string;
+  name: string;
+  os: Partial<Record<"linux" | "windows" | "android", number>>;
+  note?: string;
+  source: string;
+  checked: string;
+  takeover: boolean;
+  size: string;
+  credentials: string[][];
+  docs: string;
+}
+
 export const site = data as unknown as {
   version: string;
   generatedAt: string;
   shapes: Shape[];
   providers: SiteProvider[];
+  desktops: SiteDesktop[];
   leaderboard: LeaderRow[];
   submissions: { date: string; label: string | null; platform: string; runs: number; providers: number }[];
 };

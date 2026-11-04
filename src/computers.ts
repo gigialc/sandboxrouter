@@ -142,7 +142,7 @@ export class RoutedComputer {
   get supports() {
     return { viewer: typeof this.c.viewer === "function", sleep: typeof this.c.sleep === "function" };
   }
-  viewer(mode?: "watch" | "control", opts?: { ttlSeconds?: number; reason?: string }) {
+  async viewer(mode?: "watch" | "control", opts?: { ttlSeconds?: number; reason?: string }) {
     if (!this.c.viewer) throw new RouterError(`${this.provider} has no shareable live view`);
     return this.c.viewer(mode, opts);
   }
@@ -166,6 +166,8 @@ export interface ComputerCatalogEntry {
   checked: string;
   /** A person can watch or take over the screen through a link. */
   takeover: boolean;
+  /** The machine you get by default, so prices compare like for like, e.g. "2 vCPU · 4 GB". */
+  size: string;
   credentials: string[][];
   docs: string;
 }
@@ -179,8 +181,35 @@ export const COMPUTER_ENTRIES: ComputerCatalogEntry[] = [
     source: "https://maritime.sh/pricing",
     checked: "2026-11-04",
     takeover: true,
+    size: "2 vCPU · 4 GB",
     credentials: [["MARITIME_API_KEY"]],
     docs: "https://maritime.sh/docs/computers",
+  },
+  {
+    id: "daytona",
+    name: "Daytona",
+    // (1 vCPU x $0.0504 + 1 GiB x $0.0162) per hour, billed per second; 3 GiB disk is inside the 5 GiB free
+    os: { linux: 0.0666 },
+    note: "per second while running; default container snapshot is 1 vCPU / 1 GiB / 3 GiB (daytona-small in daytona.io/docs/en/sandboxes), larger snapshots cost more; stopped keeps the disk ($0.000108/GiB-h past 5 GiB); live view is a signed noVNC preview URL, watch mode is client-side view-only; Windows needs a Tier 3 org, not routed",
+    source: "https://www.daytona.io/pricing",
+    checked: "2026-11-04",
+    takeover: true,
+    size: "1 vCPU · 1 GB",
+    credentials: [["DAYTONA_API_KEY"]],
+    docs: "https://www.daytona.io/docs/en/computer-use",
+  },
+  {
+    id: "e2b",
+    name: "E2B",
+    // (8 vCPU x $0.000014 + 8 GiB x $0.0000045) per second x 3600
+    os: { linux: 0.5328 },
+    note: "per second while running; the public `desktop` template is 8 vCPU / 8 GiB (cpu_count=8, memory_mb=8192 in github.com/e2b-dev/desktop template/build_prod.py); live view is noVNC with a password in the URL, watch mode is client-side view-only; Hobby caps a session at 1 h, Pro at 24 h",
+    source: "https://e2b.dev/pricing",
+    checked: "2026-11-04",
+    takeover: true,
+    size: "8 vCPU · 8 GB",
+    credentials: [["E2B_API_KEY"]],
+    docs: "https://docs.e2b.dev/use-cases/computer-use",
   },
 ];
 
