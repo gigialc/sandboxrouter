@@ -98,7 +98,7 @@ async function main() {
     let n = 0;
     for (const c of plan) {
       const mark = c.skip ? "  -" : `${++n}.`.padStart(3);
-      console.log(`${mark} ${c.provider.padEnd(9)} $${c.estimatedHourlyUsd.toFixed(4)}/hr${c.skip ? `  (skipped: ${c.skip})` : ""}`);
+      console.log(`${mark} ${c.provider.padEnd(11)} $${c.estimatedHourlyUsd.toFixed(4)}/hr${c.skip ? `  (skipped: ${c.skip})` : ""}`);
     }
     return;
   }
