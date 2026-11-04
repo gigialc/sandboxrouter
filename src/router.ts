@@ -1,5 +1,13 @@
 import { CATALOG, hourlyCost, unfit } from "./catalog.js";
-import { RoutedComputer, createComputer, type ComputerProvider, type ComputerSpec } from "./computers.js";
+import {
+  RoutedComputer,
+  createComputer,
+  planComputer,
+  type ComputerOs,
+  type ComputerProvider,
+  type ComputerProviderId,
+  type ComputerSpec,
+} from "./computers.js";
 import { loadBench, median } from "./bench-store.js";
 import { DaytonaProvider } from "./providers/daytona.js";
 import { E2BProvider } from "./providers/e2b.js";
@@ -42,6 +50,13 @@ export interface RouterOptions {
   providers?: Provider[];
   /** Path of the bench results file used by strategy "fastest". */
   benchFile?: string;
+  /** Desktop-only computer providers (sandbox providers that also sell computers are found automatically). */
+  computers?: ComputerProvider[];
+}
+
+/** Desktop-only providers. Filled in as adapters are added. */
+export function defaultComputerProviders(): ComputerProvider[] {
+  return [];
 }
 
 export function defaultProviders(): Provider[] {
@@ -68,10 +83,12 @@ export function defaultProviders(): Provider[] {
 export class Router {
   private providers: Map<ProviderId, Provider>;
   private benchFile?: string;
+  private computerOnly: ComputerProvider[];
 
   constructor(opts: RouterOptions = {}) {
     this.providers = new Map((opts.providers ?? defaultProviders()).map((p) => [p.id, p]));
     this.benchFile = opts.benchFile;
+    this.computerOnly = opts.computers ?? (opts.providers ? [] : defaultComputerProviders());
   }
 
   /** Registered and has credentials. False for providers this router doesn't know. */
@@ -150,22 +167,31 @@ export class Router {
     );
   }
 
-  /** Providers that also sell computers (desktops/phones). */
+  /** Every provider that sells computers (desktops/phones): sandbox providers that do, plus desktop-only ones. */
   computerProviders(): ComputerProvider[] {
-    return [...this.providers.values()].filter((p): p is Provider & ComputerProvider => "createComputer" in p);
+    const fromSandboxes = [...this.providers.values()].filter((p): p is Provider & ComputerProvider => "createComputer" in p);
+    return [...fromSandboxes, ...this.computerOnly];
   }
 
-  /** Get or create a desktop/phone. With `externalUserId`, the same id returns the same computer. */
-  computer(spec: ComputerSpec = {}, opts: { provider?: ProviderId | ProviderId[] } = {}): Promise<RoutedComputer> {
-    const prefer = opts.provider ? ([] as ProviderId[]).concat(opts.provider) : undefined;
+  /** The order a computer create would try for this OS. */
+  planComputer(os: ComputerOs = "linux", opts: { provider?: ComputerProviderId | ComputerProviderId[] } = {}) {
+    const prefer = opts.provider ? ([] as ComputerProviderId[]).concat(opts.provider) : undefined;
+    return planComputer(this.computerProviders(), os, prefer);
+  }
+
+  /** Start a desktop or phone on the cheapest provider for its OS (ties alphabetical), with fallback. */
+  computer(spec: ComputerSpec = {}, opts: { provider?: ComputerProviderId | ComputerProviderId[] } = {}): Promise<RoutedComputer> {
+    const prefer = opts.provider ? ([] as ComputerProviderId[]).concat(opts.provider) : undefined;
     return createComputer(this.computerProviders(), spec, prefer);
   }
 
   async getComputer(id: string): Promise<RoutedComputer> {
-    const { provider, nativeId } = parseId(id);
+    const i = id.indexOf(":");
+    if (i <= 0) throw new RouterError(`bad computer id "${id}": expected provider:id`);
+    const provider = id.slice(0, i);
     const p = this.computerProviders().find((c) => c.id === provider);
     if (!p) throw new RouterError(`${provider} does not offer computers`);
-    return new RoutedComputer(provider, await p.connectComputer(nativeId));
+    return new RoutedComputer(provider, await p.connectComputer(id.slice(i + 1)));
   }
 
   /** Reattach to a sandbox by its routed id (`provider:nativeId`). */

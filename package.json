@@ -57,14 +57,14 @@
     "@blaxel/core": ">=0.3",
     "@daytonaio/sdk": ">=0.200",
     "@fly/sprites": ">=0.2",
+    "@hopx-ai/sdk": ">=0.5",
+    "@northflank/js-client": ">=0.12",
     "@runloop/api-client": ">=3",
     "@tensorlakeai/tensorlake": ">=0.5",
     "@vercel/sandbox": ">=3",
     "e2b": ">=2",
     "modal": ">=0.11",
-    "morphcloud": ">=0.0.20",
-    "@hopx-ai/sdk": ">=0.5",
-    "@northflank/js-client": ">=0.12"
+    "morphcloud": ">=0.0.20"
   },
   "peerDependenciesMeta": {
     "e2b": {
@@ -104,6 +104,7 @@
   "devDependencies": {
     "@blaxel/core": "^0.3.34",
     "@daytonaio/sdk": "^0.227.3",
+    "@e2b/desktop": "^2.5.0",
     "@fly/sprites": "^0.2.4",
     "@hopx-ai/sdk": "^0.5.1",
     "@northflank/js-client": "^0.12.0",

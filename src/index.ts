@@ -1,9 +1,16 @@
-export { Router, RoutedSandbox, defaultProviders, parseId, type Candidate, type RouterOptions } from "./router.js";
+export { Router, RoutedSandbox, defaultProviders, defaultComputerProviders, parseId, type Candidate, type RouterOptions } from "./router.js";
 export { CATALOG, hourlyCost, unfit, info, type ProviderInfo } from "./catalog.js";
 export { createApp } from "./server.js";
 export {
   RoutedComputer,
   createComputer,
+  planComputer,
+  computerCatalog,
+  computerHourly,
+  COMPUTER_ENTRIES,
+  type ComputerCatalogEntry,
+  type ComputerCandidate,
+  type ComputerProviderId,
   type ActionResult,
   type ComputerAction,
   type ComputerActionName,
