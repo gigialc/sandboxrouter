@@ -12,7 +12,7 @@ export function CopyButton({ text, className = "" }: { text: string; className?:
         setDone(true);
         setTimeout(() => setDone(false), 1200);
       }}
-      className={`rounded-md border border-white/15 px-2 py-1 font-sans text-xs text-code-ink/80 hover:text-code-ink ${className}`}
+      className={`px-2 py-1 text-[11px] text-muted hover:text-ink ${className}`}
     >
       {done ? "Copied" : "Copy"}
     </button>
@@ -21,14 +21,14 @@ export function CopyButton({ text, className = "" }: { text: string; className?:
 
 export function CodeBlock({ code, title }: { code: string; title?: string }) {
   return (
-    <div className="overflow-hidden rounded-xl border border-line bg-code-bg">
+    <div className="border border-line bg-panel">
       {title && (
-        <div className="flex items-center justify-between border-b border-white/10 px-4 py-2 text-xs text-code-ink/60">
+        <div className="flex items-center justify-between border-b border-line pl-4 pr-2 py-1.5 text-[11px] text-muted">
           <span className="font-mono">{title}</span>
           <CopyButton text={code} />
         </div>
       )}
-      <pre className="overflow-x-auto p-4 font-mono text-[13px] leading-6 text-code-ink">
+      <pre className="overflow-x-auto p-4 font-mono text-[12.5px] leading-6 text-ink-2">
         <code>{code}</code>
       </pre>
     </div>
@@ -38,26 +38,36 @@ export function CodeBlock({ code, title }: { code: string; title?: string }) {
 export function CodeTabs({ tabs }: { tabs: { label: string; code: string }[] }) {
   const [i, setI] = useState(0);
   return (
-    <div className="overflow-hidden rounded-xl border border-line bg-code-bg shadow-[0_1px_0_rgba(0,0,0,0.04)]">
-      <div className="flex items-center gap-1 border-b border-white/10 px-2 pt-2" role="tablist">
+    <div className="border border-line bg-panel">
+      <div className="flex items-center border-b border-line pr-2" role="tablist">
         {tabs.map((t, j) => (
           <button
             key={t.label}
             role="tab"
             aria-selected={i === j}
             onClick={() => setI(j)}
-            className={`rounded-t-md px-3 py-1.5 font-mono text-xs ${
-              i === j ? "bg-white/10 text-code-ink" : "text-code-ink/55 hover:text-code-ink/85"
-            }`}
+            className={`-mb-px border-b px-4 py-2 text-[12px] ${i === j ? "border-ink text-ink" : "border-transparent text-muted hover:text-ink-2"}`}
           >
             {t.label}
           </button>
         ))}
-        <CopyButton text={tabs[i].code} className="mb-1 ml-auto" />
+        <CopyButton text={tabs[i].code} className="ml-auto" />
       </div>
-      <pre className="overflow-x-auto p-4 font-mono text-[13px] leading-6 text-code-ink">
+      <pre className="overflow-x-auto p-4 font-mono text-[12.5px] leading-6 text-ink-2">
         <code>{tabs[i].code}</code>
       </pre>
+    </div>
+  );
+}
+
+export function InstallChip({ cmd }: { cmd: string }) {
+  return (
+    <div className="inline-flex items-center border border-line bg-panel font-mono text-[12.5px]">
+      <span className="select-all py-2 pl-3 pr-1 text-ink-2">
+        <span className="text-muted">$ </span>
+        {cmd}
+      </span>
+      <CopyButton text={cmd} className="mr-1" />
     </div>
   );
 }

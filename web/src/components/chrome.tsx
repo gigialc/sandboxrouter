@@ -3,12 +3,12 @@ import { REPO, site } from "@/lib/site";
 
 export function Logo({ className = "" }: { className?: string }) {
   return (
-    <span className={`inline-flex items-center gap-2 font-mono font-semibold tracking-tight ${className}`}>
-      <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true">
-        <path d="M1.5 11H7c3 0 3.5-7 8-7M7 11h8M7 11c3 0 3.5 7 8 7" stroke="currentColor" strokeWidth="1.8" fill="none" strokeLinecap="round" />
-        <circle cx="17.5" cy="4" r="2" fill="currentColor" />
-        <circle cx="17.5" cy="11" r="2.6" fill="var(--accent)" />
-        <circle cx="17.5" cy="18" r="2" fill="currentColor" />
+    <span className={`inline-flex items-center gap-2 text-[15px] tracking-tight ${className}`}>
+      <svg width="18" height="18" viewBox="0 0 22 22" aria-hidden="true">
+        <path d="M1.5 11H7c3 0 3.5-7 8-7M7 11h8M7 11c3 0 3.5 7 8 7" stroke="currentColor" strokeWidth="1.6" fill="none" strokeLinecap="square" />
+        <rect x="15.5" y="2" width="4" height="4" fill="currentColor" />
+        <rect x="15" y="8.5" width="5" height="5" fill="currentColor" />
+        <rect x="15.5" y="16" width="4" height="4" fill="currentColor" />
       </svg>
       sandboxrouter
     </span>
@@ -16,80 +16,73 @@ export function Logo({ className = "" }: { className?: string }) {
 }
 
 const NAV = [
-  { href: "/sandboxes", label: "Sandboxes" },
-  { href: "/rankings", label: "Rankings" },
-  { href: "/playground", label: "Playground" },
+  { href: "/#providers", label: "Providers" },
   { href: "/docs", label: "Docs" },
+  { href: "/playground", label: "Playground" },
 ];
 
 export function Nav() {
   return (
-    <header className="sticky top-0 z-30 border-b border-line bg-sand/80 backdrop-blur-md">
-      <div className="mx-auto flex h-16 max-w-6xl items-center gap-8 px-5">
+    <header className="sticky top-0 z-30 border-b border-line/70 bg-bg/80 backdrop-blur-md">
+      <div className="mx-auto flex h-14 max-w-5xl items-center px-6">
         <Link href="/" aria-label="sandboxrouter home">
           <Logo />
         </Link>
-        <nav className="hidden items-center gap-6 text-sm text-ink-2 md:flex">
+        <nav className="ml-auto flex items-center gap-7 text-[13px] text-ink-2">
           {NAV.map((n) => (
-            <Link key={n.href} href={n.href} className="hover:text-ink">
+            <Link key={n.href} href={n.href} className="hidden hover:text-ink sm:block">
               {n.label}
             </Link>
           ))}
-        </nav>
-        <div className="ml-auto flex items-center gap-3">
-          <a href={REPO} className="hidden text-sm text-ink-2 hover:text-ink sm:block">
+          <a href={REPO} className="bg-ink px-3 py-1.5 text-[13px] font-medium text-bg hover:bg-white">
             GitHub
           </a>
-          <Link href="/docs#quickstart" className="rounded-full bg-ink px-4 py-2 text-sm font-medium text-sand hover:opacity-90">
-            Get started
-          </Link>
-        </div>
+        </nav>
       </div>
-      <nav className="flex gap-5 overflow-x-auto border-t border-line px-5 py-2 text-sm text-ink-2 md:hidden">
-        {NAV.map((n) => (
-          <Link key={n.href} href={n.href}>
-            {n.label}
-          </Link>
-        ))}
-      </nav>
     </header>
   );
 }
 
 export function Footer() {
   return (
-    <footer className="mt-24 border-t border-line">
-      <div className="mx-auto flex max-w-6xl flex-col gap-6 px-5 py-10 text-sm text-muted sm:flex-row sm:items-center">
-        <Logo className="text-ink" />
-        <p>One API for every sandbox. MIT licensed. v{site.version}</p>
-        <div className="flex gap-5 sm:ml-auto">
-          <Link href="/sandboxes" className="hover:text-ink">Sandboxes</Link>
+    <footer className="mt-32 border-t border-line">
+      <div className="mx-auto flex max-w-5xl flex-col gap-4 px-6 py-10 text-[13px] text-muted sm:flex-row sm:items-center">
+        <Logo className="text-ink-2" />
+        <span>Free and open source. MIT. v{site.version}</span>
+        <div className="flex gap-6 sm:ml-auto">
           <Link href="/docs" className="hover:text-ink">Docs</Link>
+          <Link href="/playground" className="hover:text-ink">Playground</Link>
           <a href={REPO} className="hover:text-ink">GitHub</a>
+          <a href="https://www.npmjs.com/package/@sandboxrouter/sdk" className="hover:text-ink">npm</a>
         </div>
       </div>
     </footer>
   );
 }
 
-export function Badge({ children, tone = "plain" }: { children: React.ReactNode; tone?: "plain" | "accent" }) {
-  return (
-    <span
-      className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs ${
-        tone === "accent" ? "border-ink bg-ink text-sand" : "border-line text-ink-2"
-      }`}
-    >
+export function Tag({ children }: { children: React.ReactNode }) {
+  return <span className="inline-flex items-center border border-line-2 px-1.5 py-px text-[11px] text-ink-2">{children}</span>;
+}
+
+export function Button({ href, children, primary = false }: { href: string; children: React.ReactNode; primary?: boolean }) {
+  const cls = primary ? "bg-ink text-bg hover:bg-white" : "bg-panel-2 text-ink hover:bg-line-2";
+  const external = href.startsWith("http");
+  return external ? (
+    <a href={href} className={`inline-flex h-9 items-center px-4 text-[13px] font-medium ${cls}`}>
       {children}
-    </span>
+    </a>
+  ) : (
+    <Link href={href} className={`inline-flex h-9 items-center px-4 text-[13px] font-medium ${cls}`}>
+      {children}
+    </Link>
   );
 }
 
-export function PageHeader({ eyebrow, title, children }: { eyebrow?: string; title: string; children?: React.ReactNode }) {
+export function SectionTitle({ id, kicker, children }: { id?: string; kicker?: string; children: React.ReactNode }) {
   return (
-    <div className="mx-auto max-w-6xl px-5 pt-14 pb-8">
-      {eyebrow && <p className="mb-3 font-mono text-xs uppercase tracking-widest text-muted">{eyebrow}</p>}
-      <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">{title}</h1>
-      {children && <div className="mt-4 max-w-2xl text-lg text-ink-2">{children}</div>}
+    <div id={id} className="scroll-mt-20">
+      {kicker && <p className="mb-3 font-mono text-[11px] uppercase tracking-[0.18em] text-muted">{kicker}</p>}
+      <h2 className="text-2xl font-normal tracking-[-0.025em] sm:text-[28px]">{children}</h2>
     </div>
   );
 }

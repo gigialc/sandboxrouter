@@ -26,7 +26,7 @@ export default function DocsPage() {
         <nav className="sticky top-24 space-y-1 text-sm">
           <p className="mb-3 font-mono text-xs uppercase tracking-widest text-muted">Docs</p>
           {SECTIONS.map(([id, label]) => (
-            <a key={id} href={`#${id}`} className="block rounded-md px-2 py-1 text-ink-2 hover:bg-accent-wash hover:text-ink">
+            <a key={id} href={`#${id}`} className="block px-2 py-1 text-ink-2 hover:bg-panel-2 hover:text-ink">
               {label}
             </a>
           ))}
@@ -41,7 +41,7 @@ export default function DocsPage() {
         </p>
 
         <h2 id="quickstart">Quickstart</h2>
-        <CodeBlock title="terminal" code={`npm i @sandboxrouter/sdk\nexport MARITIME_API_KEY=mk_...   # any one provider is enough to start`} />
+        <CodeBlock title="terminal" code={`npm i @sandboxrouter/sdk\nexport E2B_API_KEY=...   # any one provider's key is enough to start`} />
         <div className="h-3" />
         <CodeBlock
           title="agent.ts"
@@ -58,13 +58,18 @@ console.log(r.exitCode, r.stdout, "on", sbx.provider);`}
           <code>await using</code> kills the sandbox when the block ends. Without it, call <code>sbx.kill()</code>. Each
           provider also ends sandboxes on its own at <code>timeoutMinutes</code>.
         </p>
+        <p>
+          No account yet? Use Docker on your own machine: start Docker, then pass <code>{`{ provider: "docker" }`}</code>. It&apos;s
+          free, and fine for trying things out, but a container shares your kernel, so use a cloud provider for untrusted code.
+        </p>
         <p>Try it without writing code:</p>
         <CodeBlock title="terminal" code={`npx @sandboxrouter/sdk providers                 # prices + which keys are set\nnpx @sandboxrouter/sdk run "uname -a && nproc"   # start, run, print, kill`} />
 
         <h2 id="keys">Provider keys</h2>
         <p>
-          Set keys for the providers you use. Providers without keys are skipped. Maritime needs no SDK; the others need their
-          own package installed next to sandboxrouter.
+          Set keys for the providers you use. Providers without keys are skipped. Some adapters call the provider&apos;s HTTP API
+          directly; the rest need the provider&apos;s own package installed next to sandboxrouter (each provider&apos;s page says
+          which).
         </p>
         <table>
           <thead>
@@ -77,7 +82,7 @@ console.log(r.exitCode, r.stdout, "on", sbx.provider);`}
             {site.providers.map((p) => (
               <tr key={p.id}>
                 <td>{p.name}</td>
-                <td className="font-mono text-xs">{p.credentials.map((g) => g.join(" + ")).join("  or  ")}</td>
+                <td className="font-mono text-xs">{p.credentials.length ? p.credentials.map((g) => g.join(" + ")).join("  or  ") : "Docker running locally"}</td>
               </tr>
             ))}
           </tbody>
@@ -93,10 +98,12 @@ router.create({ gpu: "A10G" })                      // only GPU-capable provider
 router.create(spec, { require: ["pause"] })         // only providers that can pause`}
         />
         <p>
-          The default order is the catalog order, with Maritime first because it is the cheapest at every size. To see what
-          would happen without starting anything, call <code>router.plan(spec, route)</code> or run{" "}
-          <code>npx @sandboxrouter/sdk route</code>. Every skipped provider comes with a reason, like <code>not configured</code> or{" "}
-          <code>max 16 vCPU</code>.
+          With no strategy, the router uses <code>cheapest</code>: the lowest list price for the size you asked for, among
+          providers you have keys for. Ties break alphabetically, so no provider gets a better slot. Prices come from each
+          provider&apos;s public pricing page and live in <code>src/catalog.ts</code>. Docker is never picked automatically; name it
+          with <code>{`{ provider: "docker" }`}</code>. To see what would happen without starting anything, call{" "}
+          <code>router.plan(spec, route)</code> or run <code>npx @sandboxrouter/sdk route</code>. Every skipped provider comes with
+          a reason, like <code>not configured</code> or <code>max 16 vCPU</code>.
         </p>
 
         <h2 id="fallback">Fallback</h2>
@@ -226,7 +233,7 @@ with sr.create(vcpu=2, memory_gb=4, strategy="cheapest") as sbx:
         <p>
           <code>bench</code> starts real sandboxes on every provider you have keys for, times them, kills them, and prints a
           table. <code>--share</code> also writes a report you can add to the repo&apos;s <code>results/</code> folder in a pull
-          request; the <a href="/rankings">Rankings</a> page is built from those reports.
+          request; the cold-start column in the <a href="/#providers">provider table</a> is built from those reports.
         </p>
         <CodeBlock title="terminal" code={`npx @sandboxrouter/sdk bench --runs 5 --share --label "SF, home wifi"`} />
         <p>

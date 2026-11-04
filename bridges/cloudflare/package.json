@@ -1,0 +1,20 @@
+{
+  "name": "sandboxrouter-cloudflare-bridge",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Bridge Worker that exposes Cloudflare Sandboxes (Containers + @cloudflare/sandbox) over HTTPS for sandboxrouter.",
+  "type": "module",
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@cloudflare/sandbox": "1.0.3"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261104.1",
+    "typescript": "^5.9.3",
+    "wrangler": "^4.157.0"
+  }
+}

@@ -5,11 +5,11 @@ export type Shape = string; // "2x4" = 2 vCPU, 4 GB
 export interface SiteProvider {
   id: string;
   name: string;
-  order: number;
   capabilities: string[];
   limits: { maxVcpu: number; maxMemoryGb: number };
   credentials: string[][];
   docs: string;
+  local?: boolean;
   pricing: { vcpuHour: number; gbHour: number; note?: string; source: string; checked: string };
   computers: string[];
   prices: Record<Shape, { usd: number; unfit: string | null }>;
@@ -35,6 +35,7 @@ export const site = data as unknown as {
 };
 
 export const REPO = "https://github.com/gigialc/sandboxrouter";
+export const NPM = "@sandboxrouter/sdk";
 export const DEFAULT_SHAPE: Shape = "2x4";
 
 export function shapeLabel(s: Shape) {
@@ -43,6 +44,7 @@ export function shapeLabel(s: Shape) {
 }
 
 export function usd(n: number) {
+  if (n === 0) return "free";
   return n < 1 ? `$${n.toFixed(3)}` : `$${n.toFixed(2)}`;
 }
 
@@ -50,17 +52,30 @@ export function provider(id: string) {
   return site.providers.find((p) => p.id === id);
 }
 
-export const cheapest = [...site.providers].sort((a, b) => a.prices[DEFAULT_SHAPE].usd - b.prices[DEFAULT_SHAPE].usd);
+/** The router's own rule: cheapest first, ties alphabetical; local providers last (never auto-picked). */
+export function ranked(shape: Shape = DEFAULT_SHAPE) {
+  return [...site.providers].sort(
+    (a, b) =>
+      Number(!!a.local) - Number(!!b.local) ||
+      Number(!!a.prices[shape].unfit) - Number(!!b.prices[shape].unfit) ||
+      a.prices[shape].usd - b.prices[shape].usd ||
+      a.id.localeCompare(b.id),
+  );
+}
 
 export const CAPABILITY_LABEL: Record<string, string> = {
-  pause: "Pause / resume",
+  pause: "Pause",
   gpu: "GPU",
   "custom-image": "Custom image",
-  computers: "Desktops & phones",
+  computers: "Desktops",
 };
 
 export const PACKAGE: Record<string, string | null> = {
   maritime: null,
+  docker: null,
+  boat: null,
+  exedev: null,
+  cloudflare: null,
   e2b: "e2b",
   daytona: "@daytonaio/sdk",
   modal: "modal",
@@ -70,4 +85,6 @@ export const PACKAGE: Record<string, string | null> = {
   blaxel: "@blaxel/core",
   tensorlake: "@tensorlakeai/tensorlake",
   runloop: "@runloop/api-client",
+  hopx: "@hopx-ai/sdk",
+  northflank: "@northflank/js-client",
 };

@@ -1,6 +1,6 @@
 {
   "version": "0.1.0",
-  "generatedAt": "2026-11-04T20:15:05.087Z",
+  "generatedAt": "2026-11-04T22:23:11.410Z",
   "shapes": [
     "1x2",
     "2x4",
@@ -11,9 +11,372 @@
   ],
   "providers": [
     {
+      "id": "blaxel",
+      "name": "Blaxel",
+      "local": false,
+      "capabilities": [
+        "pause",
+        "custom-image"
+      ],
+      "limits": {
+        "maxVcpu": 8,
+        "maxMemoryGb": 16
+      },
+      "credentials": [
+        [
+          "BL_API_KEY",
+          "BL_WORKSPACE"
+        ]
+      ],
+      "docs": "https://docs.blaxel.ai/Sandboxes/Overview",
+      "pricing": {
+        "vcpuHour": 0,
+        "gbHour": 0.0414,
+        "note": "billed on memory only ($0.0000115/GB-s), CPU scales with memory (~2 GB per core)",
+        "source": "https://blaxel.ai/pricing",
+        "checked": "2026-11-04"
+      },
+      "computers": [],
+      "prices": {
+        "1x2": {
+          "usd": 0.0828,
+          "unfit": null
+        },
+        "2x4": {
+          "usd": 0.1656,
+          "unfit": null
+        },
+        "4x8": {
+          "usd": 0.3312,
+          "unfit": null
+        },
+        "8x16": {
+          "usd": 0.6624,
+          "unfit": null
+        },
+        "16x32": {
+          "usd": 1.3248,
+          "unfit": "max 8 vCPU"
+        },
+        "32x128": {
+          "usd": 5.2992,
+          "unfit": "max 8 vCPU"
+        }
+      }
+    },
+    {
+      "id": "cloudflare",
+      "name": "Cloudflare Sandbox",
+      "local": false,
+      "capabilities": [],
+      "limits": {
+        "maxVcpu": 4,
+        "maxMemoryGb": 12
+      },
+      "credentials": [
+        [
+          "CLOUDFLARE_SANDBOX_URL",
+          "CLOUDFLARE_SANDBOX_TOKEN"
+        ]
+      ],
+      "docs": "https://developers.cloudflare.com/sandbox/",
+      "pricing": {
+        "vcpuHour": 0.072,
+        "gbHour": 0.009,
+        "note": "bills active CPU and provisioned memory of the instance type; this is the full-CPU price; needs Workers Paid ($5/mo) and the bridge Worker in bridges/cloudflare",
+        "source": "https://developers.cloudflare.com/containers/platform/pricing/",
+        "checked": "2026-11-04"
+      },
+      "computers": [],
+      "prices": {
+        "1x2": {
+          "usd": 0.126,
+          "unfit": null
+        },
+        "2x4": {
+          "usd": 0.216,
+          "unfit": null
+        },
+        "4x8": {
+          "usd": 0.396,
+          "unfit": null
+        },
+        "8x16": {
+          "usd": 0.396,
+          "unfit": "max 4 vCPU"
+        },
+        "16x32": {
+          "usd": 0.396,
+          "unfit": "max 4 vCPU"
+        },
+        "32x128": {
+          "usd": 0.396,
+          "unfit": "max 4 vCPU"
+        }
+      }
+    },
+    {
+      "id": "daytona",
+      "name": "Daytona",
+      "local": false,
+      "capabilities": [
+        "pause",
+        "custom-image"
+      ],
+      "limits": {
+        "maxVcpu": 4,
+        "maxMemoryGb": 8
+      },
+      "credentials": [
+        [
+          "DAYTONA_API_KEY"
+        ]
+      ],
+      "docs": "https://www.daytona.io/docs",
+      "pricing": {
+        "vcpuHour": 0.0504,
+        "gbHour": 0.0162,
+        "note": "per second, plus disk above 5 GiB",
+        "source": "https://www.daytona.io/pricing",
+        "checked": "2026-11-04"
+      },
+      "computers": [],
+      "prices": {
+        "1x2": {
+          "usd": 0.0828,
+          "unfit": null
+        },
+        "2x4": {
+          "usd": 0.1656,
+          "unfit": null
+        },
+        "4x8": {
+          "usd": 0.3312,
+          "unfit": null
+        },
+        "8x16": {
+          "usd": 0.6624,
+          "unfit": "max 4 vCPU"
+        },
+        "16x32": {
+          "usd": 1.3248,
+          "unfit": "max 4 vCPU"
+        },
+        "32x128": {
+          "usd": 3.6864,
+          "unfit": "max 4 vCPU"
+        }
+      }
+    },
+    {
+      "id": "docker",
+      "name": "Docker (local)",
+      "local": true,
+      "capabilities": [
+        "pause",
+        "custom-image"
+      ],
+      "limits": {
+        "maxVcpu": 64,
+        "maxMemoryGb": 256
+      },
+      "credentials": [],
+      "docs": "https://docs.docker.com/engine/",
+      "pricing": {
+        "vcpuHour": 0,
+        "gbHour": 0,
+        "note": "runs on your own machine; free, but shares your kernel, so weaker isolation than a cloud micro-VM",
+        "source": "https://docs.docker.com/engine/",
+        "checked": "2026-11-04"
+      },
+      "computers": [],
+      "prices": {
+        "1x2": {
+          "usd": 0,
+          "unfit": null
+        },
+        "2x4": {
+          "usd": 0,
+          "unfit": null
+        },
+        "4x8": {
+          "usd": 0,
+          "unfit": null
+        },
+        "8x16": {
+          "usd": 0,
+          "unfit": null
+        },
+        "16x32": {
+          "usd": 0,
+          "unfit": null
+        },
+        "32x128": {
+          "usd": 0,
+          "unfit": null
+        }
+      }
+    },
+    {
+      "id": "e2b",
+      "name": "E2B",
+      "local": false,
+      "capabilities": [
+        "pause",
+        "custom-image"
+      ],
+      "limits": {
+        "maxVcpu": 8,
+        "maxMemoryGb": 8
+      },
+      "credentials": [
+        [
+          "E2B_API_KEY"
+        ]
+      ],
+      "docs": "https://e2b.dev/docs",
+      "pricing": {
+        "vcpuHour": 0.0504,
+        "gbHour": 0.0162,
+        "note": "per second; Pro plan $150/mo",
+        "source": "https://e2b.dev/pricing",
+        "checked": "2026-11-04"
+      },
+      "computers": [],
+      "prices": {
+        "1x2": {
+          "usd": 0.0828,
+          "unfit": null
+        },
+        "2x4": {
+          "usd": 0.1656,
+          "unfit": null
+        },
+        "4x8": {
+          "usd": 0.3312,
+          "unfit": null
+        },
+        "8x16": {
+          "usd": 0.6624,
+          "unfit": "max 8 GB memory"
+        },
+        "16x32": {
+          "usd": 1.3248,
+          "unfit": "max 8 vCPU"
+        },
+        "32x128": {
+          "usd": 3.6864,
+          "unfit": "max 8 vCPU"
+        }
+      }
+    },
+    {
+      "id": "sprites",
+      "name": "Fly.io Sprites",
+      "local": false,
+      "capabilities": [],
+      "limits": {
+        "maxVcpu": 8,
+        "maxMemoryGb": 8
+      },
+      "credentials": [
+        [
+          "SPRITES_TOKEN"
+        ]
+      ],
+      "docs": "https://fly.io/sprites",
+      "pricing": {
+        "vcpuHour": 0.0385,
+        "gbHour": 0.021875,
+        "note": "bills actual CPU and memory use; this is the full-use price; storage extra",
+        "source": "https://fly.io/sprites",
+        "checked": "2026-11-04"
+      },
+      "computers": [],
+      "prices": {
+        "1x2": {
+          "usd": 0.0822,
+          "unfit": null
+        },
+        "2x4": {
+          "usd": 0.1645,
+          "unfit": null
+        },
+        "4x8": {
+          "usd": 0.329,
+          "unfit": null
+        },
+        "8x16": {
+          "usd": 0.658,
+          "unfit": "max 8 GB memory"
+        },
+        "16x32": {
+          "usd": 1.316,
+          "unfit": "max 8 vCPU"
+        },
+        "32x128": {
+          "usd": 4.032,
+          "unfit": "max 8 vCPU"
+        }
+      }
+    },
+    {
+      "id": "hopx",
+      "name": "HOPX",
+      "local": false,
+      "capabilities": [
+        "pause",
+        "custom-image"
+      ],
+      "limits": {
+        "maxVcpu": 2,
+        "maxMemoryGb": 4
+      },
+      "credentials": [
+        [
+          "HOPX_API_KEY"
+        ]
+      ],
+      "docs": "https://docs.hopx.ai",
+      "pricing": {
+        "vcpuHour": 0.0504,
+        "gbHour": 0.0162,
+        "note": "per second, plus storage; size comes from the template, not the request",
+        "source": "https://hopx.ai/pricing",
+        "checked": "2026-11-04"
+      },
+      "computers": [],
+      "prices": {
+        "1x2": {
+          "usd": 0.0828,
+          "unfit": null
+        },
+        "2x4": {
+          "usd": 0.1656,
+          "unfit": null
+        },
+        "4x8": {
+          "usd": 0.3312,
+          "unfit": "max 2 vCPU"
+        },
+        "8x16": {
+          "usd": 0.6624,
+          "unfit": "max 2 vCPU"
+        },
+        "16x32": {
+          "usd": 1.3248,
+          "unfit": "max 2 vCPU"
+        },
+        "32x128": {
+          "usd": 3.6864,
+          "unfit": "max 2 vCPU"
+        }
+      }
+    },
+    {
       "id": "maritime",
       "name": "Maritime",
-      "order": 0,
+      "local": false,
       "capabilities": [
         "pause",
         "custom-image"
@@ -68,115 +431,9 @@
       }
     },
     {
-      "id": "e2b",
-      "name": "E2B",
-      "order": 1,
-      "capabilities": [
-        "pause",
-        "custom-image"
-      ],
-      "limits": {
-        "maxVcpu": 8,
-        "maxMemoryGb": 8
-      },
-      "credentials": [
-        [
-          "E2B_API_KEY"
-        ]
-      ],
-      "docs": "https://e2b.dev/docs",
-      "pricing": {
-        "vcpuHour": 0.0504,
-        "gbHour": 0.0162,
-        "note": "per second; Pro plan $150/mo",
-        "source": "https://e2b.dev/pricing",
-        "checked": "2026-11-04"
-      },
-      "computers": [],
-      "prices": {
-        "1x2": {
-          "usd": 0.0828,
-          "unfit": null
-        },
-        "2x4": {
-          "usd": 0.1656,
-          "unfit": null
-        },
-        "4x8": {
-          "usd": 0.3312,
-          "unfit": null
-        },
-        "8x16": {
-          "usd": 0.6624,
-          "unfit": "max 8 GB memory"
-        },
-        "16x32": {
-          "usd": 1.3248,
-          "unfit": "max 8 vCPU"
-        },
-        "32x128": {
-          "usd": 3.6864,
-          "unfit": "max 8 vCPU"
-        }
-      }
-    },
-    {
-      "id": "daytona",
-      "name": "Daytona",
-      "order": 2,
-      "capabilities": [
-        "pause",
-        "custom-image"
-      ],
-      "limits": {
-        "maxVcpu": 4,
-        "maxMemoryGb": 8
-      },
-      "credentials": [
-        [
-          "DAYTONA_API_KEY"
-        ]
-      ],
-      "docs": "https://www.daytona.io/docs",
-      "pricing": {
-        "vcpuHour": 0.0504,
-        "gbHour": 0.0162,
-        "note": "per second, plus disk above 5 GiB",
-        "source": "https://www.daytona.io/pricing",
-        "checked": "2026-11-04"
-      },
-      "computers": [],
-      "prices": {
-        "1x2": {
-          "usd": 0.0828,
-          "unfit": null
-        },
-        "2x4": {
-          "usd": 0.1656,
-          "unfit": null
-        },
-        "4x8": {
-          "usd": 0.3312,
-          "unfit": null
-        },
-        "8x16": {
-          "usd": 0.6624,
-          "unfit": "max 4 vCPU"
-        },
-        "16x32": {
-          "usd": 1.3248,
-          "unfit": "max 4 vCPU"
-        },
-        "32x128": {
-          "usd": 3.6864,
-          "unfit": "max 4 vCPU"
-        }
-      }
-    },
-    {
       "id": "modal",
       "name": "Modal",
-      "order": 3,
+      "local": false,
       "capabilities": [
         "gpu",
         "custom-image"
@@ -228,64 +485,9 @@
       }
     },
     {
-      "id": "vercel",
-      "name": "Vercel Sandbox",
-      "order": 4,
-      "capabilities": [],
-      "limits": {
-        "maxVcpu": 8,
-        "maxMemoryGb": 16
-      },
-      "credentials": [
-        [
-          "VERCEL_OIDC_TOKEN"
-        ],
-        [
-          "VERCEL_TOKEN",
-          "VERCEL_TEAM_ID",
-          "VERCEL_PROJECT_ID"
-        ]
-      ],
-      "docs": "https://vercel.com/docs/vercel-sandbox",
-      "pricing": {
-        "vcpuHour": 0.128,
-        "gbHour": 0.0212,
-        "note": "bills active CPU only; this is the 100%-CPU price, idle work costs less",
-        "source": "https://vercel.com/docs/vercel-sandbox/pricing",
-        "checked": "2026-11-04"
-      },
-      "computers": [],
-      "prices": {
-        "1x2": {
-          "usd": 0.1704,
-          "unfit": null
-        },
-        "2x4": {
-          "usd": 0.3408,
-          "unfit": null
-        },
-        "4x8": {
-          "usd": 0.6816,
-          "unfit": null
-        },
-        "8x16": {
-          "usd": 1.3632,
-          "unfit": null
-        },
-        "16x32": {
-          "usd": 2.7264,
-          "unfit": "max 8 vCPU"
-        },
-        "32x128": {
-          "usd": 6.8096,
-          "unfit": "max 8 vCPU"
-        }
-      }
-    },
-    {
       "id": "morph",
       "name": "Morph Cloud",
-      "order": 5,
+      "local": false,
       "capabilities": [
         "pause",
         "custom-image"
@@ -336,61 +538,10 @@
       }
     },
     {
-      "id": "sprites",
-      "name": "Fly.io Sprites",
-      "order": 6,
-      "capabilities": [],
-      "limits": {
-        "maxVcpu": 8,
-        "maxMemoryGb": 8
-      },
-      "credentials": [
-        [
-          "SPRITES_TOKEN"
-        ]
-      ],
-      "docs": "https://fly.io/sprites",
-      "pricing": {
-        "vcpuHour": 0.0385,
-        "gbHour": 0.021875,
-        "note": "bills actual CPU and memory use; this is the full-use price; storage extra",
-        "source": "https://fly.io/sprites",
-        "checked": "2026-11-04"
-      },
-      "computers": [],
-      "prices": {
-        "1x2": {
-          "usd": 0.0822,
-          "unfit": null
-        },
-        "2x4": {
-          "usd": 0.1645,
-          "unfit": null
-        },
-        "4x8": {
-          "usd": 0.329,
-          "unfit": null
-        },
-        "8x16": {
-          "usd": 0.658,
-          "unfit": "max 8 GB memory"
-        },
-        "16x32": {
-          "usd": 1.316,
-          "unfit": "max 8 vCPU"
-        },
-        "32x128": {
-          "usd": 4.032,
-          "unfit": "max 8 vCPU"
-        }
-      }
-    },
-    {
-      "id": "blaxel",
-      "name": "Blaxel",
-      "order": 7,
+      "id": "northflank",
+      "name": "Northflank",
+      "local": false,
       "capabilities": [
-        "pause",
         "custom-image"
       ],
       "limits": {
@@ -399,50 +550,103 @@
       },
       "credentials": [
         [
-          "BL_API_KEY",
-          "BL_WORKSPACE"
+          "NORTHFLANK_API_TOKEN",
+          "NORTHFLANK_PROJECT_ID"
         ]
       ],
-      "docs": "https://docs.blaxel.ai/Sandboxes/Overview",
+      "docs": "https://northflank.com/docs/v1/application/overview",
       "pricing": {
-        "vcpuHour": 0,
-        "gbHour": 0.0414,
-        "note": "billed on memory only ($0.0000115/GB-s), CPU scales with memory (~2 GB per core)",
-        "source": "https://blaxel.ai/pricing",
+        "vcpuHour": 0.01667,
+        "gbHour": 0.00833,
+        "note": "per second on Northflank Cloud, ephemeral disk included; sandboxes run as deployment services (microVMs)",
+        "source": "https://northflank.com/pricing",
         "checked": "2026-11-04"
       },
       "computers": [],
       "prices": {
         "1x2": {
-          "usd": 0.0828,
+          "usd": 0.0333,
           "unfit": null
         },
         "2x4": {
-          "usd": 0.1656,
+          "usd": 0.0667,
           "unfit": null
         },
         "4x8": {
-          "usd": 0.3312,
+          "usd": 0.1333,
           "unfit": null
         },
         "8x16": {
-          "usd": 0.6624,
+          "usd": 0.2666,
           "unfit": null
         },
         "16x32": {
-          "usd": 1.3248,
+          "usd": 0.5333,
           "unfit": "max 8 vCPU"
         },
         "32x128": {
-          "usd": 5.2992,
+          "usd": 1.5997,
           "unfit": "max 8 vCPU"
+        }
+      }
+    },
+    {
+      "id": "runloop",
+      "name": "Runloop",
+      "local": false,
+      "capabilities": [
+        "pause",
+        "custom-image"
+      ],
+      "limits": {
+        "maxVcpu": 16,
+        "maxMemoryGb": 64
+      },
+      "credentials": [
+        [
+          "RUNLOOP_API_KEY"
+        ]
+      ],
+      "docs": "https://docs.runloop.ai",
+      "pricing": {
+        "vcpuHour": 0.108,
+        "gbHour": 0.0252,
+        "note": "per second, plus disk; pause (suspend) is a Pro-plan feature",
+        "source": "https://www.runloop.ai/pricing",
+        "checked": "2026-11-04"
+      },
+      "computers": [],
+      "prices": {
+        "1x2": {
+          "usd": 0.1584,
+          "unfit": null
+        },
+        "2x4": {
+          "usd": 0.3168,
+          "unfit": null
+        },
+        "4x8": {
+          "usd": 0.6336,
+          "unfit": null
+        },
+        "8x16": {
+          "usd": 1.2672,
+          "unfit": null
+        },
+        "16x32": {
+          "usd": 2.5344,
+          "unfit": null
+        },
+        "32x128": {
+          "usd": 6.6816,
+          "unfit": "max 16 vCPU"
         }
       }
     },
     {
       "id": "tensorlake",
       "name": "Tensorlake",
-      "order": 8,
+      "local": false,
       "capabilities": [
         "pause",
         "custom-image"
@@ -493,55 +697,57 @@
       }
     },
     {
-      "id": "runloop",
-      "name": "Runloop",
-      "order": 9,
-      "capabilities": [
-        "pause",
-        "custom-image"
-      ],
+      "id": "vercel",
+      "name": "Vercel Sandbox",
+      "local": false,
+      "capabilities": [],
       "limits": {
-        "maxVcpu": 16,
-        "maxMemoryGb": 64
+        "maxVcpu": 8,
+        "maxMemoryGb": 16
       },
       "credentials": [
         [
-          "RUNLOOP_API_KEY"
+          "VERCEL_OIDC_TOKEN"
+        ],
+        [
+          "VERCEL_TOKEN",
+          "VERCEL_TEAM_ID",
+          "VERCEL_PROJECT_ID"
         ]
       ],
-      "docs": "https://docs.runloop.ai",
+      "docs": "https://vercel.com/docs/vercel-sandbox",
       "pricing": {
-        "vcpuHour": 0.108,
-        "gbHour": 0.0252,
-        "note": "per second, plus disk; pause (suspend) is a Pro-plan feature",
-        "source": "https://www.runloop.ai/pricing",
+        "vcpuHour": 0.128,
+        "gbHour": 0.0212,
+        "note": "bills active CPU only; this is the 100%-CPU price, idle work costs less",
+        "source": "https://vercel.com/docs/vercel-sandbox/pricing",
         "checked": "2026-11-04"
       },
       "computers": [],
       "prices": {
         "1x2": {
-          "usd": 0.1584,
+          "usd": 0.1704,
           "unfit": null
         },
         "2x4": {
-          "usd": 0.3168,
+          "usd": 0.3408,
           "unfit": null
         },
         "4x8": {
-          "usd": 0.6336,
+          "usd": 0.6816,
           "unfit": null
         },
         "8x16": {
-          "usd": 1.2672,
+          "usd": 1.3632,
           "unfit": null
         },
         "16x32": {
-          "usd": 2.5344,
-          "unfit": null
+          "usd": 2.7264,
+          "unfit": "max 8 vCPU"
         },
         "32x128": {
-          "usd": 6.6816,
-          "unfit": "max 16 vCPU"
+          "usd": 6.8096,
+          "unfit": "max 8 vCPU"
         }
       }
     }

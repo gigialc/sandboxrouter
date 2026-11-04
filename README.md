@@ -1,85 +1,108 @@
 # sandboxrouter
 
-**OpenRouter for sandboxes.** One API for every place an AI agent can run code: Maritime, E2B, Daytona, Modal, Vercel Sandbox, Morph, Fly.io Sprites, Blaxel, Tensorlake and Runloop. Routes on price, latency or capability, and falls back to the next provider when one is down or rate-limited. Also drives desktops and phones for computer-use agents.
+**One API for every sandbox.** A free, open-source router for the places an AI agent can run code: Blaxel, Cloudflare, Daytona, E2B, Fly.io Sprites, HOPX, Maritime, Modal, Morph, Northflank, Runloop, Tensorlake and Vercel, plus Docker on your own machine. It picks a provider by price, speed or capability, and falls back to the next one when a provider is down or rate-limited.
 
 ```ts
 import { Router } from "@sandboxrouter/sdk";
 
-const router = new Router();                       // reads provider keys from env
+const router = new Router();                       // uses whichever provider keys you've set
 await using sbx = await router.create({ vcpu: 2, memoryGb: 4 });
 
 const r = await sbx.exec("python3 -c 'print(6*7)'");
-console.log(r.stdout, "ran on", sbx.provider);     // 42 ran on maritime
+console.log(r.stdout, "ran on", sbx.provider);
 ```
 
 Change providers without changing code. If one returns a 429, the next one takes the sandbox.
 
+Site: [sandboxrouter.vercel.app](https://sandboxrouter.vercel.app) · npm: [`@sandboxrouter/sdk`](https://www.npmjs.com/package/@sandboxrouter/sdk)
+
 ## Why
 
-Agents need a disposable computer: to run code a model wrote, install packages, run tests, scrape, or do an RL rollout. In 2026 there are more than a dozen sandbox providers, each with its own SDK, auth, lifecycle and price. A 2 vCPU / 4 GB box costs anywhere from **$0.022/hr to $0.34/hr** depending on where you start it.
+Agents need a disposable computer: to run code a model wrote, install packages, run tests, scrape, or do an RL rollout. There are more than a dozen sandbox providers, each with its own SDK, auth, lifecycle and price, and the same 2 vCPU / 4 GB box costs anywhere from a few cents to over thirty cents an hour.
 
 So every agent team either locks into one provider or writes its own adapter layer. sandboxrouter is that adapter layer, done once, in the open:
 
 - **One interface.** `create`, `exec`, `writeFile`, `readFile`, `pause`, `kill`, the same on every provider. `exec` streams stdout and stderr as they happen.
-- **Routing.** `default` (catalog order), `cheapest` (by list price for your shape) or `fastest` (by your own measured cold starts).
+- **Routing.** `cheapest` (the default: lowest list price for your size) or `fastest` (lowest cold start you measured with `bench`), or name providers yourself.
 - **Fallback.** A failed create moves to the next candidate, and every attempt is recorded on `sbx.attempts`.
 - **Capability filters.** Ask for a GPU and only GPU-capable providers are tried. Ask for 32 vCPU and providers that can't do it are skipped, with the reason.
-- **BYOK.** Your keys and your accounts. Nothing is proxied through a third party.
+- **Your keys.** Your accounts, your bills. Nothing is proxied through a third party.
 - **HTTP server and Python client.** Run `sandboxrouter serve` and any language gets the same API.
-- **Computers.** Linux and Windows desktops and Android phones for computer-use models: actions, screenshots, and a takeover link for a person when the model hits a login.
-- **Open leaderboard.** `bench --share` produces a report; the leaderboard is built from submitted reports in [`results/`](results/).
+- **Computers.** Desktops and phones for computer-use models (Maritime today): actions, screenshots, and a takeover link for a person when the model hits a login.
+- **Open benchmark.** `bench --share` produces a report; cold starts on the site come from reports submitted to [`results/`](results/).
+
+## Fair by construction
+
+No provider gets a better slot, and none pays for placement.
+
+- With no strategy, a sandbox goes to the **lowest list price for the size you asked for**, among providers you have keys for. Ties break **alphabetically**.
+- `fastest` uses only cold starts **you** measured with `bench`, then price.
+- Prices are each provider's public rate, with a source link, in [`src/catalog.ts`](src/catalog.ts). There's a test that the catalog has no privileged ordering.
+- Docker is never picked automatically, because it always "costs" $0 and isolates less than a cloud micro-VM. Name it to use it.
+
+If a price is wrong, open a PR with the source link.
 
 ## Prices
 
-Estimated list price while running, 2 vCPU / 4 GB (`npx @sandboxrouter/sdk providers --vcpu 2 --memory 4`):
+Estimated list price while running, 2 vCPU / 4 GB (`npx @sandboxrouter/sdk providers --vcpu 2 --memory 4`), in the order the router would try them:
 
 | Provider | $/hr | Notes | Source |
 |---|---|---|---|
-| **Maritime** | **$0.022** | Per second, disk included. Firecracker micro-VMs. Also runs stock E2B SDK code. | [pricing](https://maritime.sh/pricing) |
-| Morph Cloud | $0.100 | $0.05 per MCU; an MCU-hour is the larger of 1 vCPU, 4 GB RAM or 16 GB disk. | [pricing](https://cloud.morph.so/web/pricing) |
-| Fly.io Sprites | $0.165 | Bills actual CPU and memory use; this is the full-use price. Storage extra. | [pricing](https://fly.io/sprites) |
-| E2B | $0.166 | Per second. Pro plan $150/mo. | [pricing](https://e2b.dev/pricing) |
-| Daytona | $0.166 | Per second, plus disk above 5 GiB. | [pricing](https://www.daytona.io/pricing) |
-| Blaxel | $0.166 | Billed on memory only; CPU scales with memory. | [pricing](https://blaxel.ai/pricing) |
-| Tensorlake | $0.200 | Bills active CPU (20% floor); this is the full-use price. Pro plan is cheaper. | [pricing](https://www.tensorlake.ai/pricing) |
-| Modal | $0.239 | Sandbox rates. GPUs available. | [pricing](https://modal.com/pricing) |
-| Runloop | $0.317 | Per second, plus disk. Suspend/resume is a Pro feature. | [pricing](https://www.runloop.ai/pricing) |
-| Vercel Sandbox | $0.341 | Bills active CPU only. This is the 100%-CPU price; mostly idle work costs less. | [pricing](https://vercel.com/docs/vercel-sandbox/pricing) |
+| Maritime | $0.022 | Per second, disk included | [pricing](https://maritime.sh/pricing) |
+| Northflank | $0.067 | Per second on Northflank Cloud, ephemeral disk included; sandboxes run as deployment services (microVMs) | [pricing](https://northflank.com/pricing) |
+| Morph Cloud | $0.100 | $0.05/MCU; MCU-hours = max(vCPU, RAM/4 GB, disk/16 GB); snapshots extra | [pricing](https://cloud.morph.so/web/pricing) |
+| Fly.io Sprites | $0.164 | Bills actual CPU and memory use; this is the full-use price; storage extra | [pricing](https://fly.io/sprites) |
+| Blaxel | $0.166 | Billed on memory only ($0.0000115/GB-s), CPU scales with memory (~2 GB per core) | [pricing](https://blaxel.ai/pricing) |
+| Daytona | $0.166 | Per second, plus disk above 5 GiB | [pricing](https://www.daytona.io/pricing) |
+| E2B | $0.166 | Per second; Pro plan $150/mo | [pricing](https://e2b.dev/pricing) |
+| HOPX | $0.166 | Per second, plus storage; size comes from the template, not the request | [pricing](https://hopx.ai/pricing) |
+| Tensorlake | $0.200 | Bills active CPU (floor 20% of allocation); this is the full-use price; Pro plan is lower | [pricing](https://www.tensorlake.ai/pricing) |
+| Cloudflare Sandbox | $0.216 | Bills active CPU and provisioned memory of the instance type; this is the full-CPU price; needs Workers Paid ($5/mo) and the bridge Worker in bridges/cloudflare | [pricing](https://developers.cloudflare.com/containers/platform/pricing/) |
+| Modal | $0.239 | Sandbox rates, GPUs extra; region pinning x1.15-1.75 | [pricing](https://modal.com/pricing) |
+| Runloop | $0.317 | Per second, plus disk; pause (suspend) is a Pro-plan feature | [pricing](https://www.runloop.ai/pricing) |
+| Vercel Sandbox | $0.341 | Bills active CPU only; this is the 100%-CPU price, idle work costs less | [pricing](https://vercel.com/docs/vercel-sandbox/pricing) |
+| Docker (local) | free | Runs on your own machine; free, but shares your kernel, so weaker isolation than a cloud micro-VM | [pricing](https://docs.docker.com/engine/) |
 
-Checked 2026-11-04. Prices live in [`src/catalog.ts`](src/catalog.ts). If one is wrong, open a PR with the source link.
-
-**Why Maritime is the default:** it's first in catalog order because it's the cheapest per hour at every shape in this table (there's a test that checks this against the catalog), so `default` and `cheapest` agree. Don't take that on trust: run `sandboxrouter bench` on your own accounts and route with `strategy: "fastest"` if latency matters more to you than price.
+Checked 2026-11-04.
 
 ## Install
 
 ```bash
 npm i @sandboxrouter/sdk
-# then install the SDK of each provider you use (Maritime needs none, it's plain REST):
-npm i e2b                 # E2B
-npm i @daytonaio/sdk      # Daytona
-npm i modal               # Modal
-npm i @vercel/sandbox     # Vercel Sandbox
-npm i morphcloud          # Morph Cloud
-npm i @fly/sprites        # Fly.io Sprites (needs Node 24+ per its package)
-npm i @blaxel/core        # Blaxel
+# then the SDK of each provider you use (Maritime, Cloudflare and Docker need none):
+npm i e2b                       # E2B
+npm i @daytonaio/sdk            # Daytona
+npm i modal                     # Modal
+npm i @vercel/sandbox           # Vercel Sandbox
+npm i morphcloud                # Morph Cloud
+npm i @fly/sprites              # Fly.io Sprites (its package asks for Node 24+)
+npm i @blaxel/core              # Blaxel
 npm i @tensorlakeai/tensorlake  # Tensorlake
-npm i @runloop/api-client # Runloop
+npm i @runloop/api-client       # Runloop
+npm i @hopx-ai/sdk              # HOPX
+npm i @northflank/js-client     # Northflank
 ```
 
-Set the keys for the providers you want. Unconfigured providers are skipped.
+Cloudflare sandboxes only run inside a Cloudflare Worker, so you deploy a small bridge Worker to your own account first: see [`bridges/cloudflare`](bridges/cloudflare).
+
+Set the keys for the providers you want. Providers without keys are skipped.
 
 | Provider | Env |
 |---|---|
-| Maritime | `MARITIME_API_KEY` (an `mk_` key with the `sandboxes` scope: `maritime keys create`) |
-| E2B | `E2B_API_KEY` |
+| Blaxel | `BL_API_KEY` + `BL_WORKSPACE` |
+| Cloudflare Sandbox | `CLOUDFLARE_SANDBOX_URL` + `CLOUDFLARE_SANDBOX_TOKEN` |
 | Daytona | `DAYTONA_API_KEY` |
-| Modal | `MODAL_TOKEN_ID` + `MODAL_TOKEN_SECRET`, or `~/.modal.toml` |
-| Vercel | `VERCEL_OIDC_TOKEN`, or `VERCEL_TOKEN` + `VERCEL_TEAM_ID` + `VERCEL_PROJECT_ID` |
-| Morph | `MORPH_API_KEY` |
+| Docker (local) | none: Docker running locally |
+| E2B | `E2B_API_KEY` |
 | Fly.io Sprites | `SPRITES_TOKEN` |
-| Blaxel | `BL_API_KEY` + `BL_WORKSPACE` (optional `BL_REGION`, default `us-pdx-1`) |
-| Tensorlake | `TENSORLAKE_API_KEY` |
+| HOPX | `HOPX_API_KEY` |
+| Maritime | `MARITIME_API_KEY` |
+| Modal | `MODAL_TOKEN_ID` + `MODAL_TOKEN_SECRET` |
+| Morph Cloud | `MORPH_API_KEY` |
+| Northflank | `NORTHFLANK_API_TOKEN` + `NORTHFLANK_PROJECT_ID` |
 | Runloop | `RUNLOOP_API_KEY` |
+| Tensorlake | `TENSORLAKE_API_KEY` |
+| Vercel Sandbox | `VERCEL_OIDC_TOKEN`, or `VERCEL_TOKEN` + `VERCEL_TEAM_ID` + `VERCEL_PROJECT_ID` |
 
 ## Library
 
@@ -218,18 +241,22 @@ with sr.create(vcpu=2, memory_gb=4, strategy="cheapest") as sbx:
 | Blaxel | memory (CPU follows) | `ttl` | image | yes (archive, disk only) | Idle sandboxes go to free standby on their own. |
 | Tensorlake | `cpus`, `memoryMb` | idle timeout | image | yes (memory + disk) | Output is line-based. |
 | Runloop | snapped to Runloop's custom sizes | `keep_alive_time_seconds` (max 48 h) | blueprint | yes (Pro plan) | Commands start in the home directory. |
+| HOPX | set by the template | timeout | template | yes (memory + disk) | Size requests aren't applied, so the router only sends default-size work. |
+| Northflank | cheapest `nf-compute` plan that fits | `expiryTime` (5 min to 7 days) | any public image | no | Runs as a deployment service; files move as base64 over exec. |
+| Cloudflare | smallest instance type that fits | alarm in the bridge Worker | Dockerfile in the bridge | no | Through the bridge Worker you deploy ([`bridges/cloudflare`](bridges/cloudflare)). |
+| Docker (local) | `--cpus`, `--memory` | container exits at the lifetime | any image | yes (`docker pause`) | Your machine, shared kernel. Never auto-routed; use `{ provider: "docker" }`. |
 
 Capabilities in the catalog describe what each **adapter** implements, not everything a provider sells. Size limits are self-serve defaults and may be higher on your plan.
 
 ## Roadmap
 
-- [x] More providers: Morph, Fly.io Sprites, Blaxel, Tensorlake, Runloop
+- [x] More providers: Morph, Fly.io Sprites, Blaxel, Tensorlake, Runloop, HOPX, Northflank, Cloudflare (via a bridge Worker), Docker (local)
+- [x] Neutral routing: price decides, ties alphabetical, no privileged slot
 - [x] Desktops and phones (Maritime: Linux, Windows, Android)
 - [x] Streaming exec output
 - [x] Pause/resume where providers support it
 - [x] Python client
 - [x] Leaderboard built from `bench --share` reports
-- [ ] Cloudflare Sandbox. Its SDK runs only inside a Worker with a Durable Object binding, so it needs a small Worker shim the router can call
 - [ ] Computers on more providers (E2B Desktop, Daytona computer use)
 - [ ] Snapshots and forks as a routed operation
 - [ ] A hosted copy of the leaderboard page

@@ -22,7 +22,7 @@ Usage:
   sandboxrouter serve     [--port 8787] [--host 127.0.0.1] [--cors https://site.example,http://localhost:3000]
 
 Spec flags:   --vcpu N  --memory GB  --gpu T4  --timeout MIN
-Route flags:  --provider maritime[,e2b,...]  --strategy default|cheapest|fastest
+Route flags:  --provider e2b[,modal,...]  --strategy cheapest|fastest
               --no-fallback  --require gpu,custom-image
 
 Keys: MARITIME_API_KEY, E2B_API_KEY, DAYTONA_API_KEY, MODAL_TOKEN_ID+MODAL_TOKEN_SECRET,

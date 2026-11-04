@@ -1,0 +1,31 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "sandboxrouter-bridge",
+	"main": "src/index.ts",
+	"compatibility_date": "2026-11-04",
+	// @cloudflare/sandbox reads Linux error names through node:os.
+	"compatibility_flags": ["nodejs_compat"],
+	"observability": { "enabled": true },
+	"containers": [
+		{
+			"class_name": "BridgeSandbox",
+			// Each Durable Object starts its own container via ctx.container.start().
+			"scheduling_policy": "durable_object",
+			"images": {
+				// Started as ctx.container.images.sandbox. Add more entries to offer other images.
+				"sandbox": { "dockerfile": "./Dockerfile" }
+			}
+		}
+	],
+	"durable_objects": {
+		"bindings": [{ "class_name": "BridgeSandbox", "name": "SANDBOX" }]
+	},
+	"exports": {
+		"BridgeSandbox": { "type": "durable-object", "storage": "sqlite" }
+	},
+	"vars": {
+		// Set to "false" to block sandboxes from reaching the Internet.
+		"SANDBOX_INTERNET": "true"
+	}
+	// BRIDGE_TOKEN is a secret: npx wrangler secret put BRIDGE_TOKEN
+}

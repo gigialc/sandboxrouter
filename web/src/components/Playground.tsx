@@ -41,7 +41,7 @@ export function Playground() {
   const [configured, setConfigured] = useState<string[] | null>(null);
   const [connErr, setConnErr] = useState<string | null>(null);
   const [provider, setProvider] = useState("auto");
-  const [strategy, setStrategy] = useState("default");
+  const [strategy, setStrategy] = useState("cheapest");
   const [shape, setShape] = useState("2x4");
   const [sbx, setSbx] = useState<Sbx | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
@@ -154,13 +154,13 @@ export function Playground() {
     setBusy(null);
   }
 
-  const field = "w-full rounded-lg border border-line bg-sand px-3 py-2 text-sm outline-none focus:border-line-2";
+  const field = "w-full border border-line bg-bg px-3 py-2 text-sm outline-none focus:border-line-2";
 
   return (
-    <div className="mx-auto grid max-w-6xl gap-6 px-5 lg:grid-cols-[22rem_1fr]">
+    <div className="mx-auto grid max-w-5xl gap-6 px-6 lg:grid-cols-[20rem_1fr]">
       <div className="space-y-6">
-        <section className="rounded-xl border border-line p-5">
-          <h2 className="font-semibold">1. Connect your server</h2>
+        <section className="border border-line p-5">
+          <h2 className="font-normal">1. Connect your server</h2>
           <p className="mt-1 text-sm text-muted">Your keys stay on your machine. This page only talks to the server you run.</p>
           <label className="mt-4 block text-xs text-muted">
             Server URL
@@ -179,7 +179,7 @@ export function Playground() {
           <button
             onClick={connect}
             disabled={busy !== null}
-            className="mt-4 w-full rounded-full border border-line-2 px-4 py-2 text-sm font-medium hover:bg-accent-wash disabled:opacity-40"
+            className="mt-4 w-full border border-line-2 px-4 py-2 text-sm font-medium hover:bg-panel-2 disabled:opacity-40"
           >
             {busy === "connect" ? "Connecting…" : configured ? "Reconnect" : "Connect"}
           </button>
@@ -191,8 +191,8 @@ export function Playground() {
           )}
         </section>
 
-        <section className={`rounded-xl border border-line p-5 ${configured ? "" : "opacity-50"}`}>
-          <h2 className="font-semibold">2. Start a sandbox</h2>
+        <section className={` border border-line p-5 ${configured ? "" : "opacity-50"}`}>
+          <h2 className="font-normal">2. Start a sandbox</h2>
           <label className="mt-4 block text-xs text-muted">
             Provider
             <select value={provider} onChange={(e) => setProvider(e.target.value)} className={`${field} mt-1`} disabled={!configured}>
@@ -210,8 +210,7 @@ export function Playground() {
             <label className="block text-xs text-muted">
               Strategy
               <select value={strategy} onChange={(e) => setStrategy(e.target.value)} className={`${field} mt-1`} disabled={!configured || provider !== "auto"}>
-                <option value="default">default</option>
-                <option value="cheapest">cheapest</option>
+                                <option value="cheapest">cheapest</option>
                 <option value="fastest">fastest</option>
               </select>
             </label>
@@ -229,13 +228,13 @@ export function Playground() {
           <button
             onClick={start}
             disabled={!configured || busy !== null || !!sbx}
-            className="mt-4 w-full rounded-full bg-ink px-4 py-2 text-sm font-medium text-sand disabled:opacity-40"
+            className="mt-4 w-full bg-ink px-4 py-2 text-sm font-medium text-bg disabled:opacity-40"
           >
             {busy === "start" ? "Starting…" : "Start sandbox"}
           </button>
 
           {sbx && (
-            <div className="mt-4 rounded-xl border border-line bg-sand p-3 text-sm">
+            <div className="mt-4 border border-line bg-bg p-3 text-sm">
               <div className="font-mono text-xs break-all">{sbx.id}</div>
               <div className="mt-1 text-ink-2">
                 on <b>{sbx.provider}</b> · ~{usd(sbx.estimatedHourlyUsd)}/hr
@@ -255,33 +254,33 @@ export function Playground() {
         </section>
       </div>
 
-      <section className="flex min-h-[32rem] flex-col overflow-hidden rounded-xl border border-line bg-code-bg">
+      <section className="flex min-h-[32rem] flex-col overflow-hidden border border-line bg-panel">
         <div className="flex items-center gap-2 border-b border-white/10 p-3">
           <input
             value={cmd}
             onChange={(e) => setCmd(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && sbx && !busy && run()}
             aria-label="Command"
-            className="flex-1 rounded-lg border border-white/10 bg-white/5 px-3 py-2 font-mono text-sm text-code-ink outline-none"
+            className="flex-1 border border-white/10 bg-white/5 px-3 py-2 font-mono text-sm text-ink-2 outline-none"
           />
           <button
             onClick={run}
             disabled={!sbx || busy !== null}
-            className="rounded-lg bg-code-ink px-4 py-2 text-sm font-medium text-code-bg disabled:opacity-40"
+            className="bg-ink px-4 py-2 text-sm font-medium text-bg disabled:opacity-40"
           >
             {busy === "run" ? "Running…" : "Run"}
           </button>
         </div>
         <div ref={term} className="flex-1 overflow-auto p-4 font-mono text-[13px] leading-6 whitespace-pre-wrap">
           {lines.length === 0 ? (
-            <div className="text-code-ink/50">
+            <div className="text-muted">
               {configured ? "Start a sandbox, then run a command. Output streams here as it happens." : "Connect to your server to begin."}
             </div>
           ) : (
             lines.map((l, k) => (
               <span
                 key={k}
-                className={l.stream === "err" ? "text-[#ff8a7a]" : l.stream === "sys" ? "block text-code-ink/50" : "text-code-ink"}
+                className={l.stream === "err" ? "text-[#ff8a7a]" : l.stream === "sys" ? "block text-muted" : "text-ink-2"}
               >
                 {l.text}
                 {l.stream === "sys" ? "\n" : ""}
@@ -292,12 +291,12 @@ export function Playground() {
       </section>
 
       <section className="lg:col-span-2">
-        <h2 className="font-semibold">Don&apos;t have a server running?</h2>
+        <h2 className="font-normal">Don&apos;t have a server running?</h2>
         <p className="mt-1 text-sm text-muted">Run this in a terminal with at least one provider key, then press Connect.</p>
         <div className="mt-3">
           <CodeBlock
             title="terminal"
-            code={`export MARITIME_API_KEY=mk_...           # or any other provider's key
+            code={`export E2B_API_KEY=...            # any provider's key works
 export SANDBOXROUTER_TOKEN=pick-a-secret
 npx @sandboxrouter/sdk serve --cors ${origin}`}
           />

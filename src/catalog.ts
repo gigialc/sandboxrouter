@@ -8,17 +8,35 @@ export interface ProviderInfo {
   /** Capabilities this adapter actually implements, not everything the provider markets. */
   capabilities: Capability[];
   limits: { maxVcpu: number; maxMemoryGb: number };
+  /** Runs on your own machine (Docker). Never chosen automatically; name it to use it. */
+  local?: boolean;
   /** Env vars the adapter reads. Any one group being fully set means "configured". */
   credentials: string[][];
   docs: string;
 }
 
 /**
- * Catalog order is the default routing order. Maritime is first because it is the cheapest
- * managed sandbox per hour in this list at every shape; `npx @sandboxrouter/sdk providers` prints the
- * numbers so you can check, and PRs that correct a price are welcome.
+ * Every provider is treated the same: the router orders candidates by list price for the requested
+ * size (or by your measured cold starts), ties broken alphabetically. Nobody gets a better slot.
+ * Prices come from each provider's public pricing page; PRs that correct one are welcome.
  */
-export const CATALOG: ProviderInfo[] = [
+const ENTRIES: ProviderInfo[] = [
+  {
+    id: "docker",
+    name: "Docker (local)",
+    pricing: {
+      vcpuHour: 0,
+      gbHour: 0,
+      note: "runs on your own machine; free, but shares your kernel, so weaker isolation than a cloud micro-VM",
+      source: "https://docs.docker.com/engine/",
+      checked: "2026-11-04",
+    },
+    capabilities: ["pause", "custom-image"],
+    limits: { maxVcpu: 64, maxMemoryGb: 256 },
+    local: true,
+    credentials: [],
+    docs: "https://docs.docker.com/engine/",
+  },
   {
     id: "maritime",
     name: "Maritime",
@@ -173,6 +191,71 @@ export const CATALOG: ProviderInfo[] = [
   },
 ];
 
+ENTRIES.push(
+  {
+    id: "northflank",
+    name: "Northflank",
+    pricing: {
+      vcpuHour: 0.01667,
+      gbHour: 0.00833,
+      note: "per second on Northflank Cloud, ephemeral disk included; sandboxes run as deployment services (microVMs)",
+      source: "https://northflank.com/pricing",
+      checked: "2026-11-04",
+    },
+    capabilities: ["custom-image"],
+    limits: { maxVcpu: 8, maxMemoryGb: 16 },
+    credentials: [["NORTHFLANK_API_TOKEN", "NORTHFLANK_PROJECT_ID"]],
+    docs: "https://northflank.com/docs/v1/application/overview",
+  },
+  {
+    id: "hopx",
+    name: "HOPX",
+    pricing: {
+      vcpuHour: 0.0504,
+      gbHour: 0.0162,
+      note: "per second, plus storage; size comes from the template, not the request",
+      source: "https://hopx.ai/pricing",
+      checked: "2026-11-04",
+    },
+    capabilities: ["pause", "custom-image"],
+    // HOPX takes no size at create; capped at the default size so bigger requests go elsewhere.
+    limits: { maxVcpu: 2, maxMemoryGb: 4 },
+    credentials: [["HOPX_API_KEY"]],
+    docs: "https://docs.hopx.ai",
+  },
+  {
+    id: "cloudflare",
+    name: "Cloudflare Sandbox",
+    pricing: {
+      vcpuHour: 0.072,
+      gbHour: 0.009,
+      note: "bills active CPU and provisioned memory of the instance type; this is the full-CPU price; needs Workers Paid ($5/mo) and the bridge Worker in bridges/cloudflare",
+      source: "https://developers.cloudflare.com/containers/platform/pricing/",
+      checked: "2026-11-04",
+    },
+    capabilities: [],
+    limits: { maxVcpu: 4, maxMemoryGb: 12 },
+    credentials: [["CLOUDFLARE_SANDBOX_URL", "CLOUDFLARE_SANDBOX_TOKEN"]],
+    docs: "https://developers.cloudflare.com/sandbox/",
+  },
+);
+
+export const CATALOG: ProviderInfo[] = [...ENTRIES].sort((a, b) => a.name.localeCompare(b.name));
+
+/** Cloudflare only rents fixed instance types: https://developers.cloudflare.com/containers/platform/limits/ */
+export const CLOUDFLARE_INSTANCES = [
+  { name: "lite", vcpu: 1 / 16, memoryGb: 0.25 },
+  { name: "basic", vcpu: 1 / 4, memoryGb: 1 },
+  { name: "standard-1", vcpu: 1 / 2, memoryGb: 4 },
+  { name: "standard-2", vcpu: 1, memoryGb: 6 },
+  { name: "standard-3", vcpu: 2, memoryGb: 8 },
+  { name: "standard-4", vcpu: 4, memoryGb: 12 },
+] as const;
+
+export function cloudflareInstance(vcpu: number, memoryGb: number) {
+  return CLOUDFLARE_INSTANCES.find((t) => t.vcpu >= vcpu && t.memoryGb >= memoryGb) ?? CLOUDFLARE_INSTANCES[CLOUDFLARE_INSTANCES.length - 1];
+}
+
 export function info(id: ProviderId): ProviderInfo {
   const p = CATALOG.find((c) => c.id === id);
   if (!p) throw new Error(`unknown provider: ${id}`);
@@ -191,6 +274,11 @@ export function hourlyCost(id: ProviderId, spec: SandboxSpec = {}): number {
   if (id === "vercel") mem = Math.max(mem, vcpu * 2);
   // Blaxel sizes by memory, about 2 GB per core.
   if (id === "blaxel") mem = Math.max(mem, vcpu * 2);
+  // Cloudflare bills the instance type that fits, not the exact request.
+  if (id === "cloudflare") {
+    const t = cloudflareInstance(vcpu, mem);
+    return t.vcpu * pricing.vcpuHour + t.memoryGb * pricing.gbHour;
+  }
   // Morph bills whole MCUs: the larger of vCPUs and 4 GB blocks of memory.
   if (id === "morph") return Math.max(vcpu, Math.ceil(mem / 4)) * pricing.vcpuHour;
   return vcpu * pricing.vcpuHour + mem * pricing.gbHour;

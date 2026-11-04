@@ -8,7 +8,11 @@ export type ProviderId =
   | "sprites"
   | "blaxel"
   | "tensorlake"
-  | "runloop";
+  | "runloop"
+  | "hopx"
+  | "cloudflare"
+  | "northflank"
+  | "docker";
 
 /** Things a caller can require of a provider. The router skips providers that lack one. */
 export type Capability =
@@ -37,12 +41,16 @@ export interface SandboxSpec {
   metadata?: Record<string, string>;
 }
 
+/**
+ * "cheapest" (and "default", the same thing): lowest list price for the spec, ties alphabetical.
+ * "fastest": lowest median cold start you measured with `bench`, then cheapest.
+ */
 export type Strategy = "default" | "cheapest" | "fastest";
 
 export interface RouteOptions {
   /** Pin to one provider, or give an ordered list to try. Omit to let the router choose. */
   provider?: ProviderId | ProviderId[];
-  /** How to order candidates when no explicit list is given. Default: "default" (catalog order). */
+  /** How to order candidates when no explicit list is given. Default: cheapest. */
   strategy?: Strategy;
   /** Try the next candidate if a create fails (default true). */
   fallback?: boolean;

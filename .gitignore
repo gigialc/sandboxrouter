@@ -3,3 +3,5 @@ dist
 .env
 .sandboxrouter
 *.tgz
+__pycache__/
+*.pyc

@@ -26,8 +26,9 @@ describe("HTTP API", () => {
 
   it("lists providers with prices", async () => {
     const { providers } = await (await api("/v1/providers")).json();
-    expect(providers[0]).toMatchObject({ id: "maritime", configured: true });
-    expect(providers[0].estimatedHourlyUsd).toBeCloseTo(0.022, 4);
+    const m = providers.find((p: any) => p.id === "maritime");
+    expect(m).toMatchObject({ configured: true });
+    expect(m.estimatedHourlyUsd).toBeCloseTo(0.022, 4);
   });
 
   it("dry-runs a route", async () => {
@@ -39,9 +40,10 @@ describe("HTTP API", () => {
     const created = await api("/v1/sandboxes", { method: "POST", body: JSON.stringify({ vcpu: 2, env: { X: "1" } }) });
     expect(created.status).toBe(201);
     const sbx = await created.json();
-    expect(sbx.provider).toBe("e2b");
-    expect(sbx.attempts.map((a: any) => a.provider)).toEqual(["maritime", "e2b"]);
-    expect(fakes[1].created.at(-1)).toEqual({ vcpu: 2, env: { X: "1" } });
+    expect(sbx.provider).toBe("daytona");
+    expect(sbx.attempts.map((a: any) => a.provider)).toEqual(["maritime", "daytona"]);
+    const daytona = fakes.find((f) => f.id === "daytona")!;
+    expect(daytona.created.at(-1)).toEqual({ vcpu: 2, env: { X: "1" } });
 
     const id = encodeURIComponent(sbx.id);
     const ex = await (await api(`/v1/sandboxes/${id}/exec`, { method: "POST", body: JSON.stringify({ cmd: "ls" }) })).json();
@@ -54,14 +56,14 @@ describe("HTTP API", () => {
     expect(events[3][1]).toMatchObject({ exitCode: 0, stdout: "ran: ls\n" });
 
     expect((await api(`/v1/sandboxes/${id}/pause`, { method: "POST" })).status).toBe(200);
-    expect(fakes[1].live.get(sbx.id.split(":")[1])!.paused).toBe(true);
+    expect(daytona.live.get(sbx.id.split(":")[1])!.paused).toBe(true);
 
     expect((await api(`/v1/sandboxes/${id}/files?path=/a.bin`, { method: "PUT", body: new Uint8Array([1, 2, 255]) })).status).toBe(200);
     const got = new Uint8Array(await (await api(`/v1/sandboxes/${id}/files?path=/a.bin`)).arrayBuffer());
     expect([...got]).toEqual([1, 2, 255]);
 
     expect((await api(`/v1/sandboxes/${id}`, { method: "DELETE" })).status).toBe(200);
-    expect(fakes[1].live.get(sbx.id.split(":")[1])!.killed).toBe(true);
+    expect(daytona.live.get(sbx.id.split(":")[1])!.killed).toBe(true);
   });
 
   it("answers CORS only for allowed origins", async () => {

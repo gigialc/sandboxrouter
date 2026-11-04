@@ -1,7 +1,7 @@
 {
   "name": "@sandboxrouter/sdk",
   "version": "0.1.0",
-  "description": "OpenRouter for sandboxes: one API for Maritime, E2B, Daytona, Modal, Vercel Sandbox, Morph, Fly Sprites, Blaxel, Tensorlake and Runloop, with price/latency routing and automatic fallback.",
+  "description": "One API for every sandbox provider: route AI agents' code by price, speed or capability, with automatic fallback. Free and open source.",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -29,21 +29,25 @@
     "site:data": "node --import tsx scripts/site-data.ts"
   },
   "keywords": [
-    "sandbox",
     "ai-agents",
-    "code-execution",
-    "router",
-    "maritime",
-    "e2b",
-    "daytona",
-    "modal",
-    "vercel-sandbox",
-    "openrouter",
-    "morph",
-    "fly-sprites",
     "blaxel",
+    "cloudflare",
+    "code-execution",
+    "daytona",
+    "docker",
+    "e2b",
+    "fly-sprites",
+    "hopx",
+    "maritime",
+    "modal",
+    "morph",
+    "northflank",
+    "openrouter",
+    "router",
+    "runloop",
+    "sandbox",
     "tensorlake",
-    "runloop"
+    "vercel-sandbox"
   ],
   "license": "MIT",
   "engines": {
@@ -58,7 +62,9 @@
     "@vercel/sandbox": ">=3",
     "e2b": ">=2",
     "modal": ">=0.11",
-    "morphcloud": ">=0.0.20"
+    "morphcloud": ">=0.0.20",
+    "@hopx-ai/sdk": ">=0.5",
+    "@northflank/js-client": ">=0.12"
   },
   "peerDependenciesMeta": {
     "e2b": {
@@ -86,6 +92,12 @@
       "optional": true
     },
     "@runloop/api-client": {
+      "optional": true
+    },
+    "@hopx-ai/sdk": {
+      "optional": true
+    },
+    "@northflank/js-client": {
       "optional": true
     }
   },

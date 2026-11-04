@@ -20,10 +20,10 @@ const data = {
   version: pkg.version,
   generatedAt: new Date().toISOString(),
   shapes: SHAPES.map((s) => `${s.vcpu}x${s.memoryGb}`),
-  providers: CATALOG.map((c, order) => ({
+  providers: CATALOG.map((c) => ({
     id: c.id,
     name: c.name,
-    order,
+    local: c.local ?? false,
     capabilities: c.capabilities,
     limits: c.limits,
     credentials: c.credentials,

@@ -11,6 +11,10 @@ import { SpritesProvider } from "./providers/sprites.js";
 import { BlaxelProvider } from "./providers/blaxel.js";
 import { TensorlakeProvider } from "./providers/tensorlake.js";
 import { RunloopProvider } from "./providers/runloop.js";
+import { DockerProvider } from "./providers/docker.js";
+import { HopxProvider } from "./providers/hopx.js";
+import { CloudflareProvider } from "./providers/cloudflare.js";
+import { NorthflankProvider } from "./providers/northflank.js";
 import {
   RouterError,
   type Attempt,
@@ -50,6 +54,10 @@ export function defaultProviders(): Provider[] {
     new BlaxelProvider(),
     new TensorlakeProvider(),
     new RunloopProvider(),
+    new HopxProvider(),
+    new CloudflareProvider(),
+    new NorthflankProvider(),
+    new DockerProvider(),
   ];
 }
 
@@ -81,7 +89,9 @@ export class Router {
   /** The ordered list of providers a create would try, with the reason any are skipped. */
   plan(spec: SandboxSpec = {}, route: RouteOptions = {}): Candidate[] {
     const explicit = route.provider ? ([] as ProviderId[]).concat(route.provider) : null;
-    const ids = explicit ?? CATALOG.map((c) => c.id).filter((id) => this.providers.has(id));
+    // Local providers (Docker) are never picked automatically: they always "cost" $0 and isolate
+    // less than a cloud micro-VM. Name them explicitly to use them.
+    const ids = explicit ?? CATALOG.filter((c) => !c.local && this.providers.has(c.id)).map((c) => c.id);
     const bench = route.strategy === "fastest" ? loadBench(this.benchFile) : {};
 
     const list: Candidate[] = ids.map((id) => {
@@ -96,10 +106,15 @@ export class Router {
       return c;
     });
 
-    if (!explicit && route.strategy === "cheapest") {
-      list.sort((a, b) => a.estimatedHourlyUsd - b.estimatedHourlyUsd);
-    } else if (!explicit && route.strategy === "fastest") {
-      list.sort((a, b) => (a.medianCreateMs ?? Infinity) - (b.medianCreateMs ?? Infinity));
+    // Neutral by construction: price (or measured speed) decides, ties break alphabetically by id.
+    // An explicit provider list keeps the caller's order.
+    if (!explicit) {
+      const byPrice = (a: Candidate, b: Candidate) => a.estimatedHourlyUsd - b.estimatedHourlyUsd || a.provider.localeCompare(b.provider);
+      if (route.strategy === "fastest") {
+        list.sort((a, b) => (a.medianCreateMs ?? Infinity) - (b.medianCreateMs ?? Infinity) || byPrice(a, b));
+      } else {
+        list.sort(byPrice);
+      }
     }
     return list;
   }

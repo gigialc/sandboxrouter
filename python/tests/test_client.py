@@ -47,14 +47,14 @@ class ClientTest(unittest.TestCase):
         self.assertEqual(e.exception.status, 401)
 
     def test_providers_and_route(self):
-        self.assertEqual(self.sr.providers()[0]["id"], "maritime")
+        self.assertIn("maritime", [p["id"] for p in self.sr.providers()])
         usable = [c["provider"] for c in self.sr.route(gpu="T4") if not c.get("skip")]
         self.assertEqual(usable, ["modal"])
 
     def test_sandbox_lifecycle_with_fallback(self):
         with self.sr.create(vcpu=2, env={"X": "1"}) as sbx:
-            self.assertEqual(sbx.provider, "e2b")
-            self.assertEqual([a["provider"] for a in sbx.attempts], ["maritime", "e2b"])
+            self.assertEqual(sbx.provider, "daytona")
+            self.assertEqual([a["provider"] for a in sbx.attempts], ["maritime", "daytona"])
             self.assertEqual(sbx.exec("ls").stdout, "ran: ls\n")
 
             out, err = [], []

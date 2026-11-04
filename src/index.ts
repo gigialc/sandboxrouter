@@ -25,4 +25,8 @@ export { SpritesProvider } from "./providers/sprites.js";
 export { BlaxelProvider } from "./providers/blaxel.js";
 export { TensorlakeProvider } from "./providers/tensorlake.js";
 export { RunloopProvider } from "./providers/runloop.js";
+export { DockerProvider } from "./providers/docker.js";
+export { HopxProvider } from "./providers/hopx.js";
+export { CloudflareProvider } from "./providers/cloudflare.js";
+export { NorthflankProvider } from "./providers/northflank.js";
 export * from "./types.js";

@@ -8,28 +8,39 @@ const fakes = (over: Partial<Record<string, ConstructorParameters<typeof FakePro
   ALL.map((id) => new FakeProvider(id, over[id]));
 
 describe("routing", () => {
-  it("defaults to Maritime first", async () => {
+  it("defaults to the cheapest provider, ties broken alphabetically", async () => {
     const r = new Router({ providers: fakes() });
-    expect(r.plan().map((c) => c.provider)).toEqual(ALL);
+    // daytona and e2b list the same price, so they sort by name
+    expect(r.plan().map((c) => c.provider)).toEqual(["maritime", "daytona", "e2b", "modal", "vercel"]);
+    expect(r.plan({}, { strategy: "default" })).toEqual(r.plan({}, { strategy: "cheapest" }));
     const sbx = await r.create();
     expect(sbx.provider).toBe("maritime");
     expect(sbx.id).toBe("maritime:maritime-1");
   });
 
+  it("re-ranks when the size changes the price order", () => {
+    // Vercel fixes memory at 2 GB/vCPU, Morph bills whole MCUs: ordering follows each shape's real price
+    const r = new Router({ providers: fakes() });
+    for (const spec of [{ vcpu: 1, memoryGb: 2 }, { vcpu: 8, memoryGb: 16 }, { vcpu: 2, memoryGb: 8 }]) {
+      const prices = r.plan(spec).map((c) => c.estimatedHourlyUsd);
+      expect(prices).toEqual([...prices].sort((a, b) => a - b));
+    }
+  });
+
   it("skips providers without credentials", async () => {
     const r = new Router({ providers: fakes({ maritime: { configured: false } }) });
     expect(r.plan()[0]).toMatchObject({ provider: "maritime", skip: "not configured" });
-    expect((await r.create()).provider).toBe("e2b");
+    expect((await r.create()).provider).toBe("daytona");
   });
 
   it("falls back down the list and records every attempt", async () => {
-    const r = new Router({ providers: fakes({ maritime: { fail: "429 concurrency_limit" }, e2b: { fail: "503" } }) });
+    const r = new Router({ providers: fakes({ maritime: { fail: "429 concurrency_limit" }, daytona: { fail: "503" } }) });
     const sbx = await r.create();
-    expect(sbx.provider).toBe("daytona");
+    expect(sbx.provider).toBe("e2b");
     expect(sbx.attempts.map((a) => [a.provider, a.ok])).toEqual([
       ["maritime", false],
-      ["e2b", false],
-      ["daytona", true],
+      ["daytona", false],
+      ["e2b", true],
     ]);
     expect(sbx.attempts[0].error).toContain("429");
   });
@@ -89,6 +100,15 @@ describe("routing", () => {
   });
 });
 
+describe("local providers", () => {
+  it("never routes to Docker unless asked by name", async () => {
+    const r = new Router({ providers: [...fakes(), new FakeProvider("docker")] });
+    expect(r.plan().map((c) => c.provider)).not.toContain("docker");
+    expect((await r.create()).provider).not.toBe("docker");
+    expect((await r.create({}, { provider: "docker" })).provider).toBe("docker");
+  });
+});
+
 describe("streaming and pause", () => {
   it("passes chunks through and still returns full output", async () => {
     const r = new Router({ providers: fakes() });
@@ -110,7 +130,7 @@ describe("streaming and pause", () => {
 
   it("require pause filters to pause-capable adapters", () => {
     const r = new Router({ providers: fakes() });
-    expect(r.plan({}, { require: ["pause"] }).filter((c) => !c.skip).map((c) => c.provider)).toEqual(["maritime", "e2b", "daytona"]);
+    expect(r.plan({}, { require: ["pause"] }).filter((c) => !c.skip).map((c) => c.provider)).toEqual(["maritime", "daytona", "e2b"]);
   });
 });
 
@@ -132,6 +152,10 @@ describe("ids and prices", () => {
     expect(hourlyCost("blaxel")).toBeCloseTo(0.1656, 4);
     expect(hourlyCost("tensorlake")).toBeCloseTo(0.2, 4);
     expect(hourlyCost("runloop")).toBeCloseTo(0.3168, 4);
+    expect(hourlyCost("hopx")).toBeCloseTo(0.1656, 4);
+    expect(hourlyCost("northflank")).toBeCloseTo(0.0667, 4);
+    // 2 vCPU / 4 GB rents Cloudflare's standard-3 (2 vCPU, 8 GiB)
+    expect(hourlyCost("cloudflare")).toBeCloseTo(2 * 0.072 + 8 * 0.009, 4);
   });
 
   it("prices non-linear shapes the way each provider bills", () => {
@@ -139,11 +163,11 @@ describe("ids and prices", () => {
     expect(hourlyCost("blaxel", { vcpu: 8, memoryGb: 4 })).toBeCloseTo(16 * 0.0414, 4); // memory floor from vCPU
   });
 
-  it("Maritime is cheapest at every catalog shape", () => {
-    for (const [vcpu, memoryGb] of [[1, 2], [2, 4], [4, 8], [8, 16], [16, 64]]) {
-      const ids = CATALOG.filter((c) => !unfit(c.id, { vcpu, memoryGb })).map((c) => c.id);
-      const cheapest = ids.sort((a, b) => hourlyCost(a, { vcpu, memoryGb }) - hourlyCost(b, { vcpu, memoryGb }))[0];
-      expect(cheapest).toBe("maritime");
-    }
+  it("the catalog gives no provider a privileged position", () => {
+    const names = CATALOG.map((c) => c.name);
+    expect(names).toEqual([...names].sort((a, b) => a.localeCompare(b)));
+    for (const c of CATALOG) expect(unfit(c.id, {})).toBeNull();
+    expect(CATALOG.filter((c) => c.local).map((c) => c.id)).toEqual(["docker"]);
+    expect(new Set(CATALOG.map((c) => hourlyCost(c.id))).size).toBeGreaterThan(1);
   });
 });
