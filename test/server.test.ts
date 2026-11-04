@@ -64,6 +64,24 @@ describe("HTTP API", () => {
     expect(fakes[1].live.get(sbx.id.split(":")[1])!.killed).toBe(true);
   });
 
+  it("answers CORS only for allowed origins", async () => {
+    const app = createApp(new Router({ providers: fakes }), "tok", ["https://sandboxrouter.dev"]);
+    await new Promise<void>((r) => app.listen(0, "127.0.0.1", r));
+    const url = `http://127.0.0.1:${(app.address() as { port: number }).port}`;
+    try {
+      const ok = await fetch(`${url}/v1/providers`, { method: "OPTIONS", headers: { Origin: "https://sandboxrouter.dev" } });
+      expect(ok.status).toBe(204);
+      expect(ok.headers.get("access-control-allow-origin")).toBe("https://sandboxrouter.dev");
+      const bad = await fetch(`${url}/v1/providers`, { method: "OPTIONS", headers: { Origin: "https://evil.example" } });
+      expect(bad.status).toBe(403);
+      expect(bad.headers.get("access-control-allow-origin")).toBeNull();
+      // CORS never replaces the token
+      expect((await fetch(`${url}/v1/providers`, { headers: { Origin: "https://sandboxrouter.dev" } })).status).toBe(401);
+    } finally {
+      app.close();
+    }
+  });
+
   it("returns 400 for bad input and 502 when routing fails", async () => {
     expect((await api("/v1/sandboxes", { method: "POST", body: "{nope" })).status).toBe(400);
     expect((await api("/v1/sandboxes/e2b:x/exec", { method: "POST", body: "{}" })).status).toBe(400);

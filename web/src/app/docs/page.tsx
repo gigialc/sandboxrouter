@@ -1,0 +1,246 @@
+import type { Metadata } from "next";
+import { CodeBlock } from "@/components/code";
+import { REPO, site } from "@/lib/site";
+
+export const metadata: Metadata = { title: "Docs" };
+
+const SECTIONS = [
+  ["quickstart", "Quickstart"],
+  ["keys", "Provider keys"],
+  ["routing", "Routing"],
+  ["fallback", "Fallback"],
+  ["streaming", "Streaming output"],
+  ["files", "Files"],
+  ["pause", "Pause and resume"],
+  ["computers", "Desktops and phones"],
+  ["server", "HTTP server"],
+  ["python", "Python"],
+  ["bench", "Bench and leaderboard"],
+  ["providers", "Adding a provider"],
+] as const;
+
+export default function DocsPage() {
+  return (
+    <div className="mx-auto grid max-w-6xl gap-10 px-5 pt-14 lg:grid-cols-[13rem_1fr]">
+      <aside className="hidden lg:block">
+        <nav className="sticky top-24 space-y-1 text-sm">
+          <p className="mb-3 font-mono text-xs uppercase tracking-widest text-muted">Docs</p>
+          {SECTIONS.map(([id, label]) => (
+            <a key={id} href={`#${id}`} className="block rounded-md px-2 py-1 text-ink-2 hover:bg-card hover:text-ink">
+              {label}
+            </a>
+          ))}
+        </nav>
+      </aside>
+
+      <article className="prose-sr min-w-0 max-w-3xl">
+        <h1 className="text-4xl font-semibold tracking-tight">Docs</h1>
+        <p>
+          sandboxrouter gives your agent one API for {site.providers.length} sandbox providers. It picks a provider for each
+          sandbox, falls back when one fails, and hands you back the same handle whatever ran it.
+        </p>
+
+        <h2 id="quickstart">Quickstart</h2>
+        <CodeBlock title="terminal" code={`npm i sandboxrouter\nexport MARITIME_API_KEY=mk_...   # any one provider is enough to start`} />
+        <div className="h-3" />
+        <CodeBlock
+          title="agent.ts"
+          code={`import { Router } from "sandboxrouter";
+
+const router = new Router();
+await using sbx = await router.create({ vcpu: 2, memoryGb: 4, timeoutMinutes: 10 });
+
+await sbx.writeFile("/tmp/hello.py", "print('hello from a sandbox')");
+const r = await sbx.exec("python3 /tmp/hello.py");
+console.log(r.exitCode, r.stdout, "on", sbx.provider);`}
+        />
+        <p>
+          <code>await using</code> kills the sandbox when the block ends. Without it, call <code>sbx.kill()</code>. Each
+          provider also ends sandboxes on its own at <code>timeoutMinutes</code>.
+        </p>
+        <p>Try it without writing code:</p>
+        <CodeBlock title="terminal" code={`npx sandboxrouter providers                 # prices + which keys are set\nnpx sandboxrouter run "uname -a && nproc"   # start, run, print, kill`} />
+
+        <h2 id="keys">Provider keys</h2>
+        <p>
+          Set keys for the providers you use. Providers without keys are skipped. Maritime needs no SDK; the others need their
+          own package installed next to sandboxrouter.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Provider</th>
+              <th>Env</th>
+            </tr>
+          </thead>
+          <tbody>
+            {site.providers.map((p) => (
+              <tr key={p.id}>
+                <td>{p.name}</td>
+                <td className="font-mono text-xs">{p.credentials.map((g) => g.join(" + ")).join("  or  ")}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        <h2 id="routing">Routing</h2>
+        <p>The second argument to <code>create</code> decides where a sandbox goes.</p>
+        <CodeBlock
+          code={`router.create(spec, { strategy: "cheapest" })      // lowest list price for this size
+router.create(spec, { strategy: "fastest" })       // lowest cold start you measured with bench
+router.create(spec, { provider: ["e2b", "modal"] }) // try these, in this order
+router.create({ gpu: "A10G" })                      // only GPU-capable providers are tried
+router.create(spec, { require: ["pause"] })         // only providers that can pause`}
+        />
+        <p>
+          The default order is the catalog order, with Maritime first because it is the cheapest at every size. To see what
+          would happen without starting anything, call <code>router.plan(spec, route)</code> or run{" "}
+          <code>npx sandboxrouter route</code>. Every skipped provider comes with a reason, like <code>not configured</code> or{" "}
+          <code>max 16 vCPU</code>.
+        </p>
+
+        <h2 id="fallback">Fallback</h2>
+        <p>
+          If a create fails (rate limit, outage, plan limit), the router tries the next candidate. The sandbox you get back
+          lists every attempt:
+        </p>
+        <CodeBlock
+          code={`sbx.attempts
+// [ { provider: "maritime", ok: false, ms: 212, error: "... 429 concurrency_limit" },
+//   { provider: "e2b", ok: true, ms: 840 } ]`}
+        />
+        <p>
+          Pass <code>fallback: false</code> to try only the first candidate. If every candidate fails, <code>create</code> throws
+          a <code>RouterError</code> with the same <code>attempts</code>. Commands never fall back, because a sandbox&apos;s state
+          lives on one provider.
+        </p>
+
+        <h2 id="streaming">Streaming output</h2>
+        <CodeBlock
+          code={`const r = await sbx.exec("npm test", {
+  cwd: "/app",
+  env: { CI: "1" },
+  timeoutSeconds: 600,
+  onStdout: (chunk) => process.stdout.write(chunk),
+  onStderr: (chunk) => process.stderr.write(chunk),
+});
+// r still has the full stdout, stderr and exitCode`}
+        />
+        <p>A nonzero exit code is a result, not an exception. Exceptions mean the provider itself failed.</p>
+
+        <h2 id="files">Files</h2>
+        <CodeBlock
+          code={`await sbx.writeFile("/tmp/data.csv", "x,y\\n1,2\\n");   // string or Uint8Array
+const bytes = await sbx.readFile("/tmp/out.png");
+const text = await sbx.readText("/tmp/log.txt");`}
+        />
+
+        <h2 id="pause">Pause and resume</h2>
+        <p>
+          Providers with the pause capability keep a sandbox&apos;s disk (and memory, where they snapshot it) while it&apos;s paused.
+          Resume by reattaching with its id.
+        </p>
+        <CodeBlock
+          code={`const sbx = await router.create({}, { require: ["pause"] });
+await sbx.pause();
+// later, in any process:
+const again = await router.get(sbx.id);   // e.g. "maritime:sbx-k3m7q2ab"`}
+        />
+
+        <h2 id="computers">Desktops and phones</h2>
+        <p>
+          For computer-use agents: a machine with a screen that your model drives with clicks and keys. Maritime provides Linux
+          desktops, Windows desktops and Android phones. Actions use the Anthropic computer-use shape, and coordinates are in the
+          last screenshot&apos;s frame.
+        </p>
+        <CodeBlock
+          code={`const desk = await router.computer({ os: "linux", externalUserId: "user_42" });
+const shot = await desk.act({ action: "screenshot" });        // { imageB64, width, height, frameId }
+await desk.act({ action: "left_click", coordinate: [412, 230] });
+await desk.actBatch([{ action: "type", text: "hello" }, { action: "key", text: "Return" }]);
+
+// A login or CAPTCHA? Give the screen to a person:
+const { url } = await desk.viewer("control", { reason: "Please sign in" });`}
+        />
+        <p>
+          The same <code>externalUserId</code> always returns the same computer, with its files and logins. From the terminal:{" "}
+          <code>npx sandboxrouter desktop --control</code> prints a link to the live screen.
+        </p>
+
+        <h2 id="server">HTTP server</h2>
+        <p>Any language can use the router over HTTP. Provider keys stay on the server; clients hold one token.</p>
+        <CodeBlock
+          title="terminal"
+          code={`SANDBOXROUTER_TOKEN=secret npx sandboxrouter serve --port 8787
+# allow a website (like this one's Playground) to call it from the browser:
+SANDBOXROUTER_TOKEN=secret npx sandboxrouter serve --cors https://your-site.example`}
+        />
+        <table>
+          <thead>
+            <tr>
+              <th>Call</th>
+              <th>Body</th>
+            </tr>
+          </thead>
+          <tbody>
+            {[
+              ["GET /v1/providers", ""],
+              ["POST /v1/route", "same as create; returns the candidate order"],
+              ["POST /v1/sandboxes", "{ vcpu, memoryGb, gpu, env, timeoutMinutes, image, provider, strategy, fallback, require }"],
+              ["POST /v1/sandboxes/:id/exec", "{ cmd, cwd, env, timeoutSeconds, stream }"],
+              ["PUT /v1/sandboxes/:id/files?path=", "raw bytes"],
+              ["GET /v1/sandboxes/:id/files?path=", ""],
+              ["POST /v1/sandboxes/:id/pause", ""],
+              ["DELETE /v1/sandboxes/:id", ""],
+              ["POST /v1/computers", "{ os, externalUserId, screen }"],
+              ["POST /v1/computers/:id/actions", "one action or { actions: [...] }"],
+              ["GET /v1/computers/:id/screenshot", "image bytes"],
+              ["POST /v1/computers/:id/viewer", `{ mode: "watch" | "control" }`],
+            ].map(([a, b]) => (
+              <tr key={a}>
+                <td className="font-mono text-xs whitespace-nowrap">{a}</td>
+                <td className="font-mono text-xs">{b}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p>
+          With <code>stream: true</code>, exec answers <code>text/event-stream</code>: <code>stdout</code> and{" "}
+          <code>stderr</code> events carry JSON string chunks, then one <code>result</code> event.
+        </p>
+
+        <h2 id="python">Python</h2>
+        <p>
+          A client with no dependencies lives in the repo&apos;s <code>python/</code> folder. It talks to the HTTP server.
+        </p>
+        <CodeBlock
+          code={`from sandboxrouter import Client
+
+sr = Client("http://127.0.0.1:8787", token="secret")
+with sr.create(vcpu=2, memory_gb=4, strategy="cheapest") as sbx:
+    sbx.exec("pip install rich", on_stdout=lambda c: print(c, end=""))
+    print(sbx.provider, sbx.estimated_hourly_usd)`}
+        />
+
+        <h2 id="bench">Bench and leaderboard</h2>
+        <p>
+          <code>bench</code> starts real sandboxes on every provider you have keys for, times them, kills them, and prints a
+          table. <code>--share</code> also writes a report you can add to the repo&apos;s <code>results/</code> folder in a pull
+          request; the <a href="/rankings">Rankings</a> page is built from those reports.
+        </p>
+        <CodeBlock title="terminal" code={`npx sandboxrouter bench --runs 5 --share --label "SF, home wifi"`} />
+        <p>
+          The label says where you ran it, because the network between you and each provider is part of the number. Use a city or
+          cloud region, not an address.
+        </p>
+
+        <h2 id="providers">Adding a provider</h2>
+        <p>
+          Implement the <code>Provider</code> interface in <code>src/types.ts</code> (create, connect, exec, files, kill, and pause
+          if it&apos;s real), and add a catalog entry with a link to the provider&apos;s pricing page. Pull requests welcome on{" "}
+          <a href={REPO}>GitHub</a>.
+        </p>
+      </article>
+    </div>
+  );
+}

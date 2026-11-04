@@ -19,7 +19,7 @@ Usage:
   sandboxrouter desktop   [--os linux|windows|android] [--user ID] [--control]
                           get or create a computer and print a link to watch (or take over) its screen
   sandboxrouter screenshot <provider:id> [--out screen.png]
-  sandboxrouter serve     [--port 8787] [--host 127.0.0.1]
+  sandboxrouter serve     [--port 8787] [--host 127.0.0.1] [--cors https://site.example,http://localhost:3000]
 
 Spec flags:   --vcpu N  --memory GB  --gpu T4  --timeout MIN
 Route flags:  --provider maritime[,e2b,...]  --strategy default|cheapest|fastest
@@ -50,6 +50,7 @@ const { values, positionals } = parseArgs({
     control: { type: "boolean" },
     out: { type: "string" },
     share: { type: "boolean" },
+    cors: { type: "string" },
     label: { type: "string" },
   },
 });
@@ -177,8 +178,10 @@ async function main() {
   if (cmd === "serve") {
     const port = num(values.port) ?? Number(process.env.PORT ?? 8787);
     const host = values.host ?? "127.0.0.1";
-    createApp(router).listen(port, host, () => {
+    const origins = list(values.cors);
+    createApp(router, undefined, origins).listen(port, host, () => {
       console.log(`sandboxrouter listening on http://${host}:${port}`);
+      if (origins?.length) console.log(`browser access allowed from: ${origins.join(", ")}`);
       if (!process.env.SANDBOXROUTER_TOKEN) console.log("warning: SANDBOXROUTER_TOKEN is not set, so the API is unauthenticated");
     });
     return;

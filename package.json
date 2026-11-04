@@ -25,7 +25,8 @@
     "typecheck": "tsc --noEmit",
     "dev": "tsx src/cli.ts",
     "prepublishOnly": "npm run build && npm test",
-    "test:py": "python3 -m unittest discover -s python/tests -v"
+    "test:py": "python3 -m unittest discover -s python/tests -v",
+    "site:data": "node --import tsx scripts/site-data.ts"
   },
   "keywords": [
     "sandbox",

@@ -29,12 +29,34 @@ import { ProviderError, RouterError, type RouteOptions, type SandboxSpec } from 
  *   POST   /v1/computers/:id/sleep
  *   DELETE /v1/computers/:id
  */
-export function createApp(router = new Router(), token = process.env.SANDBOXROUTER_TOKEN) {
+export function createApp(
+  router = new Router(),
+  token = process.env.SANDBOXROUTER_TOKEN,
+  /** Browser origins allowed to call this server (e.g. the website's Playground). Off by default. */
+  corsOrigins: string[] = (process.env.SANDBOXROUTER_CORS ?? "").split(",").map((s) => s.trim()).filter(Boolean),
+) {
   const live = new Map<string, RoutedSandbox>();
+
+  const cors = (req: IncomingMessage, res: ServerResponse) => {
+    const origin = req.headers.origin;
+    if (!origin || !(corsOrigins.includes("*") || corsOrigins.includes(origin))) return false;
+    res.setHeader("Access-Control-Allow-Origin", origin);
+    res.setHeader("Vary", "Origin");
+    res.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type, Accept");
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+    res.setHeader("Access-Control-Max-Age", "600");
+    return true;
+  };
 
   const handle = async (req: IncomingMessage, res: ServerResponse) => {
     const url = new URL(req.url ?? "/", "http://localhost");
     const parts = url.pathname.split("/").filter(Boolean);
+
+    const allowed = cors(req, res);
+    if (req.method === "OPTIONS") {
+      res.writeHead(allowed ? 204 : 403);
+      return res.end();
+    }
 
     if (url.pathname === "/health") return json(res, 200, { ok: true });
     if (token && req.headers.authorization !== `Bearer ${token}`) return json(res, 401, { error: "unauthorized" });

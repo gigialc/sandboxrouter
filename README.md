@@ -234,6 +234,18 @@ Capabilities in the catalog describe what each **adapter** implements, not every
 - [ ] Snapshots and forks as a routed operation
 - [ ] A hosted copy of the leaderboard page
 
+## Website
+
+[`web/`](web/) is the project site: home, a browsable Sandboxes list with live price-per-size, a page per provider, Rankings, Docs, and a Playground that drives your own `sandboxrouter serve` from the browser. Its data is generated from the library (`npm run site:data`), so prices never drift from the code.
+
+```bash
+cd web && npm i && npm run dev          # http://localhost:3000
+# Playground without any provider keys (in-memory providers, nothing real starts):
+node --import tsx test/demo-server.ts   # token: demo
+# Playground against real providers:
+SANDBOXROUTER_TOKEN=secret npx sandboxrouter serve --cors http://localhost:3000
+```
+
 ## Development
 
 ```bash

@@ -15,3 +15,5 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - run: npm run test:py
+      - run: npm ci && npm run build
+        working-directory: web
