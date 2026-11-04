@@ -50,15 +50,15 @@
     "node": ">=20"
   },
   "peerDependencies": {
+    "@blaxel/core": ">=0.3",
     "@daytonaio/sdk": ">=0.200",
+    "@fly/sprites": ">=0.2",
+    "@runloop/api-client": ">=3",
+    "@tensorlakeai/tensorlake": ">=0.5",
     "@vercel/sandbox": ">=3",
     "e2b": ">=2",
     "modal": ">=0.11",
-    "morphcloud": ">=0.0.20",
-    "@fly/sprites": ">=0.2",
-    "@blaxel/core": ">=0.3",
-    "@tensorlakeai/tensorlake": ">=0.5",
-    "@runloop/api-client": ">=3"
+    "morphcloud": ">=0.0.20"
   },
   "peerDependenciesMeta": {
     "e2b": {
@@ -93,6 +93,8 @@
     "@blaxel/core": "^0.3.34",
     "@daytonaio/sdk": "^0.227.3",
     "@fly/sprites": "^0.2.4",
+    "@hopx-ai/sdk": "^0.5.1",
+    "@northflank/js-client": "^0.12.0",
     "@runloop/api-client": "^3.0.0",
     "@tensorlakeai/tensorlake": "^0.5.161",
     "@types/node": "^26.6.6",
