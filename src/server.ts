@@ -45,9 +45,9 @@ export function createApp(router = new Router(), token = process.env.SANDBOXROUT
     // GET /v1/providers
     if (req.method === "GET" && parts[1] === "providers" && parts.length === 2) {
       return json(res, 200, {
-        providers: CATALOG.map((c) => ({
+        providers: CATALOG.filter((c) => router.registered().includes(c.id)).map((c) => ({
           ...c,
-          configured: router.provider(c.id).configured(),
+          configured: router.isConfigured(c.id),
           estimatedHourlyUsd: hourlyCost(c.id),
         })),
       });

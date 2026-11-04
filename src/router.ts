@@ -6,6 +6,11 @@ import { E2BProvider } from "./providers/e2b.js";
 import { MaritimeProvider } from "./providers/maritime.js";
 import { ModalProvider } from "./providers/modal.js";
 import { VercelProvider } from "./providers/vercel.js";
+import { MorphProvider } from "./providers/morph.js";
+import { SpritesProvider } from "./providers/sprites.js";
+import { BlaxelProvider } from "./providers/blaxel.js";
+import { TensorlakeProvider } from "./providers/tensorlake.js";
+import { RunloopProvider } from "./providers/runloop.js";
 import {
   RouterError,
   type Attempt,
@@ -34,7 +39,18 @@ export interface RouterOptions {
 }
 
 export function defaultProviders(): Provider[] {
-  return [new MaritimeProvider(), new E2BProvider(), new DaytonaProvider(), new ModalProvider(), new VercelProvider()];
+  return [
+    new MaritimeProvider(),
+    new E2BProvider(),
+    new DaytonaProvider(),
+    new ModalProvider(),
+    new VercelProvider(),
+    new MorphProvider(),
+    new SpritesProvider(),
+    new BlaxelProvider(),
+    new TensorlakeProvider(),
+    new RunloopProvider(),
+  ];
 }
 
 export class Router {
@@ -44,6 +60,16 @@ export class Router {
   constructor(opts: RouterOptions = {}) {
     this.providers = new Map((opts.providers ?? defaultProviders()).map((p) => [p.id, p]));
     this.benchFile = opts.benchFile;
+  }
+
+  /** Registered and has credentials. False for providers this router doesn't know. */
+  isConfigured(id: ProviderId): boolean {
+    return this.providers.get(id)?.configured() ?? false;
+  }
+
+  /** Catalog ids this router has an adapter for, in catalog order. */
+  registered(): ProviderId[] {
+    return CATALOG.map((c) => c.id).filter((id) => this.providers.has(id));
   }
 
   provider(id: ProviderId): Provider {

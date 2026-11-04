@@ -1,0 +1,15 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sandboxrouter"
+version = "0.1.0"
+description = "Python client for sandboxrouter: one API for Maritime, E2B, Daytona, Modal, Vercel Sandbox and more"
+readme = "README.md"
+requires-python = ">=3.9"
+license = "MIT"
+dependencies = []
+
+[tool.setuptools]
+packages = ["sandboxrouter"]

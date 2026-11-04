@@ -28,7 +28,7 @@ export async function bench(opts: {
   const router = opts.router ?? new Router();
   const runs = opts.runs ?? 3;
   const spec = opts.spec ?? { timeoutMinutes: 5 };
-  const ids = opts.providers ?? CATALOG.map((c) => c.id).filter((id) => router.provider(id).configured());
+  const ids = opts.providers ?? router.registered().filter((id) => router.isConfigured(id));
   const log = opts.onProgress ?? (() => {});
   const stored: BenchData = loadBench(opts.benchFile);
   const rows: BenchRow[] = [];

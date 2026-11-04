@@ -77,7 +77,7 @@ async function main() {
       provider: c.name,
       id: c.id,
       "$/hr": `$${hourlyCost(c.id, spec).toFixed(4)}`,
-      configured: router.provider(c.id).configured() ? "yes" : "no",
+      configured: router.isConfigured(c.id) ? "yes" : "no",
       capabilities: c.capabilities.join(", ") || "-",
     }));
     if (values.json) return console.log(JSON.stringify(rows, null, 2));

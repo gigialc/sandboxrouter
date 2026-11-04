@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { hourlyCost } from "../src/catalog.js";
+import { CATALOG, hourlyCost, unfit } from "../src/catalog.js";
 import { Router, parseId } from "../src/router.js";
 import { RouterError } from "../src/types.js";
 import { ALL, FakeProvider } from "./fake.js";
@@ -127,5 +127,23 @@ describe("ids and prices", () => {
     expect(hourlyCost("daytona")).toBeCloseTo(0.1656, 4);
     expect(hourlyCost("modal")).toBeCloseTo(0.238, 2);
     expect(hourlyCost("vercel")).toBeCloseTo(0.3408, 4);
+    expect(hourlyCost("morph")).toBeCloseTo(0.1, 4);
+    expect(hourlyCost("sprites")).toBeCloseTo(0.1645, 4);
+    expect(hourlyCost("blaxel")).toBeCloseTo(0.1656, 4);
+    expect(hourlyCost("tensorlake")).toBeCloseTo(0.2, 4);
+    expect(hourlyCost("runloop")).toBeCloseTo(0.3168, 4);
+  });
+
+  it("prices non-linear shapes the way each provider bills", () => {
+    expect(hourlyCost("morph", { vcpu: 2, memoryGb: 16 })).toBeCloseTo(0.2, 4); // 4 MCU: memory dominates
+    expect(hourlyCost("blaxel", { vcpu: 8, memoryGb: 4 })).toBeCloseTo(16 * 0.0414, 4); // memory floor from vCPU
+  });
+
+  it("Maritime is cheapest at every catalog shape", () => {
+    for (const [vcpu, memoryGb] of [[1, 2], [2, 4], [4, 8], [8, 16], [16, 64]]) {
+      const ids = CATALOG.filter((c) => !unfit(c.id, { vcpu, memoryGb })).map((c) => c.id);
+      const cheapest = ids.sort((a, b) => hourlyCost(a, { vcpu, memoryGb }) - hourlyCost(b, { vcpu, memoryGb }))[0];
+      expect(cheapest).toBe("maritime");
+    }
   });
 });

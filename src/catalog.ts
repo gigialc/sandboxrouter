@@ -94,6 +94,83 @@ export const CATALOG: ProviderInfo[] = [
     credentials: [["VERCEL_OIDC_TOKEN"], ["VERCEL_TOKEN", "VERCEL_TEAM_ID", "VERCEL_PROJECT_ID"]],
     docs: "https://vercel.com/docs/vercel-sandbox",
   },
+  {
+    id: "morph",
+    name: "Morph Cloud",
+    pricing: {
+      vcpuHour: 0.05,
+      gbHour: 0,
+      note: "$0.05/MCU; MCU-hours = max(vCPU, RAM/4 GB, disk/16 GB); snapshots extra",
+      source: "https://cloud.morph.so/web/pricing",
+      checked: "2026-11-04",
+    },
+    capabilities: ["pause", "custom-image"],
+    limits: { maxVcpu: 64, maxMemoryGb: 256 },
+    credentials: [["MORPH_API_KEY"]],
+    docs: "https://cloud.morph.so/docs/developers",
+  },
+  {
+    id: "sprites",
+    name: "Fly.io Sprites",
+    pricing: {
+      vcpuHour: 0.0385,
+      gbHour: 0.021875,
+      note: "bills actual CPU and memory use; this is the full-use price; storage extra",
+      source: "https://fly.io/sprites",
+      checked: "2026-11-04",
+    },
+    capabilities: [],
+    // Not published per sprite; 8 GB is what accounts report getting by default.
+    limits: { maxVcpu: 8, maxMemoryGb: 8 },
+    credentials: [["SPRITES_TOKEN"]],
+    docs: "https://fly.io/sprites",
+  },
+  {
+    id: "blaxel",
+    name: "Blaxel",
+    pricing: {
+      vcpuHour: 0,
+      gbHour: 0.0414,
+      note: "billed on memory only ($0.0000115/GB-s), CPU scales with memory (~2 GB per core)",
+      source: "https://blaxel.ai/pricing",
+      checked: "2026-11-04",
+    },
+    capabilities: ["pause", "custom-image"],
+    // Self-serve caps are per-tier and not published; these are conservative.
+    limits: { maxVcpu: 8, maxMemoryGb: 16 },
+    credentials: [["BL_API_KEY", "BL_WORKSPACE"]],
+    docs: "https://docs.blaxel.ai/Sandboxes/Overview",
+  },
+  {
+    id: "tensorlake",
+    name: "Tensorlake",
+    pricing: {
+      vcpuHour: 0.07,
+      gbHour: 0.015,
+      note: "bills active CPU (floor 20% of allocation); this is the full-use price; Pro plan is lower",
+      source: "https://www.tensorlake.ai/pricing",
+      checked: "2026-11-04",
+    },
+    capabilities: ["pause", "custom-image"],
+    limits: { maxVcpu: 4, maxMemoryGb: 16 },
+    credentials: [["TENSORLAKE_API_KEY"]],
+    docs: "https://docs.tensorlake.ai/sandboxes",
+  },
+  {
+    id: "runloop",
+    name: "Runloop",
+    pricing: {
+      vcpuHour: 0.108,
+      gbHour: 0.0252,
+      note: "per second, plus disk; pause (suspend) is a Pro-plan feature",
+      source: "https://www.runloop.ai/pricing",
+      checked: "2026-11-04",
+    },
+    capabilities: ["pause", "custom-image"],
+    limits: { maxVcpu: 16, maxMemoryGb: 64 },
+    credentials: [["RUNLOOP_API_KEY"]],
+    docs: "https://docs.runloop.ai",
+  },
 ];
 
 export function info(id: ProviderId): ProviderInfo {
@@ -112,6 +189,10 @@ export function hourlyCost(id: ProviderId, spec: SandboxSpec = {}): number {
   let mem = spec.memoryGb ?? DEFAULT_MEMORY_GB;
   // Vercel fixes memory at 2 GB per vCPU.
   if (id === "vercel") mem = Math.max(mem, vcpu * 2);
+  // Blaxel sizes by memory, about 2 GB per core.
+  if (id === "blaxel") mem = Math.max(mem, vcpu * 2);
+  // Morph bills whole MCUs: the larger of vCPUs and 4 GB blocks of memory.
+  if (id === "morph") return Math.max(vcpu, Math.ceil(mem / 4)) * pricing.vcpuHour;
   return vcpu * pricing.vcpuHour + mem * pricing.gbHour;
 }
 

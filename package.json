@@ -1,7 +1,7 @@
 {
   "name": "sandboxrouter",
   "version": "0.1.0",
-  "description": "OpenRouter for sandboxes: one API for Maritime, E2B, Daytona, Modal and Vercel Sandbox, with price/latency routing and automatic fallback.",
+  "description": "OpenRouter for sandboxes: one API for Maritime, E2B, Daytona, Modal, Vercel Sandbox, Morph, Fly Sprites, Blaxel, Tensorlake and Runloop, with price/latency routing and automatic fallback.",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -24,7 +24,8 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "dev": "tsx src/cli.ts",
-    "prepublishOnly": "npm run build && npm test"
+    "prepublishOnly": "npm run build && npm test",
+    "test:py": "python3 -m unittest discover -s python/tests -v"
   },
   "keywords": [
     "sandbox",
@@ -36,7 +37,12 @@
     "daytona",
     "modal",
     "vercel-sandbox",
-    "openrouter"
+    "openrouter",
+    "morph",
+    "fly-sprites",
+    "blaxel",
+    "tensorlake",
+    "runloop"
   ],
   "license": "MIT",
   "engines": {
@@ -46,7 +52,12 @@
     "@daytonaio/sdk": ">=0.200",
     "@vercel/sandbox": ">=3",
     "e2b": ">=2",
-    "modal": ">=0.11"
+    "modal": ">=0.11",
+    "morphcloud": ">=0.0.20",
+    "@fly/sprites": ">=0.2",
+    "@blaxel/core": ">=0.3",
+    "@tensorlakeai/tensorlake": ">=0.5",
+    "@runloop/api-client": ">=3"
   },
   "peerDependenciesMeta": {
     "e2b": {
@@ -59,6 +70,21 @@
       "optional": true
     },
     "@vercel/sandbox": {
+      "optional": true
+    },
+    "morphcloud": {
+      "optional": true
+    },
+    "@fly/sprites": {
+      "optional": true
+    },
+    "@blaxel/core": {
+      "optional": true
+    },
+    "@tensorlakeai/tensorlake": {
+      "optional": true
+    },
+    "@runloop/api-client": {
       "optional": true
     }
   },

@@ -1,4 +1,14 @@
-export type ProviderId = "maritime" | "e2b" | "daytona" | "modal" | "vercel";
+export type ProviderId =
+  | "maritime"
+  | "e2b"
+  | "daytona"
+  | "modal"
+  | "vercel"
+  | "morph"
+  | "sprites"
+  | "blaxel"
+  | "tensorlake"
+  | "runloop";
 
 /** Things a caller can require of a provider. The router skips providers that lack one. */
 export type Capability =
