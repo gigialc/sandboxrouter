@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 import { parseArgs } from "node:util";
+import { readFileSync, writeFileSync } from "node:fs";
 import { bench, benchMarkdown } from "./bench.js";
+import { loadReports, makeReport, renderLeaderboard } from "./leaderboard.js";
 import { CATALOG, hourlyCost } from "./catalog.js";
 import { Router } from "./router.js";
 import { createApp } from "./server.js";
@@ -12,7 +14,8 @@ Usage:
   sandboxrouter providers [--vcpu N] [--memory GB]   price table + which keys are set
   sandboxrouter route     [spec flags] [route flags] dry run: the order providers would be tried
   sandboxrouter run "<cmd>" [spec flags] [route flags] [--keep]
-  sandboxrouter bench     [--runs 3] [--provider a,b] [--json]
+  sandboxrouter bench     [--runs 3] [--provider a,b] [--json] [--share [--label "where you ran it"]]
+  sandboxrouter leaderboard [results-dir] [--out leaderboard.html]
   sandboxrouter desktop   [--os linux|windows|android] [--user ID] [--control]
                           get or create a computer and print a link to watch (or take over) its screen
   sandboxrouter screenshot <provider:id> [--out screen.png]
@@ -46,6 +49,8 @@ const { values, positionals } = parseArgs({
     user: { type: "string" },
     control: { type: "boolean" },
     out: { type: "string" },
+    share: { type: "boolean" },
+    label: { type: "string" },
   },
 });
 
@@ -130,6 +135,22 @@ async function main() {
     console.log(`\nsandboxrouter bench: ${new Date().toISOString().slice(0, 10)}, ${rows[0].runs} runs each\n`);
     console.log(benchMarkdown(rows));
     for (const r of rows.filter((r) => r.lastError)) console.error(`\n${r.provider} last error: ${r.lastError}`);
+    if (values.share) {
+      const version = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8")).version;
+      const report = makeReport(rows, { version, runs: rows[0].runs, spec, label: values.label });
+      const file = values.out ?? `sandboxrouter-bench-${report.date.slice(0, 10)}-${Math.random().toString(36).slice(2, 8)}.json`;
+      writeFileSync(file, JSON.stringify(report, null, 2) + "\n");
+      console.log(`\nwrote ${file}. Add it to results/ in a PR to github.com/gigialc/sandboxrouter to put it on the leaderboard.`);
+    }
+    return;
+  }
+
+  if (cmd === "leaderboard") {
+    const dir = rest[0] ?? "results";
+    const reports = loadReports(dir);
+    const out = values.out ?? "leaderboard.html";
+    writeFileSync(out, renderLeaderboard(reports));
+    console.log(`wrote ${out} from ${reports.length} report${reports.length === 1 ? "" : "s"} in ${dir}/`);
     return;
   }
 

@@ -14,6 +14,7 @@ export {
   type ProviderComputer,
 } from "./computers.js";
 export { bench, benchMarkdown, type BenchRow } from "./bench.js";
+export { aggregate, loadReports, makeReport, renderLeaderboard, type BenchReport, type LeaderRow } from "./leaderboard.js";
 export { MaritimeProvider } from "./providers/maritime.js";
 export { E2BProvider } from "./providers/e2b.js";
 export { DaytonaProvider } from "./providers/daytona.js";
