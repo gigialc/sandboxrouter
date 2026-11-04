@@ -43,10 +43,10 @@
     "node": ">=20"
   },
   "peerDependencies": {
-    "e2b": ">=2",
     "@daytonaio/sdk": ">=0.200",
-    "modal": ">=0.11",
-    "@vercel/sandbox": ">=3"
+    "@vercel/sandbox": ">=3",
+    "e2b": ">=2",
+    "modal": ">=0.11"
   },
   "peerDependenciesMeta": {
     "e2b": {
@@ -63,11 +63,16 @@
     }
   },
   "devDependencies": {
+    "@blaxel/core": "^0.3.34",
     "@daytonaio/sdk": "^0.227.3",
+    "@fly/sprites": "^0.2.4",
+    "@runloop/api-client": "^3.0.0",
+    "@tensorlakeai/tensorlake": "^0.5.161",
     "@types/node": "^26.6.6",
     "@vercel/sandbox": "^3.9.1",
     "e2b": "^2.63.0",
     "modal": "^0.11.1",
+    "morphcloud": "^0.0.20",
     "tsx": "^4.23.15",
     "typescript": "^5.9.3",
     "vitest": "^5.1.0"
