@@ -220,6 +220,7 @@ class McpSession {
   private nextId = 1;
   private protocolVersion = PROTOCOL_VERSION;
   private toolNames?: Set<string>;
+  private ended = false;
 
   constructor(
     private p: WorkspacesAgentProvider,
@@ -288,6 +289,7 @@ class McpSession {
 
   /** One JSON-RPC request; the answer may come as JSON or as an SSE stream. */
   private async rpc(method: string, params: Record<string, unknown> = {}, retried = false): Promise<any> {
+    if (this.ended) throw new ProviderError(PID, "this computer was deleted");
     const id = this.nextId++;
     const res = await this.send("POST", JSON.stringify({ jsonrpc: "2.0", id, method, params }));
     if (res.status === 404 && this.sessionId && method !== "initialize" && !retried) {
@@ -334,7 +336,7 @@ class McpSession {
         if (names.has(`${PREFIX}screenshot`)) return;
         lastError = `tools/list has no ${PREFIX}screenshot (is COMPUTER_VISION enabled on the stack?): ${[...names].join(", ") || "no tools"}`;
       } catch (err) {
-        lastError = (err as Error).message;
+        lastError = (err as Error).message.replace(`${ID}: `, "");
         // Bad credentials or another agent holding the desktop won't fix themselves; a booting desktop will.
         if ((err instanceof ProviderError && (err.status === 401 || err.status === 403)) || /CONNECTION_LIMIT_REACHED|already connected/i.test(lastError)) break;
       }
@@ -367,12 +369,11 @@ class McpSession {
 
   /** HTTP DELETE ends the MCP session (and, with our header, the streaming session). */
   async end(): Promise<void> {
-    if (!this.sessionId) return;
+    if (!this.sessionId || this.ended) return;
     const res = await this.send("DELETE");
-    if (res.status === 404) return; // already gone
-    if (!res.ok) await this.fail(res, "DELETE session");
+    if (res.status !== 404 && !res.ok) await this.fail(res, "DELETE session"); // 404: already gone
     await res.body?.cancel().catch(() => {});
-    this.sessionId = undefined;
+    this.ended = true;
   }
 }
 

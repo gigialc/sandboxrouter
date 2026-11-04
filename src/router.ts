@@ -28,6 +28,7 @@ import { ExeDevProvider } from "./providers/exedev.js";
 import { OrgoProvider } from "./providers/orgo.js";
 import { MobilerunProvider } from "./providers/mobilerun.js";
 import { LimrunProvider } from "./providers/limrun.js";
+import { WorkspacesAgentProvider } from "./providers/workspaces.js";
 import {
   RouterError,
   type Attempt,
@@ -59,7 +60,7 @@ export interface RouterOptions {
 
 /** Desktop-only providers. Filled in as adapters are added. */
 export function defaultComputerProviders(): ComputerProvider[] {
-  return [new OrgoProvider(), new MobilerunProvider(), new LimrunProvider()];
+  return [new OrgoProvider(), new MobilerunProvider(), new LimrunProvider(), new WorkspacesAgentProvider()];
 }
 
 export function defaultProviders(): Provider[] {

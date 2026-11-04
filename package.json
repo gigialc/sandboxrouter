@@ -73,7 +73,11 @@
     "modal": ">=0.11",
     "morphcloud": ">=0.0.20",
     "@mobilerun/sdk": ">=6",
-    "@limrun/api": ">=0.69"
+    "@limrun/api": ">=0.69",
+    "@aws-sdk/client-appstream": ">=3",
+    "@smithy/signature-v4": ">=5",
+    "@aws-crypto/sha256-js": ">=5",
+    "@aws-sdk/credential-provider-node": ">=3"
   },
   "peerDependenciesMeta": {
     "e2b": {
@@ -116,6 +120,18 @@
       "optional": true
     },
     "@limrun/api": {
+      "optional": true
+    },
+    "@aws-sdk/client-appstream": {
+      "optional": true
+    },
+    "@smithy/signature-v4": {
+      "optional": true
+    },
+    "@aws-crypto/sha256-js": {
+      "optional": true
+    },
+    "@aws-sdk/credential-provider-node": {
       "optional": true
     }
   },

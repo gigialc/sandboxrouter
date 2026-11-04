@@ -28,7 +28,7 @@ So every agent team either locks into one provider or writes its own adapter lay
 - **Capability filters.** Ask for a GPU and only GPU-capable providers are tried. Ask for 32 vCPU and providers that can't do it are skipped, with the reason.
 - **Your keys.** Your accounts, your bills. Nothing is proxied through a third party.
 - **HTTP server and Python client.** Run `sandboxrouter serve` and any language gets the same API.
-- **Computers.** Desktops and phones for computer-use models (Maritime today): actions, screenshots, and a takeover link for a person when the model hits a login.
+- **Computers.** Linux and Windows desktops, Android phones and iPhone simulators for computer-use models, from 7 providers, routed by price per OS: actions, screenshots, and (where the provider has one) a link for a person to watch or take over.
 - **Open benchmark.** `bench --share` produces a report; cold starts on the site come from reports submitted to [`results/`](results/).
 
 ## Fair by construction
@@ -149,7 +149,19 @@ await a.kill();
 
 ## Computers (desktops and phones)
 
-For computer-use agents: a machine with a screen that your model drives with clicks and keys. Maritime provides Linux desktops, Windows desktops and Android phones on the same key. Actions use the Anthropic computer-use shape.
+For computer-use agents: a machine with a screen that your model drives with clicks and keys. `router.computer({ os })` starts one on the cheapest provider for that OS among those you have keys for, ties alphabetical, with fallback. Actions use the Anthropic computer-use shape on every provider.
+
+| Provider | Linux | Windows | Android | iOS | Default size | Live view |
+|---|---|---|---|---|---|---|
+| AWS WorkSpaces (agent access) | $0.138 | $0.150 | | | 2 vCPU · 4 GB | watch only |
+| Daytona | $0.067 | | | | 1 vCPU · 1 GB | watch/control link |
+| E2B Desktop | $0.533 | | | | 8 vCPU · 8 GB | watch/control link |
+| Limrun | | | $3.00 | $6.00 | phone emulator / iPhone simulator | interactive link |
+| Maritime | $0.120 | $0.180 | $0.150 | | 2 vCPU · 4 GB | view-only and takeover links |
+| Mobilerun | | | $1.80 | | cloud phone | embedded player |
+| Orgo | $0.055 | plan | | | 2 vCPU · 8 GB | VNC (full control) |
+
+Per hour while awake, from each provider's pricing page (sources in [`src/computers.ts`](src/computers.ts)). Sizes differ, so compare price and size together. Only Maritime and AWS enforce view-only on the server; on the others a "watch" link can be turned into control, so treat it like a password. Mobilerun and AWS have no shell; Limrun's iOS has no shell. AWS needs a fleet and stack you provision once (steps at the top of [`src/providers/workspaces.ts`](src/providers/workspaces.ts)).
 
 ```ts
 const desk = await router.computer({ os: "linux", externalUserId: "user_42" }); // same id, same desktop
@@ -258,7 +270,8 @@ Capabilities in the catalog describe what each **adapter** implements, not every
 
 - [x] More providers: Morph, Fly.io Sprites, Blaxel, Tensorlake, Runloop, HOPX, Northflank, Boat, exe.dev, Cloudflare (via a bridge Worker), Docker (local)
 - [x] Neutral routing: price decides, ties alphabetical, no privileged slot
-- [x] Desktops and phones (Maritime: Linux, Windows, Android)
+- [x] Desktops and phones from 7 providers (Linux, Windows, Android, iOS), routed by price per OS
+- [ ] Windows 365 for Agents and Corellium as opt-in computer providers
 - [x] Streaming exec output
 - [x] Pause/resume where providers support it
 - [x] Python client

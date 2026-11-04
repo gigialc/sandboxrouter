@@ -156,9 +156,12 @@ const again = await router.get(sbx.id);   // e.g. "maritime:sbx-k3m7q2ab"`}
 
         <h2 id="computers">Desktops and phones</h2>
         <p>
-          For computer-use agents: a machine with a screen that your model drives with clicks and keys. Maritime provides Linux
-          desktops, Windows desktops and Android phones. Actions use the Anthropic computer-use shape, and coordinates are in the
-          last screenshot&apos;s frame.
+          For computer-use agents: a machine with a screen that your model drives with clicks and keys. Seven providers offer Linux
+          and Windows desktops, Android phones and iPhone simulators; the <a href="/#desktops">Desktops table</a> has prices and
+          sizes. <code>router.computer({`{ os }`})</code> starts one on the cheapest provider for that OS that you have keys for, ties
+          alphabetical. Actions use the Anthropic computer-use shape everywhere, and coordinates are in the last screenshot&apos;s
+          frame. Not every provider has a live view or sleep; <code>computer.supports</code> tells you, and calling one that&apos;s
+          missing throws a clear error.
         </p>
         <CodeBlock
           code={`const desk = await router.computer({ os: "linux", externalUserId: "user_42" });

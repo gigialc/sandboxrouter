@@ -256,6 +256,20 @@ COMPUTER_ENTRIES.push(
   },
 );
 
+COMPUTER_ENTRIES.push({
+  id: "aws-workspaces",
+  name: "AWS WorkSpaces (agent access)",
+  // stream.standard.medium (AWS's own agent-access example size) + the $0.05/h MCP session fee, us-east-1
+  os: { windows: 0.15, linux: 0.138 },
+  size: "2 vCPU · 4 GB (stream.standard.medium)",
+  note: "us-east-1, Always-On/On-Demand fleet you provision once (fleet + stack), plus $0.05/h MCP session fee (first 10 h per region per month free); Windows adds $6.42 per AI-agent user per month; watch link is truly view-only but a person can't take control; no shell or files",
+  source: "https://aws.amazon.com/workspaces/applications/pricing/",
+  checked: "2026-11-04",
+  takeover: false,
+  credentials: [["AWS_REGION", "WORKSPACES_AGENT_STACK", "WORKSPACES_AGENT_FLEET"]],
+  docs: "https://docs.aws.amazon.com/appstream2/latest/developerguide/agent-access-mcp-server.html",
+});
+
 export function computerCatalog(): ComputerCatalogEntry[] {
   return [...COMPUTER_ENTRIES].sort((a, b) => a.name.localeCompare(b.name));
 }

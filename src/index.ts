@@ -41,4 +41,5 @@ export { ExeDevProvider } from "./providers/exedev.js";
 export { OrgoProvider } from "./providers/orgo.js";
 export { MobilerunProvider } from "./providers/mobilerun.js";
 export { LimrunProvider } from "./providers/limrun.js";
+export { WorkspacesAgentProvider } from "./providers/workspaces.js";
 export * from "./types.js";
