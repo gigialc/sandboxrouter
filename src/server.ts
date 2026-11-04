@@ -17,6 +17,17 @@ import { ProviderError, RouterError, type RouteOptions, type SandboxSpec } from 
  *   PUT    /v1/sandboxes/:id/files?path=  raw body
  *   GET    /v1/sandboxes/:id/files?path=  raw body
  *   DELETE /v1/sandboxes/:id
+ *
+ *   POST   /v1/computers                  { os, externalUserId, name, screen, arch, provider }
+ *   GET    /v1/computers/:id
+ *   POST   /v1/computers/:id/actions      one action, or { actions: [...] }
+ *   GET    /v1/computers/:id/screenshot   image bytes
+ *   POST   /v1/computers/:id/exec         { command, timeoutSeconds }
+ *   PUT    /v1/computers/:id/files?path=  raw body
+ *   GET    /v1/computers/:id/files?path=  raw body
+ *   POST   /v1/computers/:id/viewer       { mode: "watch" | "control", ttlSeconds, reason }
+ *   POST   /v1/computers/:id/sleep
+ *   DELETE /v1/computers/:id
  */
 export function createApp(router = new Router(), token = process.env.SANDBOXROUTER_TOKEN) {
   const live = new Map<string, RoutedSandbox>();
@@ -48,6 +59,7 @@ export function createApp(router = new Router(), token = process.env.SANDBOXROUT
       return json(res, 200, { candidates: router.plan(spec, route) });
     }
 
+    if (parts[1] === "computers") return computers(req, res, url, parts);
     if (parts[1] !== "sandboxes") return json(res, 404, { error: "not found" });
 
     // POST /v1/sandboxes
@@ -115,6 +127,61 @@ export function createApp(router = new Router(), token = process.env.SANDBOXROUT
       return json(res, 200, { id, killed: true });
     }
 
+    return json(res, 404, { error: "not found" });
+  };
+
+  const computers = async (req: IncomingMessage, res: ServerResponse, url: URL, parts: string[]) => {
+    if (req.method === "POST" && parts.length === 2) {
+      const { provider, ...spec } = await readJson(req);
+      const c = await router.computer(spec, { provider });
+      return json(res, 201, { ...(await c.info()), id: c.id, nativeId: c.nativeId, provider: c.provider });
+    }
+    const id = parts[2] ? decodeURIComponent(parts[2]) : "";
+    if (!id) return json(res, 404, { error: "not found" });
+    const c = await router.getComputer(id);
+    const sub = parts[3];
+
+    if (req.method === "GET" && !sub) return json(res, 200, { ...(await c.info()), id, nativeId: c.nativeId });
+    if (req.method === "DELETE" && !sub) {
+      await c.delete();
+      return json(res, 200, { id, deleted: true });
+    }
+    if (req.method === "POST" && sub === "actions") {
+      const body = await readJson(req);
+      return json(res, 200, Array.isArray(body.actions) ? { results: await c.actBatch(body.actions) } : await c.act(body as any));
+    }
+    if (req.method === "GET" && sub === "screenshot") {
+      const format = url.searchParams.get("format") === "jpeg" ? "jpeg" : "png";
+      const img = await c.screenshot({ format, quality: Number(url.searchParams.get("quality")) || undefined });
+      res.writeHead(200, { "Content-Type": `image/${format}`, "Content-Length": img.byteLength });
+      return res.end(Buffer.from(img));
+    }
+    if (req.method === "POST" && sub === "exec") {
+      const body = await readJson(req);
+      if (typeof body.command !== "string" || !body.command) return json(res, 400, { error: "command (string) is required" });
+      return json(res, 200, await c.exec(body.command, body.timeoutSeconds));
+    }
+    if (sub === "files") {
+      const path = url.searchParams.get("path");
+      if (!path) return json(res, 400, { error: "path query parameter is required" });
+      if (req.method === "PUT") {
+        await c.writeFile(path, await readRaw(req));
+        return json(res, 200, { ok: true, path });
+      }
+      if (req.method === "GET") {
+        const data = await c.readFile(path);
+        res.writeHead(200, { "Content-Type": "application/octet-stream", "Content-Length": data.byteLength });
+        return res.end(Buffer.from(data));
+      }
+    }
+    if (req.method === "POST" && sub === "viewer") {
+      const body = await readJson(req);
+      return json(res, 200, await c.viewer(body.mode, { ttlSeconds: body.ttlSeconds, reason: body.reason }));
+    }
+    if (req.method === "POST" && sub === "sleep") {
+      await c.sleep();
+      return json(res, 200, { id, sleeping: true });
+    }
     return json(res, 404, { error: "not found" });
   };
 

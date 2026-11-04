@@ -1,6 +1,18 @@
 export { Router, RoutedSandbox, defaultProviders, parseId, type Candidate, type RouterOptions } from "./router.js";
 export { CATALOG, hourlyCost, unfit, info, type ProviderInfo } from "./catalog.js";
 export { createApp } from "./server.js";
+export {
+  RoutedComputer,
+  createComputer,
+  type ActionResult,
+  type ComputerAction,
+  type ComputerActionName,
+  type ComputerInfo,
+  type ComputerOs,
+  type ComputerProvider,
+  type ComputerSpec,
+  type ProviderComputer,
+} from "./computers.js";
 export { bench, benchMarkdown, type BenchRow } from "./bench.js";
 export { MaritimeProvider } from "./providers/maritime.js";
 export { E2BProvider } from "./providers/e2b.js";

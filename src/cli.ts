@@ -13,6 +13,9 @@ Usage:
   sandboxrouter route     [spec flags] [route flags] dry run: the order providers would be tried
   sandboxrouter run "<cmd>" [spec flags] [route flags] [--keep]
   sandboxrouter bench     [--runs 3] [--provider a,b] [--json]
+  sandboxrouter desktop   [--os linux|windows|android] [--user ID] [--control]
+                          get or create a computer and print a link to watch (or take over) its screen
+  sandboxrouter screenshot <provider:id> [--out screen.png]
   sandboxrouter serve     [--port 8787] [--host 127.0.0.1]
 
 Spec flags:   --vcpu N  --memory GB  --gpu T4  --timeout MIN
@@ -39,6 +42,10 @@ const { values, positionals } = parseArgs({
     port: { type: "string" },
     host: { type: "string" },
     help: { type: "boolean", short: "h" },
+    os: { type: "string" },
+    user: { type: "string" },
+    control: { type: "boolean" },
+    out: { type: "string" },
   },
 });
 
@@ -123,6 +130,26 @@ async function main() {
     console.log(`\nsandboxrouter bench: ${new Date().toISOString().slice(0, 10)}, ${rows[0].runs} runs each\n`);
     console.log(benchMarkdown(rows));
     for (const r of rows.filter((r) => r.lastError)) console.error(`\n${r.provider} last error: ${r.lastError}`);
+    return;
+  }
+
+  if (cmd === "desktop") {
+    const os = (values.os ?? "linux") as "linux" | "windows" | "android";
+    const c = await router.computer({ os, externalUserId: values.user }, { provider: providers });
+    const info = await c.info();
+    const link = await c.viewer(values.control ? "control" : "watch");
+    console.log(`${c.id}  ${info.os}  ${info.status}${info.screen ? `  ${info.screen.width}x${info.screen.height}` : ""}`);
+    console.log(`${values.control ? "take over" : "watch"}: ${link.url}  (expires ${link.expiresAt})`);
+    return;
+  }
+
+  if (cmd === "screenshot") {
+    const id = rest[0];
+    if (!id) throw new RouterError("usage: sandboxrouter screenshot <provider:id> [--out screen.png]");
+    const img = await (await router.getComputer(id)).screenshot();
+    const out = values.out ?? "screen.png";
+    (await import("node:fs")).writeFileSync(out, img);
+    console.log(`wrote ${out} (${img.byteLength} bytes)`);
     return;
   }
 

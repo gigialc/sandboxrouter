@@ -2,6 +2,15 @@ import { DEFAULT_MEMORY_GB, DEFAULT_VCPU } from "../catalog.js";
 import { ProviderError, type ExecOptions, type ExecResult, type Provider, type ProviderSandbox, type SandboxSpec } from "../types.js";
 import { toBytes } from "../util.js";
 import { readSSE } from "../sse.js";
+import type {
+  ActionResult,
+  ComputerAction,
+  ComputerInfo,
+  ComputerOs,
+  ComputerProvider,
+  ComputerSpec,
+  ProviderComputer,
+} from "../computers.js";
 
 /**
  * Maritime over plain REST (no SDK needed).
@@ -12,8 +21,9 @@ import { readSSE } from "../sse.js";
  * Any data plane call resumes a paused sandbox.
  * Docs: https://maritime.sh/docs/ephemeral-sandboxes
  */
-export class MaritimeProvider implements Provider {
+export class MaritimeProvider implements Provider, ComputerProvider {
   readonly id = "maritime" as const;
+  readonly computerOs: ComputerOs[] = ["linux", "windows", "android"];
 
   constructor(
     private apiKey = process.env.MARITIME_API_KEY,
@@ -41,7 +51,9 @@ export class MaritimeProvider implements Provider {
       let detail = text.slice(0, 300);
       try {
         const j = JSON.parse(text);
-        detail = j?.code ? `${j.code}: ${j.message ?? ""}` : j?.detail ? JSON.stringify(j.detail) : detail;
+        // Sandboxes: {code, message}. Computers: {error, message, retryAfterS}. Agents: {detail}.
+        const code = j?.code ?? (typeof j?.error === "string" ? j.error : undefined);
+        detail = code ? `${code}: ${j.message ?? ""}` : j?.detail ? JSON.stringify(j.detail) : detail;
       } catch {
         /* non-JSON body */
       }
@@ -75,6 +87,24 @@ export class MaritimeProvider implements Provider {
     if (spec.env) body.env = spec.env;
     if (spec.metadata) body.metadata = spec.metadata;
     return new MaritimeSandbox(this, await this.control<MaritimeSandboxObject>("POST", "/api/sandboxes/ephemeral", body));
+  }
+
+  /** @internal Control-plane call that returns the raw Response (binary bodies). */
+  controlRaw(method: string, path: string, bytes?: Uint8Array): Promise<Response> {
+    if (!this.apiKey) throw new ProviderError(this.id, "MARITIME_API_KEY is not set");
+    return this.request(method, `${this.baseUrl}${path}`, { bytes, headers: { Authorization: `Bearer ${this.apiKey}` } });
+  }
+
+  async createComputer(spec: ComputerSpec): Promise<ProviderComputer> {
+    const body: Record<string, unknown> = { os: spec.os ?? "linux" };
+    for (const k of ["externalUserId", "name", "screen", "arch"] as const) if (spec[k] !== undefined) body[k] = spec[k];
+    const c = await this.control<ComputerInfo>("POST", "/api/v1/computers", body);
+    return new MaritimeComputer(this, c.id);
+  }
+
+  async connectComputer(nativeId: string): Promise<ProviderComputer> {
+    const c = await this.control<ComputerInfo>("GET", `/api/v1/computers/${encodeURIComponent(nativeId)}`);
+    return new MaritimeComputer(this, c.id);
   }
 
   async connect(nativeId: string): Promise<ProviderSandbox> {
@@ -166,6 +196,70 @@ class MaritimeSandbox implements ProviderSandbox {
 
   async kill(): Promise<void> {
     await this.p.control("DELETE", `/api/sandboxes/ephemeral/${encodeURIComponent(this.nativeId)}`);
+  }
+}
+
+/** A Maritime desktop or phone. REST: /api/v1/computers/{id}/... (camelCase fields). */
+class MaritimeComputer implements ProviderComputer {
+  private base: string;
+  constructor(
+    private p: MaritimeProvider,
+    readonly nativeId: string,
+  ) {
+    this.base = `/api/v1/computers/${encodeURIComponent(nativeId)}`;
+  }
+
+  info(): Promise<ComputerInfo> {
+    return this.p.control<ComputerInfo>("GET", this.base);
+  }
+
+  act(action: ComputerAction): Promise<ActionResult> {
+    return this.p.control<ActionResult>("POST", `${this.base}/actions`, action);
+  }
+
+  async actBatch(actions: ComputerAction[]): Promise<ActionResult[]> {
+    const r = await this.p.control<{ results: ActionResult[] }>("POST", `${this.base}/actions`, { actions });
+    return r.results;
+  }
+
+  async screenshot(opts: { format?: "png" | "jpeg"; quality?: number } = {}): Promise<Uint8Array> {
+    const q = new URLSearchParams();
+    if (opts.format) q.set("format", opts.format);
+    if (opts.quality) q.set("quality", String(opts.quality));
+    const res = await this.p.controlRaw("GET", `${this.base}/screenshot${q.size ? `?${q}` : ""}`);
+    return new Uint8Array(await res.arrayBuffer());
+  }
+
+  async exec(command: string, timeoutSeconds = 30) {
+    const r = await this.p.control<{ exitCode: number | null; stdout: string; stderr: string }>("POST", `${this.base}/exec`, {
+      command,
+      timeoutS: Math.min(30, timeoutSeconds),
+    });
+    return { exitCode: r.exitCode ?? -1, stdout: r.stdout, stderr: r.stderr };
+  }
+
+  async readFile(path: string): Promise<Uint8Array> {
+    const res = await this.p.controlRaw("GET", `${this.base}/files?path=${encodeURIComponent(path)}`);
+    return new Uint8Array(await res.arrayBuffer());
+  }
+
+  async writeFile(path: string, content: string | Uint8Array): Promise<void> {
+    await this.p.controlRaw("PUT", `${this.base}/files?path=${encodeURIComponent(path)}`, toBytes(content));
+  }
+
+  viewer(mode: "watch" | "control" = "watch", opts: { ttlSeconds?: number; reason?: string } = {}) {
+    const body: Record<string, unknown> = { mode };
+    if (opts.ttlSeconds !== undefined) body.ttlS = opts.ttlSeconds;
+    if (opts.reason !== undefined) body.reason = opts.reason;
+    return this.p.control<{ url: string; expiresAt: string }>("POST", `${this.base}/viewer`, body);
+  }
+
+  async sleep(): Promise<void> {
+    await this.p.control("POST", `${this.base}/sleep`);
+  }
+
+  async delete(): Promise<void> {
+    await this.p.control("DELETE", this.base);
   }
 }
 

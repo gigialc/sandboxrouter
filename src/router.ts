@@ -1,4 +1,5 @@
 import { CATALOG, hourlyCost, unfit } from "./catalog.js";
+import { RoutedComputer, createComputer, type ComputerProvider, type ComputerSpec } from "./computers.js";
 import { loadBench, median } from "./bench-store.js";
 import { DaytonaProvider } from "./providers/daytona.js";
 import { E2BProvider } from "./providers/e2b.js";
@@ -102,6 +103,24 @@ export class Router {
       `all providers failed: ${attempts.map((a) => `${a.provider}: ${a.error}`).join(" | ")}`,
       attempts,
     );
+  }
+
+  /** Providers that also sell computers (desktops/phones). */
+  computerProviders(): ComputerProvider[] {
+    return [...this.providers.values()].filter((p): p is Provider & ComputerProvider => "createComputer" in p);
+  }
+
+  /** Get or create a desktop/phone. With `externalUserId`, the same id returns the same computer. */
+  computer(spec: ComputerSpec = {}, opts: { provider?: ProviderId | ProviderId[] } = {}): Promise<RoutedComputer> {
+    const prefer = opts.provider ? ([] as ProviderId[]).concat(opts.provider) : undefined;
+    return createComputer(this.computerProviders(), spec, prefer);
+  }
+
+  async getComputer(id: string): Promise<RoutedComputer> {
+    const { provider, nativeId } = parseId(id);
+    const p = this.computerProviders().find((c) => c.id === provider);
+    if (!p) throw new RouterError(`${provider} does not offer computers`);
+    return new RoutedComputer(provider, await p.connectComputer(nativeId));
   }
 
   /** Reattach to a sandbox by its routed id (`provider:nativeId`). */
