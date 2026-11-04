@@ -34,9 +34,9 @@ export default async function ProviderPage({ params }: PageProps<"/sandboxes/[id
   if (!p) notFound();
 
   const pkg = PACKAGE[p.id];
-  const install = pkg ? `npm i sandboxrouter ${pkg}` : "npm i sandboxrouter";
+  const install = pkg ? `npm i @sandboxrouter/sdk ${pkg}` : "npm i @sandboxrouter/sdk";
   const env = p.credentials.map((g) => g.map((k) => `export ${k}=...`).join("\n")).join("\n# or\n");
-  const code = `import { Router } from "sandboxrouter";
+  const code = `import { Router } from "@sandboxrouter/sdk";
 
 const router = new Router();
 const sbx = await router.create({ vcpu: 2, memoryGb: 4 }, { provider: "${p.id}" });

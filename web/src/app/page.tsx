@@ -4,7 +4,7 @@ import { CodeTabs } from "@/components/code";
 import { RouteDiagram } from "@/components/RouteDiagram";
 import { DEFAULT_SHAPE, cheapest, site, usd } from "@/lib/site";
 
-const TS = `import { Router } from "sandboxrouter";
+const TS = `import { Router } from "@sandboxrouter/sdk";
 
 const router = new Router();          // reads provider keys from env
 const sbx = await router.create({ vcpu: 2, memoryGb: 4 });
@@ -76,7 +76,7 @@ export default function Home() {
             </Link>
           </div>
           <div className="mt-6 font-mono text-sm text-muted">
-            <span className="select-all">npm i sandboxrouter</span>
+            <span className="select-all">npm i @sandboxrouter/sdk</span>
           </div>
         </div>
         <RouteDiagram />

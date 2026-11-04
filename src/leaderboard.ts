@@ -193,7 +193,7 @@ a { color: inherit; }
         <th>List price, 2 vCPU / 4 GB</th><th>Success</th><th>Submissions</th>
       </tr></thead>
       <tbody>
-${body || `<tr><td colspan="7" class="muted">No results yet. Run <code>npx sandboxrouter bench --share</code> and open a PR.</td></tr>`}
+${body || `<tr><td colspan="7" class="muted">No results yet. Run <code>npx @sandboxrouter/sdk bench --share</code> and open a PR.</td></tr>`}
       </tbody>
     </table>
   </div>

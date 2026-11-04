@@ -1,4 +1,4 @@
-"""Python client for the sandboxrouter HTTP API (`npx sandboxrouter serve`).
+"""Python client for the sandboxrouter HTTP API (`npx @sandboxrouter/sdk serve`).
 
 Standard library only.
 

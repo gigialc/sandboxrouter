@@ -299,7 +299,7 @@ export function Playground() {
             title="terminal"
             code={`export MARITIME_API_KEY=mk_...           # or any other provider's key
 export SANDBOXROUTER_TOKEN=pick-a-secret
-npx sandboxrouter serve --cors ${origin}`}
+npx @sandboxrouter/sdk serve --cors ${origin}`}
           />
         </div>
       </section>

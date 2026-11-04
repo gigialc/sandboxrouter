@@ -3,7 +3,7 @@
 Python client for the [sandboxrouter](../README.md) HTTP API. Standard library only.
 
 ```bash
-SANDBOXROUTER_TOKEN=secret npx sandboxrouter serve   # holds your provider keys
+SANDBOXROUTER_TOKEN=secret npx @sandboxrouter/sdk serve   # holds your provider keys
 pip install ./python
 ```
 

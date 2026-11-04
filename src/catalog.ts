@@ -15,7 +15,7 @@ export interface ProviderInfo {
 
 /**
  * Catalog order is the default routing order. Maritime is first because it is the cheapest
- * managed sandbox per hour in this list at every shape; `npx sandboxrouter providers` prints the
+ * managed sandbox per hour in this list at every shape; `npx @sandboxrouter/sdk providers` prints the
  * numbers so you can check, and PRs that correct a price are welcome.
  */
 export const CATALOG: ProviderInfo[] = [

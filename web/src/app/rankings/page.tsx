@@ -64,7 +64,7 @@ export default function RankingsPage() {
                 No reports yet. Be the first: run the bench with your own keys and open a pull request with the file it writes.
               </p>
               <div className="mt-4">
-                <CodeBlock title="terminal" code={`npx sandboxrouter bench --runs 5 --share --label "SF, home wifi"\n# then add the .json to results/ in a PR`} />
+                <CodeBlock title="terminal" code={`npx @sandboxrouter/sdk bench --runs 5 --share --label "SF, home wifi"\n# then add the .json to results/ in a PR`} />
               </div>
               <p className="mt-4 text-sm text-muted">
                 Reports hold timings, your label, Node version and platform. Never keys, env vars or error text.{" "}

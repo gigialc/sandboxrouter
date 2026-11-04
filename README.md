@@ -3,7 +3,7 @@
 **OpenRouter for sandboxes.** One API for every place an AI agent can run code: Maritime, E2B, Daytona, Modal, Vercel Sandbox, Morph, Fly.io Sprites, Blaxel, Tensorlake and Runloop. Routes on price, latency or capability, and falls back to the next provider when one is down or rate-limited. Also drives desktops and phones for computer-use agents.
 
 ```ts
-import { Router } from "sandboxrouter";
+import { Router } from "@sandboxrouter/sdk";
 
 const router = new Router();                       // reads provider keys from env
 await using sbx = await router.create({ vcpu: 2, memoryGb: 4 });
@@ -31,7 +31,7 @@ So every agent team either locks into one provider or writes its own adapter lay
 
 ## Prices
 
-Estimated list price while running, 2 vCPU / 4 GB (`npx sandboxrouter providers --vcpu 2 --memory 4`):
+Estimated list price while running, 2 vCPU / 4 GB (`npx @sandboxrouter/sdk providers --vcpu 2 --memory 4`):
 
 | Provider | $/hr | Notes | Source |
 |---|---|---|---|
@@ -53,7 +53,7 @@ Checked 2026-11-04. Prices live in [`src/catalog.ts`](src/catalog.ts). If one is
 ## Install
 
 ```bash
-npm i sandboxrouter
+npm i @sandboxrouter/sdk
 # then install the SDK of each provider you use (Maritime needs none, it's plain REST):
 npm i e2b                 # E2B
 npm i @daytonaio/sdk      # Daytona
@@ -136,21 +136,21 @@ const { url } = await desk.viewer("control", { reason: "Please sign in" });
 ```
 
 ```bash
-npx sandboxrouter desktop --os linux --user user_42 --control   # prints a takeover link
-npx sandboxrouter screenshot maritime:<id> --out screen.png
+npx @sandboxrouter/sdk desktop --os linux --user user_42 --control   # prints a takeover link
+npx @sandboxrouter/sdk screenshot maritime:<id> --out screen.png
 ```
 
 ## CLI
 
 ```bash
-npx sandboxrouter providers                    # price table + which keys are set
-npx sandboxrouter route --gpu T4               # dry run
-npx sandboxrouter run "uname -a && nproc"      # start, run, print, kill
-npx sandboxrouter run "pytest -q" --provider e2b,maritime --keep
-npx sandboxrouter bench --runs 5               # cold start + exec latency table
-npx sandboxrouter bench --share --label "us-east-1"   # also write a report for results/
-npx sandboxrouter leaderboard results --out leaderboard.html
-npx sandboxrouter serve --port 8787            # HTTP API
+npx @sandboxrouter/sdk providers                    # price table + which keys are set
+npx @sandboxrouter/sdk route --gpu T4               # dry run
+npx @sandboxrouter/sdk run "uname -a && nproc"      # start, run, print, kill
+npx @sandboxrouter/sdk run "pytest -q" --provider e2b,maritime --keep
+npx @sandboxrouter/sdk bench --runs 5               # cold start + exec latency table
+npx @sandboxrouter/sdk bench --share --label "us-east-1"   # also write a report for results/
+npx @sandboxrouter/sdk leaderboard results --out leaderboard.html
+npx @sandboxrouter/sdk serve --port 8787            # HTTP API
 ```
 
 ### Bench
@@ -162,7 +162,7 @@ npx sandboxrouter serve --port 8787            # HTTP API
 ## HTTP API
 
 ```bash
-SANDBOXROUTER_TOKEN=secret npx sandboxrouter serve
+SANDBOXROUTER_TOKEN=secret npx @sandboxrouter/sdk serve
 ```
 
 | Method | Path | Body |
@@ -243,7 +243,7 @@ cd web && npm i && npm run dev          # http://localhost:3000
 # Playground without any provider keys (in-memory providers, nothing real starts):
 node --import tsx test/demo-server.ts   # token: demo
 # Playground against real providers:
-SANDBOXROUTER_TOKEN=secret npx sandboxrouter serve --cors http://localhost:3000
+SANDBOXROUTER_TOKEN=secret npx @sandboxrouter/sdk serve --cors http://localhost:3000
 ```
 
 ## Development

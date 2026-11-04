@@ -3,9 +3,9 @@
 Each JSON file here is one `sandboxrouter bench --share` run. The leaderboard page is built from all of them:
 
 ```bash
-npx sandboxrouter bench --runs 5 --share --label "us-east-1 c7g.large"
+npx @sandboxrouter/sdk bench --runs 5 --share --label "us-east-1 c7g.large"
 # writes sandboxrouter-bench-YYYY-MM-DD-xxxxxx.json; move it here and open a PR
-npx sandboxrouter leaderboard results --out leaderboard.html
+npx @sandboxrouter/sdk leaderboard results --out leaderboard.html
 ```
 
 Rules for submissions:

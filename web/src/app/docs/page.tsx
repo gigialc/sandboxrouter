@@ -41,11 +41,11 @@ export default function DocsPage() {
         </p>
 
         <h2 id="quickstart">Quickstart</h2>
-        <CodeBlock title="terminal" code={`npm i sandboxrouter\nexport MARITIME_API_KEY=mk_...   # any one provider is enough to start`} />
+        <CodeBlock title="terminal" code={`npm i @sandboxrouter/sdk\nexport MARITIME_API_KEY=mk_...   # any one provider is enough to start`} />
         <div className="h-3" />
         <CodeBlock
           title="agent.ts"
-          code={`import { Router } from "sandboxrouter";
+          code={`import { Router } from "@sandboxrouter/sdk";
 
 const router = new Router();
 await using sbx = await router.create({ vcpu: 2, memoryGb: 4, timeoutMinutes: 10 });
@@ -59,7 +59,7 @@ console.log(r.exitCode, r.stdout, "on", sbx.provider);`}
           provider also ends sandboxes on its own at <code>timeoutMinutes</code>.
         </p>
         <p>Try it without writing code:</p>
-        <CodeBlock title="terminal" code={`npx sandboxrouter providers                 # prices + which keys are set\nnpx sandboxrouter run "uname -a && nproc"   # start, run, print, kill`} />
+        <CodeBlock title="terminal" code={`npx @sandboxrouter/sdk providers                 # prices + which keys are set\nnpx @sandboxrouter/sdk run "uname -a && nproc"   # start, run, print, kill`} />
 
         <h2 id="keys">Provider keys</h2>
         <p>
@@ -95,7 +95,7 @@ router.create(spec, { require: ["pause"] })         // only providers that can p
         <p>
           The default order is the catalog order, with Maritime first because it is the cheapest at every size. To see what
           would happen without starting anything, call <code>router.plan(spec, route)</code> or run{" "}
-          <code>npx sandboxrouter route</code>. Every skipped provider comes with a reason, like <code>not configured</code> or{" "}
+          <code>npx @sandboxrouter/sdk route</code>. Every skipped provider comes with a reason, like <code>not configured</code> or{" "}
           <code>max 16 vCPU</code>.
         </p>
 
@@ -164,16 +164,16 @@ const { url } = await desk.viewer("control", { reason: "Please sign in" });`}
         />
         <p>
           The same <code>externalUserId</code> always returns the same computer, with its files and logins. From the terminal:{" "}
-          <code>npx sandboxrouter desktop --control</code> prints a link to the live screen.
+          <code>npx @sandboxrouter/sdk desktop --control</code> prints a link to the live screen.
         </p>
 
         <h2 id="server">HTTP server</h2>
         <p>Any language can use the router over HTTP. Provider keys stay on the server; clients hold one token.</p>
         <CodeBlock
           title="terminal"
-          code={`SANDBOXROUTER_TOKEN=secret npx sandboxrouter serve --port 8787
+          code={`SANDBOXROUTER_TOKEN=secret npx @sandboxrouter/sdk serve --port 8787
 # allow a website (like this one's Playground) to call it from the browser:
-SANDBOXROUTER_TOKEN=secret npx sandboxrouter serve --cors https://your-site.example`}
+SANDBOXROUTER_TOKEN=secret npx @sandboxrouter/sdk serve --cors https://your-site.example`}
         />
         <table>
           <thead>
@@ -228,7 +228,7 @@ with sr.create(vcpu=2, memory_gb=4, strategy="cheapest") as sbx:
           table. <code>--share</code> also writes a report you can add to the repo&apos;s <code>results/</code> folder in a pull
           request; the <a href="/rankings">Rankings</a> page is built from those reports.
         </p>
-        <CodeBlock title="terminal" code={`npx sandboxrouter bench --runs 5 --share --label "SF, home wifi"`} />
+        <CodeBlock title="terminal" code={`npx @sandboxrouter/sdk bench --runs 5 --share --label "SF, home wifi"`} />
         <p>
           The label says where you ran it, because the network between you and each provider is part of the number. Use a city or
           cloud region, not an address.
