@@ -159,7 +159,7 @@ export function Playground() {
   return (
     <div className="mx-auto grid max-w-6xl gap-6 px-5 lg:grid-cols-[22rem_1fr]">
       <div className="space-y-6">
-        <section className="rounded-2xl border border-line bg-card p-5">
+        <section className="rounded-xl border border-line p-5">
           <h2 className="font-semibold">1. Connect your server</h2>
           <p className="mt-1 text-sm text-muted">Your keys stay on your machine. This page only talks to the server you run.</p>
           <label className="mt-4 block text-xs text-muted">
@@ -179,7 +179,7 @@ export function Playground() {
           <button
             onClick={connect}
             disabled={busy !== null}
-            className="mt-4 w-full rounded-full bg-ink px-4 py-2 text-sm font-medium text-sand disabled:opacity-50"
+            className="mt-4 w-full rounded-full border border-line-2 px-4 py-2 text-sm font-medium hover:bg-accent-wash disabled:opacity-40"
           >
             {busy === "connect" ? "Connecting…" : configured ? "Reconnect" : "Connect"}
           </button>
@@ -191,7 +191,7 @@ export function Playground() {
           )}
         </section>
 
-        <section className={`rounded-2xl border border-line bg-card p-5 ${configured ? "" : "opacity-50"}`}>
+        <section className={`rounded-xl border border-line p-5 ${configured ? "" : "opacity-50"}`}>
           <h2 className="font-semibold">2. Start a sandbox</h2>
           <label className="mt-4 block text-xs text-muted">
             Provider
@@ -229,7 +229,7 @@ export function Playground() {
           <button
             onClick={start}
             disabled={!configured || busy !== null || !!sbx}
-            className="mt-4 w-full rounded-full bg-accent px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+            className="mt-4 w-full rounded-full bg-ink px-4 py-2 text-sm font-medium text-sand disabled:opacity-40"
           >
             {busy === "start" ? "Starting…" : "Start sandbox"}
           </button>
@@ -255,7 +255,7 @@ export function Playground() {
         </section>
       </div>
 
-      <section className="flex min-h-[32rem] flex-col overflow-hidden rounded-2xl border border-line bg-code-bg">
+      <section className="flex min-h-[32rem] flex-col overflow-hidden rounded-xl border border-line bg-code-bg">
         <div className="flex items-center gap-2 border-b border-white/10 p-3">
           <input
             value={cmd}

@@ -71,7 +71,7 @@ export default function Home() {
             <Link href="/docs#quickstart" className="rounded-full bg-ink px-5 py-3 text-sm font-medium text-sand hover:opacity-90">
               Get started
             </Link>
-            <Link href="/sandboxes" className="rounded-full border border-line-2 px-5 py-3 text-sm font-medium hover:bg-card">
+            <Link href="/sandboxes" className="rounded-full border border-line-2 px-5 py-3 text-sm font-medium hover:bg-accent-wash">
               Compare sandboxes
             </Link>
           </div>
@@ -82,7 +82,7 @@ export default function Home() {
         <RouteDiagram />
       </section>
 
-      <section className="border-y border-line bg-card">
+      <section className="border-y border-line ">
         <dl className="mx-auto grid max-w-6xl grid-cols-2 gap-px px-5 sm:grid-cols-4">
           {[
             { k: "Providers", v: String(site.providers.length) },
@@ -132,9 +132,9 @@ export default function Home() {
       </section>
 
       <section className="mx-auto max-w-6xl px-5 pb-20">
-        <div className="grid gap-px overflow-hidden rounded-2xl border border-line bg-line sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-px overflow-hidden rounded-xl border border-line bg-line sm:grid-cols-2 lg:grid-cols-3">
           {FEATURES.map((f) => (
-            <div key={f.title} className="bg-card p-6">
+            <div key={f.title} className="bg-sand p-6">
               <h3 className="font-semibold">{f.title}</h3>
               <p className="mt-2 text-sm leading-6 text-ink-2">{f.body}</p>
             </div>
@@ -152,10 +152,10 @@ export default function Home() {
             All {site.providers.length} →
           </Link>
         </div>
-        <ol className="mt-6 divide-y divide-line overflow-hidden rounded-2xl border border-line bg-card">
+        <ol className="mt-6 divide-y divide-line overflow-hidden rounded-xl border border-line ">
           {cheapest.slice(0, 5).map((p, k) => (
             <li key={p.id}>
-              <Link href={`/sandboxes/${p.id}`} className="flex items-center gap-4 px-5 py-4 hover:bg-sand/60">
+              <Link href={`/sandboxes/${p.id}`} className="flex items-center gap-4 px-5 py-4 hover:bg-accent-wash">
                 <span className="w-5 text-sm text-muted tnum">{k + 1}</span>
                 <span className="font-medium">{p.name}</span>
                 {k === 0 && <Badge tone="accent">default</Badge>}

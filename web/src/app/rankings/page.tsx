@@ -8,8 +8,8 @@ export const metadata: Metadata = { title: "Rankings" };
 
 function Bar({ pct }: { pct: number }) {
   return (
-    <div className="h-3 w-full max-w-64 border-l border-line-2">
-      <div className="h-3 rounded-r bg-bar" style={{ width: `${Math.max(2, pct)}%` }} />
+    <div className="h-2 w-full max-w-64 border-l border-line-2">
+      <div className="h-2 rounded-r-sm bg-bar" style={{ width: `${Math.max(2, pct)}%` }} />
     </div>
   );
 }
@@ -27,7 +27,7 @@ export default function RankingsPage() {
       </PageHeader>
 
       <div className="mx-auto grid max-w-6xl gap-8 px-5 lg:grid-cols-2">
-        <section className="rounded-2xl border border-line bg-card">
+        <section className="rounded-xl border border-line ">
           <header className="border-b border-line px-5 py-4">
             <h2 className="font-semibold">Price</h2>
             <p className="text-sm text-muted">Per hour, 2 vCPU · 4 GB, while running</p>
@@ -51,7 +51,7 @@ export default function RankingsPage() {
           </ol>
         </section>
 
-        <section className="rounded-2xl border border-line bg-card">
+        <section className="rounded-xl border border-line ">
           <header className="border-b border-line px-5 py-4">
             <h2 className="font-semibold">Cold start</h2>
             <p className="text-sm text-muted">

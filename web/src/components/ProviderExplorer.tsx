@@ -32,7 +32,7 @@ export function ProviderExplorer() {
 
   return (
     <div className="mx-auto max-w-6xl px-5">
-      <div className="flex flex-col gap-4 rounded-2xl border border-line bg-card p-4 lg:flex-row lg:items-center">
+      <div className="flex flex-col gap-4 rounded-xl border border-line p-4 lg:flex-row lg:items-center">
         <div className="flex flex-wrap items-center gap-2">
           <span className="mr-1 text-xs text-muted">Machine</span>
           {site.shapes.map((s) => (
@@ -54,7 +54,7 @@ export function ProviderExplorer() {
                 key={f}
                 aria-pressed={on}
                 onClick={() => setNeed(on ? need.filter((x) => x !== f) : [...need, f])}
-                className={`rounded-full border px-3 py-1 text-xs ${on ? "border-accent bg-accent-wash text-accent-ink" : "border-line hover:border-line-2"}`}
+                className={`rounded-full border px-3 py-1 text-xs ${on ? "border-ink bg-ink text-sand" : "border-line hover:border-line-2"}`}
               >
                 {CAPABILITY_LABEL[f]}
               </button>
@@ -69,12 +69,12 @@ export function ProviderExplorer() {
           onChange={(e) => setQ(e.target.value)}
           placeholder="Search providers"
           aria-label="Search providers"
-          className="w-56 rounded-lg border border-line bg-card px-3 py-2 outline-none focus:border-line-2"
+          className="w-56 rounded-lg border border-line px-3 py-2 outline-none focus:border-line-2"
         />
         <span className="text-muted">{rows.length} shown</span>
         <label className="ml-auto flex items-center gap-2 text-muted">
           Sort
-          <select value={sort} onChange={(e) => setSort(e.target.value as Sort)} className="rounded-lg border border-line bg-card px-2 py-1.5 text-ink">
+          <select value={sort} onChange={(e) => setSort(e.target.value as Sort)} className="rounded-lg border border-line px-2 py-1.5 text-ink">
             <option value="price">Price, low to high</option>
             <option value="default">Routing order</option>
             <option value="name">Name</option>
@@ -82,7 +82,7 @@ export function ProviderExplorer() {
         </label>
       </div>
 
-      <div className="mt-4 overflow-x-auto rounded-2xl border border-line bg-card">
+      <div className="mt-4 overflow-x-auto rounded-xl border border-line ">
         <table className="w-full text-sm md:min-w-[720px]">
           <thead>
             <tr className="border-b border-line-2 text-left text-xs text-muted">
@@ -97,12 +97,12 @@ export function ProviderExplorer() {
               const price = p.prices[shape];
               const pct = price.unfit ? 0 : Math.max(2, (price.usd / max) * 100);
               return (
-                <tr key={p.id} className="group hover:bg-sand/50">
+                <tr key={p.id} className="group hover:bg-accent-wash">
                   <td className="px-4 py-4 sm:px-5">
                     <Link href={`/sandboxes/${p.id}`} className="font-medium group-hover:underline underline-offset-4">
                       {p.name}
                     </Link>
-                    {p.order === 0 && <span className="ml-2 align-middle text-xs text-accent-ink">default</span>}
+                    {p.order === 0 && <span className="ml-2 rounded-full bg-ink px-1.5 py-px align-middle text-[10px] font-medium text-sand">default</span>}
                     <div className="mt-0.5 font-mono text-xs text-muted">{p.id}</div>
                   </td>
                   <td className="px-3 py-4">
@@ -110,8 +110,8 @@ export function ProviderExplorer() {
                       <span className="text-muted">Can&apos;t: {price.unfit}</span>
                     ) : (
                       <div className="flex items-center gap-3" title={`${p.name}: ${usd(price.usd)} per hour at list price`}>
-                        <div className="h-3 w-16 border-l border-line-2 sm:w-40">
-                          <div className="h-3 rounded-r bg-bar" style={{ width: `${pct}%` }} />
+                        <div className="h-2 w-16 border-l border-line-2 sm:w-40">
+                          <div className="h-2 rounded-r-sm bg-bar" style={{ width: `${pct}%` }} />
                         </div>
                         <span className="font-mono tnum">{usd(price.usd)}</span>
                       </div>

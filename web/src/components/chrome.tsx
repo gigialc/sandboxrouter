@@ -24,7 +24,7 @@ const NAV = [
 
 export function Nav() {
   return (
-    <header className="sticky top-0 z-30 border-b border-line bg-sand/85 backdrop-blur">
+    <header className="sticky top-0 z-30 border-b border-line bg-sand/80 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-6xl items-center gap-8 px-5">
         <Link href="/" aria-label="sandboxrouter home">
           <Logo />
@@ -76,7 +76,7 @@ export function Badge({ children, tone = "plain" }: { children: React.ReactNode;
   return (
     <span
       className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs ${
-        tone === "accent" ? "border-accent/40 bg-accent-wash text-accent-ink" : "border-line bg-card text-ink-2"
+        tone === "accent" ? "border-ink bg-ink text-sand" : "border-line text-ink-2"
       }`}
     >
       {children}

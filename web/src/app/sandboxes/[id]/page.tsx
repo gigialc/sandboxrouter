@@ -57,7 +57,7 @@ await sbx.kill();`;
       <p className="mt-5 max-w-2xl text-ink-2">{NOTES[p.id]}</p>
 
       <div className="mt-10 grid gap-8 lg:grid-cols-[1.1fr_1fr]">
-        <section className="rounded-2xl border border-line bg-card">
+        <section className="rounded-xl border border-line ">
           <h2 className="border-b border-line px-5 py-3 text-sm font-medium">Price per hour while running</h2>
           <table className="w-full text-sm">
             <tbody className="divide-y divide-line">
@@ -84,7 +84,7 @@ await sbx.kill();`;
         </section>
 
         <section className="space-y-6">
-          <div className="rounded-2xl border border-line bg-card p-5">
+          <div className="rounded-xl border border-line p-5">
             <h2 className="text-sm font-medium">What the adapter supports</h2>
             <div className="mt-3 flex flex-wrap gap-2">
               <Badge>exec + streaming</Badge>

@@ -50,7 +50,7 @@ export function RouteDiagram() {
   const mid = total / 2;
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-line bg-card p-4 sm:p-6">
+    <div className="overflow-hidden rounded-xl border border-line p-4 sm:p-6">
       <div className="mb-5 flex flex-wrap items-center gap-2">
         {SCENES.map((s, j) => (
           <button
@@ -66,11 +66,11 @@ export function RouteDiagram() {
       </div>
 
       <div className="flex items-center" style={{ height: total }}>
-        <div className="hidden shrink-0 rounded-xl border border-line bg-sand px-3 py-2 text-center sm:block">
+        <div className="hidden shrink-0 rounded-xl border border-line bg-sand px-3 py-2 text-center xl:block">
           <div className="font-mono text-[11px] text-muted">your agent</div>
           <div className="font-mono text-sm">create()</div>
         </div>
-        <svg className="hidden h-full w-10 shrink-0 sm:block" viewBox={`0 0 40 ${total}`} preserveAspectRatio="none" aria-hidden="true">
+        <svg className="hidden h-full w-8 shrink-0 xl:block" viewBox={`0 0 40 ${total}`} preserveAspectRatio="none" aria-hidden="true">
           <path d={`M0 ${mid} H40`} stroke="var(--accent)" strokeWidth="2" className="sr-flow" />
         </svg>
         <div className="shrink-0 rounded-xl bg-ink px-2.5 py-2 text-center text-sand sm:px-3">
@@ -96,7 +96,7 @@ export function RouteDiagram() {
             );
           })}
         </svg>
-        <ul className="w-40 shrink-0 space-y-2 sm:w-56">
+        <ul className="w-40 shrink-0 space-y-2 sm:w-52">
           {ROWS.map((r) => {
             const m = scene.marks[r.id] ?? { state: "idle" as const };
             return (
@@ -105,7 +105,7 @@ export function RouteDiagram() {
                 style={{ height: ROW_H }}
                 className={`flex items-center justify-between rounded-lg border px-2.5 text-xs transition-all duration-300 sm:px-3 sm:text-sm ${
                   m.state === "win"
-                    ? "border-accent bg-accent-wash"
+                    ? "border-ink bg-ink text-sand"
                     : m.state === "fail"
                       ? "border-bad/40"
                       : "border-line"
@@ -114,7 +114,7 @@ export function RouteDiagram() {
                 <span className="truncate font-medium">{r.name}</span>
                 <span className="ml-2 shrink-0 font-mono text-xs">
                   {m.state === "win" ? (
-                    <span className="text-accent-ink">✓ {r.price}</span>
+                    <span>✓ {r.price}</span>
                   ) : m.state === "fail" ? (
                     <span className="text-bad">✗ {m.note}</span>
                   ) : m.note ? (

@@ -26,7 +26,7 @@ export default function DocsPage() {
         <nav className="sticky top-24 space-y-1 text-sm">
           <p className="mb-3 font-mono text-xs uppercase tracking-widest text-muted">Docs</p>
           {SECTIONS.map(([id, label]) => (
-            <a key={id} href={`#${id}`} className="block rounded-md px-2 py-1 text-ink-2 hover:bg-card hover:text-ink">
+            <a key={id} href={`#${id}`} className="block rounded-md px-2 py-1 text-ink-2 hover:bg-accent-wash hover:text-ink">
               {label}
             </a>
           ))}
