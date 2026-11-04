@@ -34,6 +34,7 @@ export interface SiteDesktop {
   checked: string;
   takeover: boolean;
   size: string;
+  planOnly?: string[];
   credentials: string[][];
   docs: string;
 }

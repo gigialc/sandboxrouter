@@ -25,6 +25,9 @@ import { CloudflareProvider } from "./providers/cloudflare.js";
 import { NorthflankProvider } from "./providers/northflank.js";
 import { BoatProvider } from "./providers/boat.js";
 import { ExeDevProvider } from "./providers/exedev.js";
+import { OrgoProvider } from "./providers/orgo.js";
+import { MobilerunProvider } from "./providers/mobilerun.js";
+import { LimrunProvider } from "./providers/limrun.js";
 import {
   RouterError,
   type Attempt,
@@ -56,7 +59,7 @@ export interface RouterOptions {
 
 /** Desktop-only providers. Filled in as adapters are added. */
 export function defaultComputerProviders(): ComputerProvider[] {
-  return [];
+  return [new OrgoProvider(), new MobilerunProvider(), new LimrunProvider()];
 }
 
 export function defaultProviders(): Provider[] {

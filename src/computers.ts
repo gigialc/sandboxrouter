@@ -168,6 +168,8 @@ export interface ComputerCatalogEntry {
   takeover: boolean;
   /** The machine you get by default, so prices compare like for like, e.g. "2 vCPU · 4 GB". */
   size: string;
+  /** OSes offered only on a monthly plan, with no hourly price. Routed last for that OS. */
+  planOnly?: ComputerOs[];
   credentials: string[][];
   docs: string;
 }
@@ -212,6 +214,47 @@ export const COMPUTER_ENTRIES: ComputerCatalogEntry[] = [
     docs: "https://docs.e2b.dev/use-cases/computer-use",
   },
 ];
+
+COMPUTER_ENTRIES.push({
+  id: "orgo",
+  name: "Orgo",
+  os: { linux: 0.055 },
+  planOnly: ["windows"],
+  size: "2 vCPU · 8 GB",
+  note: "Medium Linux by the hour from credit, billed per second; stopped pays only its 40 GB disk. Other sizes need a paid plan (Starter $29/mo). Windows is not hourly: Scale plan ($399/mo) or a $15/mo licence plus a Medium. The live view is a VNC websockify URL whose token is full control, for a noVNC client",
+  source: "https://www.orgo.ai/pricing.md",
+  checked: "2026-11-04",
+  takeover: false,
+  credentials: [["ORGO_API_KEY"]],
+  docs: "https://docs.orgo.ai/api-reference/introduction",
+});
+
+COMPUTER_ENTRIES.push(
+  {
+    id: "mobilerun",
+    name: "Mobilerun",
+    os: { android: 1.8 },
+    size: "Android cloud phone (virtual, EU)",
+    note: "$0.03 per device minute past the plan allowance (Developer $20/mo incl. 600 min, Startup $99, Scaleup $299); Free has 60 min/month; stopped phones keep apps and data and bill no minutes; live view is a WebRTC stream for @mobilerun/react, always controllable; no shell",
+    source: "https://mobilerun.ai/pricing",
+    checked: "2026-11-04",
+    takeover: true,
+    credentials: [["MOBILERUN_CLOUD_API_KEY"]],
+    docs: "https://docs.mobilerun.ai",
+  },
+  {
+    id: "limrun",
+    name: "Limrun",
+    os: { android: 3.0, ios: 6.0 },
+    size: "Android 15 phone emulator / iPhone simulator",
+    note: "per-minute credits (Android 1/min, iOS 2/min) at the $0.05/credit overage rate; plans: Trial free (120 credits), Entry $20/mo (500), Individual $200/mo (5,000); no pause, an idle device is deleted after its inactivity timeout; the stream link is interactive; iOS has no shell",
+    source: "https://limrun.com/pricing",
+    checked: "2026-11-04",
+    takeover: true,
+    credentials: [["LIM_API_KEY"]],
+    docs: "https://docs.limrun.com/docs/reference/sdk.md",
+  },
+);
 
 export function computerCatalog(): ComputerCatalogEntry[] {
   return [...COMPUTER_ENTRIES].sort((a, b) => a.name.localeCompare(b.name));

@@ -117,7 +117,7 @@ export class RouterError extends Error {
 /** Thrown by adapters for HTTP failures so the router can report status codes. */
 export class ProviderError extends Error {
   constructor(
-    readonly provider: ProviderId,
+    readonly provider: ProviderId | (string & {}),
     message: string,
     readonly status?: number,
   ) {

@@ -38,4 +38,7 @@ export { CloudflareProvider } from "./providers/cloudflare.js";
 export { NorthflankProvider } from "./providers/northflank.js";
 export { BoatProvider } from "./providers/boat.js";
 export { ExeDevProvider } from "./providers/exedev.js";
+export { OrgoProvider } from "./providers/orgo.js";
+export { MobilerunProvider } from "./providers/mobilerun.js";
+export { LimrunProvider } from "./providers/limrun.js";
 export * from "./types.js";

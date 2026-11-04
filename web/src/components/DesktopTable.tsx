@@ -43,7 +43,13 @@ export function DesktopTable() {
                 return (
                   <td key={os} className="py-3 pr-4 font-mono tnum">
                     {v === undefined ? (
-                      <span className="text-muted">—</span>
+                      d.planOnly?.includes(os) ? (
+                        <span className="text-ink-2" title={`${d.name} ${os}: monthly plan only, no hourly price`}>
+                          plan
+                        </span>
+                      ) : (
+                        <span className="text-muted">—</span>
+                      )
                     ) : (
                       <span className={v === cheapest[os] ? "text-ink" : "text-ink-2"} title={`${d.name} ${os}: ${usd(v)} per hour`}>
                         {usd(v)}

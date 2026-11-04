@@ -30,19 +30,25 @@
   },
   "keywords": [
     "ai-agents",
+    "android",
     "blaxel",
     "cloudflare",
     "code-execution",
+    "computer-use",
     "daytona",
     "docker",
     "e2b",
     "fly-sprites",
     "hopx",
+    "ios",
+    "limrun",
     "maritime",
+    "mobilerun",
     "modal",
     "morph",
     "northflank",
     "openrouter",
+    "orgo",
     "router",
     "runloop",
     "sandbox",
@@ -65,7 +71,9 @@
     "@vercel/sandbox": ">=3",
     "e2b": ">=2",
     "modal": ">=0.11",
-    "morphcloud": ">=0.0.20"
+    "morphcloud": ">=0.0.20",
+    "@mobilerun/sdk": ">=6",
+    "@limrun/api": ">=0.69"
   },
   "peerDependenciesMeta": {
     "e2b": {
@@ -102,6 +110,12 @@
       "optional": true
     },
     "@e2b/desktop": {
+      "optional": true
+    },
+    "@mobilerun/sdk": {
+      "optional": true
+    },
+    "@limrun/api": {
       "optional": true
     }
   },
