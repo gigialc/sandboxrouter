@@ -4,6 +4,7 @@ const OSES = [
   ["linux", "Linux"],
   ["windows", "Windows"],
   ["android", "Android"],
+  ["ios", "iOS"],
 ] as const;
 
 /** Desktops and phones, priced per OS. Alphabetical; the router picks the cheapest for the OS you ask for. */

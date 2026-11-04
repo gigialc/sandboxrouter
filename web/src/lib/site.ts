@@ -28,7 +28,7 @@ export interface LeaderRow {
 export interface SiteDesktop {
   id: string;
   name: string;
-  os: Partial<Record<"linux" | "windows" | "android", number>>;
+  os: Partial<Record<"linux" | "windows" | "android" | "ios", number>>;
   note?: string;
   source: string;
   checked: string;

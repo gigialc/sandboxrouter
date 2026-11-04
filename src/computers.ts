@@ -9,7 +9,7 @@ import { RouterError } from "./types.js";
 /** Computer providers include sandbox providers (maritime, e2b, daytona) and desktop-only ones. */
 export type ComputerProviderId = string;
 
-export type ComputerOs = "linux" | "windows" | "android";
+export type ComputerOs = "linux" | "windows" | "android" | "ios";
 
 export interface ComputerSpec {
   os?: ComputerOs;
