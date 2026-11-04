@@ -72,6 +72,11 @@ describe("HTTP API", () => {
       const ok = await fetch(`${url}/v1/providers`, { method: "OPTIONS", headers: { Origin: "https://sandboxrouter.dev" } });
       expect(ok.status).toBe(204);
       expect(ok.headers.get("access-control-allow-origin")).toBe("https://sandboxrouter.dev");
+      const pna = await fetch(`${url}/v1/providers`, {
+        method: "OPTIONS",
+        headers: { Origin: "https://sandboxrouter.dev", "Access-Control-Request-Private-Network": "true" },
+      });
+      expect(pna.headers.get("access-control-allow-private-network")).toBe("true");
       const bad = await fetch(`${url}/v1/providers`, { method: "OPTIONS", headers: { Origin: "https://evil.example" } });
       expect(bad.status).toBe(403);
       expect(bad.headers.get("access-control-allow-origin")).toBeNull();

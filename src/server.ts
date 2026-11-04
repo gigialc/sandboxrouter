@@ -45,6 +45,10 @@ export function createApp(
     res.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type, Accept");
     res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
     res.setHeader("Access-Control-Max-Age", "600");
+    // Chrome asks before a public HTTPS page (the hosted Playground) may call a server on localhost.
+    if (req.headers["access-control-request-private-network"] === "true") {
+      res.setHeader("Access-Control-Allow-Private-Network", "true");
+    }
     return true;
   };
 
