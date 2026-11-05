@@ -25,6 +25,17 @@ import { CloudflareProvider } from "./providers/cloudflare.js";
 import { NorthflankProvider } from "./providers/northflank.js";
 import { BoatProvider } from "./providers/boat.js";
 import { ExeDevProvider } from "./providers/exedev.js";
+import { AgentCoreProvider } from "./providers/agentcore.js";
+import { AzureSessionsProvider } from "./providers/azure.js";
+import { LambdaMicrovmProvider } from "./providers/lambda.js";
+import { AlibabaProvider } from "./providers/alibaba.js";
+import { BeamProvider } from "./providers/beam.js";
+import { CodeSandboxProvider } from "./providers/codesandbox.js";
+import { DenoProvider } from "./providers/deno.js";
+import { FreestyleProvider } from "./providers/freestyle.js";
+import { KoyebProvider } from "./providers/koyeb.js";
+import { NovitaProvider } from "./providers/novita.js";
+import { UpstashProvider } from "./providers/upstash.js";
 import { OrgoProvider } from "./providers/orgo.js";
 import { MobilerunProvider } from "./providers/mobilerun.js";
 import { LimrunProvider } from "./providers/limrun.js";
@@ -80,6 +91,17 @@ export function defaultProviders(): Provider[] {
     new NorthflankProvider(),
     new BoatProvider(),
     new ExeDevProvider(),
+    new AgentCoreProvider(),
+    new AzureSessionsProvider(),
+    new LambdaMicrovmProvider(),
+    new AlibabaProvider(),
+    new BeamProvider(),
+    new CodeSandboxProvider(),
+    new DenoProvider(),
+    new FreestyleProvider(),
+    new KoyebProvider(),
+    new NovitaProvider(),
+    new UpstashProvider(),
     new DockerProvider(),
   ];
 }

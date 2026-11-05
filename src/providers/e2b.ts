@@ -1,4 +1,4 @@
-import { ProviderError, type ExecOptions, type ExecResult, type Provider, type ProviderSandbox, type SandboxSpec } from "../types.js";
+import { ProviderError, type ExecOptions, type ExecResult, type Provider, type ProviderId, type ProviderSandbox, type SandboxSpec } from "../types.js";
 import { optionalImport, toBytes } from "../util.js";
 import type {
   ActionResult,
@@ -85,9 +85,40 @@ export class E2BProvider implements Provider, ComputerProvider {
   }
 }
 
-class E2BBox implements ProviderSandbox {
+/**
+ * The members of an `e2b` Sandbox that the shared box below uses. SDKs forked from E2B's
+ * (e.g. `novita-sandbox`) and E2B-API-compatible services reached through the `e2b` SDK have the
+ * same shape, so their adapters reuse these classes.
+ */
+export interface E2BLikeSandbox {
+  readonly sandboxId: string;
+  commands: {
+    run(
+      cmd: string,
+      opts: {
+        cwd?: string;
+        envs?: Record<string, string>;
+        timeoutMs?: number;
+        onStdout?: (chunk: string) => void;
+        onStderr?: (chunk: string) => void;
+      },
+    ): Promise<{ exitCode: number; stdout: string; stderr: string }>;
+  };
+  files: {
+    write(path: string, data: Uint8Array): Promise<unknown>;
+    read(path: string, opts: { format: "bytes" }): Promise<Uint8Array>;
+  };
+  kill(): Promise<unknown>;
+  pause(): Promise<unknown>;
+}
+
+/** exec/files/kill over an E2B-style SDK sandbox. `provider` labels errors. No pause. */
+export class E2BCompatBox implements ProviderSandbox {
   readonly nativeId: string;
-  constructor(private sbx: E2BSandbox) {
+  constructor(
+    protected sbx: E2BLikeSandbox,
+    protected provider: ProviderId = "e2b",
+  ) {
     this.nativeId = sbx.sandboxId;
   }
 
@@ -107,7 +138,7 @@ class E2BBox implements ProviderSandbox {
       if (err?.name === "CommandExitError" || typeof err?.exitCode === "number") {
         return { exitCode: err.exitCode, stdout: err.stdout ?? "", stderr: err.stderr ?? "", durationMs: Date.now() - t0 };
       }
-      throw new ProviderError("e2b", err?.message ?? String(err));
+      throw new ProviderError(this.provider, err?.message ?? String(err));
     }
   }
 
@@ -119,13 +150,16 @@ class E2BBox implements ProviderSandbox {
     return await this.sbx.files.read(path, { format: "bytes" });
   }
 
+  async kill(): Promise<void> {
+    await this.sbx.kill();
+  }
+}
+
+/** E2BCompatBox plus pause, for services where pause/resume is generally available. */
+export class E2BBox extends E2BCompatBox {
   /** Snapshot memory and disk. Sandbox.connect (router.get) resumes it. */
   async pause(): Promise<void> {
     await this.sbx.pause();
-  }
-
-  async kill(): Promise<void> {
-    await this.sbx.kill();
   }
 }
 

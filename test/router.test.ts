@@ -174,7 +174,8 @@ describe("ids and prices", () => {
   it("the catalog gives no provider a privileged position", () => {
     const names = CATALOG.map((c) => c.name);
     expect(names).toEqual([...names].sort((a, b) => a.localeCompare(b)));
-    for (const c of CATALOG) expect(unfit(c.id, {})).toBeNull();
+    // Alibaba's default template (2 vCPU / 2 GB) and Azure's sessions are fixed below the default size.
+    for (const c of CATALOG) if (!["alibaba", "azure"].includes(c.id)) expect(unfit(c.id, {})).toBeNull();
     expect(CATALOG.filter((c) => c.local).map((c) => c.id)).toEqual(["docker"]);
     expect(new Set(CATALOG.map((c) => hourlyCost(c.id))).size).toBeGreaterThan(1);
   });

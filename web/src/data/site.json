@@ -1,6 +1,6 @@
 {
   "version": "0.2.0",
-  "generatedAt": "2026-11-04T23:31:17.238Z",
+  "generatedAt": "2026-11-05T02:11:10.887Z",
   "shapes": [
     "1x2",
     "2x4",
@@ -10,6 +10,287 @@
     "32x128"
   ],
   "providers": [
+    {
+      "id": "alibaba",
+      "name": "Alibaba Cloud Agent Sandbox",
+      "local": false,
+      "capabilities": [
+        "custom-image"
+      ],
+      "limits": {
+        "maxVcpu": 2,
+        "maxMemoryGb": 2
+      },
+      "credentials": [
+        [
+          "ALIBABA_SANDBOX_API_KEY"
+        ]
+      ],
+      "docs": "https://www.alibabacloud.com/help/en/agent-sandbox/e2b-sdk-integration-parameter-description",
+      "pricing": {
+        "vcpuHour": 0.017856,
+        "gbHour": 0.008928,
+        "note": "per second; Default QoS class, Hong Kong and regions outside mainland China; disk above 15 GiB extra; size comes from the template (E2B-compatible API)",
+        "source": "https://www.alibabacloud.com/help/en/agent-sandbox/product-overview/billing-overview",
+        "checked": "2026-11-04"
+      },
+      "computers": [],
+      "prices": {
+        "1x2": {
+          "usd": 0.0357,
+          "unfit": null
+        },
+        "2x4": {
+          "usd": 0.0714,
+          "unfit": "max 2 GB memory"
+        },
+        "4x8": {
+          "usd": 0.1428,
+          "unfit": "max 2 vCPU"
+        },
+        "8x16": {
+          "usd": 0.2857,
+          "unfit": "max 2 vCPU"
+        },
+        "16x32": {
+          "usd": 0.5714,
+          "unfit": "max 2 vCPU"
+        },
+        "32x128": {
+          "usd": 1.7142,
+          "unfit": "max 2 vCPU"
+        }
+      }
+    },
+    {
+      "id": "agentcore",
+      "name": "Amazon Bedrock AgentCore Code Interpreter",
+      "local": false,
+      "capabilities": [],
+      "limits": {
+        "maxVcpu": 2,
+        "maxMemoryGb": 8
+      },
+      "credentials": [
+        [
+          "AGENTCORE_CODE_INTERPRETER_ID",
+          "AWS_REGION",
+          "AWS_ACCESS_KEY_ID",
+          "AWS_SECRET_ACCESS_KEY"
+        ],
+        [
+          "AGENTCORE_CODE_INTERPRETER_ID",
+          "AWS_REGION",
+          "AWS_PROFILE"
+        ]
+      ],
+      "docs": "https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/code-interpreter-api-reference-examples.html",
+      "pricing": {
+        "vcpuHour": 0.0895,
+        "gbHour": 0.00945,
+        "note": "per second; CPU billed on actual use (I/O wait free), memory on peak; fixed 2 vCPU / 8 GB session, this is the 100%-CPU price",
+        "source": "https://aws.amazon.com/bedrock/agentcore/pricing/",
+        "checked": "2026-11-04"
+      },
+      "computers": [],
+      "prices": {
+        "1x2": {
+          "usd": 0.1084,
+          "unfit": null
+        },
+        "2x4": {
+          "usd": 0.2168,
+          "unfit": null
+        },
+        "4x8": {
+          "usd": 0.4336,
+          "unfit": "max 2 vCPU"
+        },
+        "8x16": {
+          "usd": 0.8672,
+          "unfit": "max 2 vCPU"
+        },
+        "16x32": {
+          "usd": 1.7344,
+          "unfit": "max 2 vCPU"
+        },
+        "32x128": {
+          "usd": 4.0736,
+          "unfit": "max 2 vCPU"
+        }
+      }
+    },
+    {
+      "id": "lambda",
+      "name": "AWS Lambda MicroVMs",
+      "local": false,
+      "capabilities": [
+        "pause",
+        "custom-image"
+      ],
+      "limits": {
+        "maxVcpu": 4,
+        "maxMemoryGb": 8
+      },
+      "credentials": [
+        [
+          "AWS_REGION",
+          "LAMBDA_MICROVM_IMAGE",
+          "AWS_ACCESS_KEY_ID",
+          "AWS_SECRET_ACCESS_KEY"
+        ],
+        [
+          "AWS_REGION",
+          "LAMBDA_MICROVM_IMAGE",
+          "AWS_PROFILE"
+        ]
+      ],
+      "docs": "https://docs.aws.amazon.com/lambda/latest/dg/lambda-microvms-guide.html",
+      "pricing": {
+        "vcpuHour": 0.0997,
+        "gbHour": 0.0132,
+        "note": "us-east-1 ARM; billed on the image's baseline size (2 GB per vCPU) while running, per-second burst up to 4x; suspended VMs pay snapshot storage; needs a MicroVM image you build once",
+        "source": "https://aws.amazon.com/lambda/pricing/",
+        "checked": "2026-11-04"
+      },
+      "computers": [],
+      "prices": {
+        "1x2": {
+          "usd": 0.1261,
+          "unfit": null
+        },
+        "2x4": {
+          "usd": 0.2522,
+          "unfit": null
+        },
+        "4x8": {
+          "usd": 0.5044,
+          "unfit": null
+        },
+        "8x16": {
+          "usd": 0.5044,
+          "unfit": "max 4 vCPU"
+        },
+        "16x32": {
+          "usd": 0.5044,
+          "unfit": "max 4 vCPU"
+        },
+        "32x128": {
+          "usd": 0.5044,
+          "unfit": "max 4 vCPU"
+        }
+      }
+    },
+    {
+      "id": "azure",
+      "name": "Azure Container Apps dynamic sessions",
+      "local": false,
+      "capabilities": [],
+      "limits": {
+        "maxVcpu": 1,
+        "maxMemoryGb": 2
+      },
+      "credentials": [
+        [
+          "AZURE_SESSIONS_POOL_ENDPOINT",
+          "AZURE_SESSIONS_TOKEN"
+        ],
+        [
+          "AZURE_SESSIONS_POOL_ENDPOINT",
+          "AZURE_TENANT_ID",
+          "AZURE_CLIENT_ID",
+          "AZURE_CLIENT_SECRET"
+        ]
+      ],
+      "docs": "https://learn.microsoft.com/en-us/azure/container-apps/sessions-tutorial-shell",
+      "pricing": {
+        "vcpuHour": 0.03,
+        "gbHour": 0,
+        "note": "flat $0.03 per session-hour (built-in Shell pools), billed per allocated session in 1-hour increments, East US; needs a session pool you create once",
+        "source": "https://learn.microsoft.com/en-us/azure/container-apps/billing#dynamic-sessions",
+        "checked": "2026-11-04"
+      },
+      "computers": [],
+      "prices": {
+        "1x2": {
+          "usd": 0.03,
+          "unfit": null
+        },
+        "2x4": {
+          "usd": 0.03,
+          "unfit": "max 1 vCPU"
+        },
+        "4x8": {
+          "usd": 0.03,
+          "unfit": "max 1 vCPU"
+        },
+        "8x16": {
+          "usd": 0.03,
+          "unfit": "max 1 vCPU"
+        },
+        "16x32": {
+          "usd": 0.03,
+          "unfit": "max 1 vCPU"
+        },
+        "32x128": {
+          "usd": 0.03,
+          "unfit": "max 1 vCPU"
+        }
+      }
+    },
+    {
+      "id": "beam",
+      "name": "Beam",
+      "local": false,
+      "capabilities": [
+        "custom-image"
+      ],
+      "limits": {
+        "maxVcpu": 30,
+        "maxMemoryGb": 64
+      },
+      "credentials": [
+        [
+          "BEAM_TOKEN",
+          "BEAM_WORKSPACE_ID"
+        ]
+      ],
+      "docs": "https://docs.beam.cloud/v2/reference/ts-sdk",
+      "pricing": {
+        "vcpuHour": 0.05,
+        "gbHour": 0.01,
+        "note": "per second, Performance tier (sandbox default); Developer plan $20/mo incl. $20 credits; GPUs billed separately",
+        "source": "https://www.beam.cloud/pricing",
+        "checked": "2026-11-04"
+      },
+      "computers": [],
+      "prices": {
+        "1x2": {
+          "usd": 0.07,
+          "unfit": null
+        },
+        "2x4": {
+          "usd": 0.14,
+          "unfit": null
+        },
+        "4x8": {
+          "usd": 0.28,
+          "unfit": null
+        },
+        "8x16": {
+          "usd": 0.56,
+          "unfit": null
+        },
+        "16x32": {
+          "usd": 1.12,
+          "unfit": null
+        },
+        "32x128": {
+          "usd": 2.88,
+          "unfit": "max 30 vCPU"
+        }
+      }
+    },
     {
       "id": "blaxel",
       "name": "Blaxel",
@@ -169,6 +450,59 @@
       }
     },
     {
+      "id": "codesandbox",
+      "name": "CodeSandbox SDK (Together)",
+      "local": false,
+      "capabilities": [
+        "pause",
+        "custom-image"
+      ],
+      "limits": {
+        "maxVcpu": 64,
+        "maxMemoryGb": 128
+      },
+      "credentials": [
+        [
+          "CSB_API_KEY"
+        ]
+      ],
+      "docs": "https://codesandbox.io/docs/sdk",
+      "pricing": {
+        "vcpuHour": 0.0743,
+        "gbHour": 0,
+        "note": "fixed VM tiers, credits at $0.01486 billed per started minute ($0.1486/h for 2 vCPU / 4 GB up to $4.7552/h for 64 / 128); free Build plan allows 10 concurrent VMs",
+        "source": "https://docs.together.ai/docs/together-code-sandbox-legacy",
+        "checked": "2026-11-04"
+      },
+      "computers": [],
+      "prices": {
+        "1x2": {
+          "usd": 0.1486,
+          "unfit": null
+        },
+        "2x4": {
+          "usd": 0.1486,
+          "unfit": null
+        },
+        "4x8": {
+          "usd": 0.2972,
+          "unfit": null
+        },
+        "8x16": {
+          "usd": 0.5944,
+          "unfit": null
+        },
+        "16x32": {
+          "usd": 1.1888,
+          "unfit": null
+        },
+        "32x128": {
+          "usd": 4.7552,
+          "unfit": null
+        }
+      }
+    },
+    {
       "id": "daytona",
       "name": "Daytona",
       "local": false,
@@ -220,6 +554,58 @@
         "32x128": {
           "usd": 3.6864,
           "unfit": "max 4 vCPU"
+        }
+      }
+    },
+    {
+      "id": "deno",
+      "name": "Deno Sandbox",
+      "local": false,
+      "capabilities": [
+        "custom-image"
+      ],
+      "limits": {
+        "maxVcpu": 2,
+        "maxMemoryGb": 4
+      },
+      "credentials": [
+        [
+          "DENO_DEPLOY_TOKEN"
+        ]
+      ],
+      "docs": "https://docs.deno.com/sandbox/",
+      "pricing": {
+        "vcpuHour": 0.1,
+        "gbHour": 0.025,
+        "note": "billed on CPU time, not wall clock (estimate assumes both vCPUs busy); fixed 2 vCPU, 0.75-4 GB, max 30 min lifetime; needs a paid Deno Deploy plan",
+        "source": "https://deno.com/sandbox",
+        "checked": "2026-11-04"
+      },
+      "computers": [],
+      "prices": {
+        "1x2": {
+          "usd": 0.25,
+          "unfit": null
+        },
+        "2x4": {
+          "usd": 0.3,
+          "unfit": null
+        },
+        "4x8": {
+          "usd": 0.4,
+          "unfit": "max 2 vCPU"
+        },
+        "8x16": {
+          "usd": 0.6,
+          "unfit": "max 2 vCPU"
+        },
+        "16x32": {
+          "usd": 1,
+          "unfit": "max 2 vCPU"
+        },
+        "32x128": {
+          "usd": 3.4,
+          "unfit": "max 2 vCPU"
         }
       }
     },
@@ -430,6 +816,59 @@
       }
     },
     {
+      "id": "freestyle",
+      "name": "Freestyle",
+      "local": false,
+      "capabilities": [
+        "pause",
+        "custom-image"
+      ],
+      "limits": {
+        "maxVcpu": 32,
+        "maxMemoryGb": 64
+      },
+      "credentials": [
+        [
+          "FREESTYLE_API_KEY"
+        ]
+      ],
+      "docs": "https://www.freestyle.sh/docs/vms",
+      "pricing": {
+        "vcpuHour": 0.04032,
+        "gbHour": 0.0129,
+        "note": "per second on allocated size; sizes fixed by base snapshot, disk included; free tier 200 vCPU-h + 400 GiB-h/mo; paused VMs bill storage only",
+        "source": "https://www.freestyle.sh/docs/vms/pricing-and-limits",
+        "checked": "2026-11-04"
+      },
+      "computers": [],
+      "prices": {
+        "1x2": {
+          "usd": 0.1336,
+          "unfit": null
+        },
+        "2x4": {
+          "usd": 0.1336,
+          "unfit": null
+        },
+        "4x8": {
+          "usd": 0.2672,
+          "unfit": null
+        },
+        "8x16": {
+          "usd": 0.5345,
+          "unfit": null
+        },
+        "16x32": {
+          "usd": 1.0689,
+          "unfit": null
+        },
+        "32x128": {
+          "usd": 2.1269,
+          "unfit": "max 64 GB memory"
+        }
+      }
+    },
+    {
       "id": "hopx",
       "name": "HOPX",
       "local": false,
@@ -479,6 +918,58 @@
         "32x128": {
           "usd": 3.6864,
           "unfit": "max 2 vCPU"
+        }
+      }
+    },
+    {
+      "id": "koyeb",
+      "name": "Koyeb Sandboxes",
+      "local": false,
+      "capabilities": [
+        "custom-image"
+      ],
+      "limits": {
+        "maxVcpu": 40,
+        "maxMemoryGb": 128
+      },
+      "credentials": [
+        [
+          "KOYEB_API_TOKEN"
+        ]
+      ],
+      "docs": "https://www.koyeb.com/docs/sandboxes",
+      "pricing": {
+        "vcpuHour": 0.0144,
+        "gbHour": 0,
+        "note": "per second; fixed Standard instance sizes (1 vCPU + 1 GB = $0.0144/h); sandboxes need a paid plan (Pro $29/mo); public preview",
+        "source": "https://www.koyeb.com/docs/reference/instances",
+        "checked": "2026-11-04"
+      },
+      "computers": [],
+      "prices": {
+        "1x2": {
+          "usd": 0.0288,
+          "unfit": null
+        },
+        "2x4": {
+          "usd": 0.0576,
+          "unfit": null
+        },
+        "4x8": {
+          "usd": 0.1152,
+          "unfit": null
+        },
+        "8x16": {
+          "usd": 0.2304,
+          "unfit": null
+        },
+        "16x32": {
+          "usd": 0.4608,
+          "unfit": null
+        },
+        "32x128": {
+          "usd": 1.8432,
+          "unfit": null
         }
       }
     },
@@ -700,6 +1191,59 @@
       }
     },
     {
+      "id": "novita",
+      "name": "Novita AI Agent Sandbox",
+      "local": false,
+      "capabilities": [
+        "pause",
+        "custom-image"
+      ],
+      "limits": {
+        "maxVcpu": 8,
+        "maxMemoryGb": 8
+      },
+      "credentials": [
+        [
+          "NOVITA_API_KEY"
+        ]
+      ],
+      "docs": "https://docs.novita.ai/guides/sandbox-overview",
+      "pricing": {
+        "vcpuHour": 0.03528,
+        "gbHour": 0.01152,
+        "note": "per second ($0.0000098/vCPU/s, $0.0000032/GiB/s); size comes from the template; paused = storage only",
+        "source": "https://docs.novita.ai/guides/sandbox-pricing",
+        "checked": "2026-11-04"
+      },
+      "computers": [],
+      "prices": {
+        "1x2": {
+          "usd": 0.0583,
+          "unfit": null
+        },
+        "2x4": {
+          "usd": 0.1166,
+          "unfit": null
+        },
+        "4x8": {
+          "usd": 0.2333,
+          "unfit": null
+        },
+        "8x16": {
+          "usd": 0.4666,
+          "unfit": "max 8 GB memory"
+        },
+        "16x32": {
+          "usd": 0.9331,
+          "unfit": "max 8 vCPU"
+        },
+        "32x128": {
+          "usd": 2.6035,
+          "unfit": "max 8 vCPU"
+        }
+      }
+    },
+    {
       "id": "runloop",
       "name": "Runloop",
       "local": false,
@@ -802,6 +1346,56 @@
         "32x128": {
           "usd": 4.16,
           "unfit": "max 4 vCPU"
+        }
+      }
+    },
+    {
+      "id": "upstash",
+      "name": "Upstash Box",
+      "local": false,
+      "capabilities": [],
+      "limits": {
+        "maxVcpu": 8,
+        "maxMemoryGb": 16
+      },
+      "credentials": [
+        [
+          "UPSTASH_BOX_API_KEY"
+        ]
+      ],
+      "docs": "https://upstash.com/docs/box/overall/ephemeral-box",
+      "pricing": {
+        "vcpuHour": 0.1,
+        "gbHour": 0,
+        "note": "billed per active CPU core-hour only (memory and idle time free); estimate assumes every core of the box busy; fixed sizes 2/4, 4/8, 8/16",
+        "source": "https://upstash.com/pricing/box",
+        "checked": "2026-11-04"
+      },
+      "computers": [],
+      "prices": {
+        "1x2": {
+          "usd": 0.2,
+          "unfit": null
+        },
+        "2x4": {
+          "usd": 0.2,
+          "unfit": null
+        },
+        "4x8": {
+          "usd": 0.4,
+          "unfit": null
+        },
+        "8x16": {
+          "usd": 0.8,
+          "unfit": null
+        },
+        "16x32": {
+          "usd": 0.8,
+          "unfit": "max 8 vCPU"
+        },
+        "32x128": {
+          "usd": 0.8,
+          "unfit": "max 8 vCPU"
         }
       }
     },

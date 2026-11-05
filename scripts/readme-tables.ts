@@ -1,13 +1,16 @@
 // Prints the README's price and credentials tables from the catalog, so the README can't drift.
 // Run: node --import tsx scripts/readme-tables.ts
-import { CATALOG, hourlyCost } from "../src/catalog.js";
+import { CATALOG, hourlyCost, unfit } from "../src/catalog.js";
 
-const rows = [...CATALOG].sort((a, b) => Number(!!a.local) - Number(!!b.local) || hourlyCost(a.id) - hourlyCost(b.id) || a.id.localeCompare(b.id));
+// Providers that can't take the default size sort after the ones that can, as the router skips them.
+const rank = (c: (typeof CATALOG)[number]) => (c.local ? 2 : unfit(c.id, {}) ? 1 : 0);
+const rows = [...CATALOG].sort((a, b) => rank(a) - rank(b) || hourlyCost(a.id) - hourlyCost(b.id) || a.id.localeCompare(b.id));
 
 console.log("| Provider | $/hr | Notes | Source |");
 console.log("|---|---|---|---|");
 for (const c of rows) {
-  const price = c.local ? "free" : `$${hourlyCost(c.id).toFixed(3)}`;
+  const why = unfit(c.id, {});
+  const price = c.local ? "free" : why ? `skipped (${why})` : `$${hourlyCost(c.id).toFixed(3)}`;
   const note = (c.pricing.note ?? "").replace(/\|/g, "/");
   console.log(`| ${c.name} | ${price} | ${note[0]?.toUpperCase() ?? ""}${note.slice(1)} | [pricing](${c.pricing.source}) |`);
 }

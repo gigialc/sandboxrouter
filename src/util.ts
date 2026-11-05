@@ -30,7 +30,9 @@ export async function optionalImport<T>(pkg: string, provider: string): Promise<
     return (await import(pkg)) as T;
   } catch (err) {
     const code = (err as NodeJS.ErrnoException).code;
-    if (code === "ERR_MODULE_NOT_FOUND" || code === "MODULE_NOT_FOUND") {
+    // Bundlers and test runners (Vite, esbuild) report a missing package without Node's error code.
+    const missing = /Cannot find (module|package)|Could not resolve|Failed to (resolve|load url)/.test(String((err as Error)?.message));
+    if (code === "ERR_MODULE_NOT_FOUND" || code === "MODULE_NOT_FOUND" || missing) {
       throw new Error(`${provider} needs the "${pkg}" package: npm i ${pkg}`);
     }
     throw err;

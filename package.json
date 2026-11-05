@@ -30,29 +30,40 @@
   },
   "keywords": [
     "ai-agents",
+    "alibaba-cloud",
     "android",
+    "aws-lambda",
+    "azure-container-apps",
+    "beam",
+    "bedrock-agentcore",
     "blaxel",
     "cloudflare",
     "code-execution",
+    "codesandbox",
     "computer-use",
     "daytona",
+    "deno",
     "docker",
     "e2b",
     "fly-sprites",
+    "freestyle",
     "hopx",
     "ios",
+    "koyeb",
     "limrun",
     "maritime",
     "mobilerun",
     "modal",
     "morph",
     "northflank",
+    "novita",
     "openrouter",
     "orgo",
     "router",
     "runloop",
     "sandbox",
     "tensorlake",
+    "upstash",
     "vercel-sandbox"
   ],
   "license": "MIT",
@@ -77,7 +88,11 @@
     "@aws-sdk/client-appstream": ">=3",
     "@smithy/signature-v4": ">=5",
     "@aws-crypto/sha256-js": ">=5",
-    "@aws-sdk/credential-provider-node": ">=3"
+    "@aws-sdk/credential-provider-node": ">=3",
+    "@beamcloud/beam-js": ">=1.1.6",
+    "@codesandbox/sdk": ">=2.4",
+    "@deno/sandbox": ">=0.13.0 <0.14.0",
+    "novita-sandbox": ">=2"
   },
   "peerDependenciesMeta": {
     "e2b": {
@@ -132,6 +147,18 @@
       "optional": true
     },
     "@aws-sdk/credential-provider-node": {
+      "optional": true
+    },
+    "@beamcloud/beam-js": {
+      "optional": true
+    },
+    "@codesandbox/sdk": {
+      "optional": true
+    },
+    "@deno/sandbox": {
+      "optional": true
+    },
+    "novita-sandbox": {
       "optional": true
     }
   },

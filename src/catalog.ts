@@ -1,4 +1,6 @@
 import type { Capability, ProviderId, SandboxSpec } from "./types.js";
+import { KOYEB_INSTANCES, koyebInstance } from "./providers/koyeb.js";
+import { FREESTYLE_SIZES, freestyleSize } from "./providers/freestyle.js";
 
 export interface ProviderInfo {
   id: ProviderId;
@@ -271,6 +273,186 @@ ENTRIES.push(
   },
 );
 
+ENTRIES.push(
+  {
+    id: "agentcore",
+    name: "Amazon Bedrock AgentCore Code Interpreter",
+    pricing: {
+      vcpuHour: 0.0895,
+      gbHour: 0.00945,
+      note: "per second; CPU billed on actual use (I/O wait free), memory on peak; fixed 2 vCPU / 8 GB session, this is the 100%-CPU price",
+      source: "https://aws.amazon.com/bedrock/agentcore/pricing/",
+      checked: "2026-11-04",
+    },
+    capabilities: [],
+    limits: { maxVcpu: 2, maxMemoryGb: 8 },
+    credentials: [
+      ["AGENTCORE_CODE_INTERPRETER_ID", "AWS_REGION", "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY"],
+      ["AGENTCORE_CODE_INTERPRETER_ID", "AWS_REGION", "AWS_PROFILE"],
+    ],
+    docs: "https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/code-interpreter-api-reference-examples.html",
+  },
+  {
+    id: "azure",
+    name: "Azure Container Apps dynamic sessions",
+    pricing: {
+      vcpuHour: 0.03,
+      gbHour: 0,
+      note: "flat $0.03 per session-hour (built-in Shell pools), billed per allocated session in 1-hour increments, East US; needs a session pool you create once",
+      source: "https://learn.microsoft.com/en-us/azure/container-apps/billing#dynamic-sessions",
+      checked: "2026-11-04",
+    },
+    capabilities: [],
+    // Per-session size isn't published; placeholder until measured with nproc / free.
+    limits: { maxVcpu: 1, maxMemoryGb: 2 },
+    credentials: [
+      ["AZURE_SESSIONS_POOL_ENDPOINT", "AZURE_SESSIONS_TOKEN"],
+      ["AZURE_SESSIONS_POOL_ENDPOINT", "AZURE_TENANT_ID", "AZURE_CLIENT_ID", "AZURE_CLIENT_SECRET"],
+    ],
+    docs: "https://learn.microsoft.com/en-us/azure/container-apps/sessions-tutorial-shell",
+  },
+  {
+    id: "lambda",
+    name: "AWS Lambda MicroVMs",
+    pricing: {
+      vcpuHour: 0.0997,
+      gbHour: 0.0132,
+      note: "us-east-1 ARM; billed on the image's baseline size (2 GB per vCPU) while running, per-second burst up to 4x; suspended VMs pay snapshot storage; needs a MicroVM image you build once",
+      source: "https://aws.amazon.com/lambda/pricing/",
+      checked: "2026-11-04",
+    },
+    capabilities: ["pause", "custom-image"],
+    limits: { maxVcpu: 4, maxMemoryGb: 8 },
+    credentials: [
+      ["AWS_REGION", "LAMBDA_MICROVM_IMAGE", "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY"],
+      ["AWS_REGION", "LAMBDA_MICROVM_IMAGE", "AWS_PROFILE"],
+    ],
+    docs: "https://docs.aws.amazon.com/lambda/latest/dg/lambda-microvms-guide.html",
+  },
+  {
+    id: "alibaba",
+    name: "Alibaba Cloud Agent Sandbox",
+    pricing: {
+      vcpuHour: 0.017856,
+      gbHour: 0.008928,
+      note: "per second; Default QoS class, Hong Kong and regions outside mainland China; disk above 15 GiB extra; size comes from the template (E2B-compatible API)",
+      source: "https://www.alibabacloud.com/help/en/agent-sandbox/product-overview/billing-overview",
+      checked: "2026-11-04",
+    },
+    capabilities: ["custom-image"],
+    // No published maximum; the default template is 2 vCPU / 2 GB, so bigger requests go elsewhere.
+    limits: { maxVcpu: 2, maxMemoryGb: 2 },
+    credentials: [["ALIBABA_SANDBOX_API_KEY"]],
+    docs: "https://www.alibabacloud.com/help/en/agent-sandbox/e2b-sdk-integration-parameter-description",
+  },
+  {
+    id: "beam",
+    name: "Beam",
+    pricing: {
+      vcpuHour: 0.05,
+      gbHour: 0.01,
+      note: "per second, Performance tier (sandbox default); Developer plan $20/mo incl. $20 credits; GPUs billed separately",
+      source: "https://www.beam.cloud/pricing",
+      checked: "2026-11-04",
+    },
+    capabilities: ["custom-image"],
+    // Not documented per sandbox: 30 is the Developer plan's concurrent vCPU cap.
+    limits: { maxVcpu: 30, maxMemoryGb: 64 },
+    credentials: [["BEAM_TOKEN", "BEAM_WORKSPACE_ID"]],
+    docs: "https://docs.beam.cloud/v2/reference/ts-sdk",
+  },
+  {
+    id: "codesandbox",
+    name: "CodeSandbox SDK (Together)",
+    pricing: {
+      vcpuHour: 0.0743,
+      gbHour: 0,
+      note: "fixed VM tiers, credits at $0.01486 billed per started minute ($0.1486/h for 2 vCPU / 4 GB up to $4.7552/h for 64 / 128); free Build plan allows 10 concurrent VMs",
+      source: "https://docs.together.ai/docs/together-code-sandbox-legacy",
+      checked: "2026-11-04",
+    },
+    capabilities: ["pause", "custom-image"],
+    limits: { maxVcpu: 64, maxMemoryGb: 128 },
+    credentials: [["CSB_API_KEY"]],
+    docs: "https://codesandbox.io/docs/sdk",
+  },
+  {
+    id: "deno",
+    name: "Deno Sandbox",
+    pricing: {
+      vcpuHour: 0.1,
+      gbHour: 0.025,
+      note: "billed on CPU time, not wall clock (estimate assumes both vCPUs busy); fixed 2 vCPU, 0.75-4 GB, max 30 min lifetime; needs a paid Deno Deploy plan",
+      source: "https://deno.com/sandbox",
+      checked: "2026-11-04",
+    },
+    capabilities: ["custom-image"],
+    limits: { maxVcpu: 2, maxMemoryGb: 4 },
+    credentials: [["DENO_DEPLOY_TOKEN"]],
+    docs: "https://docs.deno.com/sandbox/",
+  },
+  {
+    id: "freestyle",
+    name: "Freestyle",
+    pricing: {
+      vcpuHour: 0.04032,
+      gbHour: 0.0129,
+      note: "per second on allocated size; sizes fixed by base snapshot, disk included; free tier 200 vCPU-h + 400 GiB-h/mo; paused VMs bill storage only",
+      source: "https://www.freestyle.sh/docs/vms/pricing-and-limits",
+      checked: "2026-11-04",
+    },
+    capabilities: ["pause", "custom-image"],
+    limits: { maxVcpu: 32, maxMemoryGb: 64 },
+    credentials: [["FREESTYLE_API_KEY"]],
+    docs: "https://www.freestyle.sh/docs/vms",
+  },
+  {
+    id: "koyeb",
+    name: "Koyeb Sandboxes",
+    pricing: {
+      vcpuHour: 0.0144,
+      gbHour: 0,
+      note: "per second; fixed Standard instance sizes (1 vCPU + 1 GB = $0.0144/h); sandboxes need a paid plan (Pro $29/mo); public preview",
+      source: "https://www.koyeb.com/docs/reference/instances",
+      checked: "2026-11-04",
+    },
+    capabilities: ["custom-image"],
+    limits: { maxVcpu: 40, maxMemoryGb: 128 },
+    credentials: [["KOYEB_API_TOKEN"]],
+    docs: "https://www.koyeb.com/docs/sandboxes",
+  },
+  {
+    id: "novita",
+    name: "Novita AI Agent Sandbox",
+    pricing: {
+      vcpuHour: 0.03528,
+      gbHour: 0.01152,
+      note: "per second ($0.0000098/vCPU/s, $0.0000032/GiB/s); size comes from the template; paused = storage only",
+      source: "https://docs.novita.ai/guides/sandbox-pricing",
+      checked: "2026-11-04",
+    },
+    capabilities: ["pause", "custom-image"],
+    limits: { maxVcpu: 8, maxMemoryGb: 8 },
+    credentials: [["NOVITA_API_KEY"]],
+    docs: "https://docs.novita.ai/guides/sandbox-overview",
+  },
+  {
+    id: "upstash",
+    name: "Upstash Box",
+    pricing: {
+      vcpuHour: 0.1,
+      gbHour: 0,
+      note: "billed per active CPU core-hour only (memory and idle time free); estimate assumes every core of the box busy; fixed sizes 2/4, 4/8, 8/16",
+      source: "https://upstash.com/pricing/box",
+      checked: "2026-11-04",
+    },
+    capabilities: [],
+    limits: { maxVcpu: 8, maxMemoryGb: 16 },
+    credentials: [["UPSTASH_BOX_API_KEY"]],
+    docs: "https://upstash.com/docs/box/overall/ephemeral-box",
+  },
+);
+
 export const CATALOG: ProviderInfo[] = [...ENTRIES].sort((a, b) => a.name.localeCompare(b.name));
 
 /** Cloudflare only rents fixed instance types: https://developers.cloudflare.com/containers/platform/limits/ */
@@ -282,6 +464,33 @@ export const CLOUDFLARE_INSTANCES = [
   { name: "standard-3", vcpu: 2, memoryGb: 8 },
   { name: "standard-4", vcpu: 4, memoryGb: 12 },
 ] as const;
+
+/** CodeSandbox VM tiers: https://docs.together.ai/docs/together-code-sandbox-legacy (Pico only for requests within 1 vCPU / 1 GB). */
+export const CODESANDBOX_TIERS = [
+  { name: "Pico", vcpu: 1, memoryGb: 1, usdHour: 0.0743 },
+  { name: "Nano", vcpu: 2, memoryGb: 4, usdHour: 0.1486 },
+  { name: "Micro", vcpu: 4, memoryGb: 8, usdHour: 0.2972 },
+  { name: "Small", vcpu: 8, memoryGb: 16, usdHour: 0.5944 },
+  { name: "Medium", vcpu: 16, memoryGb: 32, usdHour: 1.1888 },
+  { name: "Large", vcpu: 32, memoryGb: 64, usdHour: 2.3776 },
+  { name: "XLarge", vcpu: 64, memoryGb: 128, usdHour: 4.7552 },
+] as const;
+
+/** Smallest tier with at least the requested vCPUs and memory (the largest if nothing fits). */
+export function codesandboxTier(vcpu: number, memoryGb: number) {
+  return CODESANDBOX_TIERS.find((t) => t.vcpu >= vcpu && t.memoryGb >= memoryGb) ?? CODESANDBOX_TIERS[CODESANDBOX_TIERS.length - 1];
+}
+
+/** Upstash Box sizes (https://upstash.com/docs/box/overall/how-it-works.md#box-size). */
+export const UPSTASH_SIZES = [
+  { size: "small", vcpu: 2, memoryGb: 4 },
+  { size: "medium", vcpu: 4, memoryGb: 8 },
+  { size: "large", vcpu: 8, memoryGb: 16 },
+] as const;
+
+export function upstashSize(vcpu: number, memoryGb: number) {
+  return UPSTASH_SIZES.find((s) => s.vcpu >= vcpu && s.memoryGb >= memoryGb) ?? UPSTASH_SIZES[UPSTASH_SIZES.length - 1];
+}
 
 /** Boat's fixed machine sizes and hourly prices: https://docs.boat.dev/machines.md */
 export const BOAT_SIZES = [
@@ -325,6 +534,20 @@ export function hourlyCost(id: ProviderId, spec: SandboxSpec = {}): number {
     const t = cloudflareInstance(vcpu, mem);
     return t.vcpu * pricing.vcpuHour + t.memoryGb * pricing.gbHour;
   }
+  // Azure bills a flat rate per allocated session.
+  if (id === "azure") return pricing.vcpuHour;
+  // Lambda MicroVMs bill the smallest baseline image size that fits (2 GB per vCPU).
+  if (id === "lambda") {
+    const size = [0.5, 1, 2, 4, 8].find((s) => s >= Math.max(mem, vcpu * 2)) ?? 8;
+    return size * pricing.gbHour + (size / 2) * pricing.vcpuHour;
+  }
+  if (id === "codesandbox") return codesandboxTier(vcpu, mem).usdHour;
+  if (id === "koyeb") return (koyebInstance(vcpu, mem) ?? KOYEB_INSTANCES[KOYEB_INSTANCES.length - 1]).usdHour;
+  if (id === "freestyle") return (freestyleSize(vcpu, mem) ?? FREESTYLE_SIZES[FREESTYLE_SIZES.length - 1]).usdHour;
+  // Upstash bills active core-hours on the box size that fits; this assumes every core is busy.
+  if (id === "upstash") return upstashSize(vcpu, mem).vcpu * pricing.vcpuHour;
+  // Deno bills CPU time on a fixed 2 vCPU box, with at least 768 MB of memory.
+  if (id === "deno") return 2 * pricing.vcpuHour + Math.max(mem, 0.75) * pricing.gbHour;
   // Morph bills whole MCUs: the larger of vCPUs and 4 GB blocks of memory.
   if (id === "morph") return Math.max(vcpu, Math.ceil(mem / 4)) * pricing.vcpuHour;
   return vcpu * pricing.vcpuHour + mem * pricing.gbHour;

@@ -14,7 +14,18 @@ export type ProviderId =
   | "northflank"
   | "boat"
   | "exedev"
-  | "docker";
+  | "docker"
+  | "novita"
+  | "alibaba"
+  | "upstash"
+  | "koyeb"
+  | "freestyle"
+  | "deno"
+  | "beam"
+  | "codesandbox"
+  | "azure"
+  | "agentcore"
+  | "lambda";
 
 /** Things a caller can require of a provider. The router skips providers that lack one. */
 export type Capability =
