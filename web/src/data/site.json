@@ -1,6 +1,6 @@
 {
   "version": "0.2.0",
-  "generatedAt": "2026-11-05T17:11:05.146Z",
+  "generatedAt": "2026-11-05T18:21:50.934Z",
   "shapes": [
     "1x2",
     "2x4",
@@ -35,6 +35,7 @@
         "source": "https://www.agent37.com/docs/agents-api/billing",
         "checked": "2026-11-05"
       },
+      "check": null,
       "computers": [],
       "prices": {
         "1x2": {
@@ -87,6 +88,7 @@
         "source": "https://www.alibabacloud.com/help/en/agent-sandbox/product-overview/billing-overview",
         "checked": "2026-11-05"
       },
+      "check": null,
       "computers": [],
       "prices": {
         "1x2": {
@@ -145,6 +147,7 @@
         "source": "https://aws.amazon.com/bedrock/agentcore/pricing/",
         "checked": "2026-11-04"
       },
+      "check": null,
       "computers": [],
       "prices": {
         "1x2": {
@@ -206,6 +209,7 @@
         "source": "https://aws.amazon.com/lambda/pricing/",
         "checked": "2026-11-05"
       },
+      "check": null,
       "computers": [],
       "prices": {
         "1x2": {
@@ -263,6 +267,7 @@
         "source": "https://learn.microsoft.com/en-us/azure/container-apps/billing#dynamic-sessions",
         "checked": "2026-11-04"
       },
+      "check": null,
       "computers": [],
       "prices": {
         "1x2": {
@@ -316,6 +321,7 @@
         "source": "https://www.beam.cloud/pricing",
         "checked": "2026-11-04"
       },
+      "check": null,
       "computers": [],
       "prices": {
         "1x2": {
@@ -370,6 +376,7 @@
         "source": "https://blaxel.ai/pricing",
         "checked": "2026-11-04"
       },
+      "check": null,
       "computers": [],
       "prices": {
         "1x2": {
@@ -423,6 +430,7 @@
         "source": "https://docs.boat.dev/pricing.md",
         "checked": "2026-11-04"
       },
+      "check": null,
       "computers": [],
       "prices": {
         "1x2": {
@@ -474,6 +482,7 @@
         "source": "https://developers.cloudflare.com/containers/platform/pricing/",
         "checked": "2026-11-05"
       },
+      "check": null,
       "computers": [],
       "prices": {
         "1x2": {
@@ -527,6 +536,7 @@
         "source": "https://docs.together.ai/docs/together-code-sandbox-legacy",
         "checked": "2026-11-05"
       },
+      "check": null,
       "computers": [],
       "prices": {
         "1x2": {
@@ -580,6 +590,7 @@
         "source": "https://www.daytona.io/pricing",
         "checked": "2026-11-04"
       },
+      "check": null,
       "computers": [
         "linux"
       ],
@@ -634,6 +645,7 @@
         "source": "https://docs.dedaluslabs.ai/dcs/dm/pricing",
         "checked": "2026-11-05"
       },
+      "check": null,
       "computers": [],
       "prices": {
         "1x2": {
@@ -686,6 +698,7 @@
         "source": "https://deno.com/sandbox",
         "checked": "2026-11-04"
       },
+      "check": null,
       "computers": [],
       "prices": {
         "1x2": {
@@ -734,6 +747,30 @@
         "note": "runs on your own machine; free, but shares your kernel, so weaker isolation than a cloud micro-VM",
         "source": "https://docs.docker.com/engine/",
         "checked": "2026-11-04"
+      },
+      "check": {
+        "date": "2026-11-05T18:17:55.354Z",
+        "version": "0.2.0",
+        "passed": 13,
+        "failed": [],
+        "skipped": [],
+        "notRun": [],
+        "notes": [],
+        "steps": {
+          "create": "pass",
+          "exec: stdout, stderr, exit code": "pass",
+          "exec: env and cwd": "pass",
+          "exec: UTF-8 output": "pass",
+          "exec: streaming": "pass",
+          "files: binary round-trip": "pass",
+          "files: 1 MB round-trip": "pass",
+          "files: missing file is an error": "pass",
+          "files: visible to commands": "pass",
+          "exec: command timeout": "pass",
+          "pause and resume": "pass",
+          "kill": "pass",
+          "killed sandbox is gone": "pass"
+        }
       },
       "computers": [],
       "prices": {
@@ -788,6 +825,7 @@
         "source": "https://e2b.dev/pricing",
         "checked": "2026-11-04"
       },
+      "check": null,
       "computers": [
         "linux"
       ],
@@ -842,6 +880,7 @@
         "source": "https://exe.dev/docs/standalone-vms.md",
         "checked": "2026-11-05"
       },
+      "check": null,
       "computers": [],
       "prices": {
         "1x2": {
@@ -892,6 +931,7 @@
         "source": "https://fly.io/sprites",
         "checked": "2026-11-04"
       },
+      "check": null,
       "computers": [],
       "prices": {
         "1x2": {
@@ -945,6 +985,7 @@
         "source": "https://www.freestyle.sh/docs/vms/pricing-and-limits",
         "checked": "2026-11-05"
       },
+      "check": null,
       "computers": [],
       "prices": {
         "1x2": {
@@ -998,6 +1039,7 @@
         "source": "https://hopx.ai/pricing",
         "checked": "2026-11-04"
       },
+      "check": null,
       "computers": [],
       "prices": {
         "1x2": {
@@ -1051,6 +1093,7 @@
         "source": "https://instabox.sh/docs/pricing.md",
         "checked": "2026-11-05"
       },
+      "check": null,
       "computers": [],
       "prices": {
         "1x2": {
@@ -1103,6 +1146,7 @@
         "source": "https://www.koyeb.com/docs/reference/instances",
         "checked": "2026-11-04"
       },
+      "check": null,
       "computers": [],
       "prices": {
         "1x2": {
@@ -1156,6 +1200,7 @@
         "source": "https://maritime.sh/pricing",
         "checked": "2026-11-05"
       },
+      "check": null,
       "computers": [
         "linux",
         "windows",
@@ -1214,6 +1259,7 @@
         "source": "https://modal.com/pricing",
         "checked": "2026-11-05"
       },
+      "check": null,
       "computers": [],
       "prices": {
         "1x2": {
@@ -1267,6 +1313,7 @@
         "source": "https://cloud.morph.so/web/pricing",
         "checked": "2026-11-04"
       },
+      "check": null,
       "computers": [],
       "prices": {
         "1x2": {
@@ -1320,6 +1367,7 @@
         "source": "https://northflank.com/pricing",
         "checked": "2026-11-04"
       },
+      "check": null,
       "computers": [],
       "prices": {
         "1x2": {
@@ -1373,6 +1421,7 @@
         "source": "https://docs.novita.ai/guides/sandbox-pricing",
         "checked": "2026-11-04"
       },
+      "check": null,
       "computers": [],
       "prices": {
         "1x2": {
@@ -1426,6 +1475,7 @@
         "source": "https://openscale.so/sandboxes",
         "checked": "2026-11-05"
       },
+      "check": null,
       "computers": [],
       "prices": {
         "1x2": {
@@ -1479,6 +1529,7 @@
         "source": "https://www.runloop.ai/pricing",
         "checked": "2026-11-04"
       },
+      "check": null,
       "computers": [],
       "prices": {
         "1x2": {
@@ -1532,6 +1583,7 @@
         "source": "https://superserve.ai/pricing",
         "checked": "2026-11-05"
       },
+      "check": null,
       "computers": [],
       "prices": {
         "1x2": {
@@ -1585,6 +1637,7 @@
         "source": "https://www.tensorlake.ai/pricing",
         "checked": "2026-11-04"
       },
+      "check": null,
       "computers": [],
       "prices": {
         "1x2": {
@@ -1635,6 +1688,7 @@
         "source": "https://upstash.com/pricing/box",
         "checked": "2026-11-04"
       },
+      "check": null,
       "computers": [],
       "prices": {
         "1x2": {
@@ -1690,6 +1744,7 @@
         "source": "https://vercel.com/docs/vercel-sandbox/pricing",
         "checked": "2026-11-05"
       },
+      "check": null,
       "computers": [],
       "prices": {
         "1x2": {
@@ -1718,6 +1773,21 @@
         }
       }
     }
+  ],
+  "checkSteps": [
+    "create",
+    "exec: stdout, stderr, exit code",
+    "exec: env and cwd",
+    "exec: UTF-8 output",
+    "exec: streaming",
+    "files: binary round-trip",
+    "files: 1 MB round-trip",
+    "files: missing file is an error",
+    "files: visible to commands",
+    "exec: command timeout",
+    "pause and resume",
+    "kill",
+    "killed sandbox is gone"
   ],
   "desktops": [
     {

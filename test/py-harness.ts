@@ -4,7 +4,7 @@ import { createApp } from "../src/server.js";
 import { ALL, FakeProvider } from "./fake.js";
 
 const providers = ALL.map((id) => new FakeProvider(id, id === "maritime" ? { fail: "429 concurrency_limit" } : {}));
-const app = createApp(new Router({ providers }), "pytok");
+const app = createApp(new Router({ providers, ledger: false }), "pytok");
 app.listen(0, "127.0.0.1", () => {
   console.log(`PORT=${(app.address() as { port: number }).port}`);
 });

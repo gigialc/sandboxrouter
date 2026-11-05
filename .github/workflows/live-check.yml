@@ -1,0 +1,142 @@
+name: live-check
+# Nightly: run the 13-step real-account check on every provider that has keys in this repo's
+# secrets (npm run secrets:push uploads them), save the results, and kill anything left behind.
+# Providers without keys are skipped, so with no secrets this only checks Docker on the runner.
+on:
+  schedule:
+    - cron: "23 6 * * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: live-check
+  cancel-in-progress: false
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - run: npm ci
+      # Provider SDKs that are peer dependencies but not dev dependencies.
+      - run: npm i --no-save @beamcloud/beam-js @codesandbox/sdk @deno/sandbox novita-sandbox
+        continue-on-error: true
+      - id: check
+        name: Check every configured provider
+        continue-on-error: true
+        run: npx tsx src/cli.ts check --all --save
+        env:
+          AGENT37_API_KEY: ${{ secrets.AGENT37_API_KEY }}
+          AGENTCORE_CODE_INTERPRETER_ID: ${{ secrets.AGENTCORE_CODE_INTERPRETER_ID }}
+          ALIBABA_SANDBOX_API_KEY: ${{ secrets.ALIBABA_SANDBOX_API_KEY }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          AZURE_SESSIONS_POOL_ENDPOINT: ${{ secrets.AZURE_SESSIONS_POOL_ENDPOINT }}
+          AZURE_SESSIONS_TOKEN: ${{ secrets.AZURE_SESSIONS_TOKEN }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          BEAM_TOKEN: ${{ secrets.BEAM_TOKEN }}
+          BEAM_WORKSPACE_ID: ${{ secrets.BEAM_WORKSPACE_ID }}
+          BL_API_KEY: ${{ secrets.BL_API_KEY }}
+          BL_WORKSPACE: ${{ secrets.BL_WORKSPACE }}
+          BOAT_API_KEY: ${{ secrets.BOAT_API_KEY }}
+          CLOUDFLARE_SANDBOX_TOKEN: ${{ secrets.CLOUDFLARE_SANDBOX_TOKEN }}
+          CLOUDFLARE_SANDBOX_URL: ${{ secrets.CLOUDFLARE_SANDBOX_URL }}
+          CSB_API_KEY: ${{ secrets.CSB_API_KEY }}
+          DAYTONA_API_KEY: ${{ secrets.DAYTONA_API_KEY }}
+          DEDALUS_API_KEY: ${{ secrets.DEDALUS_API_KEY }}
+          DENO_DEPLOY_TOKEN: ${{ secrets.DENO_DEPLOY_TOKEN }}
+          E2B_API_KEY: ${{ secrets.E2B_API_KEY }}
+          EXE_TOKEN: ${{ secrets.EXE_TOKEN }}
+          FREESTYLE_API_KEY: ${{ secrets.FREESTYLE_API_KEY }}
+          HOPX_API_KEY: ${{ secrets.HOPX_API_KEY }}
+          INSTABOX_API_KEY: ${{ secrets.INSTABOX_API_KEY }}
+          KOYEB_API_TOKEN: ${{ secrets.KOYEB_API_TOKEN }}
+          LAMBDA_MICROVM_IMAGE: ${{ secrets.LAMBDA_MICROVM_IMAGE }}
+          MARITIME_API_KEY: ${{ secrets.MARITIME_API_KEY }}
+          MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
+          MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}
+          MORPH_API_KEY: ${{ secrets.MORPH_API_KEY }}
+          NORTHFLANK_API_TOKEN: ${{ secrets.NORTHFLANK_API_TOKEN }}
+          NORTHFLANK_PROJECT_ID: ${{ secrets.NORTHFLANK_PROJECT_ID }}
+          NOVITA_API_KEY: ${{ secrets.NOVITA_API_KEY }}
+          OPENSCALE_API_KEY: ${{ secrets.OPENSCALE_API_KEY }}
+          RUNLOOP_API_KEY: ${{ secrets.RUNLOOP_API_KEY }}
+          SPRITES_TOKEN: ${{ secrets.SPRITES_TOKEN }}
+          SUPERSERVE_API_KEY: ${{ secrets.SUPERSERVE_API_KEY }}
+          TENSORLAKE_API_KEY: ${{ secrets.TENSORLAKE_API_KEY }}
+          UPSTASH_BOX_API_KEY: ${{ secrets.UPSTASH_BOX_API_KEY }}
+          VERCEL_OIDC_TOKEN: ${{ secrets.VERCEL_OIDC_TOKEN }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      - name: Kill anything the check left running
+        if: always()
+        run: npx tsx src/cli.ts ls && npx tsx src/cli.ts gc --all
+        env:
+          AGENT37_API_KEY: ${{ secrets.AGENT37_API_KEY }}
+          AGENTCORE_CODE_INTERPRETER_ID: ${{ secrets.AGENTCORE_CODE_INTERPRETER_ID }}
+          ALIBABA_SANDBOX_API_KEY: ${{ secrets.ALIBABA_SANDBOX_API_KEY }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          AZURE_SESSIONS_POOL_ENDPOINT: ${{ secrets.AZURE_SESSIONS_POOL_ENDPOINT }}
+          AZURE_SESSIONS_TOKEN: ${{ secrets.AZURE_SESSIONS_TOKEN }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          BEAM_TOKEN: ${{ secrets.BEAM_TOKEN }}
+          BEAM_WORKSPACE_ID: ${{ secrets.BEAM_WORKSPACE_ID }}
+          BL_API_KEY: ${{ secrets.BL_API_KEY }}
+          BL_WORKSPACE: ${{ secrets.BL_WORKSPACE }}
+          BOAT_API_KEY: ${{ secrets.BOAT_API_KEY }}
+          CLOUDFLARE_SANDBOX_TOKEN: ${{ secrets.CLOUDFLARE_SANDBOX_TOKEN }}
+          CLOUDFLARE_SANDBOX_URL: ${{ secrets.CLOUDFLARE_SANDBOX_URL }}
+          CSB_API_KEY: ${{ secrets.CSB_API_KEY }}
+          DAYTONA_API_KEY: ${{ secrets.DAYTONA_API_KEY }}
+          DEDALUS_API_KEY: ${{ secrets.DEDALUS_API_KEY }}
+          DENO_DEPLOY_TOKEN: ${{ secrets.DENO_DEPLOY_TOKEN }}
+          E2B_API_KEY: ${{ secrets.E2B_API_KEY }}
+          EXE_TOKEN: ${{ secrets.EXE_TOKEN }}
+          FREESTYLE_API_KEY: ${{ secrets.FREESTYLE_API_KEY }}
+          HOPX_API_KEY: ${{ secrets.HOPX_API_KEY }}
+          INSTABOX_API_KEY: ${{ secrets.INSTABOX_API_KEY }}
+          KOYEB_API_TOKEN: ${{ secrets.KOYEB_API_TOKEN }}
+          LAMBDA_MICROVM_IMAGE: ${{ secrets.LAMBDA_MICROVM_IMAGE }}
+          MARITIME_API_KEY: ${{ secrets.MARITIME_API_KEY }}
+          MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
+          MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}
+          MORPH_API_KEY: ${{ secrets.MORPH_API_KEY }}
+          NORTHFLANK_API_TOKEN: ${{ secrets.NORTHFLANK_API_TOKEN }}
+          NORTHFLANK_PROJECT_ID: ${{ secrets.NORTHFLANK_PROJECT_ID }}
+          NOVITA_API_KEY: ${{ secrets.NOVITA_API_KEY }}
+          OPENSCALE_API_KEY: ${{ secrets.OPENSCALE_API_KEY }}
+          RUNLOOP_API_KEY: ${{ secrets.RUNLOOP_API_KEY }}
+          SPRITES_TOKEN: ${{ secrets.SPRITES_TOKEN }}
+          SUPERSERVE_API_KEY: ${{ secrets.SUPERSERVE_API_KEY }}
+          TENSORLAKE_API_KEY: ${{ secrets.TENSORLAKE_API_KEY }}
+          UPSTASH_BOX_API_KEY: ${{ secrets.UPSTASH_BOX_API_KEY }}
+          VERCEL_OIDC_TOKEN: ${{ secrets.VERCEL_OIDC_TOKEN }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      - name: Save results when they changed
+        if: always()
+        run: |
+          # Commit only when a step's result changed, not for every new date.
+          if ! node --import tsx scripts/conformance-changed.ts; then echo "no result changed"; exit 0; fi
+          node --import tsx scripts/readme-tables.ts --write
+          npm run site:data
+          git config user.name "live-check"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add results/conformance README.md web/src/data/site.json
+          git commit -m "live-check: results for $(date -u +%F)"
+          git push
+      - name: Fail the run if a provider failed
+        if: steps.check.outcome == 'failure'
+        run: exit 1

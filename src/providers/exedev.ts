@@ -106,13 +106,19 @@ export class ExeDevProvider implements Provider {
       flags.push(`--image=${image}`);
     }
     const vm = await this.lobby<{ vm_name?: string }>(`new ${flags.join(" ")}`);
-    const box = new ExeDevSandbox(this, vm.vm_name ?? name, spec.env);
+    const vmName = vm.vm_name ?? name;
+    const box = new ExeDevSandbox(this, vmName, spec.env);
     try {
       await box.waitForSsh();
     } catch (err) {
       await box.kill().catch(() => {});
       throw err;
     }
+    // exe.dev has no lifetime setting, so the VM powers itself off when spec.timeoutMinutes runs out
+    // (a stopped VM bills disk only; kill() or `sandboxrouter gc` deletes it). Best effort: it needs
+    // root or passwordless sudo in the image (not yet confirmed on a real exe.dev VM).
+    const secs = Math.max(60, Math.round((spec.timeoutMinutes ?? 30) * 60));
+    await this.ssh(vmName, `setsid nohup sh -c 'sleep ${secs}; sudo -n poweroff || poweroff' > /dev/null 2>&1 < /dev/null &`).catch(() => {});
     return box;
   }
 

@@ -1,6 +1,23 @@
 import type { Router, RoutedSandbox } from "./router.js";
 import type { ProviderId, SandboxSpec } from "./types.js";
 
+/** Every step `check` runs, in order. Each provider's saved report is scored against this list. */
+export const CHECK_STEPS = [
+  "create",
+  "exec: stdout, stderr, exit code",
+  "exec: env and cwd",
+  "exec: UTF-8 output",
+  "exec: streaming",
+  "files: binary round-trip",
+  "files: 1 MB round-trip",
+  "files: missing file is an error",
+  "files: visible to commands",
+  "exec: command timeout",
+  "pause and resume",
+  "kill",
+  "killed sandbox is gone",
+] as const;
+
 export type CheckStatus = "pass" | "fail" | "skip" | "info";
 
 export interface CheckResult {
@@ -70,6 +87,12 @@ export async function checkProvider(
       if (r.stdout.trim() !== "v1 /tmp") throw new Error(`expected "v1 /tmp", got ${JSON.stringify(r.stdout)}`);
     });
 
+    await step("exec: UTF-8 output", async () => {
+      // "café ✓" as octal escapes, so the command itself is plain ASCII.
+      const r = await box.exec("printf 'caf\\303\\251 \\342\\234\\223'");
+      if (r.stdout !== "café ✓") throw new Error(`expected "café ✓", got ${JSON.stringify(r.stdout)}`);
+    });
+
     await step("exec: streaming", async () => {
       const t0 = Date.now();
       let first = -1;
@@ -93,6 +116,26 @@ export async function checkProvider(
       await box.writeFile(path, bytes);
       const back = await box.readFile(path);
       if (back.length !== bytes.length || back.some((b, i) => b !== bytes[i])) throw new Error(`read back ${back.length} bytes, content differs`);
+    });
+
+    await step("files: 1 MB round-trip", async () => {
+      // Big enough to cross every adapter's chunking; a pattern that isn't all one repeating byte.
+      const big = new Uint8Array(1024 * 1024).map((_, i) => (i * 31 + (i >> 10)) % 256);
+      await box.writeFile("/tmp/sbr-check/big.bin", big);
+      const back = await box.readFile("/tmp/sbr-check/big.bin");
+      if (back.length !== big.length) throw new Error(`read back ${back.length} of ${big.length} bytes`);
+      const at = back.findIndex((b, i) => b !== big[i]);
+      if (at >= 0) throw new Error(`content differs from byte ${at}`);
+    });
+
+    await step("files: missing file is an error", async () => {
+      let got: Uint8Array;
+      try {
+        got = await box.readFile("/tmp/sbr-check/does-not-exist");
+      } catch {
+        return;
+      }
+      throw new Error(`readFile of a missing file returned ${got.length} bytes instead of throwing`);
     });
 
     await step("files: visible to commands", async () => {

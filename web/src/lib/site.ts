@@ -13,6 +13,17 @@ export interface SiteProvider {
   pricing: { vcpuHour: number; gbHour: number; note?: string; source: string; checked: string };
   computers: string[];
   prices: Record<Shape, { usd: number; unfit: string | null }>;
+  /** The last saved real-account `check` run, or null when none has been saved. */
+  check: null | {
+    date: string;
+    version: string;
+    passed: number;
+    failed: { step: string; detail?: string }[];
+    skipped: string[];
+    notRun: string[];
+    notes: { step: string; detail?: string }[];
+    steps: Record<string, "pass" | "fail" | "skip" | "info" | "not run">;
+  };
 }
 
 export interface LeaderRow {
@@ -44,6 +55,7 @@ export const site = data as unknown as {
   generatedAt: string;
   shapes: Shape[];
   providers: SiteProvider[];
+  checkSteps: string[];
   desktops: SiteDesktop[];
   leaderboard: LeaderRow[];
   submissions: { date: string; label: string | null; platform: string; runs: number; providers: number }[];

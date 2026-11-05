@@ -23,20 +23,20 @@ Node 20+ (CI uses 22; the Fly Sprites SDK wants 24). No provider accounts are ne
 
 ```bash
 export KOYEB_API_TOKEN=...                       # the env vars for that provider: `npx tsx src/cli.ts providers`
-npx tsx src/cli.ts check --provider koyeb        # 10 real steps; any FAIL line is a bug
+npx tsx src/cli.ts check --provider koyeb --save # 13 real steps; any FAIL line is a bug
 npx tsx src/cli.ts bench --provider koyeb --share --label "your city"   # cold starts, writes results/*.json
 ```
 
 Maintainers: `npm run secrets:push -- --init` writes a gitignored `.env.providers` with every key name; fill it in and run `npm run secrets:push` to load the keys into the repo's Actions secrets for the nightly tests.
 
-Open an issue with the `check` output (it never prints your keys), and a PR with the `results/` file if you ran `bench --share`. Afterwards, check the provider's dashboard that nothing is left running.
+Open an issue with the `check` output (it never prints your keys), and a PR with `results/conformance/<id>.json` (from `--save`) and the `results/` file if you ran `bench --share`. `npx tsx src/cli.ts gc --all` kills anything a crashed run left behind. Afterwards, check the provider's dashboard that nothing is left running.
 
 ## Fixing a price
 
 Prices live in [`src/catalog.ts`](src/catalog.ts): `vcpuHour`, `gbHour`, a short `note`, the `source` URL and the date you `checked` it. Fixed-size providers also have a rule in `hourlyCost()`. Change the numbers, set `checked` to today, link the page in the PR, then regenerate the generated parts:
 
 ```bash
-node --import tsx scripts/readme-tables.ts    # paste the two tables into README.md (Prices, Env)
+node --import tsx scripts/readme-tables.ts --write   # regenerate the README tables (Prices, Env, Compatibility)
 npm run site:data                             # web/src/data/site.json
 ```
 

@@ -84,6 +84,39 @@ await sbx.kill();`;
         </section>
       </div>
 
+      <section className="mt-12">
+        <h2 className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted">Real-account check</h2>
+        {p.check ? (
+          <>
+            <p className="mt-4 text-[13px] text-ink-2">
+              {p.check.passed} of {site.checkSteps.length - p.check.skipped.length} steps passed on a real account, {p.check.date.slice(0, 10)} (v
+              {p.check.version}).
+            </p>
+            <ul className="mt-3 grid gap-x-10 text-[13px] sm:grid-cols-2">
+              {site.checkSteps.map((step) => {
+                const st = p.check!.steps[step];
+                const why = [...p.check!.failed, ...p.check!.notes].find((f) => f.step === step)?.detail;
+                const mark = { pass: ["passed", "text-ok"], info: ["passed, with a note", "text-ok"], fail: ["failed", "text-bad"], skip: ["n/a", "text-muted"], "not run": ["not run", "text-muted"] }[st];
+                return (
+                  <li key={step} className="flex gap-4 border-t border-line py-2.5">
+                    <span className="flex-1 text-ink-2">
+                      {step}
+                      {why && <span className="block text-[12px] text-muted">{why}</span>}
+                    </span>
+                    <span className={`shrink-0 font-mono text-[12px] ${mark[1]}`}>{mark[0]}</span>
+                  </li>
+                );
+              })}
+            </ul>
+          </>
+        ) : (
+          <p className="mt-4 max-w-2xl text-[13px] leading-6 text-ink-2">
+            Not run against a real account yet. The adapter is tested against a mock of {p.name}&apos;s API; this fills in when someone runs{" "}
+            <code className="font-mono text-[12px]">sandboxrouter check --provider {p.id} --save</code> with real keys.
+          </p>
+        )}
+      </section>
+
       <div className="mt-12 grid gap-4">
         <CodeBlock title="setup" code={setup} />
         <CodeBlock title={`use ${p.name}`} code={code} />

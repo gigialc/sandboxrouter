@@ -9,7 +9,9 @@ All notable changes. Versions follow [semver](https://semver.org/); while the ve
   - Koyeb, Freestyle, Deno Sandbox, Beam, CodeSandbox (Together), Upstash Box, Novita, Alibaba Cloud, Azure Container Apps sessions, AWS Bedrock AgentCore (opt-in) and AWS Lambda MicroVMs.
   - YC sandbox startups: Agent37, InstaBox, OpenScale, Dedalus Machines (private beta) and Superserve.
 - Desktops and phones from 6 more providers, routed by price per OS (Linux, Windows, Android, iOS): E2B Desktop, Daytona, Orgo, Mobilerun, Limrun and AWS WorkSpaces agent access.
-- `sandboxrouter check --provider <id>`, plus `checkProvider()` from code: a 10-step test of one provider against a real account (output, env and cwd, streaming, binary files, timeout, pause and resume, kill).
+- `sandboxrouter check --provider <id>`, plus `checkProvider()` from code: a 13-step test of one provider against a real account (output, env and cwd, UTF-8, streaming, binary and 1 MB files, missing-file errors, timeout, pause and resume, kill). `check --all --save` runs every configured provider and saves results/conformance/<id>.json, which the README's Compatibility table and each provider's page on the site are built from. A nightly workflow re-runs it with the repo's provider keys.
+- Leak cleanup: routers record the sandboxes they start in a local ledger (~/.sandboxrouter/sandboxes.jsonl; `ledger: false` or SANDBOXROUTER_LEDGER=off to turn it off). `sandboxrouter ls` lists the ones never killed, with cost so far; `sandboxrouter gc` kills those past their lifetime (`--all`, `--older-than`, `--dry-run`). `sandboxrouter run` kills its sandbox on Ctrl-C.
+- exe.dev: the VM powers itself off when its requested lifetime runs out (best effort), since exe.dev has no lifetime setting.
 - Contributing guide, security policy, code of conduct, issue and PR templates, and a weekly price-page check.
 
 ### Changed
@@ -17,6 +19,7 @@ All notable changes. Versions follow [semver](https://semver.org/); while the ve
 - Website: full-width layout, white page, black ink.
 
 ### Fixed
+- Modal: the adapter asked for twice the CPU it meant to (Modal counts physical cores, 1 core = 2 vCPUs).
 - Deno: a timed-out command no longer hangs when its child processes keep stdout open.
 - Optional SDKs that aren't installed are reported as missing under bundlers (Vite, esbuild) too.
 

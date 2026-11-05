@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { checkProvider } from "../src/check.js";
+import { CHECK_STEPS, checkProvider } from "../src/check.js";
 import { Router } from "../src/router.js";
 import type { ExecOptions, ExecResult, Provider, ProviderSandbox } from "../src/types.js";
 
@@ -14,6 +14,7 @@ class GoodBox implements ProviderSandbox {
       return { exitCode, stdout, stderr, durationMs: 1 };
     };
     if (cmd.startsWith("printf hi")) return ok("hi", "err", 3);
+    if (cmd.startsWith("printf 'caf")) return ok("café ✓");
     if (cmd.includes("SBR_CHECK")) return ok(`${opts.env?.SBR_CHECK} ${opts.cwd}`);
     if (cmd.startsWith("for i")) {
       for (const n of [1, 2, 3]) {
@@ -64,18 +65,7 @@ describe("sandboxrouter check", () => {
   it("passes every step on a provider that behaves", async () => {
     const report = await checkProvider(new Router({ providers: [new GoodProvider()] }), "boat");
     expect(report.results.filter((r) => r.status === "fail")).toEqual([]);
-    expect(report.results.map((r) => r.step)).toEqual([
-      "create",
-      "exec: stdout, stderr, exit code",
-      "exec: env and cwd",
-      "exec: streaming",
-      "files: binary round-trip",
-      "files: visible to commands",
-      "exec: command timeout",
-      "pause and resume",
-      "kill",
-      "killed sandbox is gone",
-    ]);
+    expect(report.results.map((r) => r.step)).toEqual([...CHECK_STEPS]);
     expect(report.ok).toBe(true);
   }, 15_000);
 
@@ -83,6 +73,20 @@ describe("sandboxrouter check", () => {
     const report = await checkProvider(new Router({ providers: [new GoodProvider({ leak: true })] }), "boat");
     expect(report.ok).toBe(false);
     expect(report.results.at(-1)).toMatchObject({ step: "killed sandbox is gone", status: "fail" });
+  }, 15_000);
+
+  it("fails a provider whose readFile returns empty bytes for a missing file, or truncates big files", async () => {
+    const p = new GoodProvider();
+    const create = p.create.bind(p);
+    p.create = async () => {
+      const b = (await create()) as GoodBox;
+      const read = b.readFile.bind(b);
+      b.readFile = async (path) => (path.endsWith("does-not-exist") ? new Uint8Array() : (await read(path)).slice(0, 200_000));
+      return b;
+    };
+    const report = await checkProvider(new Router({ providers: [p], ledger: false }), "boat");
+    const failed = report.results.filter((r) => r.status === "fail").map((r) => r.step);
+    expect(failed).toEqual(["files: 1 MB round-trip", "files: missing file is an error"]);
   }, 15_000);
 
   it("stops after a failed create", async () => {
