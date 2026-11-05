@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 import { parseArgs } from "node:util";
-import { readFileSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { platform, arch } from "node:os";
 import { bench, benchMarkdown } from "./bench.js";
 import { checkProvider } from "./check.js";
+import { gc, listOpen } from "./gc.js";
 import { loadReports, makeReport, renderLeaderboard } from "./leaderboard.js";
 import { CATALOG, hourlyCost } from "./catalog.js";
 import { Router } from "./router.js";
@@ -15,8 +17,13 @@ Usage:
   sandboxrouter providers [--vcpu N] [--memory GB]   price table + which keys are set
   sandboxrouter route     [spec flags] [route flags] dry run: the order providers would be tried
   sandboxrouter run "<cmd>" [spec flags] [route flags] [--keep]
-  sandboxrouter check     --provider ID [--json]           test one provider for real: exec, env, streaming,
-                          files, timeout, pause, kill; exits 1 if any step fails
+  sandboxrouter check     --provider ID[,ID] | --all [--json] [--save [dir]]
+                          test providers for real: exec, env, UTF-8, streaming, files, timeout, pause,
+                          kill; exits 1 if any step fails. --all = every configured provider;
+                          --save writes results/conformance/<id>.json for the compatibility table
+  sandboxrouter ls        [--json]                       sandboxes this machine started that weren't killed
+  sandboxrouter gc        [--all | --older-than MIN] [--dry-run]
+                          kill leaked sandboxes: by default those past their lifetime
   sandboxrouter bench     [--runs 3] [--provider a,b] [--json] [--share [--label "where you ran it"]]
   sandboxrouter leaderboard [results-dir] [--out leaderboard.html]
   sandboxrouter desktop   [--os linux|windows|android|ios] [--user ID] [--control]
@@ -54,6 +61,10 @@ const { values, positionals } = parseArgs({
     share: { type: "boolean" },
     cors: { type: "string" },
     label: { type: "string" },
+    all: { type: "boolean" },
+    save: { type: "boolean" },
+    "older-than": { type: "string" },
+    "dry-run": { type: "boolean" },
   },
 });
 
@@ -109,6 +120,12 @@ async function main() {
     const command = rest.join(" ");
     if (!command) throw new RouterError('usage: sandboxrouter run "<cmd>"');
     const sbx = await router.create(spec, route);
+    // Ctrl-C: kill the sandbox before exiting instead of leaving it billing.
+    const stop = () => {
+      console.error(`\n> interrupted, killing ${sbx.id}`);
+      sbx.kill().finally(() => process.exit(130));
+    };
+    if (!values.keep) process.once("SIGINT", stop);
     for (const a of sbx.attempts.filter((a) => !a.ok)) console.error(`! ${a.provider} failed, fell back: ${a.error}`);
     console.error(`> ${sbx.id} on ${sbx.provider} (~$${sbx.estimatedHourlyUsd}/hr, started in ${sbx.attempts.at(-1)?.ms} ms)`);
     try {
@@ -126,10 +143,16 @@ async function main() {
   }
 
   if (cmd === "check") {
-    if (!providers?.length) throw new RouterError("usage: sandboxrouter check --provider <id>[,<id>...]");
+    const ids = values.all ? router.registered().filter((id) => router.isConfigured(id)) : providers;
+    if (!ids?.length) {
+      if (values.all) return console.log("No providers configured: set at least one provider's keys (sandboxrouter providers lists them).");
+      throw new RouterError("usage: sandboxrouter check --provider <id>[,<id>...] | --all");
+    }
+    const version = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8")).version;
+    const saveDir = values.save ? (rest[0] ?? "results/conformance") : undefined;
     const mark = { pass: "ok  ", fail: "FAIL", skip: "skip", info: "note" } as const;
     const reports = [];
-    for (const p of providers) {
+    for (const p of ids) {
       if (!values.json) console.log(`\n${p}`);
       const report = await checkProvider(router, p, {
         spec,
@@ -138,10 +161,40 @@ async function main() {
         },
       });
       reports.push(report);
+      if (saveDir) {
+        mkdirSync(saveDir, { recursive: true });
+        const saved = { tool: "sandboxrouter-check", version, date: new Date().toISOString(), platform: `${platform()}-${arch()}`, ...report };
+        writeFileSync(`${saveDir}/${p}.json`, JSON.stringify(saved, null, 2) + "\n");
+      }
     }
     if (values.json) console.log(JSON.stringify(reports, null, 2));
     else console.log(`\n${reports.filter((r) => r.ok).length}/${reports.length} passed`);
     if (reports.some((r) => !r.ok)) process.exitCode = 1;
+    return;
+  }
+
+  if (cmd === "ls") {
+    if (!router.ledger) return console.log("The sandbox ledger is off (SANDBOXROUTER_LEDGER=off), so there is nothing to list.");
+    const open = listOpen(router);
+    if (values.json) return console.log(JSON.stringify(open, null, 2));
+    if (!open.length) return console.log(`No open sandboxes in ${router.ledger.file}.`);
+    for (const s of open) {
+      const left = Math.round((Date.parse(s.expiresAt) - Date.now()) / 60_000);
+      const when = s.expired ? `past its lifetime by ${-left} min` : `${left} min of lifetime left`;
+      console.log(`${s.id.padEnd(40)} up ${String(s.ageMinutes).padStart(5)} min  ${when.padEnd(28)} ~$${s.estimatedUsdSoFar.toFixed(4)} so far`);
+    }
+    const expired = open.filter((s) => s.expired).length;
+    console.log(`\n${open.length} open, ${expired} past their lifetime. "sandboxrouter gc" kills those; "gc --all" kills every one.`);
+    return;
+  }
+
+  if (cmd === "gc") {
+    if (!router.ledger) return console.log("The sandbox ledger is off (SANDBOXROUTER_LEDGER=off), so there is nothing to clean up.");
+    const results = await gc(router, { all: values.all, olderThanMinutes: num(values["older-than"]), dryRun: values["dry-run"] });
+    if (values.json) return console.log(JSON.stringify(results, null, 2));
+    if (!results.length) return console.log("Nothing to clean up.");
+    for (const r of results) console.log(`${r.action.padEnd(10)} ${r.id}${r.detail ? `  (${r.detail})` : ""}`);
+    if (results.some((r) => r.action === "failed")) process.exitCode = 1;
     return;
   }
 

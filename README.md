@@ -231,7 +231,23 @@ npx @sandboxrouter/sdk bench --runs 5               # cold start + exec latency 
 npx @sandboxrouter/sdk bench --share --label "us-east-1"   # also write a report for results/
 npx @sandboxrouter/sdk leaderboard results --out leaderboard.html
 npx @sandboxrouter/sdk serve --port 8787            # HTTP API
+npx @sandboxrouter/sdk ls                           # sandboxes started here that were never killed
+npx @sandboxrouter/sdk gc                           # kill the ones past their lifetime (--all: every one)
 ```
+
+### Cleaning up leaks
+
+If a script crashes before `kill()`, its sandbox keeps billing. Every router keeps a ledger of the sandboxes it starts in `~/.sandboxrouter/sandboxes.jsonl` (set `SANDBOXROUTER_HOME` to move it, `SANDBOXROUTER_LEDGER=off` or `new Router({ ledger: false })` to turn it off), and `kill()` closes the entry.
+
+```bash
+sandboxrouter ls                    # id, age, lifetime left, cost so far
+sandboxrouter gc --dry-run          # what would be killed
+sandboxrouter gc                    # kill sandboxes past their requested lifetime
+sandboxrouter gc --all              # kill every open one (end of a CI job)
+sandboxrouter gc --older-than 60    # kill those up for an hour or more
+```
+
+A sandbox the provider already stopped is just dropped from the ledger. `sandboxrouter run` kills its sandbox on Ctrl-C. The ledger only knows sandboxes started on this machine (or wherever `SANDBOXROUTER_HOME` points), so run `gc --all` at the end of CI jobs. Every adapter hands `timeoutMinutes` to the provider, which stops, deletes or pauses the sandbox when it runs out (the table under "How each adapter maps the spec" says which), except Fly.io Sprites, which has none (an idle sprite stops billing CPU but keeps its storage), and exe.dev, where the VM powers itself off when the lifetime runs out (best effort; a stopped VM bills disk until it's deleted).
 
 ### Bench
 
@@ -239,13 +255,51 @@ npx @sandboxrouter/sdk serve --port 8787            # HTTP API
 
 `--share` writes a JSON report (timings, your label, Node version and platform; never keys, env or error text). Open a PR adding it to [`results/`](results/). `sandboxrouter leaderboard` builds one static HTML page from every report there, taking the median of each submission's medians so one submitter can't dominate. Host the page anywhere static files go.
 
-Testing an adapter against a real account:
+### Compatibility
+
+`check` runs the same 13 steps against a real account: create; stdout, stderr and exit code; env and cwd; UTF-8 output; live streaming; a binary file round-trip; a 1 MB file; reading a missing file is an error; files written by `writeFile` are visible to commands and the other way round; a command timeout; pause and resume; kill; and the killed sandbox is really gone.
 
 ```bash
-sandboxrouter check --provider koyeb    # create, exec, env/cwd, streaming, binary files, timeout, pause, kill
+sandboxrouter check --provider koyeb    # one provider
+sandboxrouter check --all --save        # every configured provider; writes results/conformance/<id>.json
 ```
 
-It prints one line per step and exits 1 if any fails. `checkProvider(router, id)` does the same from code.
+It prints one line per step and exits 1 if any fails. `checkProvider(router, id)` does the same from code. Saved runs make this table (`node --import tsx scripts/readme-tables.ts --write`), and a nightly workflow re-runs it with the repo's provider keys, committing only when a result changes (so the date is when the current result was first seen). Every adapter also has mock-API tests in `npm test`; this table is only real runs.
+
+| Provider | Real-account check (13 steps) | Result since |
+|---|---|---|
+| Agent37 | not run yet | |
+| InstaBox | not run yet | |
+| OpenScale Sandboxes | not run yet | |
+| Boat | not run yet | |
+| Maritime | not run yet | |
+| Koyeb Sandboxes | not run yet | |
+| Northflank | not run yet | |
+| Morph Cloud | not run yet | |
+| exe.dev | not run yet | |
+| Novita AI Agent Sandbox | not run yet | |
+| Freestyle | not run yet | |
+| Beam | not run yet | |
+| CodeSandbox SDK (Together) | not run yet | |
+| Dedalus Machines | not run yet | |
+| Fly.io Sprites | not run yet | |
+| Blaxel | not run yet | |
+| Daytona | not run yet | |
+| E2B | not run yet | |
+| HOPX | not run yet | |
+| Superserve | not run yet | |
+| Tensorlake | not run yet | |
+| Upstash Box | not run yet | |
+| Cloudflare Sandbox | not run yet | |
+| Amazon Bedrock AgentCore Code Interpreter | not run yet | |
+| Modal | not run yet | |
+| AWS Lambda MicroVMs | not run yet | |
+| Deno Sandbox | not run yet | |
+| Runloop | not run yet | |
+| Vercel Sandbox | not run yet | |
+| Azure Container Apps dynamic sessions | not run yet | |
+| Alibaba Cloud Agent Sandbox | not run yet | |
+| Docker (local) | 13/13 passed | 2026-11-05, v0.2.0 |
 
 ## HTTP API
 
@@ -302,7 +356,7 @@ with sr.create(vcpu=2, memory_gb=4, strategy="cheapest") as sbx:
 | Modal | `cpu`, `memoryMiB`, `gpu` | `timeoutMs` | registry tag | no | Uses Modal app `sandboxrouter` (override with `SANDBOXROUTER_MODAL_APP`). |
 | Vercel | `vcpus` (2 GB each) | `timeout` | `runtime` | no | Max 8 vCPU. |
 | Morph | via a cached base snapshot per shape | `ttlSeconds` | snapshot id | yes (memory + disk) | First create of a new shape builds a snapshot. Files over SSH. |
-| Fly.io Sprites | `cpus`, `ramMB` (may be ignored) | none: `kill()` deletes | no | no | Sprites idle for free on their own. |
+| Fly.io Sprites | `cpus`, `ramMB` (may be ignored) | none: `kill()` or `gc` deletes | no | no | Sprites idle for free on their own. |
 | Blaxel | memory (CPU follows) | `ttl` | image | yes (archive, disk only) | Idle sandboxes go to free standby on their own. |
 | Tensorlake | `cpus`, `memoryMb` | idle timeout | image | yes (memory + disk) | Output is line-based. |
 | Runloop | snapped to Runloop's custom sizes | `keep_alive_time_seconds` (max 48 h) | blueprint | yes (Pro plan) | Commands start in the home directory. |
@@ -310,7 +364,7 @@ with sr.create(vcpu=2, memory_gb=4, strategy="cheapest") as sbx:
 | Northflank | cheapest `nf-compute` plan that fits | `expiryTime` (5 min to 7 days) | any public image | no | Runs as a deployment service; files move as base64 over exec. |
 | Cloudflare | smallest instance type that fits | alarm in the bridge Worker | Dockerfile in the bridge | no | Through the bridge Worker you deploy ([`bridges/cloudflare`](bridges/cloudflare)). |
 | Boat | smallest of 4 fixed sizes that fits | auto-stop timer | saved snapshot | yes (stop: disk kept, processes end) | Plain REST. Commands that wait are capped at 600 s; files API up to 5 MiB. |
-| exe.dev | `--cpu`, `--memory` (2 GiB per vCPU max) | none: `kill()` deletes | `--image` | no | Plain REST over exe.dev's `/exec`; long commands run detached and are polled. |
+| exe.dev | `--cpu`, `--memory` (2 GiB per vCPU max) | the VM powers itself off (best effort); `kill()` or `gc` deletes | `--image` | no | Plain REST over exe.dev's `/exec`; long commands run detached and are polled. |
 | Agent37 | smallest of 4 fixed shapes that fits (max 4 vCPU) | auto-sleep after idle (5 min to 24 h) | template (`agent37-base` default) | yes (sleep: memory + disk) | Plain REST; no streaming; files move as base64 over exec in chunks. |
 | Alibaba Cloud | set by the template | `timeoutMs` (max 24 h) | template | no (allowlist only) | E2B-compatible API via the `e2b` SDK; region from `ALIBABA_SANDBOX_REGION` (default ap-southeast-1). |
 | AgentCore | fixed 2 vCPU / 8 GB | `sessionTimeoutSeconds` (max 8 h) | no | no | SigV4, plain fetch; files move as base64 over commands. Opt-in. |
@@ -342,6 +396,9 @@ Capabilities in the catalog describe what each **adapter** implements, not every
 - [x] Pause/resume where providers support it
 - [x] Python client
 - [x] Leaderboard built from `bench --share` reports
+- [x] Leak cleanup: a local ledger, `ls` and `gc`
+- [x] One 13-step real-account check for every adapter, with a compatibility table and a nightly run
+- [ ] Every adapter run against a real account (see the Compatibility table)
 - [ ] Snapshots and forks as a routed operation
 - [ ] A hosted copy of the leaderboard page
 
@@ -366,6 +423,7 @@ npm run test:py      # Python client against the real HTTP server
 npm run build
 npm run dev -- providers
 npm run price:check  # compare every provider's pricing page with the last check
+node --import tsx scripts/readme-tables.ts --write   # regenerate the README's Prices, Env and Compatibility tables
 ```
 
 Prices are list prices copied from each provider's public pricing page, with the date they were checked. A GitHub workflow runs `price:check` every Monday and opens an issue when a pricing page changes or a price is more than 45 days old; a person then updates [`src/catalog.ts`](src/catalog.ts).

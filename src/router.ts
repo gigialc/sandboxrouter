@@ -9,6 +9,7 @@ import {
   type ComputerSpec,
 } from "./computers.js";
 import { loadBench, median } from "./bench-store.js";
+import { Ledger, defaultLedgerFile } from "./ledger.js";
 import { DaytonaProvider } from "./providers/daytona.js";
 import { E2BProvider } from "./providers/e2b.js";
 import { MaritimeProvider } from "./providers/maritime.js";
@@ -72,6 +73,12 @@ export interface RouterOptions {
   benchFile?: string;
   /** Desktop-only computer providers (sandbox providers that also sell computers are found automatically). */
   computers?: ComputerProvider[];
+  /**
+   * Record created sandboxes so leaks can be found and killed (`sandboxrouter ls` / `gc`).
+   * Default: ~/.sandboxrouter/sandboxes.jsonl (or $SANDBOXROUTER_HOME); a path for another file;
+   * false to keep no record. SANDBOXROUTER_LEDGER=off also turns it off.
+   */
+  ledger?: string | false;
 }
 
 /** Desktop-only providers. Filled in as adapters are added. */
@@ -120,8 +127,12 @@ export class Router {
   private providers: Map<ProviderId, Provider>;
   private benchFile?: string;
   private computerOnly: ComputerProvider[];
+  /** The local record of sandboxes this router created, or undefined when turned off. */
+  readonly ledger?: Ledger;
 
   constructor(opts: RouterOptions = {}) {
+    const file = opts.ledger === false ? null : (opts.ledger ?? defaultLedgerFile());
+    if (file) this.ledger = new Ledger(file);
     this.providers = new Map((opts.providers ?? defaultProviders()).map((p) => [p.id, p]));
     this.benchFile = opts.benchFile;
     this.computerOnly = opts.computers ?? (opts.providers ? [] : defaultComputerProviders());
@@ -192,7 +203,16 @@ export class Router {
       try {
         const box = await this.provider(c.provider).create(spec);
         attempts.push({ provider: c.provider, ok: true, ms: Date.now() - t0 });
-        return new RoutedSandbox(c.provider, box, attempts, c.estimatedHourlyUsd);
+        const sbx = new RoutedSandbox(c.provider, box, attempts, c.estimatedHourlyUsd, this.ledger);
+        const now = Date.now();
+        this.ledger?.open({
+          id: sbx.id,
+          provider: c.provider,
+          createdAt: new Date(now).toISOString(),
+          expiresAt: new Date(now + (spec.timeoutMinutes ?? 30) * 60_000).toISOString(),
+          usdHour: c.estimatedHourlyUsd,
+        });
+        return sbx;
       } catch (err) {
         attempts.push({ provider: c.provider, ok: false, ms: Date.now() - t0, error: (err as Error).message });
       }
@@ -234,7 +254,7 @@ export class Router {
   async get(id: string): Promise<RoutedSandbox> {
     const { provider, nativeId } = parseId(id);
     const box = await this.provider(provider).connect(nativeId);
-    return new RoutedSandbox(provider, box, [], round(hourlyCost(provider)));
+    return new RoutedSandbox(provider, box, [], round(hourlyCost(provider)), this.ledger);
   }
 }
 
@@ -248,6 +268,7 @@ export class RoutedSandbox {
     /** Every create attempt, including failed fallbacks. */
     readonly attempts: Attempt[],
     readonly estimatedHourlyUsd: number,
+    private ledger?: Ledger,
   ) {
     this.id = `${provider}:${box.nativeId}`;
   }
@@ -272,8 +293,9 @@ export class RoutedSandbox {
     return new TextDecoder().decode(await this.box.readFile(path));
   }
 
-  kill(): Promise<void> {
-    return this.box.kill();
+  async kill(): Promise<void> {
+    await this.box.kill();
+    this.ledger?.close(this.id);
   }
 
   /** Pause, keeping the disk. Resume with router.get(id) or, on Maritime, any call. */

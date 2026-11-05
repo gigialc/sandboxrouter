@@ -1,0 +1,79 @@
+{
+  "tool": "sandboxrouter-check",
+  "version": "0.2.0",
+  "date": "2026-11-05T18:17:55.354Z",
+  "platform": "darwin-arm64",
+  "provider": "docker",
+  "sandboxId": "docker:sbr-34130d91-c0c",
+  "results": [
+    {
+      "step": "create",
+      "ms": 374,
+      "status": "pass",
+      "detail": "docker:sbr-34130d91-c0c, ~$0/hr"
+    },
+    {
+      "step": "exec: stdout, stderr, exit code",
+      "ms": 64,
+      "status": "pass"
+    },
+    {
+      "step": "exec: env and cwd",
+      "ms": 59,
+      "status": "pass"
+    },
+    {
+      "step": "exec: UTF-8 output",
+      "ms": 49,
+      "status": "pass"
+    },
+    {
+      "step": "exec: streaming",
+      "ms": 3086,
+      "status": "pass",
+      "detail": "first output after 61 ms"
+    },
+    {
+      "step": "files: binary round-trip",
+      "ms": 153,
+      "status": "pass"
+    },
+    {
+      "step": "files: 1 MB round-trip",
+      "ms": 157,
+      "status": "pass"
+    },
+    {
+      "step": "files: missing file is an error",
+      "ms": 47,
+      "status": "pass"
+    },
+    {
+      "step": "files: visible to commands",
+      "ms": 153,
+      "status": "pass"
+    },
+    {
+      "step": "exec: command timeout",
+      "ms": 3006,
+      "status": "pass",
+      "detail": "threw after 3006 ms: docker: command timed out after 3s"
+    },
+    {
+      "step": "pause and resume",
+      "ms": 148,
+      "status": "pass"
+    },
+    {
+      "step": "kill",
+      "ms": 85,
+      "status": "pass"
+    },
+    {
+      "step": "killed sandbox is gone",
+      "ms": 21,
+      "status": "pass"
+    }
+  ],
+  "ok": true
+}

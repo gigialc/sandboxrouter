@@ -1,4 +1,7 @@
-export { checkProvider, type CheckReport, type CheckResult, type CheckStatus } from "./check.js";
+export { checkProvider, CHECK_STEPS, type CheckReport, type CheckResult, type CheckStatus } from "./check.js";
+export { Ledger, defaultLedgerFile, type LedgerEntry } from "./ledger.js";
+export { conformanceTable, loadConformance, type ConformanceRow, type SavedCheck } from "./conformance.js";
+export { gc, listOpen, isGone, type GcResult, type OpenSandbox } from "./gc.js";
 export { Router, RoutedSandbox, defaultProviders, defaultComputerProviders, parseId, type Candidate, type RouterOptions } from "./router.js";
 export { CATALOG, hourlyCost, unfit, info, type ProviderInfo } from "./catalog.js";
 export { createApp } from "./server.js";
