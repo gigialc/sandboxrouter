@@ -13,6 +13,7 @@ export const CHECK_STEPS = [
   "files: missing file is an error",
   "files: visible to commands",
   "exec: command timeout",
+  "exec: timed-out command was stopped",
   "pause and resume",
   "kill",
   "killed sandbox is gone",
@@ -147,15 +148,27 @@ export async function checkProvider(
     });
 
     await step("exec: command timeout", async () => {
+      // The contract: the command is stopped and exec rejects with "command timed out after Ns".
+      const seconds = 3;
       const t0 = Date.now();
+      let outcome: string;
       try {
-        const r = await box.exec("sleep 30; echo late", { timeoutSeconds: 3 });
-        if (r.stdout.includes("late")) throw new Error("command ran past its 3 s timeout");
-        return { status: "pass", detail: `ended with exit ${r.exitCode} after ${Date.now() - t0} ms` };
+        const r = await box.exec(`sleep 30; echo late`, { timeoutSeconds: seconds });
+        outcome = `returned exit ${r.exitCode}${r.stdout.includes("late") ? " and ran to completion" : ""}`;
       } catch (err) {
-        if (Date.now() - t0 > 20_000) throw err;
-        return { status: "pass", detail: `threw after ${Date.now() - t0} ms: ${(err as Error).message}` };
+        const message = (err as Error).message;
+        if (message.endsWith(`command timed out after ${seconds}s`)) return `threw after ${Date.now() - t0} ms`;
+        outcome = `threw "${message}"`;
       }
+      throw new Error(`expected a "command timed out after ${seconds}s" error, ${outcome} after ${Date.now() - t0} ms`);
+    });
+
+    await step("exec: timed-out command was stopped", async () => {
+      // A command killed by its timeout must not finish on its own later.
+      await box.exec("rm -f /tmp/sbr-check/late; sleep 4 && echo late > /tmp/sbr-check/late", { timeoutSeconds: 1 }).catch(() => {});
+      await new Promise((r) => setTimeout(r, 5000));
+      const r = await box.exec("cat /tmp/sbr-check/late 2>/dev/null || echo stopped");
+      if (r.stdout.includes("late")) throw new Error("the command kept running after its timeout");
     });
 
     if (box.canPause) {

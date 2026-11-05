@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { ProviderError, type ExecOptions, type ExecResult, type Provider, type ProviderSandbox, type SandboxSpec } from "../types.js";
-import { optionalImport, toBytes, wrapCommand } from "../util.js";
+import { DEFAULT_EXEC_TIMEOUT_S, optionalImport, timeoutError, toBytes, wrapCommand } from "../util.js";
 import type {
   ActionResult,
   ComputerAction,
@@ -121,21 +121,13 @@ class DaytonaBox implements ProviderSandbox {
     this.nativeId = sbx.id;
   }
 
+  /**
+   * Every command runs in a throwaway session. Unlike `executeCommand`, a session keeps stdout and
+   * stderr apart and lets the deadline be enforced here: deleting the session ends the command.
+   */
   async exec(cmd: string, opts: ExecOptions = {}): Promise<ExecResult> {
-    if (opts.onStdout || opts.onStderr) return this.execStreaming(cmd, opts);
     const t0 = Date.now();
-    try {
-      const r = await this.sbx.process.executeCommand(cmd, opts.cwd, opts.env, opts.timeoutSeconds ?? 60);
-      // Daytona merges stdout and stderr into `result` here.
-      return { exitCode: r.exitCode, stdout: r.result, stderr: "", durationMs: Date.now() - t0 };
-    } catch (err: any) {
-      throw new ProviderError("daytona", err?.message ?? String(err));
-    }
-  }
-
-  /** Streaming goes through a throwaway session, which also keeps stdout and stderr apart. */
-  private async execStreaming(cmd: string, opts: ExecOptions): Promise<ExecResult> {
-    const t0 = Date.now();
+    const seconds = opts.timeoutSeconds ?? DEFAULT_EXEC_TIMEOUT_S;
     const session = `sbr-${randomUUID()}`;
     const proc = this.sbx.process;
     let stdout = "";
@@ -158,9 +150,11 @@ class DaytonaBox implements ProviderSandbox {
           opts.onStderr?.(c);
         },
       );
-      const limit = (opts.timeoutSeconds ?? 60) * 1000;
-      const timedOut = await Promise.race([logs.then(() => false), sleep(limit).then(() => true)]);
-      if (timedOut) throw new ProviderError("daytona", `command timed out after ${limit / 1000}s`);
+      const timedOut = await Promise.race([logs.then(() => false), sleep(seconds * 1000).then(() => true)]);
+      if (timedOut) {
+        logs.catch(() => {});
+        throw timeoutError("daytona", seconds);
+      }
       const done = await proc.getSessionCommand(session, cmdId);
       return { exitCode: done.exitCode ?? -1, stdout, stderr, durationMs: Date.now() - t0 };
     } catch (err: any) {

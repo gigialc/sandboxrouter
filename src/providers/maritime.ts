@@ -1,6 +1,6 @@
 import { DEFAULT_MEMORY_GB, DEFAULT_VCPU } from "../catalog.js";
 import { ProviderError, type ExecOptions, type ExecResult, type Provider, type ProviderSandbox, type SandboxSpec } from "../types.js";
-import { toBytes } from "../util.js";
+import { DEFAULT_EXEC_TIMEOUT_S, killedByTimeout, timeoutError, toBytes } from "../util.js";
 import { readSSE } from "../sse.js";
 import type {
   ActionResult,
@@ -155,7 +155,8 @@ class MaritimeSandbox implements ProviderSandbox {
 
   async exec(cmd: string, opts: ExecOptions = {}): Promise<ExecResult> {
     const t0 = Date.now();
-    const body = { cmd, cwd: opts.cwd, env: opts.env, timeoutSeconds: opts.timeoutSeconds ?? 60 };
+    const seconds = opts.timeoutSeconds ?? DEFAULT_EXEC_TIMEOUT_S;
+    const body = { cmd, cwd: opts.cwd, env: opts.env, timeoutSeconds: seconds };
     const streaming = !!(opts.onStdout || opts.onStderr);
     const res = await this.data("POST", "/commands", {
       json: body,
@@ -178,7 +179,10 @@ class MaritimeSandbox implements ProviderSandbox {
       if (result.stdout) opts.onStdout?.(result.stdout);
       if (result.stderr) opts.onStderr?.(result.stderr);
     }
-    return { exitCode: result.exitCode ?? -1, stdout: result.stdout ?? "", stderr: result.stderr ?? "", durationMs: Date.now() - t0 };
+    const durationMs = Date.now() - t0;
+    // The server stops the command at timeoutSeconds and reports no exit code (or a kill code).
+    if (killedByTimeout(result.exitCode ?? -1, durationMs, seconds)) throw timeoutError("maritime", seconds);
+    return { exitCode: result.exitCode ?? -1, stdout: result.stdout ?? "", stderr: result.stderr ?? "", durationMs };
   }
 
   async writeFile(path: string, content: string | Uint8Array): Promise<void> {

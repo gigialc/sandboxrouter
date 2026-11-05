@@ -3,7 +3,7 @@ import { homedir } from "node:os";
 import { join } from "node:path";
 import { DEFAULT_MEMORY_GB, DEFAULT_VCPU } from "../catalog.js";
 import { ProviderError, type ExecOptions, type ExecResult, type Provider, type ProviderSandbox, type SandboxSpec } from "../types.js";
-import { optionalImport, toBytes } from "../util.js";
+import { DEFAULT_EXEC_TIMEOUT_S, killedByTimeout, optionalImport, timeoutError, toBytes } from "../util.js";
 
 type ModalModule = typeof import("modal");
 type ModalClient = InstanceType<ModalModule["ModalClient"]>;
@@ -68,15 +68,20 @@ class ModalBox implements ProviderSandbox {
 
   async exec(cmd: string, opts: ExecOptions = {}): Promise<ExecResult> {
     const t0 = Date.now();
+    const seconds = opts.timeoutSeconds ?? DEFAULT_EXEC_TIMEOUT_S;
     try {
+      // Modal kills the process at timeoutMs; the kill shows up as a signal exit code.
       const p = await this.sb.exec(["sh", "-c", cmd], {
         workdir: opts.cwd,
         env: opts.env,
-        timeoutMs: (opts.timeoutSeconds ?? 60) * 1000,
+        timeoutMs: seconds * 1000,
       });
       const [stdout, stderr, exitCode] = await Promise.all([drain(p.stdout, opts.onStdout), drain(p.stderr, opts.onStderr), p.wait()]);
-      return { exitCode, stdout, stderr, durationMs: Date.now() - t0 };
+      const durationMs = Date.now() - t0;
+      if (killedByTimeout(exitCode, durationMs, seconds)) throw timeoutError("modal", seconds);
+      return { exitCode, stdout, stderr, durationMs };
     } catch (err: any) {
+      if (err instanceof ProviderError) throw err;
       throw new ProviderError("modal", err?.message ?? String(err));
     }
   }
