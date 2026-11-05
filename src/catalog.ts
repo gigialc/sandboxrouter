@@ -47,9 +47,9 @@ const ENTRIES: ProviderInfo[] = [
     pricing: {
       vcpuHour: 0.0055,
       gbHour: 0.00275,
-      note: "per second, disk included",
+      note: "per second, no minimum runtime; running disk included; Starter $20/mo incl. $20 usage; paused disk $0.08/GB-month (default idle action deletes sandbox)",
       source: "https://maritime.sh/pricing",
-      checked: "2026-11-04",
+      checked: "2026-11-05",
     },
     capabilities: ["pause", "custom-image"],
     limits: { maxVcpu: 16, maxMemoryGb: 64 },
@@ -107,9 +107,9 @@ const ENTRIES: ProviderInfo[] = [
     pricing: {
       vcpuHour: 0.128,
       gbHour: 0.0212,
-      note: "bills active CPU only; this is the 100%-CPU price, idle work costs less",
+      note: "iad1; active CPU, provisioned RAM in minimum 1-minute increments (2 GB/vCPU); full-CPU estimate; Hobby free within quotas, Pro $20/mo usage credit; creations $0.60/million and retained snapshots $0.08/GB-month extra",
       source: "https://vercel.com/docs/vercel-sandbox/pricing",
-      checked: "2026-11-04",
+      checked: "2026-11-05",
     },
     capabilities: [],
     limits: { maxVcpu: 8, maxMemoryGb: 16 },
@@ -218,12 +218,12 @@ ENTRIES.push(
     pricing: {
       vcpuHour: 0.0525,
       gbHour: 0,
-      note: "$0.105/h per 2 vCPU + 4 GiB, per second, up to 2 GiB per vCPU; needs an exe.dev subscription",
+      note: "standalone reserved size, per second: $0.105/h per 2 vCPU / 4 GiB unit; stopped CPU/RAM free, retained disk separate; Personal from $15/mo, Work $75/mo regular price; Work allows 32 vCPU / 64 GiB without approval",
       source: "https://exe.dev/docs/standalone-vms.md",
-      checked: "2026-11-04",
+      checked: "2026-11-05",
     },
     capabilities: ["custom-image"],
-    limits: { maxVcpu: 16, maxMemoryGb: 32 },
+    limits: { maxVcpu: 32, maxMemoryGb: 64 },
     credentials: [["EXE_TOKEN"]],
     docs: "https://exe.dev/docs/https-api.md",
   },
@@ -264,9 +264,9 @@ ENTRIES.push(
     pricing: {
       vcpuHour: 0.072,
       gbHour: 0.009,
-      note: "bills active CPU and provisioned memory of the instance type; this is the full-CPU price; needs Workers Paid ($5/mo) and the bridge Worker in bridges/cloudflare",
+      note: "10 ms billing on active CPU and allocated instance memory; full-CPU estimate excludes allocated disk ($0.000252/GB-h), Worker and Durable Objects charges; needs Workers Paid ($5/mo) and bridges/cloudflare",
       source: "https://developers.cloudflare.com/containers/platform/pricing/",
-      checked: "2026-11-04",
+      checked: "2026-11-05",
     },
     capabilities: [],
     limits: { maxVcpu: 4, maxMemoryGb: 12 },
@@ -317,11 +317,11 @@ ENTRIES.push(
     id: "lambda",
     name: "AWS Lambda MicroVMs",
     pricing: {
-      vcpuHour: 0.0997,
-      gbHour: 0.0132,
+      vcpuHour: 0.09969984,
+      gbHour: 0.01320012,
       note: "us-east-1 ARM; billed on the image's baseline size (2 GB per vCPU) while running, per-second burst up to 4x; suspended VMs pay snapshot storage; needs a MicroVM image you build once",
-      source: "https://aws.amazon.com/lambda/pricing/",
-      checked: "2026-11-04",
+      source: "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSLambda/current/us-east-1/index.json",
+      checked: "2026-11-05",
     },
     capabilities: ["pause", "custom-image"],
     limits: { maxVcpu: 4, maxMemoryGb: 8 },
@@ -335,10 +335,10 @@ ENTRIES.push(
     id: "agent37",
     name: "Agent37",
     pricing: {
-      vcpuHour: AGENT37_SHAPES[0].usdHour,
-      gbHour: 0,
-      note: "per minute on fixed shapes (2 vCPU / 4 GB = $4.76/mo with disk); asleep = disk only ($0.09/GB-mo); gVisor isolation; prepaid wallet must hold 1 day of compute",
-      source: "https://www.agent37.com/docs/agents-api/instance-sizing",
+      vcpuHour: 0.8 / 730,
+      gbHour: 0.7 / 730,
+      note: "whole-minute billing: monthly shape total / 730 / 60; running estimate includes default disk (2 vCPU / 4 GB / 4 GB disk = $4.76/mo); sleeping/stopped disk $0.09/GB-mo; gVisor; $5 minimum top-up, wallet must hold one running day",
+      source: "https://www.agent37.com/docs/agents-api/billing",
       checked: "2026-11-05",
     },
     capabilities: ["pause", "custom-image"],
@@ -352,9 +352,9 @@ ENTRIES.push(
     pricing: {
       vcpuHour: 0.017856,
       gbHour: 0.008928,
-      note: "per second; Default QoS class, Hong Kong and regions outside mainland China; disk above 15 GiB extra; size comes from the template (E2B-compatible API)",
+      note: "per second; Default QoS, Hong Kong and regions outside mainland China; disk separately $0.00025308/GiB-h; code-interpreter-v1 template is 2 vCPU / 2 GiB with 10 GiB disk (E2B-compatible API)",
       source: "https://www.alibabacloud.com/help/en/agent-sandbox/product-overview/billing-overview",
-      checked: "2026-11-04",
+      checked: "2026-11-05",
     },
     capabilities: ["custom-image"],
     // No published maximum; the default template is 2 vCPU / 2 GB, so bigger requests go elsewhere.
@@ -384,9 +384,9 @@ ENTRIES.push(
     pricing: {
       vcpuHour: 0.0743,
       gbHour: 0,
-      note: "fixed VM tiers, credits at $0.01486 billed per started minute ($0.1486/h for 2 vCPU / 4 GB up to $4.7552/h for 64 / 128); free Build plan allows 10 concurrent VMs",
+      note: "fixed tiers: Pico 2 vCPU / 1 GB $0.0743/h, Nano 2 / 4 $0.1486/h, up to 64 / 128 $4.7552/h; credits $0.01486, billed per started minute; Build free, 10 concurrent; Scale $170/mo incl. 1,100 credits",
       source: "https://docs.together.ai/docs/together-code-sandbox-legacy",
-      checked: "2026-11-04",
+      checked: "2026-11-05",
     },
     capabilities: ["pause", "custom-image"],
     limits: { maxVcpu: 64, maxMemoryGb: 128 },
@@ -399,7 +399,7 @@ ENTRIES.push(
     pricing: {
       vcpuHour: 0.0504,
       gbHour: 0.0162,
-      note: "per second while active; paused bills storage only ($0.000108/GiB-h); sizes fixed by template (system templates 2 vCPU / 4 GiB); Free plan: 1 concurrent sandbox, $0.13/day allowance; bigger sizes need a team template on a paid plan",
+      note: "per second active; superserve/base fixed at 2 vCPU / 4 GiB / 8 GiB disk; retained storage $0.000108/GiB-h (shared template plus changed blocks); Developer $20/mo incl. $20, max 4/16 with team templates; recurring Free allowance not published on pricing page",
       source: "https://superserve.ai/pricing",
       checked: "2026-11-05",
     },
@@ -459,9 +459,9 @@ ENTRIES.push(
     pricing: {
       vcpuHour: 0.04032,
       gbHour: 0.0129,
-      note: "per second on allocated size; sizes fixed by base snapshot, disk included; free tier 200 vCPU-h + 400 GiB-h/mo; paused VMs bill storage only",
+      note: "per second on allocated fixed snapshot size; estimate includes disk at $0.000086/GiB-h; free monthly 200 vCPU-h, 400 GiB-h RAM, 60,000 GiB-h disk; Hobby $50/mo incl. $50 (max 8/16), Pro $500 (max 32/64); paused storage only",
       source: "https://www.freestyle.sh/docs/vms/pricing-and-limits",
-      checked: "2026-11-04",
+      checked: "2026-11-05",
     },
     capabilities: ["pause", "custom-image"],
     limits: { maxVcpu: 32, maxMemoryGb: 64 },
@@ -542,9 +542,9 @@ export const CLOUDFLARE_INSTANCES = [
   { name: "standard-4", vcpu: 4, memoryGb: 12 },
 ] as const;
 
-/** CodeSandbox VM tiers: https://docs.together.ai/docs/together-code-sandbox-legacy (Pico only for requests within 1 vCPU / 1 GB). */
+/** CodeSandbox VM tiers: https://docs.together.ai/docs/together-code-sandbox-legacy (Pico supports 2 vCPU / 1 GB). */
 export const CODESANDBOX_TIERS = [
-  { name: "Pico", vcpu: 1, memoryGb: 1, usdHour: 0.0743 },
+  { name: "Pico", vcpu: 2, memoryGb: 1, usdHour: 0.0743 },
   { name: "Nano", vcpu: 2, memoryGb: 4, usdHour: 0.1486 },
   { name: "Micro", vcpu: 4, memoryGb: 8, usdHour: 0.2972 },
   { name: "Small", vcpu: 8, memoryGb: 16, usdHour: 0.5944 },
@@ -625,7 +625,8 @@ export function hourlyCost(id: ProviderId, spec: SandboxSpec = {}): number {
     const s = instaboxSize(vcpu, mem) ?? INSTABOX_SIZES[INSTABOX_SIZES.length - 1];
     return s.vcpu * pricing.vcpuHour + s.memoryGb * pricing.gbHour;
   }
-  if (id === "agent37") return (agent37Shape(vcpu, mem) ?? AGENT37_SHAPES[AGENT37_SHAPES.length - 1]).usdHour;
+  // Agent37 publishes total running shapes per 730-hour month, including their default disk.
+  if (id === "agent37") return (agent37Shape(vcpu, mem) ?? AGENT37_SHAPES[AGENT37_SHAPES.length - 1]).usdMonth / 730;
   if (id === "codesandbox") return codesandboxTier(vcpu, mem).usdHour;
   if (id === "koyeb") return (koyebInstance(vcpu, mem) ?? KOYEB_INSTANCES[KOYEB_INSTANCES.length - 1]).usdHour;
   if (id === "freestyle") return (freestyleSize(vcpu, mem) ?? FREESTYLE_SIZES[FREESTYLE_SIZES.length - 1]).usdHour;
