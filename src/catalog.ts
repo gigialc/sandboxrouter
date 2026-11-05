@@ -3,6 +3,7 @@ import { KOYEB_INSTANCES, koyebInstance } from "./providers/koyeb.js";
 import { AGENT37_SHAPES, agent37Shape } from "./providers/agent37.js";
 import { INSTABOX_SIZES, instaboxSize } from "./providers/instabox.js";
 import { FREESTYLE_SIZES, freestyleSize } from "./providers/freestyle.js";
+import { langsmithSize } from "./providers/langsmith.js";
 
 export interface ProviderInfo {
   id: ProviderId;
@@ -519,6 +520,22 @@ ENTRIES.push(
     },
   },
   {
+    id: "langsmith",
+    name: "LangSmith Sandboxes",
+    pricing: {
+      vcpuHour: 0.0576,
+      gbHour: 0.01845,
+      note: "per second; memory must be 2 to 6 GiB per vCPU; storage $0.000123/GiB-h; 8 LSU ($8) of sandbox usage a month included; Developer plan max 10 sandboxes",
+      source: "https://www.langchain.com/pricing",
+      checked: "2026-11-05",
+    },
+    capabilities: ["pause", "custom-image"],
+    // Not published; 16 vCPU / 96 GiB stays inside the 6 GiB per vCPU band. Real runs will tell.
+    limits: { maxVcpu: 16, maxMemoryGb: 96 },
+    credentials: [["LANGSMITH_API_KEY"]],
+    docs: "https://docs.langchain.com/langsmith/sandboxes",
+  },
+  {
     id: "novita",
     name: "Novita AI Agent Sandbox",
     pricing: {
@@ -654,6 +671,11 @@ export function hourlyCost(id: ProviderId, spec: SandboxSpec = {}): number {
   if (id === "upstash") return upstashSize(vcpu, mem).vcpu * pricing.vcpuHour;
   // Deno bills CPU time on a fixed 2 vCPU box, with at least 768 MB of memory.
   if (id === "deno") return 2 * pricing.vcpuHour + Math.max(mem, 0.75) * pricing.gbHour;
+  // LangSmith runs 2 to 6 GiB per vCPU, so a request outside that band is widened.
+  if (id === "langsmith") {
+    const s = langsmithSize(vcpu, mem);
+    return s.vcpu * pricing.vcpuHour + s.memoryGb * pricing.gbHour;
+  }
   // Morph bills whole MCUs: the larger of vCPUs and 4 GB blocks of memory.
   if (id === "morph") return Math.max(vcpu, Math.ceil(mem / 4)) * pricing.vcpuHour;
   return vcpu * pricing.vcpuHour + mem * pricing.gbHour;

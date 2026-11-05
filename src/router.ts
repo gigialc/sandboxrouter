@@ -41,6 +41,7 @@ import { OpenScaleProvider } from "./providers/openscale.js";
 import { SuperserveProvider } from "./providers/superserve.js";
 import { InstaboxProvider } from "./providers/instabox.js";
 import { NovitaProvider } from "./providers/novita.js";
+import { LangSmithProvider } from "./providers/langsmith.js";
 import { UpstashProvider } from "./providers/upstash.js";
 import { OrgoProvider } from "./providers/orgo.js";
 import { MobilerunProvider } from "./providers/mobilerun.js";
@@ -116,6 +117,7 @@ export function defaultProviders(): Provider[] {
     new InstaboxProvider(),
     new KoyebProvider(),
     new NovitaProvider(),
+    new LangSmithProvider(),
     new OpenScaleProvider(),
     new SuperserveProvider(),
     new UpstashProvider(),

@@ -1,6 +1,6 @@
 {
   "version": "0.2.0",
-  "generatedAt": "2026-11-05T19:56:19.530Z",
+  "generatedAt": "2026-11-05T20:13:21.638Z",
   "shapes": [
     "1x2",
     "2x4",
@@ -1205,6 +1205,61 @@
         "32x128": {
           "usd": 1.8432,
           "unfit": null
+        }
+      }
+    },
+    {
+      "id": "langsmith",
+      "name": "LangSmith Sandboxes",
+      "local": false,
+      "capabilities": [
+        "pause",
+        "custom-image"
+      ],
+      "limits": {
+        "maxVcpu": 16,
+        "maxMemoryGb": 96
+      },
+      "credentials": [
+        [
+          "LANGSMITH_API_KEY"
+        ]
+      ],
+      "docs": "https://docs.langchain.com/langsmith/sandboxes",
+      "pricing": {
+        "vcpuHour": 0.0576,
+        "gbHour": 0.01845,
+        "note": "per second; memory must be 2 to 6 GiB per vCPU; storage $0.000123/GiB-h; 8 LSU ($8) of sandbox usage a month included; Developer plan max 10 sandboxes",
+        "source": "https://www.langchain.com/pricing",
+        "checked": "2026-11-05"
+      },
+      "access": null,
+      "check": null,
+      "computers": [],
+      "prices": {
+        "1x2": {
+          "usd": 0.0945,
+          "unfit": null
+        },
+        "2x4": {
+          "usd": 0.189,
+          "unfit": null
+        },
+        "4x8": {
+          "usd": 0.378,
+          "unfit": null
+        },
+        "8x16": {
+          "usd": 0.756,
+          "unfit": null
+        },
+        "16x32": {
+          "usd": 1.512,
+          "unfit": null
+        },
+        "32x128": {
+          "usd": 4.2048,
+          "unfit": "max 16 vCPU"
         }
       }
     },
