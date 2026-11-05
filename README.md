@@ -1,6 +1,6 @@
 # sandboxrouter
 
-**One API for every sandbox.** A free, open-source router for the places an AI agent can run code: Alibaba Cloud, AWS (Bedrock AgentCore and Lambda MicroVMs), Azure Container Apps, Beam, Blaxel, Boat, Cloudflare, CodeSandbox, Daytona, Deno, E2B, exe.dev, Fly.io Sprites, Freestyle, HOPX, Koyeb, Maritime, Modal, Morph, Northflank, Novita, Runloop, Tensorlake, Upstash Box and Vercel, plus Docker on your own machine. It picks a provider by price, speed or capability, and falls back to the next one when a provider is down or rate-limited.
+**One API for every sandbox.** A free, open-source router for the places an AI agent can run code: Agent37, Alibaba Cloud, AWS (Bedrock AgentCore and Lambda MicroVMs), Azure Container Apps, Beam, Blaxel, Boat, Cloudflare, CodeSandbox, Daytona, Dedalus Machines, Deno, E2B, exe.dev, Fly.io Sprites, Freestyle, HOPX, Koyeb, Maritime, Modal, Morph, Northflank, Novita, Runloop, Tensorlake, Upstash Box and Vercel, plus Docker on your own machine. It picks a provider by price, speed or capability, and falls back to the next one when a provider is down or rate-limited.
 
 ```ts
 import { Router } from "@sandboxrouter/sdk";
@@ -48,6 +48,7 @@ Estimated list price while running, 2 vCPU / 4 GB (`npx @sandboxrouter/sdk provi
 
 | Provider | $/hr | Notes | Source |
 |---|---|---|---|
+| Agent37 | $0.006 | Per minute on fixed shapes (2 vCPU / 4 GB = $4.76/mo with disk); asleep = disk only ($0.09/GB-mo); gVisor isolation; prepaid wallet must hold 1 day of compute | [pricing](https://www.agent37.com/docs/agents-api/instance-sizing) |
 | Boat | $0.018 | Fixed sizes billed per second ($0.018/h for 2 vCPU / 4 GB up to $0.20/h for 16 / 32); needs a plan from $20/mo, paid back as VM time | [pricing](https://docs.boat.dev/pricing.md) |
 | Maritime | $0.022 | Per second, disk included | [pricing](https://maritime.sh/pricing) |
 | Koyeb Sandboxes | $0.058 | Per second; fixed Standard instance sizes (1 vCPU + 1 GB = $0.0144/h); sandboxes need a paid plan (Pro $29/mo); public preview | [pricing](https://www.koyeb.com/docs/reference/instances) |
@@ -58,6 +59,7 @@ Estimated list price while running, 2 vCPU / 4 GB (`npx @sandboxrouter/sdk provi
 | Freestyle | $0.134 | Per second on allocated size; sizes fixed by base snapshot, disk included; free tier 200 vCPU-h + 400 GiB-h/mo; paused VMs bill storage only | [pricing](https://www.freestyle.sh/docs/vms/pricing-and-limits) |
 | Beam | $0.140 | Per second, Performance tier (sandbox default); Developer plan $20/mo incl. $20 credits; GPUs billed separately | [pricing](https://www.beam.cloud/pricing) |
 | CodeSandbox SDK (Together) | $0.149 | Fixed VM tiers, credits at $0.01486 billed per started minute ($0.1486/h for 2 vCPU / 4 GB up to $4.7552/h for 64 / 128); free Build plan allows 10 concurrent VMs | [pricing](https://docs.together.ai/docs/together-code-sandbox-legacy) |
+| Dedalus Machines | $0.149 | Per second while awake; sleeping machines bill storage only (10 GiB included on Hobby, 20 on Pro); Hobby plan max 4 vCPU / 16 GiB; private beta | [pricing](https://docs.dedaluslabs.ai/dcs/dm/pricing) |
 | Fly.io Sprites | $0.164 | Bills actual CPU and memory use; this is the full-use price; storage extra | [pricing](https://fly.io/sprites) |
 | Blaxel | $0.166 | Billed on memory only ($0.0000115/GB-s), CPU scales with memory (~2 GB per core) | [pricing](https://blaxel.ai/pricing) |
 | Daytona | $0.166 | Per second, plus disk above 5 GiB | [pricing](https://www.daytona.io/pricing) |
@@ -82,7 +84,7 @@ Checked 2026-11-04.
 
 ```bash
 npm i @sandboxrouter/sdk
-# then the SDK of each provider you use (Azure, AgentCore, Boat, Cloudflare, exe.dev, Freestyle, Koyeb,
+# then the SDK of each provider you use (Agent37, Azure, AgentCore, Boat, Cloudflare, Dedalus, exe.dev, Freestyle, Koyeb,
 # Lambda, Maritime, Upstash and Docker need none; the AWS ones need the signing packages below):
 npm i e2b                       # E2B
 npm i @daytonaio/sdk            # Daytona
@@ -111,6 +113,7 @@ Set the keys for the providers you want. Providers without keys are skipped.
 
 | Provider | Env |
 |---|---|
+| Agent37 | `AGENT37_API_KEY` |
 | Alibaba Cloud Agent Sandbox | `ALIBABA_SANDBOX_API_KEY` |
 | Amazon Bedrock AgentCore Code Interpreter | `AGENTCORE_CODE_INTERPRETER_ID` + `AWS_REGION` + `AWS_ACCESS_KEY_ID` + `AWS_SECRET_ACCESS_KEY`, or `AGENTCORE_CODE_INTERPRETER_ID` + `AWS_REGION` + `AWS_PROFILE` |
 | AWS Lambda MicroVMs | `AWS_REGION` + `LAMBDA_MICROVM_IMAGE` + `AWS_ACCESS_KEY_ID` + `AWS_SECRET_ACCESS_KEY`, or `AWS_REGION` + `LAMBDA_MICROVM_IMAGE` + `AWS_PROFILE` |
@@ -121,6 +124,7 @@ Set the keys for the providers you want. Providers without keys are skipped.
 | Cloudflare Sandbox | `CLOUDFLARE_SANDBOX_URL` + `CLOUDFLARE_SANDBOX_TOKEN` |
 | CodeSandbox SDK (Together) | `CSB_API_KEY` |
 | Daytona | `DAYTONA_API_KEY` |
+| Dedalus Machines | `DEDALUS_API_KEY` |
 | Deno Sandbox | `DENO_DEPLOY_TOKEN` |
 | Docker (local) | none: Docker running locally |
 | E2B | `E2B_API_KEY` |
@@ -301,11 +305,13 @@ with sr.create(vcpu=2, memory_gb=4, strategy="cheapest") as sbx:
 | Cloudflare | smallest instance type that fits | alarm in the bridge Worker | Dockerfile in the bridge | no | Through the bridge Worker you deploy ([`bridges/cloudflare`](bridges/cloudflare)). |
 | Boat | smallest of 4 fixed sizes that fits | auto-stop timer | saved snapshot | yes (stop: disk kept, processes end) | Plain REST. Commands that wait are capped at 600 s; files API up to 5 MiB. |
 | exe.dev | `--cpu`, `--memory` (2 GiB per vCPU max) | none: `kill()` deletes | `--image` | no | Plain REST over exe.dev's `/exec`; long commands run detached and are polled. |
+| Agent37 | smallest of 4 fixed shapes that fits (max 4 vCPU) | auto-sleep after idle (5 min to 24 h) | template (`agent37-base` default) | yes (sleep: memory + disk) | Plain REST; no streaming; files move as base64 over exec in chunks. |
 | Alibaba Cloud | set by the template | `timeoutMs` (max 24 h) | template | no (allowlist only) | E2B-compatible API via the `e2b` SDK; region from `ALIBABA_SANDBOX_REGION` (default ap-southeast-1). |
 | AgentCore | fixed 2 vCPU / 8 GB | `sessionTimeoutSeconds` (max 8 h) | no | no | SigV4, plain fetch; files move as base64 over commands. Opt-in. |
 | Azure sessions | fixed by the pool | pool cooldown (5 to 60 min idle) | no | no | Shell session pool; output over 4 KB is fetched from files. |
 | Beam | `cpu`, `memory` | `keepWarmSeconds` | registry image | no | Uses Beam app `sandboxrouter` (override with `SANDBOXROUTER_BEAM_APP`). |
 | CodeSandbox | smallest of 7 fixed tiers that fits | hibernation timeout | template | yes (hibernate: memory + disk) | Exec output goes through files because the SDK's terminal merges streams. |
+| Dedalus Machines | `vcpu`, `memory_mib` | autosleep after idle (compute stops, disk kept) | no | yes (sleep/wake) | Plain REST; streams by polling the events feed; files move as base64 over stdin/stdout. Private beta. |
 | Deno | fixed 2 vCPU, 0.75 to 4 GB | up to 30 min | snapshot or volume | no | WebSocket RPC via `@deno/sandbox`. |
 | Freestyle | smallest Ubuntu snapshot that fits | `ttlSeconds` | snapshot | yes (memory + disk) | Plain REST; long commands run as background requests and are polled. |
 | Koyeb | smallest Standard instance that fits | auto-delete delay (max 24 h) | any Docker image | no | Plain REST; streams over SSE. Public preview. |
@@ -320,6 +326,7 @@ Capabilities in the catalog describe what each **adapter** implements, not every
 
 - [x] More providers: Morph, Fly.io Sprites, Blaxel, Tensorlake, Runloop, HOPX, Northflank, Boat, exe.dev, Cloudflare (via a bridge Worker), Docker (local)
 - [x] More providers: Koyeb, Freestyle, Deno, Beam, CodeSandbox, Upstash Box, Novita, Alibaba Cloud, Azure Container Apps sessions, AWS Bedrock AgentCore, AWS Lambda MicroVMs
+- [x] YC sandbox startups: Dedalus Machines (S25), Agent37 (F26)
 - [ ] More E2B-compatible clouds (PPIO, UCloud, Baidu) and Google Agent Engine sandboxes
 - [x] Neutral routing: price decides, ties alphabetical, no privileged slot
 - [x] Desktops and phones from 7 providers (Linux, Windows, Android, iOS), routed by price per OS

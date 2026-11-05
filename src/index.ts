@@ -48,6 +48,8 @@ export { CodeSandboxProvider } from "./providers/codesandbox.js";
 export { DenoProvider } from "./providers/deno.js";
 export { FreestyleProvider } from "./providers/freestyle.js";
 export { KoyebProvider } from "./providers/koyeb.js";
+export { DedalusProvider } from "./providers/dedalus.js";
+export { Agent37Provider, AGENT37_SHAPES, agent37Shape } from "./providers/agent37.js";
 export { NovitaProvider } from "./providers/novita.js";
 export { UpstashProvider } from "./providers/upstash.js";
 export { OrgoProvider } from "./providers/orgo.js";

@@ -1,5 +1,6 @@
 import type { Capability, ProviderId, SandboxSpec } from "./types.js";
 import { KOYEB_INSTANCES, koyebInstance } from "./providers/koyeb.js";
+import { AGENT37_SHAPES, agent37Shape } from "./providers/agent37.js";
 import { FREESTYLE_SIZES, freestyleSize } from "./providers/freestyle.js";
 
 export interface ProviderInfo {
@@ -330,6 +331,21 @@ ENTRIES.push(
     docs: "https://docs.aws.amazon.com/lambda/latest/dg/lambda-microvms-guide.html",
   },
   {
+    id: "agent37",
+    name: "Agent37",
+    pricing: {
+      vcpuHour: AGENT37_SHAPES[0].usdHour,
+      gbHour: 0,
+      note: "per minute on fixed shapes (2 vCPU / 4 GB = $4.76/mo with disk); asleep = disk only ($0.09/GB-mo); gVisor isolation; prepaid wallet must hold 1 day of compute",
+      source: "https://www.agent37.com/docs/agents-api/instance-sizing",
+      checked: "2026-11-05",
+    },
+    capabilities: ["pause", "custom-image"],
+    limits: { maxVcpu: 4, maxMemoryGb: 32 },
+    credentials: [["AGENT37_API_KEY"]],
+    docs: "https://www.agent37.com/docs/agents-api/overview",
+  },
+  {
     id: "alibaba",
     name: "Alibaba Cloud Agent Sandbox",
     pricing: {
@@ -375,6 +391,21 @@ ENTRIES.push(
     limits: { maxVcpu: 64, maxMemoryGb: 128 },
     credentials: [["CSB_API_KEY"]],
     docs: "https://codesandbox.io/docs/sdk",
+  },
+  {
+    id: "dedalus",
+    name: "Dedalus Machines",
+    pricing: {
+      vcpuHour: 0.04536,
+      gbHour: 0.01458,
+      note: "per second while awake; sleeping machines bill storage only (10 GiB included on Hobby, 20 on Pro); Hobby plan max 4 vCPU / 16 GiB; private beta",
+      source: "https://docs.dedaluslabs.ai/dcs/dm/pricing",
+      checked: "2026-11-05",
+    },
+    capabilities: ["pause"],
+    limits: { maxVcpu: 16, maxMemoryGb: 64 },
+    credentials: [["DEDALUS_API_KEY"]],
+    docs: "https://docs.dedaluslabs.ai/dcs/dm/quickstart",
   },
   {
     id: "deno",
@@ -541,6 +572,7 @@ export function hourlyCost(id: ProviderId, spec: SandboxSpec = {}): number {
     const size = [0.5, 1, 2, 4, 8].find((s) => s >= Math.max(mem, vcpu * 2)) ?? 8;
     return size * pricing.gbHour + (size / 2) * pricing.vcpuHour;
   }
+  if (id === "agent37") return (agent37Shape(vcpu, mem) ?? AGENT37_SHAPES[AGENT37_SHAPES.length - 1]).usdHour;
   if (id === "codesandbox") return codesandboxTier(vcpu, mem).usdHour;
   if (id === "koyeb") return (koyebInstance(vcpu, mem) ?? KOYEB_INSTANCES[KOYEB_INSTANCES.length - 1]).usdHour;
   if (id === "freestyle") return (freestyleSize(vcpu, mem) ?? FREESTYLE_SIZES[FREESTYLE_SIZES.length - 1]).usdHour;

@@ -113,4 +113,6 @@ export const PACKAGE: Record<string, string | null> = {
   beam: "@beamcloud/beam-js",
   codesandbox: "@codesandbox/sdk",
   deno: "@deno/sandbox",
+  dedalus: null,
+  agent37: null,
 };

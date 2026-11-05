@@ -34,6 +34,8 @@ import { CodeSandboxProvider } from "./providers/codesandbox.js";
 import { DenoProvider } from "./providers/deno.js";
 import { FreestyleProvider } from "./providers/freestyle.js";
 import { KoyebProvider } from "./providers/koyeb.js";
+import { DedalusProvider } from "./providers/dedalus.js";
+import { Agent37Provider } from "./providers/agent37.js";
 import { NovitaProvider } from "./providers/novita.js";
 import { UpstashProvider } from "./providers/upstash.js";
 import { OrgoProvider } from "./providers/orgo.js";
@@ -94,9 +96,11 @@ export function defaultProviders(): Provider[] {
     new AgentCoreProvider(),
     new AzureSessionsProvider(),
     new LambdaMicrovmProvider(),
+    new Agent37Provider(),
     new AlibabaProvider(),
     new BeamProvider(),
     new CodeSandboxProvider(),
+    new DedalusProvider(),
     new DenoProvider(),
     new FreestyleProvider(),
     new KoyebProvider(),

@@ -1,6 +1,6 @@
 {
   "version": "0.2.0",
-  "generatedAt": "2026-11-05T02:11:10.887Z",
+  "generatedAt": "2026-11-05T13:02:43.676Z",
   "shapes": [
     "1x2",
     "2x4",
@@ -10,6 +10,59 @@
     "32x128"
   ],
   "providers": [
+    {
+      "id": "agent37",
+      "name": "Agent37",
+      "local": false,
+      "capabilities": [
+        "pause",
+        "custom-image"
+      ],
+      "limits": {
+        "maxVcpu": 4,
+        "maxMemoryGb": 32
+      },
+      "credentials": [
+        [
+          "AGENT37_API_KEY"
+        ]
+      ],
+      "docs": "https://www.agent37.com/docs/agents-api/overview",
+      "pricing": {
+        "vcpuHour": 0.006027397260273973,
+        "gbHour": 0,
+        "note": "per minute on fixed shapes (2 vCPU / 4 GB = $4.76/mo with disk); asleep = disk only ($0.09/GB-mo); gVisor isolation; prepaid wallet must hold 1 day of compute",
+        "source": "https://www.agent37.com/docs/agents-api/instance-sizing",
+        "checked": "2026-11-05"
+      },
+      "computers": [],
+      "prices": {
+        "1x2": {
+          "usd": 0.006,
+          "unfit": null
+        },
+        "2x4": {
+          "usd": 0.006,
+          "unfit": null
+        },
+        "4x8": {
+          "usd": 0.0121,
+          "unfit": null
+        },
+        "8x16": {
+          "usd": 0.0351,
+          "unfit": "max 4 vCPU"
+        },
+        "16x32": {
+          "usd": 0.0351,
+          "unfit": "max 4 vCPU"
+        },
+        "32x128": {
+          "usd": 0.0351,
+          "unfit": "max 4 vCPU"
+        }
+      }
+    },
     {
       "id": "alibaba",
       "name": "Alibaba Cloud Agent Sandbox",
@@ -554,6 +607,58 @@
         "32x128": {
           "usd": 3.6864,
           "unfit": "max 4 vCPU"
+        }
+      }
+    },
+    {
+      "id": "dedalus",
+      "name": "Dedalus Machines",
+      "local": false,
+      "capabilities": [
+        "pause"
+      ],
+      "limits": {
+        "maxVcpu": 16,
+        "maxMemoryGb": 64
+      },
+      "credentials": [
+        [
+          "DEDALUS_API_KEY"
+        ]
+      ],
+      "docs": "https://docs.dedaluslabs.ai/dcs/dm/quickstart",
+      "pricing": {
+        "vcpuHour": 0.04536,
+        "gbHour": 0.01458,
+        "note": "per second while awake; sleeping machines bill storage only (10 GiB included on Hobby, 20 on Pro); Hobby plan max 4 vCPU / 16 GiB; private beta",
+        "source": "https://docs.dedaluslabs.ai/dcs/dm/pricing",
+        "checked": "2026-11-05"
+      },
+      "computers": [],
+      "prices": {
+        "1x2": {
+          "usd": 0.0745,
+          "unfit": null
+        },
+        "2x4": {
+          "usd": 0.149,
+          "unfit": null
+        },
+        "4x8": {
+          "usd": 0.2981,
+          "unfit": null
+        },
+        "8x16": {
+          "usd": 0.5962,
+          "unfit": null
+        },
+        "16x32": {
+          "usd": 1.1923,
+          "unfit": null
+        },
+        "32x128": {
+          "usd": 3.3178,
+          "unfit": "max 16 vCPU"
         }
       }
     },

@@ -25,7 +25,9 @@ export type ProviderId =
   | "codesandbox"
   | "azure"
   | "agentcore"
-  | "lambda";
+  | "lambda"
+  | "dedalus"
+  | "agent37";
 
 /** Things a caller can require of a provider. The router skips providers that lack one. */
 export type Capability =
