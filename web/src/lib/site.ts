@@ -115,4 +115,7 @@ export const PACKAGE: Record<string, string | null> = {
   deno: "@deno/sandbox",
   dedalus: null,
   agent37: null,
+  openscale: "e2b",
+  superserve: null,
+  instabox: null,
 };

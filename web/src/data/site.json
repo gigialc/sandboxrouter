@@ -1,6 +1,6 @@
 {
   "version": "0.2.0",
-  "generatedAt": "2026-11-05T13:02:43.676Z",
+  "generatedAt": "2026-11-05T13:11:11.561Z",
   "shapes": [
     "1x2",
     "2x4",
@@ -1027,6 +1027,59 @@
       }
     },
     {
+      "id": "instabox",
+      "name": "InstaBox",
+      "local": false,
+      "capabilities": [
+        "pause",
+        "custom-image"
+      ],
+      "limits": {
+        "maxVcpu": 8,
+        "maxMemoryGb": 16
+      },
+      "credentials": [
+        [
+          "INSTABOX_API_KEY"
+        ]
+      ],
+      "docs": "https://instabox.sh/docs/api.md",
+      "pricing": {
+        "vcpuHour": 0.004,
+        "gbHour": 0.00225,
+        "note": "per second while running on fixed sizes (2/4, 4/8, 8/16); paused or stopped boxes bill only /data beyond the included disk ($0.00011/GiB-h); Pro $20/mo includes $20 credits; free plan: 1 box at 4/8",
+        "source": "https://instabox.sh/docs/pricing.md",
+        "checked": "2026-11-05"
+      },
+      "computers": [],
+      "prices": {
+        "1x2": {
+          "usd": 0.017,
+          "unfit": null
+        },
+        "2x4": {
+          "usd": 0.017,
+          "unfit": null
+        },
+        "4x8": {
+          "usd": 0.034,
+          "unfit": null
+        },
+        "8x16": {
+          "usd": 0.068,
+          "unfit": null
+        },
+        "16x32": {
+          "usd": 0.136,
+          "unfit": "max 8 vCPU"
+        },
+        "32x128": {
+          "usd": 0.272,
+          "unfit": "max 8 vCPU"
+        }
+      }
+    },
+    {
       "id": "koyeb",
       "name": "Koyeb Sandboxes",
       "local": false,
@@ -1349,6 +1402,59 @@
       }
     },
     {
+      "id": "openscale",
+      "name": "OpenScale Sandboxes",
+      "local": false,
+      "capabilities": [
+        "pause",
+        "custom-image"
+      ],
+      "limits": {
+        "maxVcpu": 8,
+        "maxMemoryGb": 16
+      },
+      "credentials": [
+        [
+          "OPENSCALE_API_KEY"
+        ]
+      ],
+      "docs": "https://openscale.so/sandboxes",
+      "pricing": {
+        "vcpuHour": 0.0065,
+        "gbHour": 0.001,
+        "note": "per second on allocated size; no platform fee or minimum; paused = free; size comes from the template (E2B-compatible API); Singapore only; needs a pay-as-you-go key",
+        "source": "https://openscale.so/sandboxes",
+        "checked": "2026-11-05"
+      },
+      "computers": [],
+      "prices": {
+        "1x2": {
+          "usd": 0.0085,
+          "unfit": null
+        },
+        "2x4": {
+          "usd": 0.017,
+          "unfit": null
+        },
+        "4x8": {
+          "usd": 0.034,
+          "unfit": null
+        },
+        "8x16": {
+          "usd": 0.068,
+          "unfit": null
+        },
+        "16x32": {
+          "usd": 0.136,
+          "unfit": "max 8 vCPU"
+        },
+        "32x128": {
+          "usd": 0.336,
+          "unfit": "max 8 vCPU"
+        }
+      }
+    },
+    {
       "id": "runloop",
       "name": "Runloop",
       "local": false,
@@ -1398,6 +1504,59 @@
         "32x128": {
           "usd": 6.6816,
           "unfit": "max 16 vCPU"
+        }
+      }
+    },
+    {
+      "id": "superserve",
+      "name": "Superserve",
+      "local": false,
+      "capabilities": [
+        "pause",
+        "custom-image"
+      ],
+      "limits": {
+        "maxVcpu": 2,
+        "maxMemoryGb": 4
+      },
+      "credentials": [
+        [
+          "SUPERSERVE_API_KEY"
+        ]
+      ],
+      "docs": "https://docs.superserve.ai",
+      "pricing": {
+        "vcpuHour": 0.0504,
+        "gbHour": 0.0162,
+        "note": "per second while active; paused bills storage only ($0.000108/GiB-h); sizes fixed by template (system templates 2 vCPU / 4 GiB); Free plan: 1 concurrent sandbox, $0.13/day allowance; bigger sizes need a team template on a paid plan",
+        "source": "https://superserve.ai/pricing",
+        "checked": "2026-11-05"
+      },
+      "computers": [],
+      "prices": {
+        "1x2": {
+          "usd": 0.1656,
+          "unfit": null
+        },
+        "2x4": {
+          "usd": 0.1656,
+          "unfit": null
+        },
+        "4x8": {
+          "usd": 0.1656,
+          "unfit": "max 2 vCPU"
+        },
+        "8x16": {
+          "usd": 0.1656,
+          "unfit": "max 2 vCPU"
+        },
+        "16x32": {
+          "usd": 0.1656,
+          "unfit": "max 2 vCPU"
+        },
+        "32x128": {
+          "usd": 0.1656,
+          "unfit": "max 2 vCPU"
         }
       }
     },

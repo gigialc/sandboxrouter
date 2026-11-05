@@ -27,7 +27,10 @@ export type ProviderId =
   | "agentcore"
   | "lambda"
   | "dedalus"
-  | "agent37";
+  | "agent37"
+  | "superserve"
+  | "instabox"
+  | "openscale";
 
 /** Things a caller can require of a provider. The router skips providers that lack one. */
 export type Capability =

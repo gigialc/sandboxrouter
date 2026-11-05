@@ -1,6 +1,6 @@
 # sandboxrouter
 
-**One API for every sandbox.** A free, open-source router for the places an AI agent can run code: Agent37, Alibaba Cloud, AWS (Bedrock AgentCore and Lambda MicroVMs), Azure Container Apps, Beam, Blaxel, Boat, Cloudflare, CodeSandbox, Daytona, Dedalus Machines, Deno, E2B, exe.dev, Fly.io Sprites, Freestyle, HOPX, Koyeb, Maritime, Modal, Morph, Northflank, Novita, Runloop, Tensorlake, Upstash Box and Vercel, plus Docker on your own machine. It picks a provider by price, speed or capability, and falls back to the next one when a provider is down or rate-limited.
+**One API for every sandbox.** A free, open-source router for the places an AI agent can run code: Agent37, Alibaba Cloud, AWS (Bedrock AgentCore and Lambda MicroVMs), Azure Container Apps, Beam, Blaxel, Boat, Cloudflare, CodeSandbox, Daytona, Dedalus Machines, Deno, E2B, exe.dev, Fly.io Sprites, Freestyle, HOPX, InstaBox, Koyeb, Maritime, Modal, Morph, Northflank, Novita, OpenScale, Runloop, Superserve, Tensorlake, Upstash Box and Vercel, plus Docker on your own machine. It picks a provider by price, speed or capability, and falls back to the next one when a provider is down or rate-limited.
 
 ```ts
 import { Router } from "@sandboxrouter/sdk";
@@ -49,6 +49,8 @@ Estimated list price while running, 2 vCPU / 4 GB (`npx @sandboxrouter/sdk provi
 | Provider | $/hr | Notes | Source |
 |---|---|---|---|
 | Agent37 | $0.006 | Per minute on fixed shapes (2 vCPU / 4 GB = $4.76/mo with disk); asleep = disk only ($0.09/GB-mo); gVisor isolation; prepaid wallet must hold 1 day of compute | [pricing](https://www.agent37.com/docs/agents-api/instance-sizing) |
+| InstaBox | $0.017 | Per second while running on fixed sizes (2/4, 4/8, 8/16); paused or stopped boxes bill only /data beyond the included disk ($0.00011/GiB-h); Pro $20/mo includes $20 credits; free plan: 1 box at 4/8 | [pricing](https://instabox.sh/docs/pricing.md) |
+| OpenScale Sandboxes | $0.017 | Per second on allocated size; no platform fee or minimum; paused = free; size comes from the template (E2B-compatible API); Singapore only; needs a pay-as-you-go key | [pricing](https://openscale.so/sandboxes) |
 | Boat | $0.018 | Fixed sizes billed per second ($0.018/h for 2 vCPU / 4 GB up to $0.20/h for 16 / 32); needs a plan from $20/mo, paid back as VM time | [pricing](https://docs.boat.dev/pricing.md) |
 | Maritime | $0.022 | Per second, disk included | [pricing](https://maritime.sh/pricing) |
 | Koyeb Sandboxes | $0.058 | Per second; fixed Standard instance sizes (1 vCPU + 1 GB = $0.0144/h); sandboxes need a paid plan (Pro $29/mo); public preview | [pricing](https://www.koyeb.com/docs/reference/instances) |
@@ -65,7 +67,10 @@ Estimated list price while running, 2 vCPU / 4 GB (`npx @sandboxrouter/sdk provi
 | Daytona | $0.166 | Per second, plus disk above 5 GiB | [pricing](https://www.daytona.io/pricing) |
 | E2B | $0.166 | Per second; Pro plan $150/mo | [pricing](https://e2b.dev/pricing) |
 | HOPX | $0.166 | Per second, plus storage; size comes from the template, not the request | [pricing](https://hopx.ai/pricing) |
+| Superserve | $0.166 | Per second while active; paused bills storage only ($0.000108/GiB-h); sizes fixed by template (system templates 2 vCPU / 4 GiB); Free plan: 1 concurrent sandbox, $0.13/day allowance; bigger sizes need a team template on a paid plan | [pricing](https://superserve.ai/pricing) |
 | Tensorlake | $0.200 | Bills active CPU (floor 20% of allocation); this is the full-use price; Pro plan is lower | [pricing](https://www.tensorlake.ai/pricing) |
+| OpenScale | set by the template (1 to 8 vCPU, up to 16 GB) | `timeoutMs` | template (E2B builder) | yes (memory + disk, paused free) | E2B-compatible API via the `e2b` SDK at sandbox.openscale.so; Singapore only; needs a pay-as-you-go key. |
+| Superserve | fixed 2 vCPU / 4 GB (system templates); a team template sets its own size | auto-pause after the lifetime (not delete) | template name or id | yes (memory + disk) | Plain REST; data plane uses a per-sandbox token, re-activated on 401/503. |
 | Upstash Box | $0.200 | Billed per active CPU core-hour only (memory and idle time free); estimate assumes every core of the box busy; fixed sizes 2/4, 4/8, 8/16 | [pricing](https://upstash.com/pricing/box) |
 | Cloudflare Sandbox | $0.216 | Bills active CPU and provisioned memory of the instance type; this is the full-CPU price; needs Workers Paid ($5/mo) and the bridge Worker in bridges/cloudflare | [pricing](https://developers.cloudflare.com/containers/platform/pricing/) |
 | Amazon Bedrock AgentCore Code Interpreter | $0.217 | Per second; CPU billed on actual use (I/O wait free), memory on peak; fixed 2 vCPU / 8 GB session, this is the 100%-CPU price | [pricing](https://aws.amazon.com/bedrock/agentcore/pricing/) |
@@ -84,9 +89,9 @@ Checked 2026-11-04.
 
 ```bash
 npm i @sandboxrouter/sdk
-# then the SDK of each provider you use (Agent37, Azure, AgentCore, Boat, Cloudflare, Dedalus, exe.dev, Freestyle, Koyeb,
-# Lambda, Maritime, Upstash and Docker need none; the AWS ones need the signing packages below):
-npm i e2b                       # E2B
+# then the SDK of each provider you use (Agent37, Azure, AgentCore, Boat, Cloudflare, Dedalus, exe.dev, Freestyle, InstaBox, Koyeb,
+# Lambda, Maritime, Superserve, Upstash and Docker need none; the AWS ones need the signing packages below):
+npm i e2b                       # E2B (also Alibaba Cloud and OpenScale)
 npm i @daytonaio/sdk            # Daytona
 npm i modal                     # Modal
 npm i @vercel/sandbox           # Vercel Sandbox
@@ -132,13 +137,16 @@ Set the keys for the providers you want. Providers without keys are skipped.
 | Fly.io Sprites | `SPRITES_TOKEN` |
 | Freestyle | `FREESTYLE_API_KEY` |
 | HOPX | `HOPX_API_KEY` |
+| InstaBox | `INSTABOX_API_KEY` |
 | Koyeb Sandboxes | `KOYEB_API_TOKEN` |
 | Maritime | `MARITIME_API_KEY` |
 | Modal | `MODAL_TOKEN_ID` + `MODAL_TOKEN_SECRET` |
 | Morph Cloud | `MORPH_API_KEY` |
 | Northflank | `NORTHFLANK_API_TOKEN` + `NORTHFLANK_PROJECT_ID` |
 | Novita AI Agent Sandbox | `NOVITA_API_KEY` |
+| OpenScale Sandboxes | `OPENSCALE_API_KEY` |
 | Runloop | `RUNLOOP_API_KEY` |
+| Superserve | `SUPERSERVE_API_KEY` |
 | Tensorlake | `TENSORLAKE_API_KEY` |
 | Upstash Box | `UPSTASH_BOX_API_KEY` |
 | Vercel Sandbox | `VERCEL_OIDC_TOKEN`, or `VERCEL_TOKEN` + `VERCEL_TEAM_ID` + `VERCEL_PROJECT_ID` |
@@ -314,6 +322,7 @@ with sr.create(vcpu=2, memory_gb=4, strategy="cheapest") as sbx:
 | Dedalus Machines | `vcpu`, `memory_mib` | autosleep after idle (compute stops, disk kept) | no | yes (sleep/wake) | Plain REST; streams by polling the events feed; files move as base64 over stdin/stdout. Private beta. |
 | Deno | fixed 2 vCPU, 0.75 to 4 GB | up to 30 min | snapshot or volume | no | WebSocket RPC via `@deno/sandbox`. |
 | Freestyle | smallest Ubuntu snapshot that fits | `ttlSeconds` | snapshot | yes (memory + disk) | Plain REST; long commands run as background requests and are polled. |
+| InstaBox | smallest fixed size that fits (2/4, 4/8, 8/16; free plan falls back to 4/8) | `deleteAfterSeconds` (60 s to 24 h) | template or snapshot (`sn_...`) | yes (suspend: memory + disk) | Plain REST; exec via `bash -lc`, max 600 s, SSE streaming; files API raw bytes. Pauses itself after 30 idle min. |
 | Koyeb | smallest Standard instance that fits | auto-delete delay (max 24 h) | any Docker image | no | Plain REST; streams over SSE. Public preview. |
 | Lambda MicroVMs | image baseline (2 GB per vCPU) | `maximumDurationInSeconds` | your MicroVM image | yes (suspend/resume) | Runs the bundled in-VM server for exec and files. |
 | Novita | set by the template | `timeoutMs` | template | yes (memory + disk) | `novita-sandbox` SDK (an E2B fork). |
@@ -326,7 +335,7 @@ Capabilities in the catalog describe what each **adapter** implements, not every
 
 - [x] More providers: Morph, Fly.io Sprites, Blaxel, Tensorlake, Runloop, HOPX, Northflank, Boat, exe.dev, Cloudflare (via a bridge Worker), Docker (local)
 - [x] More providers: Koyeb, Freestyle, Deno, Beam, CodeSandbox, Upstash Box, Novita, Alibaba Cloud, Azure Container Apps sessions, AWS Bedrock AgentCore, AWS Lambda MicroVMs
-- [x] YC sandbox startups: Dedalus Machines (S25), Agent37 (F26)
+- [x] YC sandbox startups: Agent37 (F26), Dedalus Machines (S25), InstaBox (P26), OpenScale (S22), Superserve (F26)
 - [ ] More E2B-compatible clouds (PPIO, UCloud, Baidu) and Google Agent Engine sandboxes
 - [x] Neutral routing: price decides, ties alphabetical, no privileged slot
 - [x] Desktops and phones from 7 providers (Linux, Windows, Android, iOS), routed by price per OS

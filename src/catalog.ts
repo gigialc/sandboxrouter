@@ -1,6 +1,7 @@
 import type { Capability, ProviderId, SandboxSpec } from "./types.js";
 import { KOYEB_INSTANCES, koyebInstance } from "./providers/koyeb.js";
 import { AGENT37_SHAPES, agent37Shape } from "./providers/agent37.js";
+import { INSTABOX_SIZES, instaboxSize } from "./providers/instabox.js";
 import { FREESTYLE_SIZES, freestyleSize } from "./providers/freestyle.js";
 
 export interface ProviderInfo {
@@ -393,6 +394,36 @@ ENTRIES.push(
     docs: "https://codesandbox.io/docs/sdk",
   },
   {
+    id: "superserve",
+    name: "Superserve",
+    pricing: {
+      vcpuHour: 0.0504,
+      gbHour: 0.0162,
+      note: "per second while active; paused bills storage only ($0.000108/GiB-h); sizes fixed by template (system templates 2 vCPU / 4 GiB); Free plan: 1 concurrent sandbox, $0.13/day allowance; bigger sizes need a team template on a paid plan",
+      source: "https://superserve.ai/pricing",
+      checked: "2026-11-05",
+    },
+    capabilities: ["pause", "custom-image"],
+    limits: { maxVcpu: 2, maxMemoryGb: 4 },
+    credentials: [["SUPERSERVE_API_KEY"]],
+    docs: "https://docs.superserve.ai",
+  },
+  {
+    id: "openscale",
+    name: "OpenScale Sandboxes",
+    pricing: {
+      vcpuHour: 0.0065,
+      gbHour: 0.001,
+      note: "per second on allocated size; no platform fee or minimum; paused = free; size comes from the template (E2B-compatible API); Singapore only; needs a pay-as-you-go key",
+      source: "https://openscale.so/sandboxes",
+      checked: "2026-11-05",
+    },
+    capabilities: ["pause", "custom-image"],
+    limits: { maxVcpu: 8, maxMemoryGb: 16 },
+    credentials: [["OPENSCALE_API_KEY"]],
+    docs: "https://openscale.so/sandboxes",
+  },
+  {
     id: "dedalus",
     name: "Dedalus Machines",
     pricing: {
@@ -436,6 +467,21 @@ ENTRIES.push(
     limits: { maxVcpu: 32, maxMemoryGb: 64 },
     credentials: [["FREESTYLE_API_KEY"]],
     docs: "https://www.freestyle.sh/docs/vms",
+  },
+  {
+    id: "instabox",
+    name: "InstaBox",
+    pricing: {
+      vcpuHour: 0.004,
+      gbHour: 0.00225,
+      note: "per second while running on fixed sizes (2/4, 4/8, 8/16); paused or stopped boxes bill only /data beyond the included disk ($0.00011/GiB-h); Pro $20/mo includes $20 credits; free plan: 1 box at 4/8",
+      source: "https://instabox.sh/docs/pricing.md",
+      checked: "2026-11-05",
+    },
+    capabilities: ["pause", "custom-image"],
+    limits: { maxVcpu: 8, maxMemoryGb: 16 },
+    credentials: [["INSTABOX_API_KEY"]],
+    docs: "https://instabox.sh/docs/api.md",
   },
   {
     id: "koyeb",
@@ -571,6 +617,13 @@ export function hourlyCost(id: ProviderId, spec: SandboxSpec = {}): number {
   if (id === "lambda") {
     const size = [0.5, 1, 2, 4, 8].find((s) => s >= Math.max(mem, vcpu * 2)) ?? 8;
     return size * pricing.gbHour + (size / 2) * pricing.vcpuHour;
+  }
+  // Superserve system templates are a fixed 2 vCPU / 4 GiB, billed whole.
+  if (id === "superserve") return 2 * pricing.vcpuHour + 4 * pricing.gbHour;
+  // InstaBox bills the fixed size that fits.
+  if (id === "instabox") {
+    const s = instaboxSize(vcpu, mem) ?? INSTABOX_SIZES[INSTABOX_SIZES.length - 1];
+    return s.vcpu * pricing.vcpuHour + s.memoryGb * pricing.gbHour;
   }
   if (id === "agent37") return (agent37Shape(vcpu, mem) ?? AGENT37_SHAPES[AGENT37_SHAPES.length - 1]).usdHour;
   if (id === "codesandbox") return codesandboxTier(vcpu, mem).usdHour;
