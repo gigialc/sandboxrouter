@@ -5,3 +5,4 @@ dist
 *.tgz
 __pycache__/
 *.pyc
+.env.providers

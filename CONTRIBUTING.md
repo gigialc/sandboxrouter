@@ -27,6 +27,8 @@ npx tsx src/cli.ts check --provider koyeb        # 10 real steps; any FAIL line 
 npx tsx src/cli.ts bench --provider koyeb --share --label "your city"   # cold starts, writes results/*.json
 ```
 
+Maintainers: `npm run secrets:push -- --init` writes a gitignored `.env.providers` with every key name; fill it in and run `npm run secrets:push` to load the keys into the repo's Actions secrets for the nightly tests.
+
 Open an issue with the `check` output (it never prints your keys), and a PR with the `results/` file if you ran `bench --share`. Afterwards, check the provider's dashboard that nothing is left running.
 
 ## Fixing a price
