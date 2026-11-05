@@ -1,4 +1,4 @@
-import { CATALOG, hourlyCost, unfit } from "./catalog.js";
+import { CATALOG, accessLabel, hourlyCost, unfit } from "./catalog.js";
 import {
   RoutedComputer,
   createComputer,
@@ -170,7 +170,10 @@ export class Router {
         medianCreateMs: median(bench[id]?.createMs),
       };
       if (!p) c.skip = "unknown provider";
-      else c.skip = unfit(id, spec, route.require) ?? (p.configured() ? undefined : "not configured");
+      else {
+        const gated = accessLabel(id);
+        c.skip = unfit(id, spec, route.require) ?? (p.configured() ? undefined : gated ? `not configured; ${gated}` : "not configured");
+      }
       return c;
     });
 

@@ -17,6 +17,18 @@ export interface ProviderInfo {
   /** Env vars the adapter reads. Any one group being fully set means "configured". */
   credentials: string[][];
   docs: string;
+  /**
+   * Set when you can't just sign up and get a key: "waitlist" (invite or beta only) or "closed"
+   * (not taking new accounts). Existing accounts keep working, so routing is unchanged: the router
+   * only ever uses providers you have keys for.
+   */
+  access?: { status: "waitlist" | "closed"; note: string; checked: string };
+}
+
+/** Short label for a gated provider's sign-up status, or null when anyone can sign up. */
+export function accessLabel(id: ProviderId): string | null {
+  const a = CATALOG.find((c) => c.id === id)?.access;
+  return a ? (a.status === "waitlist" ? "sign-up waitlisted" : "not taking new accounts") : null;
 }
 
 /**
@@ -438,6 +450,7 @@ ENTRIES.push(
     limits: { maxVcpu: 16, maxMemoryGb: 64 },
     credentials: [["DEDALUS_API_KEY"]],
     docs: "https://docs.dedaluslabs.ai/dcs/dm/quickstart",
+    access: { status: "waitlist", note: "private beta: your organization has to be admitted before keys work", checked: "2026-11-05" },
   },
   {
     id: "deno",
@@ -483,6 +496,7 @@ ENTRIES.push(
     limits: { maxVcpu: 8, maxMemoryGb: 16 },
     credentials: [["INSTABOX_API_KEY"]],
     docs: "https://instabox.sh/docs/api.md",
+    access: { status: "waitlist", note: "new accounts go on a waitlist before they can create boxes or keys", checked: "2026-11-05" },
   },
   {
     id: "koyeb",
@@ -498,6 +512,11 @@ ENTRIES.push(
     limits: { maxVcpu: 40, maxMemoryGb: 128 },
     credentials: [["KOYEB_API_TOKEN"]],
     docs: "https://www.koyeb.com/docs/sandboxes",
+    access: {
+      status: "closed",
+      note: "Koyeb is joining Mistral; a new account's dashboard only shows that notice, with no way to create sandboxes or tokens. Existing accounts are unaffected",
+      checked: "2026-11-05",
+    },
   },
   {
     id: "novita",

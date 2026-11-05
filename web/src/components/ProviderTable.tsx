@@ -60,6 +60,11 @@ export function ProviderTable() {
                     {p.name}
                   </Link>
                   {p.local && <span className="ml-2 text-[11px] text-muted">opt-in</span>}
+                  {p.access && (
+                    <span className="ml-2 text-[11px] text-muted" title={p.access.note}>
+                      {p.access.status === "waitlist" ? "waitlist" : "no new accounts"}
+                    </span>
+                  )}
                 </td>
                 <td className="py-3 pr-4">
                   {price.unfit ? (

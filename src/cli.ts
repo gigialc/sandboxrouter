@@ -6,7 +6,7 @@ import { bench, benchMarkdown } from "./bench.js";
 import { checkProvider } from "./check.js";
 import { gc, listOpen } from "./gc.js";
 import { loadReports, makeReport, renderLeaderboard } from "./leaderboard.js";
-import { CATALOG, hourlyCost } from "./catalog.js";
+import { CATALOG, accessLabel, hourlyCost } from "./catalog.js";
 import { Router } from "./router.js";
 import { createApp } from "./server.js";
 import { RouterError, type Capability, type ProviderId, type SandboxSpec, type Strategy } from "./types.js";
@@ -98,6 +98,7 @@ async function main() {
       "$/hr": `$${hourlyCost(c.id, spec).toFixed(4)}`,
       configured: router.isConfigured(c.id) ? "yes" : "no",
       capabilities: c.capabilities.join(", ") || "-",
+      "sign-up": accessLabel(c.id) ?? "open",
     }));
     if (values.json) return console.log(JSON.stringify(rows, null, 2));
     console.log(`Estimated list price for ${spec.vcpu ?? 2} vCPU, ${spec.memoryGb ?? 4} GB while running:\n`);

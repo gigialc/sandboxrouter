@@ -3,7 +3,7 @@
 // Run: node --import tsx scripts/readme-tables.ts           print them
 //      node --import tsx scripts/readme-tables.ts --write   replace them in README.md
 import { readFileSync, writeFileSync } from "node:fs";
-import { CATALOG, hourlyCost, unfit } from "../src/catalog.js";
+import { CATALOG, accessLabel, hourlyCost, unfit } from "../src/catalog.js";
 import { CHECK_STEPS } from "../src/check.js";
 import { conformanceTable } from "../src/conformance.js";
 
@@ -19,7 +19,9 @@ for (const c of rows) {
   const note = (c.pricing.note ?? "").replace(/\|/g, "/");
   // Capitalize a leading plain word ("per second" -> "Per second"), but not codes like "us-east-1" or "iad1".
   const shown = /^[a-z]+(?:-[a-z]+)*(?=[\s,;:(]|$)/.test(note) ? note[0].toUpperCase() + note.slice(1) : note;
-  prices.push(`| ${c.name} | ${price} | ${shown} | [pricing](${c.pricing.source}) |`);
+  const gated = accessLabel(c.id);
+  const name = gated ? `${c.name} (${gated})` : c.name;
+  prices.push(`| ${name} | ${price} | ${shown} | [pricing](${c.pricing.source}) |`);
 }
 const dates = CATALOG.filter((c) => !c.local).map((c) => c.pricing.checked).sort();
 prices.push("", `Checked ${dates[0] === dates.at(-1) ? dates[0] : `${dates[0]} to ${dates.at(-1)}`}.`);

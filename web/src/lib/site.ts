@@ -11,6 +11,8 @@ export interface SiteProvider {
   docs: string;
   local?: boolean;
   pricing: { vcpuHour: number; gbHour: number; note?: string; source: string; checked: string };
+  /** Set when you can't just sign up: "waitlist" (invite or beta only) or "closed" (no new accounts). */
+  access: null | { status: "waitlist" | "closed"; note: string; checked: string };
   computers: string[];
   prices: Record<Shape, { usd: number; unfit: string | null }>;
   /** The last saved real-account `check` run, or null when none has been saved. */
