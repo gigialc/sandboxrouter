@@ -229,6 +229,14 @@ npx @sandboxrouter/sdk serve --port 8787            # HTTP API
 
 `--share` writes a JSON report (timings, your label, Node version and platform; never keys, env or error text). Open a PR adding it to [`results/`](results/). `sandboxrouter leaderboard` builds one static HTML page from every report there, taking the median of each submission's medians so one submitter can't dominate. Host the page anywhere static files go.
 
+Testing an adapter against a real account:
+
+```bash
+sandboxrouter check --provider koyeb    # create, exec, env/cwd, streaming, binary files, timeout, pause, kill
+```
+
+It prints one line per step and exits 1 if any fails. `checkProvider(router, id)` does the same from code.
+
 ## HTTP API
 
 ```bash

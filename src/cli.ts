@@ -2,6 +2,7 @@
 import { parseArgs } from "node:util";
 import { readFileSync, writeFileSync } from "node:fs";
 import { bench, benchMarkdown } from "./bench.js";
+import { checkProvider } from "./check.js";
 import { loadReports, makeReport, renderLeaderboard } from "./leaderboard.js";
 import { CATALOG, hourlyCost } from "./catalog.js";
 import { Router } from "./router.js";
@@ -14,9 +15,11 @@ Usage:
   sandboxrouter providers [--vcpu N] [--memory GB]   price table + which keys are set
   sandboxrouter route     [spec flags] [route flags] dry run: the order providers would be tried
   sandboxrouter run "<cmd>" [spec flags] [route flags] [--keep]
+  sandboxrouter check     --provider ID [--json]           test one provider for real: exec, env, streaming,
+                          files, timeout, pause, kill; exits 1 if any step fails
   sandboxrouter bench     [--runs 3] [--provider a,b] [--json] [--share [--label "where you ran it"]]
   sandboxrouter leaderboard [results-dir] [--out leaderboard.html]
-  sandboxrouter desktop   [--os linux|windows|android] [--user ID] [--control]
+  sandboxrouter desktop   [--os linux|windows|android|ios] [--user ID] [--control]
                           get or create a computer and print a link to watch (or take over) its screen
   sandboxrouter screenshot <provider:id> [--out screen.png]
   sandboxrouter serve     [--port 8787] [--host 127.0.0.1] [--cors https://site.example,http://localhost:3000]
@@ -25,8 +28,7 @@ Spec flags:   --vcpu N  --memory GB  --gpu T4  --timeout MIN
 Route flags:  --provider e2b[,modal,...]  --strategy cheapest|fastest
               --no-fallback  --require gpu,custom-image
 
-Keys: MARITIME_API_KEY, E2B_API_KEY, DAYTONA_API_KEY, MODAL_TOKEN_ID+MODAL_TOKEN_SECRET,
-      VERCEL_OIDC_TOKEN (or VERCEL_TOKEN+VERCEL_TEAM_ID+VERCEL_PROJECT_ID)`;
+Keys: one env var group per provider; "sandboxrouter providers" lists them and shows which are set.`;
 
 const { values, positionals } = parseArgs({
   allowPositionals: true,
@@ -120,6 +122,26 @@ async function main() {
       if (values.keep) console.error(`> kept alive: ${sbx.id}`);
       else await sbx.kill();
     }
+    return;
+  }
+
+  if (cmd === "check") {
+    if (!providers?.length) throw new RouterError("usage: sandboxrouter check --provider <id>[,<id>...]");
+    const mark = { pass: "ok  ", fail: "FAIL", skip: "skip", info: "note" } as const;
+    const reports = [];
+    for (const p of providers) {
+      if (!values.json) console.log(`\n${p}`);
+      const report = await checkProvider(router, p, {
+        spec,
+        onStep: (r) => {
+          if (!values.json) console.log(`  ${mark[r.status]}  ${r.step.padEnd(32)} ${String(r.ms).padStart(6)} ms  ${r.detail ?? ""}`);
+        },
+      });
+      reports.push(report);
+    }
+    if (values.json) console.log(JSON.stringify(reports, null, 2));
+    else console.log(`\n${reports.filter((r) => r.ok).length}/${reports.length} passed`);
+    if (reports.some((r) => !r.ok)) process.exitCode = 1;
     return;
   }
 

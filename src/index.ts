@@ -1,3 +1,4 @@
+export { checkProvider, type CheckReport, type CheckResult, type CheckStatus } from "./check.js";
 export { Router, RoutedSandbox, defaultProviders, defaultComputerProviders, parseId, type Candidate, type RouterOptions } from "./router.js";
 export { CATALOG, hourlyCost, unfit, info, type ProviderInfo } from "./catalog.js";
 export { createApp } from "./server.js";
