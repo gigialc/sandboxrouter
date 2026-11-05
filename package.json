@@ -26,7 +26,8 @@
     "dev": "tsx src/cli.ts",
     "prepublishOnly": "npm run build && npm test",
     "test:py": "python3 -m unittest discover -s python/tests -v",
-    "site:data": "node --import tsx scripts/site-data.ts"
+    "site:data": "node --import tsx scripts/site-data.ts",
+    "price:check": "node --import tsx scripts/price-watch.ts"
   },
   "keywords": [
     "ai-agents",

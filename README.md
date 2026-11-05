@@ -363,12 +363,15 @@ SANDBOXROUTER_TOKEN=secret npx @sandboxrouter/sdk serve --cors http://localhost:
 
 ```bash
 npm i
-npm test          # router, HTTP server, leaderboard, Maritime sandboxes + computers against contract mocks
-npm run test:py   # Python client against the real HTTP server
+npm test             # router, HTTP server, and every adapter against a local mock of its API
+npm run test:py      # Python client against the real HTTP server
 npm run build
 npm run dev -- providers
+npm run price:check  # compare every provider's pricing page with the last check
 ```
 
-Adding a provider means implementing `Provider` from [`src/types.ts`](src/types.ts) and adding a catalog entry with a pricing source link.
+Prices are list prices copied from each provider's public pricing page, with the date they were checked. A GitHub workflow runs `price:check` every Monday and opens an issue when a pricing page changes or a price is more than 45 days old; a person then updates [`src/catalog.ts`](src/catalog.ts).
 
-MIT
+See [CONTRIBUTING.md](CONTRIBUTING.md) to test a provider, fix a price or add one, [SECURITY.md](SECURITY.md) to report a vulnerability, and [CHANGELOG.md](CHANGELOG.md) for releases.
+
+[MIT](LICENSE)

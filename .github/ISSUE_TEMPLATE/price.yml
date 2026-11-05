@@ -1,0 +1,23 @@
+name: Wrong price or limit
+description: A provider's price, size limit or capability in the catalog is out of date.
+labels: [pricing]
+body:
+  - type: input
+    id: provider
+    attributes:
+      label: Provider id
+    validations:
+      required: true
+  - type: textarea
+    id: wrong
+    attributes:
+      label: What the catalog says, and what it should say
+      description: For example, "vCPU-hour 0.05 should be 0.04536".
+    validations:
+      required: true
+  - type: input
+    id: source
+    attributes:
+      label: Link to the provider's public pricing page
+    validations:
+      required: true

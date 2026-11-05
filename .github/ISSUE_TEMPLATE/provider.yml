@@ -1,0 +1,34 @@
+name: New provider
+description: Suggest a sandbox, desktop or phone provider to add.
+labels: [provider]
+body:
+  - type: input
+    id: name
+    attributes:
+      label: Provider and website
+    validations:
+      required: true
+  - type: input
+    id: api
+    attributes:
+      label: API or SDK docs
+      description: A public, self-serve way to create a sandbox, run a command, move files and delete it.
+    validations:
+      required: true
+  - type: input
+    id: pricing
+    attributes:
+      label: Public pricing page
+      description: Per-hour or per-second list prices. Providers without public prices can't be ranked fairly, so they aren't added.
+    validations:
+      required: true
+  - type: dropdown
+    id: who
+    attributes:
+      label: Are you from this provider?
+      options: ["No", "Yes, and I can test the adapter or give test credits"]
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything else
+      description: Pause/resume, custom images, GPUs, regions, limits.

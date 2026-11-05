@@ -1,0 +1,35 @@
+name: Bug
+description: Something doesn't work the way the docs say.
+labels: [bug]
+body:
+  - type: input
+    id: provider
+    attributes:
+      label: Provider
+      description: The provider id (`sandboxrouter providers` lists them), or "router" / "cli" / "server" / "python" / "website".
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what you expected
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: How to reproduce
+      description: The smallest code or command that shows it. If it's a provider, paste the output of `npx tsx src/cli.ts check --provider <id>`.
+      render: shell
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: "`npm ls @sandboxrouter/sdk`, plus your Node version and OS"
+  - type: checkboxes
+    id: keys
+    attributes:
+      label: Before posting
+      options:
+        - label: I removed every API key, token and private URL from this issue.
+          required: true

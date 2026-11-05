@@ -1,0 +1,40 @@
+name: price-watch
+# Every Monday: compare each provider's pricing page with last week's, and open (or update) one
+# issue listing what changed. The catalog itself is only ever changed by a reviewed PR.
+on:
+  schedule:
+    - cron: "17 8 * * 1"
+  workflow_dispatch:
+permissions:
+  contents: write
+  issues: write
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - id: check
+        run: |
+          set +e
+          node --import tsx scripts/price-watch.ts --update --md > report.md
+          echo "status=$?" >> "$GITHUB_OUTPUT"
+          cat report.md
+      - name: Save the new baseline
+        run: |
+          git config user.name "price-watch"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add scripts/price-watch.json
+          git diff --cached --quiet || (git commit -m "price-watch: baseline for $(date -u +%F)" && git push)
+      - name: Open or update the price issue
+        if: steps.check.outputs.status != '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh label create pricing --color FBCA04 --description "Catalog prices" 2>/dev/null || true
+          n=$(gh issue list --label pricing --state open --search "Price check in:title" --json number -q '.[0].number')
+          if [ -n "$n" ]; then gh issue comment "$n" --body-file report.md
+          else gh issue create --title "Price check: pricing pages changed" --label pricing --body-file report.md; fi
