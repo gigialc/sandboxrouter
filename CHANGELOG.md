@@ -5,6 +5,7 @@ All notable changes. Versions follow [semver](https://semver.org/); while the ve
 ## Unreleased (next: 0.3.0)
 
 ### Added
+- First real-account runs: E2B, Daytona, Maritime and OpenScale pass all 13 steps; Blaxel passes 12 of 12 (no pause).
 - LangSmith Sandboxes (LangChain) via the `langsmith` SDK (`LANGSMITH_API_KEY`; streaming needs `ws`). Memory is kept within the 2 to 6 GiB per vCPU LangSmith allows; `timeoutMinutes` becomes the idle stop, and a stopped sandbox is deleted a day later.
 - Sign-up status for gated providers (`access` in the catalog, `accessLabel()`): InstaBox and Dedalus are waitlisted, Koyeb isn't taking new accounts since joining Mistral. `providers`, `route`, the README and the site say so. Routing is unchanged: anyone who already has a key still gets routed there.
 - 16 more sandbox providers, for 31 cloud providers plus Docker:
@@ -21,6 +22,8 @@ All notable changes. Versions follow [semver](https://semver.org/); while the ve
 - Website: full-width layout, white page, black ink.
 
 ### Fixed
+- Daytona: stdout and stderr came back merged, and pause always failed because sandboxes were created ephemeral (`autoDeleteInterval: 0`); a stopped sandbox is now deleted a minute later instead. Streaming commands that call `exit` no longer hang.
+- Blaxel: pause removed (archiving is a preview Blaxel enables per workspace), `kill()` waits for the asynchronous delete, and API errors no longer read "[object Object]".
 - Modal: the adapter asked for twice the CPU it meant to (Modal counts physical cores, 1 core = 2 vCPUs).
 - Deno: a timed-out command no longer hangs when its child processes keep stdout open.
 - Optional SDKs that aren't installed are reported as missing under bundlers (Vite, esbuild) too.

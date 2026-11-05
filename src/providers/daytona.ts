@@ -51,9 +51,10 @@ export class DaytonaProvider implements Provider, ComputerProvider {
     const base = {
       envVars: spec.env,
       labels: spec.metadata,
-      // Minutes of inactivity before Daytona stops it; delete right after stop.
+      // Minutes of inactivity before Daytona stops it; deleted a minute after it stops. Not 0:
+      // that makes the sandbox ephemeral, which is fixed at creation and rules out pause.
       autoStopInterval: Math.max(1, Math.round(spec.timeoutMinutes ?? 30)),
-      autoDeleteInterval: 0,
+      autoDeleteInterval: 1,
     };
     const sbx = spec.image?.daytona
       ? await d.create({
@@ -121,20 +122,30 @@ class DaytonaBox implements ProviderSandbox {
     this.nativeId = sbx.id;
   }
 
+  /**
+   * executeCommand merges stderr into stdout, so stderr goes to a temp file that is read back.
+   * Streaming goes through a throwaway session instead, whose logs keep the two apart.
+   */
   async exec(cmd: string, opts: ExecOptions = {}): Promise<ExecResult> {
-    if (opts.onStdout || opts.onStderr) return this.execStreaming(cmd, opts);
+    if (opts.onStdout || opts.onStderr) return this.execSession(cmd, opts);
     const t0 = Date.now();
+    const errFile = `/tmp/sbr-stderr-${randomUUID()}`;
     try {
-      const r = await this.sbx.process.executeCommand(cmd, opts.cwd, opts.env, opts.timeoutSeconds ?? 60);
-      // Daytona merges stdout and stderr into `result` here.
-      return { exitCode: r.exitCode, stdout: r.result, stderr: "", durationMs: Date.now() - t0 };
+      const r = await this.sbx.process.executeCommand(`(\n${cmd}\n) 2>${errFile}`, opts.cwd, opts.env, opts.timeoutSeconds ?? 60);
+      let stderr = "";
+      try {
+        stderr = Buffer.from(await this.sbx.fs.downloadFile(errFile)).toString("utf8");
+      } catch {
+        // No stderr file (e.g. the command removed /tmp): report none.
+      }
+      this.sbx.process.executeCommand(`rm -f ${errFile}`).catch(() => {});
+      return { exitCode: r.exitCode, stdout: r.result, stderr, durationMs: Date.now() - t0 };
     } catch (err: any) {
       throw new ProviderError("daytona", err?.message ?? String(err));
     }
   }
 
-  /** Streaming goes through a throwaway session, which also keeps stdout and stderr apart. */
-  private async execStreaming(cmd: string, opts: ExecOptions): Promise<ExecResult> {
+  private async execSession(cmd: string, opts: ExecOptions): Promise<ExecResult> {
     const t0 = Date.now();
     const session = `sbr-${randomUUID()}`;
     const proc = this.sbx.process;
@@ -143,7 +154,8 @@ class DaytonaBox implements ProviderSandbox {
     try {
       await proc.createSession(session);
       const { cmdId } = await proc.executeSessionCommand(session, {
-        command: wrapCommand(cmd, { cwd: opts.cwd, env: opts.env }),
+        // A subshell, so `exit` in the command ends it rather than the session's shell.
+        command: wrapCommand(`(\n${cmd}\n)`, { cwd: opts.cwd, env: opts.env }),
         runAsync: true,
       });
       const logs = proc.getSessionCommandLogs(

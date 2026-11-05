@@ -1,0 +1,79 @@
+{
+  "tool": "sandboxrouter-check",
+  "version": "0.2.0",
+  "date": "2026-11-05T23:23:52.429Z",
+  "platform": "darwin-arm64",
+  "provider": "openscale",
+  "sandboxId": "openscale:4x91hwtwwt85sfqz0hce",
+  "results": [
+    {
+      "step": "create",
+      "ms": 980,
+      "status": "pass",
+      "detail": "openscale:4x91hwtwwt85sfqz0hce, ~$0.017/hr"
+    },
+    {
+      "step": "exec: stdout, stderr, exit code",
+      "ms": 1030,
+      "status": "pass"
+    },
+    {
+      "step": "exec: env and cwd",
+      "ms": 337,
+      "status": "pass"
+    },
+    {
+      "step": "exec: UTF-8 output",
+      "ms": 268,
+      "status": "pass"
+    },
+    {
+      "step": "exec: streaming",
+      "ms": 3293,
+      "status": "pass",
+      "detail": "first output after 414 ms"
+    },
+    {
+      "step": "files: binary round-trip",
+      "ms": 1685,
+      "status": "pass"
+    },
+    {
+      "step": "files: 1 MB round-trip",
+      "ms": 2124,
+      "status": "pass"
+    },
+    {
+      "step": "files: missing file is an error",
+      "ms": 269,
+      "status": "pass"
+    },
+    {
+      "step": "files: visible to commands",
+      "ms": 1432,
+      "status": "pass"
+    },
+    {
+      "step": "exec: command timeout",
+      "ms": 3003,
+      "status": "pass",
+      "detail": "threw after 3003 ms: openscale: [deadline_exceeded] the operation timed out: This error is likely due to exceeding 'timeoutMs' — the total time a long running request (like command execution or directory watch) can be active. It can be modified by passing 'timeoutMs' when making the request. Use '0' to disable the timeout."
+    },
+    {
+      "step": "pause and resume",
+      "ms": 1926,
+      "status": "pass"
+    },
+    {
+      "step": "kill",
+      "ms": 259,
+      "status": "pass"
+    },
+    {
+      "step": "killed sandbox is gone",
+      "ms": 249,
+      "status": "pass"
+    }
+  ],
+  "ok": true
+}

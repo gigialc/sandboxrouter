@@ -1,6 +1,6 @@
 {
   "version": "0.2.0",
-  "generatedAt": "2026-11-05T20:13:21.638Z",
+  "generatedAt": "2026-11-05T23:28:35.666Z",
   "shapes": [
     "1x2",
     "2x4",
@@ -361,7 +361,6 @@
       "name": "Blaxel",
       "local": false,
       "capabilities": [
-        "pause",
         "custom-image"
       ],
       "limits": {
@@ -383,7 +382,32 @@
         "checked": "2026-11-04"
       },
       "access": null,
-      "check": null,
+      "check": {
+        "date": "2026-11-05T23:27:35.340Z",
+        "version": "0.2.0",
+        "passed": 12,
+        "failed": [],
+        "skipped": [
+          "pause and resume"
+        ],
+        "notRun": [],
+        "notes": [],
+        "steps": {
+          "create": "pass",
+          "exec: stdout, stderr, exit code": "pass",
+          "exec: env and cwd": "pass",
+          "exec: UTF-8 output": "pass",
+          "exec: streaming": "pass",
+          "files: binary round-trip": "pass",
+          "files: 1 MB round-trip": "pass",
+          "files: missing file is an error": "pass",
+          "files: visible to commands": "pass",
+          "exec: command timeout": "pass",
+          "pause and resume": "skip",
+          "kill": "pass",
+          "killed sandbox is gone": "pass"
+        }
+      },
       "computers": [],
       "prices": {
         "1x2": {
@@ -601,7 +625,30 @@
         "checked": "2026-11-04"
       },
       "access": null,
-      "check": null,
+      "check": {
+        "date": "2026-11-05T23:28:26.329Z",
+        "version": "0.2.0",
+        "passed": 13,
+        "failed": [],
+        "skipped": [],
+        "notRun": [],
+        "notes": [],
+        "steps": {
+          "create": "pass",
+          "exec: stdout, stderr, exit code": "pass",
+          "exec: env and cwd": "pass",
+          "exec: UTF-8 output": "pass",
+          "exec: streaming": "pass",
+          "files: binary round-trip": "pass",
+          "files: 1 MB round-trip": "pass",
+          "files: missing file is an error": "pass",
+          "files: visible to commands": "pass",
+          "exec: command timeout": "pass",
+          "pause and resume": "pass",
+          "kill": "pass",
+          "killed sandbox is gone": "pass"
+        }
+      },
       "computers": [
         "linux"
       ],
@@ -767,7 +814,7 @@
       },
       "access": null,
       "check": {
-        "date": "2026-11-05T18:17:55.354Z",
+        "date": "2026-11-05T23:23:07.981Z",
         "version": "0.2.0",
         "passed": 13,
         "failed": [],
@@ -844,7 +891,30 @@
         "checked": "2026-11-04"
       },
       "access": null,
-      "check": null,
+      "check": {
+        "date": "2026-11-05T23:23:19.922Z",
+        "version": "0.2.0",
+        "passed": 13,
+        "failed": [],
+        "skipped": [],
+        "notRun": [],
+        "notes": [],
+        "steps": {
+          "create": "pass",
+          "exec: stdout, stderr, exit code": "pass",
+          "exec: env and cwd": "pass",
+          "exec: UTF-8 output": "pass",
+          "exec: streaming": "pass",
+          "files: binary round-trip": "pass",
+          "files: 1 MB round-trip": "pass",
+          "files: missing file is an error": "pass",
+          "files: visible to commands": "pass",
+          "exec: command timeout": "pass",
+          "pause and resume": "pass",
+          "kill": "pass",
+          "killed sandbox is gone": "pass"
+        }
+      },
       "computers": [
         "linux"
       ],
@@ -1289,7 +1359,30 @@
         "checked": "2026-11-05"
       },
       "access": null,
-      "check": null,
+      "check": {
+        "date": "2026-11-05T23:23:35.570Z",
+        "version": "0.2.0",
+        "passed": 13,
+        "failed": [],
+        "skipped": [],
+        "notRun": [],
+        "notes": [],
+        "steps": {
+          "create": "pass",
+          "exec: stdout, stderr, exit code": "pass",
+          "exec: env and cwd": "pass",
+          "exec: UTF-8 output": "pass",
+          "exec: streaming": "pass",
+          "files: binary round-trip": "pass",
+          "files: 1 MB round-trip": "pass",
+          "files: missing file is an error": "pass",
+          "files: visible to commands": "pass",
+          "exec: command timeout": "pass",
+          "pause and resume": "pass",
+          "kill": "pass",
+          "killed sandbox is gone": "pass"
+        }
+      },
       "computers": [
         "linux",
         "windows",
@@ -1569,7 +1662,30 @@
         "checked": "2026-11-05"
       },
       "access": null,
-      "check": null,
+      "check": {
+        "date": "2026-11-05T23:23:52.429Z",
+        "version": "0.2.0",
+        "passed": 13,
+        "failed": [],
+        "skipped": [],
+        "notRun": [],
+        "notes": [],
+        "steps": {
+          "create": "pass",
+          "exec: stdout, stderr, exit code": "pass",
+          "exec: env and cwd": "pass",
+          "exec: UTF-8 output": "pass",
+          "exec: streaming": "pass",
+          "files: binary round-trip": "pass",
+          "files: 1 MB round-trip": "pass",
+          "files: missing file is an error": "pass",
+          "files: visible to commands": "pass",
+          "exec: command timeout": "pass",
+          "pause and resume": "pass",
+          "kill": "pass",
+          "killed sandbox is gone": "pass"
+        }
+      },
       "computers": [],
       "prices": {
         "1x2": {

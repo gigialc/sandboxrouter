@@ -14,7 +14,9 @@ const MIN_TTL_MINUTES = 5;
  * Blaxel sandboxes via `@blaxel/core`. Auth: BL_API_KEY + BL_WORKSPACE (or `bl login`).
  * Region: BL_REGION, else us-pdx-1. Blaxel sizes by memory only and gives 1 vCPU per 2 GB,
  * so memory is max(memoryGb, 2 × vcpu) GB. Idle sandboxes drop to standby on their own and
- * wake on the next call; pause() archives explicitly.
+ * wake on the next call. No pause(): archiving is a preview Blaxel enables per workspace (others
+ * get 403 "Archiving a sandbox is in preview and is not enabled for this workspace", 2026-11-05).
+ * kill() waits until the sandbox is gone, because Blaxel deletes asynchronously.
  */
 export class BlaxelProvider implements Provider {
   readonly id = "blaxel" as const;
@@ -122,31 +124,30 @@ class BlaxelBox implements ProviderSandbox {
     }
   }
 
-  /**
-   * Archive: the filesystem is kept, memory and processes are lost. The max-age ttl is cleared
-   * first so the archive survives until kill(). router.get() unarchives it.
-   */
-  async pause(): Promise<void> {
-    const { SandboxInstance } = await optionalImport<BlaxelModule>("@blaxel/core", "blaxel");
-    try {
-      await SandboxInstance.updateTtl(this.nativeId, null);
-      await this.sbx.archive();
-    } catch (err) {
-      throw wrap(err);
-    }
-  }
-
   async kill(): Promise<void> {
     try {
       await this.sbx.delete();
     } catch (err) {
       throw wrap(err);
     }
+    // Deletion is asynchronous: wait (up to 20 s) until the sandbox is gone or terminated.
+    const { SandboxInstance } = await optionalImport<BlaxelModule>("@blaxel/core", "blaxel");
+    for (let i = 0; i < 40; i++) {
+      try {
+        const s = await SandboxInstance.get(this.nativeId);
+        if (s.status === "TERMINATED") return;
+      } catch {
+        return;
+      }
+      await new Promise((r) => setTimeout(r, 500));
+    }
   }
 }
 
 function wrap(err: any): ProviderError {
   if (err instanceof ProviderError) return err;
-  const status = typeof err?.status === "number" ? err.status : err?.response?.status;
-  return new ProviderError("blaxel", err?.message ?? String(err), status);
+  const status = typeof err?.status === "number" ? err.status : typeof err?.code === "number" ? err.code : err?.response?.status;
+  // The SDK sometimes throws the plain API body ({ code, error }), not an Error.
+  const message = err?.message ?? err?.error ?? (typeof err === "object" ? JSON.stringify(err) : String(err));
+  return new ProviderError("blaxel", message, status);
 }

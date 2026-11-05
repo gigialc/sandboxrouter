@@ -1,0 +1,79 @@
+{
+  "tool": "sandboxrouter-check",
+  "version": "0.2.0",
+  "date": "2026-11-05T23:23:19.922Z",
+  "platform": "darwin-arm64",
+  "provider": "e2b",
+  "sandboxId": "e2b:i9mbt9nyv7tsazxe304ny",
+  "results": [
+    {
+      "step": "create",
+      "ms": 906,
+      "status": "pass",
+      "detail": "e2b:i9mbt9nyv7tsazxe304ny, ~$0.1656/hr"
+    },
+    {
+      "step": "exec: stdout, stderr, exit code",
+      "ms": 461,
+      "status": "pass"
+    },
+    {
+      "step": "exec: env and cwd",
+      "ms": 257,
+      "status": "pass"
+    },
+    {
+      "step": "exec: UTF-8 output",
+      "ms": 170,
+      "status": "pass"
+    },
+    {
+      "step": "exec: streaming",
+      "ms": 3189,
+      "status": "pass",
+      "detail": "first output after 169 ms"
+    },
+    {
+      "step": "files: binary round-trip",
+      "ms": 886,
+      "status": "pass"
+    },
+    {
+      "step": "files: 1 MB round-trip",
+      "ms": 1015,
+      "status": "pass"
+    },
+    {
+      "step": "files: missing file is an error",
+      "ms": 162,
+      "status": "pass"
+    },
+    {
+      "step": "files: visible to commands",
+      "ms": 514,
+      "status": "pass"
+    },
+    {
+      "step": "exec: command timeout",
+      "ms": 3005,
+      "status": "pass",
+      "detail": "threw after 3005 ms: e2b: [deadline_exceeded] the operation timed out: This error is likely due to exceeding 'timeoutMs' — the total time a long running request (like command execution or directory watch) can be active. It can be modified by passing 'timeoutMs' when making the request. Use '0' to disable the timeout."
+    },
+    {
+      "step": "pause and resume",
+      "ms": 1018,
+      "status": "pass"
+    },
+    {
+      "step": "kill",
+      "ms": 185,
+      "status": "pass"
+    },
+    {
+      "step": "killed sandbox is gone",
+      "ms": 171,
+      "status": "pass"
+    }
+  ],
+  "ok": true
+}
