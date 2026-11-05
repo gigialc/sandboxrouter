@@ -35,7 +35,7 @@ export default function Home() {
     <div className="mx-auto max-w-5xl px-6">
       <section className="pt-20 pb-14 sm:pt-28">
         <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted">Open source · {cloud} providers</p>
-        <h1 className="mt-5 max-w-2xl text-4xl font-light leading-[1.08] tracking-[-0.035em] sm:text-[52px]">One API for every sandbox.</h1>
+        <h1 className="mt-5 max-w-2xl text-4xl font-normal leading-[1.08] tracking-[-0.035em] sm:text-[52px]">One API for every sandbox.</h1>
         <p className="mt-5 max-w-xl text-[15px] leading-7 text-ink-2">
           AI agents need a safe computer to run code. sandboxrouter starts it on whichever provider fits the job, and moves to the
           next one if that provider is busy. One interface for {cloud} providers, plus Docker on your own machine.

@@ -37,7 +37,7 @@ await sbx.kill();`;
       <Link href="/#providers" className="text-[13px] text-muted hover:text-ink">
         ← Providers
       </Link>
-      <h1 className="mt-8 text-4xl font-light tracking-[-0.035em]">{p.name}</h1>
+      <h1 className="mt-8 text-4xl font-normal tracking-[-0.035em]">{p.name}</h1>
       <p className="mt-2 font-mono text-[12px] text-muted">provider: &quot;{p.id}&quot;</p>
       {p.pricing.note && <p className="mt-5 max-w-2xl text-[14px] leading-6 text-ink-2">{p.pricing.note[0].toUpperCase() + p.pricing.note.slice(1)}.</p>}
 

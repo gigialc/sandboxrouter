@@ -3,17 +3,17 @@
 /* One dark theme, in the style of a quiet terminal: near-black, hairlines, square corners. */
 :root {
   color-scheme: dark;
-  --bg: #0b0b0b;
-  --panel: #121212;
-  --panel-2: #191919;
-  --ink: #ededed;
-  --ink-2: #b4b4b4;
-  --muted: #7a7a7a;
-  --line: #222222;
-  --line-2: #2e2e2e;
+  --bg: #000000;
+  --panel: #0f0f0f;
+  --panel-2: #1a1a1a;
+  --ink: #ffffff;
+  --ink-2: #d4d4d4;
+  --muted: #a3a3a3;
+  --line: #333333;
+  --line-2: #4a4a4a;
   --ok: #4ade80;
   --bad: #f87171;
-  --bar: #d4d4d4;
+  --bar: #e5e5e5;
 }
 
 @theme inline {
