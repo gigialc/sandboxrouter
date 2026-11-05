@@ -27,7 +27,8 @@ describe("wrapCommand", () => {
     const r = sh(wrapCommand("echo ran", { cwd: "/no/such/dir", env: { A: "1" } }));
     expect(r.code).not.toBe(0);
     expect(r.stdout).toBe("");
-    expect(r.stderr).toMatch(/No such file or directory|not found/);
+    // The wording is the shell's (bash: "No such file or directory", dash: "can't cd to"); the path is what matters.
+    expect(r.stderr).toContain("/no/such/dir");
   });
 
   it("keeps the command's own `;` and `||` inside the guarded group", () => {
