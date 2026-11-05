@@ -27,6 +27,9 @@ import type {
 
 // ProviderId in types.ts is the sandbox-provider union; computer-only providers are plain strings.
 const ID = "orgo" as ProviderId;
+/** A resume takes about a minute and a start up to a few; this is how long to poll for running. */
+const RUNNING_TIMEOUT_MS = 5 * 60_000;
+const RUNNING_POLL_MS = 1000;
 
 /** Medium: 2 vCPU, 8 GB, 40 GB disk. The only size a free account can run, the dashboard default, and Windows needs 8 GB. */
 const MEDIUM = { cpu: 2, ram: 8, disk_size_gb: 40 } as const;
@@ -120,22 +123,35 @@ export class OrgoProvider implements ComputerProvider {
     }
     // Orgo has no metadata field, so externalUserId only shapes the (workspace-unique) name.
     // Each create makes a new computer; reconnect with connectComputer(id) to keep files and logins.
-    const c = await this.json("POST", "/computers", { json: body });
+    let c = await this.json("POST", "/computers", { json: body });
+    if (c.status !== "running") c = await this.waitRunning(`/computers/${encodeURIComponent(String(c.id))}`);
     return new OrgoComputer(this, c, spec.externalUserId ?? null);
   }
 
-  /** Reattach to a computer. A stopped (frozen) one is started, a suspended one resumed. */
+  /**
+   * Reattach to a computer. A stopped (frozen) one is started, a suspended one resumed. Both answer
+   * 202 while the computer comes back, so it is polled until it reports running.
+   */
   async connectComputer(nativeId: string): Promise<ProviderComputer> {
     const path = `/computers/${encodeURIComponent(nativeId)}`;
     let c = await this.json("GET", path);
-    if (c.status === "frozen" || c.status === "stopped") {
-      await this.json("POST", `${path}/start`);
-      c = await this.json("GET", path);
-    } else if (c.status === "suspended") {
-      await this.json("POST", `${path}/resume`);
-      c = await this.json("GET", path);
-    }
+    if (c.status === "frozen" || c.status === "stopped") await this.json("POST", `${path}/start`);
+    else if (c.status === "suspended") await this.json("POST", `${path}/resume`);
+    if (c.status !== "running") c = await this.waitRunning(path);
     return new OrgoComputer(this, c, null);
+  }
+
+  /** Poll a computer until it is running; a computer that errored or was deleted meanwhile is reported. */
+  private async waitRunning(path: string): Promise<Json> {
+    const deadline = Date.now() + RUNNING_TIMEOUT_MS;
+    for (;;) {
+      const c = await this.json("GET", path);
+      const status = String(c.status ?? "unknown");
+      if (status === "running") return c;
+      if (["error", "failed", "deleted"].includes(status)) throw new ProviderError(ID, `computer ${path.split("/").pop()} is ${status}`);
+      if (Date.now() > deadline) throw new ProviderError(ID, `computer ${path.split("/").pop()} still ${status} after ${RUNNING_TIMEOUT_MS / 1000}s`);
+      await new Promise<void>((r) => setTimeout(r, RUNNING_POLL_MS).unref());
+    }
   }
 
   /** @internal wss:// origin for the computer's VNC WebSocket (same host as the API). */

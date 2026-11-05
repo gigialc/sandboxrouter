@@ -164,13 +164,15 @@ export class Router {
     const bench = route.strategy === "fastest" ? loadBench(this.benchFile) : {};
 
     const list: Candidate[] = ids.map((id) => {
+      // An id the catalog has never heard of (a typo in an explicit list) has no price to look up.
+      if (!CATALOG.some((c) => c.id === id)) return { provider: id, estimatedHourlyUsd: 0, skip: "unknown provider" };
       const p = this.providers.get(id);
       const c: Candidate = {
         provider: id,
         estimatedHourlyUsd: round(hourlyCost(id, spec)),
         medianCreateMs: median(bench[id]?.createMs),
       };
-      if (!p) c.skip = "unknown provider";
+      if (!p) c.skip = "no adapter registered";
       else c.skip = unfit(id, spec, route.require) ?? (p.configured() ? undefined : "not configured");
       return c;
     });

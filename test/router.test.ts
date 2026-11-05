@@ -86,6 +86,15 @@ describe("routing", () => {
     expect(sbx.provider).toBe("e2b");
   });
 
+  it("reports an unknown provider id as a skipped candidate, and create refuses it", async () => {
+    const r = new Router({ providers: fakes() });
+    const plan = r.plan({}, { provider: ["nope" as never, "e2b"] });
+    expect(plan.map((c) => [c.provider, c.skip])).toEqual([["nope", "unknown provider"], ["e2b", undefined]]);
+    const err = await r.create({}, { provider: "nope" as never }).catch((e) => e);
+    expect(err).toBeInstanceOf(RouterError);
+    expect(err.message).toMatch(/nope \(unknown provider\)/);
+  });
+
   it("explains why nothing can run", async () => {
     const r = new Router({ providers: ALL.map((id) => new FakeProvider(id, { configured: false })) });
     await expect(r.create()).rejects.toThrow(/no provider can take this sandbox: maritime \(not configured\)/);

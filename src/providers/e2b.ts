@@ -310,8 +310,9 @@ class E2BComputer implements ProviderComputer {
     return { frameId: ++this.frame, imageB64: Buffer.from(png).toString("base64"), mime: "image/png", ...pngSize(png) };
   }
 
-  private run(cmd: string) {
-    return this.sbx.commands.run(cmd);
+  /** Run a desktop command, with an explicit timeout rather than the SDK's 60 s default. */
+  private run(cmd: string, timeoutSeconds = 60) {
+    return this.sbx.commands.run(cmd, { timeoutMs: timeoutSeconds * 1000 });
   }
 
   private async withModifier<T>(modifier: string | undefined, fn: () => Promise<T>): Promise<T> {
@@ -404,8 +405,10 @@ class E2BComputer implements ProviderComputer {
       case "hold_key": {
         if (!a.text) throw new ActionError("hold_key needs text");
         const keys = xdoKeys(a.text).map(sh).join(" ");
-        const secs = Math.max(0, a.duration ?? 1);
-        await this.run(`xdotool keydown ${keys}; sleep ${secs}; xdotool keyup ${keys}`);
+        const secs = a.duration ?? 1;
+        if (!(secs >= 0 && secs <= 100)) throw new ActionError("duration must be 0 to 100 seconds");
+        // The SDK's default command timeout is 60 s and would end a longer hold with the key still down.
+        await this.run(`xdotool keydown ${keys}; sleep ${secs}; xdotool keyup ${keys}`, secs + 30);
         return {};
       }
       case "wait":

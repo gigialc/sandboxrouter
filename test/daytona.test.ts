@@ -145,17 +145,27 @@ class FakeSandbox {
     this.endSessions();
     this.state = "stopped";
   }
-  async start() {
-    calls.push(["start", this.id]);
+  async start(timeout?: number) {
+    calls.push(["start", this.id, timeout]);
     this.state = "started";
   }
+  async waitUntilStarted(timeout?: number) {
+    calls.push(["waitUntilStarted", this.id, timeout]);
+    this.state = "started";
+  }
+  /** What refreshData() will see next, for a sandbox caught mid-transition. */
+  nextStates: string[] = [];
   async delete() {
     calls.push(["delete", this.id]);
     this.endSessions();
     this.state = "destroyed";
     live.delete(this.id);
   }
-  async refreshData() {}
+  async refreshData() {
+    calls.push(["refreshData", this.id]);
+    const next = this.nextStates.shift();
+    if (next) this.state = next;
+  }
 }
 
 vi.mock("@daytonaio/sdk", () => ({
@@ -262,6 +272,37 @@ describe("DaytonaProvider", () => {
     await sbx.kill();
   });
 
+  it("connect starts a sandbox Daytona archived or paused on its own, waiting longer for an archived one", async () => {
+    const sbx = await p().create({});
+    const fake = live.get(sbx.nativeId)!;
+    // Archived: the disk comes back from storage, which can take minutes.
+    fake.state = "archived";
+    calls.length = 0;
+    expect((await (await p().connect(sbx.nativeId)).exec("echo back")).stdout.trim()).toBe("back");
+    expect(calls.slice(0, 2)).toEqual([["get", sbx.nativeId], ["start", sbx.nativeId, 600]]);
+    // Paused: a plain start.
+    fake.state = "paused";
+    calls.length = 0;
+    await p().connect(sbx.nativeId);
+    expect(calls).toEqual([["get", sbx.nativeId], ["start", sbx.nativeId, 60]]);
+    // Caught mid-transition: wait for the state to settle, then start.
+    fake.state = "stopping";
+    fake.nextStates = ["stopping", "stopped"];
+    calls.length = 0;
+    await p().connect(sbx.nativeId);
+    expect(calls).toEqual([["get", sbx.nativeId], ["refreshData", sbx.nativeId], ["refreshData", sbx.nativeId], ["start", sbx.nativeId, 60]]);
+    // Already starting (another client woke it): wait for that instead of a second start.
+    fake.state = "resuming";
+    calls.length = 0;
+    await p().connect(sbx.nativeId);
+    expect(calls).toEqual([["get", sbx.nativeId], ["waitUntilStarted", sbx.nativeId, 600]]);
+    // Gone for good: a clear error, not a start that cannot work.
+    fake.state = "error";
+    await expect(p().connect(sbx.nativeId)).rejects.toMatchObject({ name: "ProviderError", message: `daytona: sandbox ${sbx.nativeId} is in state "error" and cannot be started` });
+    fake.state = "started";
+    await sbx.kill();
+  }, 15_000);
+
   it("pause stops the sandbox but keeps its disk; connect starts a stopped one; kill deletes", async () => {
     const sbx = await p().create({});
     await sbx.pause!();
@@ -270,7 +311,7 @@ describe("DaytonaProvider", () => {
     calls.length = 0;
     const again = await p().connect(sbx.nativeId);
     expect(again.nativeId).toBe(sbx.nativeId);
-    expect(calls).toEqual([["get", sbx.nativeId], ["start", sbx.nativeId]]);
+    expect(calls).toEqual([["get", sbx.nativeId], ["start", sbx.nativeId, 60]]);
     calls.length = 0;
     await p().connect(sbx.nativeId);
     expect(calls).toEqual([["get", sbx.nativeId]]);

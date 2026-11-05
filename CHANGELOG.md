@@ -13,6 +13,7 @@ All notable changes. Versions follow [semver](https://semver.org/); while the ve
 - Leak cleanup: routers record the sandboxes they start in a local ledger (~/.sandboxrouter/sandboxes.jsonl; `ledger: false` or SANDBOXROUTER_LEDGER=off to turn it off). `sandboxrouter ls` lists the ones never killed, with cost so far; `sandboxrouter gc` kills those past their lifetime (`--all`, `--older-than`, `--dry-run`). `sandboxrouter run` kills its sandbox on Ctrl-C.
 - exe.dev: the VM powers itself off when its requested lifetime runs out (best effort), since exe.dev has no lifetime setting.
 - Contributing guide, security policy, code of conduct, issue and PR templates, and a weekly price-page check.
+- CI fails when the README tables or `web/src/data/site.json` do not match what the code generates.
 - `test/conformance.ts`: the sandbox contract as a shared test suite that every adapter runs against its mock, and mock tests for the 13 adapters that had none (Blaxel, Boat, Cloudflare, Docker, exe.dev, HOPX, Modal, Morph, Northflank, Runloop, Sprites, Tensorlake, Vercel) plus the E2B and Daytona sandbox paths.
 
 ### Changed
@@ -24,6 +25,14 @@ All notable changes. Versions follow [semver](https://semver.org/); while the ve
 - The exec timeout contract now holds on every provider: a command that outlives `timeoutSeconds` is stopped inside the sandbox and `exec` rejects with `<provider>: command timed out after Ns`. Before, E2B (and OpenScale, Novita, Alibaba), Vercel, Morph, Docker, HOPX and Northflank left the process running after the client gave up; Lambda, Cloudflare, exe.dev, AgentCore, Azure, Boat, Maritime, Modal and Blaxel returned the kill as an ordinary exit code; Beam's non-streaming exec waited for the command before starting its timer. `RoutedSandbox.exec` also bounds every call at the timeout plus 30 s with the same error, should an adapter miss its deadline, and `sandboxrouter check` fails a provider that returns a timed-out command as a result or lets it keep running.
 - `wrapCommand` (used by 17 adapters for cwd/env) ran the command in the wrong directory when `cwd` did not exist and `env` was set, because `cd` was joined with `;` to the exports. Every step is now chained with `&&` and the command is grouped, so a missing cwd stops it.
 - Daytona's non-streaming exec merged stderr into stdout; every command now runs through a session, which keeps them apart.
+- Daytona: `connect()` only restarted a `stopped` sandbox. Daytona also archives and pauses idle sandboxes on its own, so those (and sandboxes caught mid-transition) are now brought back too, with a longer wait for an archived one, and a sandbox that cannot be started (destroyed, error) is reported instead of failing on the first command.
+- Dedalus: `readFile` asked for 256 KiB chunks through an endpoint that returns at most 64 KiB per stream, so files over about 48 KiB came back corrupted; chunks now fit the cap, and command output past the cap is assembled from the events feed instead of being cut. A streamed command no longer repeats output when a page of events carries no cursor.
+- E2B desktops: `hold_key` ran under the SDK's default 60 s command timeout, so a longer hold ended with the key still down; the command now gets a timeout past the hold, and holds over 100 s are refused.
+- Deno: a command killed by a signal reported a negative exit code (Deno's convention); it is now 128 plus the signal number, like every other provider.
+- Upstash: an `event: error` marker split across two network reads could leak into the output and hang the command; the hold-back window now covers the longer marker.
+- Mobilerun: a phone that took longer than the server-side wait to boot failed with "did not become ready" instead of being waited on, because the SDK's timeout error carries no `name`; it is recognised by its class now.
+- Orgo: `connectComputer()` returned while a resumed or started computer was still coming back (`/resume` and `/start` answer 202); it now polls until the computer is running.
+- An unknown provider id in an explicit list made `Router.plan()` throw and the HTTP API answer 500; the planner now lists it as skipped ("unknown provider") and the API answers 400.
 - Deno: a timed-out command no longer hangs when its child processes keep stdout open.
 - Optional SDKs that aren't installed are reported as missing under bundlers (Vite, esbuild) too.
 

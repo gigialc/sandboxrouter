@@ -13,6 +13,13 @@ jobs:
           python-version: "3.12"
       - run: npm ci
       - run: npm run typecheck
+      - name: Generated docs match the code
+        # README tables and web/src/data/site.json are built from src/catalog.ts and the saved checks; a
+        # hand edit, or a catalog change without a regeneration, fails here instead of drifting.
+        run: |
+          node --import tsx scripts/readme-tables.ts --write
+          npm run site:data
+          git diff --exit-code -I '"generatedAt"' -- README.md web/src/data/site.json
       - run: npm test
       - run: npm run test:py
       - run: npm ci && npm run build
