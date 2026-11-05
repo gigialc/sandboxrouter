@@ -1,6 +1,6 @@
 {
   "version": "0.2.0",
-  "generatedAt": "2026-11-05T16:14:12.236Z",
+  "generatedAt": "2026-11-05T17:11:05.146Z",
   "shapes": [
     "1x2",
     "2x4",
@@ -203,7 +203,7 @@
         "vcpuHour": 0.09969984,
         "gbHour": 0.01320012,
         "note": "us-east-1 ARM; billed on the image's baseline size (2 GB per vCPU) while running, per-second burst up to 4x; suspended VMs pay snapshot storage; needs a MicroVM image you build once",
-        "source": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSLambda/current/us-east-1/index.json",
+        "source": "https://aws.amazon.com/lambda/pricing/",
         "checked": "2026-11-05"
       },
       "computers": [],
@@ -826,8 +826,8 @@
         "custom-image"
       ],
       "limits": {
-        "maxVcpu": 32,
-        "maxMemoryGb": 64
+        "maxVcpu": 16,
+        "maxMemoryGb": 32
       },
       "credentials": [
         [
@@ -838,7 +838,7 @@
       "pricing": {
         "vcpuHour": 0.0525,
         "gbHour": 0,
-        "note": "standalone reserved size, per second: $0.105/h per 2 vCPU / 4 GiB unit; stopped CPU/RAM free, retained disk separate; Personal from $15/mo, Work $75/mo regular price; Work allows 32 vCPU / 64 GiB without approval",
+        "note": "standalone reserved size, per second: $0.105/h per 2 vCPU / 4 GiB unit; stopped CPU/RAM free, retained disk separate; Personal from $15/mo (up to 16 vCPU / 32 GiB), Work $75/mo (32 / 64 without approval)",
         "source": "https://exe.dev/docs/standalone-vms.md",
         "checked": "2026-11-05"
       },
@@ -866,7 +866,7 @@
         },
         "32x128": {
           "usd": 3.36,
-          "unfit": "max 64 GB memory"
+          "unfit": "max 16 vCPU"
         }
       }
     },
@@ -1208,36 +1208,36 @@
       ],
       "docs": "https://modal.com/docs/guide/sandbox",
       "pricing": {
-        "vcpuHour": 0.07096,
-        "gbHour": 0.0242,
-        "note": "sandbox rates, GPUs extra; region pinning x1.15-1.75",
+        "vcpuHour": 0.070956,
+        "gbHour": 0.024012,
+        "note": "sandbox rates, per second ($0.00003942 per physical core = 2 vCPUs); GPUs extra; region pinning x1.15-1.75; Starter includes $30/mo credit",
         "source": "https://modal.com/pricing",
-        "checked": "2026-11-04"
+        "checked": "2026-11-05"
       },
       "computers": [],
       "prices": {
         "1x2": {
-          "usd": 0.1194,
+          "usd": 0.119,
           "unfit": null
         },
         "2x4": {
-          "usd": 0.2387,
+          "usd": 0.238,
           "unfit": null
         },
         "4x8": {
-          "usd": 0.4774,
+          "usd": 0.4759,
           "unfit": null
         },
         "8x16": {
-          "usd": 0.9549,
+          "usd": 0.9518,
           "unfit": null
         },
         "16x32": {
-          "usd": 1.9098,
+          "usd": 1.9037,
           "unfit": null
         },
         "32x128": {
-          "usd": 5.3683,
+          "usd": 5.3441,
           "unfit": null
         }
       }

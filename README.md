@@ -56,7 +56,7 @@ Estimated list price while running, 2 vCPU / 4 GB (`npx @sandboxrouter/sdk provi
 | Koyeb Sandboxes | $0.058 | Per second; fixed Standard instance sizes (1 vCPU + 1 GB = $0.0144/h); sandboxes need a paid plan (Pro $29/mo); public preview | [pricing](https://www.koyeb.com/docs/reference/instances) |
 | Northflank | $0.067 | Per second on Northflank Cloud, ephemeral disk included; sandboxes run as deployment services (microVMs) | [pricing](https://northflank.com/pricing) |
 | Morph Cloud | $0.100 | $0.05/MCU; MCU-hours = max(vCPU, RAM/4 GB, disk/16 GB); snapshots extra | [pricing](https://cloud.morph.so/web/pricing) |
-| exe.dev | $0.105 | Standalone reserved size, per second: $0.105/h per 2 vCPU / 4 GiB unit; stopped CPU/RAM free, retained disk separate; Personal from $15/mo, Work $75/mo regular price; Work allows 32 vCPU / 64 GiB without approval | [pricing](https://exe.dev/docs/standalone-vms.md) |
+| exe.dev | $0.105 | Standalone reserved size, per second: $0.105/h per 2 vCPU / 4 GiB unit; stopped CPU/RAM free, retained disk separate; Personal from $15/mo (up to 16 vCPU / 32 GiB), Work $75/mo (32 / 64 without approval) | [pricing](https://exe.dev/docs/standalone-vms.md) |
 | Novita AI Agent Sandbox | $0.117 | Per second ($0.0000098/vCPU/s, $0.0000032/GiB/s); size comes from the template; paused = storage only | [pricing](https://docs.novita.ai/guides/sandbox-pricing) |
 | Freestyle | $0.134 | Per second on allocated fixed snapshot size; estimate includes disk at $0.000086/GiB-h; free monthly 200 vCPU-h, 400 GiB-h RAM, 60,000 GiB-h disk; Hobby $50/mo incl. $50 (max 8/16), Pro $500 (max 32/64); paused storage only | [pricing](https://www.freestyle.sh/docs/vms/pricing-and-limits) |
 | Beam | $0.140 | Per second, Performance tier (sandbox default); Developer plan $20/mo incl. $20 credits; GPUs billed separately | [pricing](https://www.beam.cloud/pricing) |
@@ -72,16 +72,16 @@ Estimated list price while running, 2 vCPU / 4 GB (`npx @sandboxrouter/sdk provi
 | Upstash Box | $0.200 | Billed per active CPU core-hour only (memory and idle time free); estimate assumes every core of the box busy; fixed sizes 2/4, 4/8, 8/16 | [pricing](https://upstash.com/pricing/box) |
 | Cloudflare Sandbox | $0.216 | 10 ms billing on active CPU and allocated instance memory; full-CPU estimate excludes allocated disk ($0.000252/GB-h), Worker and Durable Objects charges; needs Workers Paid ($5/mo) and bridges/cloudflare | [pricing](https://developers.cloudflare.com/containers/platform/pricing/) |
 | Amazon Bedrock AgentCore Code Interpreter | $0.217 | Per second; CPU billed on actual use (I/O wait free), memory on peak; fixed 2 vCPU / 8 GB session, this is the 100%-CPU price | [pricing](https://aws.amazon.com/bedrock/agentcore/pricing/) |
-| Modal | $0.239 | Sandbox rates, GPUs extra; region pinning x1.15-1.75 | [pricing](https://modal.com/pricing) |
-| AWS Lambda MicroVMs | $0.252 | Us-east-1 ARM; billed on the image's baseline size (2 GB per vCPU) while running, per-second burst up to 4x; suspended VMs pay snapshot storage; needs a MicroVM image you build once | [pricing](https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSLambda/current/us-east-1/index.json) |
+| Modal | $0.238 | Sandbox rates, per second ($0.00003942 per physical core = 2 vCPUs); GPUs extra; region pinning x1.15-1.75; Starter includes $30/mo credit | [pricing](https://modal.com/pricing) |
+| AWS Lambda MicroVMs | $0.252 | us-east-1 ARM; billed on the image's baseline size (2 GB per vCPU) while running, per-second burst up to 4x; suspended VMs pay snapshot storage; needs a MicroVM image you build once | [pricing](https://aws.amazon.com/lambda/pricing/) |
 | Deno Sandbox | $0.300 | Billed on CPU time, not wall clock (estimate assumes both vCPUs busy); fixed 2 vCPU, 0.75-4 GB, max 30 min lifetime; needs a paid Deno Deploy plan | [pricing](https://deno.com/sandbox) |
 | Runloop | $0.317 | Per second, plus disk; pause (suspend) is a Pro-plan feature | [pricing](https://www.runloop.ai/pricing) |
-| Vercel Sandbox | $0.341 | Iad1; active CPU, provisioned RAM in minimum 1-minute increments (2 GB/vCPU); full-CPU estimate; Hobby free within quotas, Pro $20/mo usage credit; creations $0.60/million and retained snapshots $0.08/GB-month extra | [pricing](https://vercel.com/docs/vercel-sandbox/pricing) |
+| Vercel Sandbox | $0.341 | iad1; active CPU, provisioned RAM in minimum 1-minute increments (2 GB/vCPU); full-CPU estimate; Hobby free within quotas, Pro $20/mo usage credit; creations $0.60/million and retained snapshots $0.08/GB-month extra | [pricing](https://vercel.com/docs/vercel-sandbox/pricing) |
 | Azure Container Apps dynamic sessions | skipped (max 1 vCPU) | Flat $0.03 per session-hour (built-in Shell pools), billed per allocated session in 1-hour increments, East US; needs a session pool you create once | [pricing](https://learn.microsoft.com/en-us/azure/container-apps/billing#dynamic-sessions) |
 | Alibaba Cloud Agent Sandbox | skipped (max 2 GB memory) | Per second; Default QoS, Hong Kong and regions outside mainland China; disk separately $0.00025308/GiB-h; code-interpreter-v1 template is 2 vCPU / 2 GiB with 10 GiB disk (E2B-compatible API) | [pricing](https://www.alibabacloud.com/help/en/agent-sandbox/product-overview/billing-overview) |
 | Docker (local) | free | Runs on your own machine; free, but shares your kernel, so weaker isolation than a cloud micro-VM | [pricing](https://docs.docker.com/engine/) |
 
-Checked 2026-11-04.
+Checked 2026-11-04 to 2026-11-05.
 
 ## Install
 
