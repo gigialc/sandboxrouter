@@ -33,7 +33,7 @@ await sbx.kill();`;
   const caps = [...p.capabilities, ...(p.computers.length ? ["computers"] : [])];
 
   return (
-    <div className="mx-auto max-w-5xl px-6 pt-12">
+    <div className="px-5 sm:px-10 pt-12">
       <Link href="/#providers" className="text-[13px] text-muted hover:text-ink">
         ← Providers
       </Link>

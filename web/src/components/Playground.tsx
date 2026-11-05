@@ -157,7 +157,7 @@ export function Playground() {
   const field = "w-full border border-line bg-bg px-3 py-2 text-sm outline-none focus:border-line-2";
 
   return (
-    <div className="mx-auto grid max-w-5xl gap-6 px-6 lg:grid-cols-[20rem_1fr]">
+    <div className="grid gap-6 px-5 sm:px-10 lg:grid-cols-[22rem_1fr]">
       <div className="space-y-6">
         <section className="border border-line p-5">
           <h2 className="font-normal">1. Connect your server</h2>
@@ -255,13 +255,13 @@ export function Playground() {
       </div>
 
       <section className="flex min-h-[32rem] flex-col overflow-hidden border border-line bg-panel">
-        <div className="flex items-center gap-2 border-b border-white/10 p-3">
+        <div className="flex items-center gap-2 border-b border-line p-3">
           <input
             value={cmd}
             onChange={(e) => setCmd(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && sbx && !busy && run()}
             aria-label="Command"
-            className="flex-1 border border-white/10 bg-white/5 px-3 py-2 font-mono text-sm text-ink-2 outline-none"
+            className="flex-1 border border-line bg-panel px-3 py-2 font-mono text-sm text-ink-2 outline-none"
           />
           <button
             onClick={run}
@@ -280,7 +280,7 @@ export function Playground() {
             lines.map((l, k) => (
               <span
                 key={k}
-                className={l.stream === "err" ? "text-[#ff8a7a]" : l.stream === "sys" ? "block text-muted" : "text-ink-2"}
+                className={l.stream === "err" ? "text-bad" : l.stream === "sys" ? "block text-muted" : "text-ink-2"}
               >
                 {l.text}
                 {l.stream === "sys" ? "\n" : ""}

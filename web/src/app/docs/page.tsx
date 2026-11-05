@@ -21,7 +21,7 @@ const SECTIONS = [
 
 export default function DocsPage() {
   return (
-    <div className="mx-auto grid max-w-6xl gap-10 px-5 pt-14 lg:grid-cols-[13rem_1fr]">
+    <div className="grid gap-10 px-5 sm:px-10 pt-14 lg:grid-cols-[13rem_1fr] xl:gap-16">
       <aside className="hidden lg:block">
         <nav className="sticky top-24 space-y-1 text-sm">
           <p className="mb-3 font-mono text-xs uppercase tracking-widest text-muted">Docs</p>

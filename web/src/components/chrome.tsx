@@ -24,8 +24,8 @@ const NAV = [
 
 export function Nav() {
   return (
-    <header className="sticky top-0 z-30 border-b border-line/70 bg-bg/80 backdrop-blur-md">
-      <div className="mx-auto flex h-14 max-w-5xl items-center px-6">
+    <header className="sticky top-0 z-30 border-b border-line bg-bg/90 backdrop-blur-md">
+      <div className="flex h-14 items-center px-5 sm:px-10">
         <Link href="/" aria-label="sandboxrouter home">
           <Logo />
         </Link>
@@ -35,7 +35,7 @@ export function Nav() {
               {n.label}
             </Link>
           ))}
-          <a href={REPO} className="bg-ink px-3 py-1.5 text-[13px] font-medium text-bg hover:bg-white">
+          <a href={REPO} className="rounded-full bg-ink px-4 py-1.5 text-[13px] font-medium text-bg hover:bg-ink-2">
             GitHub
           </a>
         </nav>
@@ -47,7 +47,7 @@ export function Nav() {
 export function Footer() {
   return (
     <footer className="mt-32 border-t border-line">
-      <div className="mx-auto flex max-w-5xl flex-col gap-4 px-6 py-10 text-[13px] text-muted sm:flex-row sm:items-center">
+      <div className="flex flex-col gap-4 px-5 sm:px-10 py-10 text-[13px] text-muted sm:flex-row sm:items-center">
         <Logo className="text-ink-2" />
         <span>Free and open source. MIT. v{site.version}</span>
         <div className="flex gap-6 sm:ml-auto">
@@ -66,14 +66,14 @@ export function Tag({ children }: { children: React.ReactNode }) {
 }
 
 export function Button({ href, children, primary = false }: { href: string; children: React.ReactNode; primary?: boolean }) {
-  const cls = primary ? "bg-ink text-bg hover:bg-white" : "bg-panel-2 text-ink hover:bg-line-2";
+  const cls = primary ? "bg-ink text-bg hover:bg-ink-2" : "border border-line-2 bg-bg text-ink hover:bg-panel";
   const external = href.startsWith("http");
   return external ? (
-    <a href={href} className={`inline-flex h-9 items-center px-4 text-[13px] font-medium ${cls}`}>
+    <a href={href} className={`inline-flex h-9 items-center rounded-full px-4 text-[13px] font-medium ${cls}`}>
       {children}
     </a>
   ) : (
-    <Link href={href} className={`inline-flex h-9 items-center px-4 text-[13px] font-medium ${cls}`}>
+    <Link href={href} className={`inline-flex h-9 items-center rounded-full px-4 text-[13px] font-medium ${cls}`}>
       {children}
     </Link>
   );

@@ -32,8 +32,9 @@ const RULES = [
 export default function Home() {
   const cloud = site.providers.filter((p) => !p.local).length;
   return (
-    <div className="mx-auto max-w-5xl px-6">
-      <section className="pt-20 pb-14 sm:pt-28">
+    <div className="px-5 sm:px-10">
+      <div className="grid items-center gap-12 pt-16 pb-6 sm:pt-24 lg:grid-cols-2 lg:gap-16">
+      <section>
         <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted">Open source · {cloud} providers</p>
         <h1 className="mt-5 max-w-2xl text-4xl font-normal leading-[1.08] tracking-[-0.035em] sm:text-[52px]">One API for every sandbox.</h1>
         <p className="mt-5 max-w-xl text-[15px] leading-7 text-ink-2">
@@ -49,13 +50,16 @@ export default function Home() {
         </div>
       </section>
 
-      <CodeTabs
-        tabs={[
-          { label: "TypeScript", code: TS },
-          { label: "Python", code: PY },
-          { label: "HTTP", code: HTTP },
-        ]}
-      />
+      <div className="min-w-0">
+        <CodeTabs
+          tabs={[
+            { label: "TypeScript", code: TS },
+            { label: "Python", code: PY },
+            { label: "HTTP", code: HTTP },
+          ]}
+        />
+      </div>
+      </div>
 
       <section className="mt-24">
         <SectionTitle id="providers" kicker="Providers">
