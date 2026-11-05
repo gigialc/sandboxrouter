@@ -1,5 +1,5 @@
-import { spawn } from "node:child_process";
-import { chmodSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { spawn, spawnSync } from "node:child_process";
+import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { createServer, type Server } from "node:http";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
@@ -26,7 +26,7 @@ beforeAll(async () => {
   root = mkdtempSync(join(tmpdir(), "sbr-koyeb-"));
   // The sandbox image has coreutils `timeout`; macOS does not, so give the mock a minimal one.
   mkdirSync(join(root, "bin"));
-  writeFileSync(
+  if (spawnSync("sh", ["-c", "command -v timeout"]).status !== 0) writeFileSync(
     join(root, "bin", "timeout"),
     [
       "#!/bin/sh",
@@ -40,7 +40,7 @@ beforeAll(async () => {
       "exit $c",
     ].join("\n"),
   );
-  chmodSync(join(root, "bin", "timeout"), 0o755);
+  if (existsSync(join(root, "bin", "timeout"))) chmodSync(join(root, "bin", "timeout"), 0o755);
   shimPath = `${join(root, "bin")}:${process.env.PATH}`;
   server = createServer(async (req, res) => {
     const chunks: Buffer[] = [];

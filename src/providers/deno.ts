@@ -116,15 +116,20 @@ class DenoBox implements ProviderSandbox {
       }),
     );
     let timedOut = false;
+    let giveUp: NodeJS.Timeout | undefined;
+    // Killing the shell can leave its children holding stdout open, so stop waiting for the
+    // streams shortly after the kill instead of hanging until those children exit.
+    const abandoned = new Promise<never>((_, reject) => {
+      giveUp = setTimeout(() => reject(new ProviderError(ID, `command timed out after ${secs}s`)), secs * 1000 + 1000);
+    });
     const timer = setTimeout(() => {
       timedOut = true;
       child.kill("SIGKILL").catch(() => {});
     }, secs * 1000);
     try {
-      const [stdout, stderr, status] = await Promise.all([
-        drain(child.stdout, opts.onStdout),
-        drain(child.stderr, opts.onStderr),
-        sdk(() => child.status),
+      const [stdout, stderr, status] = await Promise.race([
+        Promise.all([drain(child.stdout, opts.onStdout), drain(child.stderr, opts.onStderr), sdk(() => child.status)]),
+        abandoned,
       ]);
       if (timedOut) throw new ProviderError(ID, `command timed out after ${secs}s`);
       // A signal-terminated process reports no useful code; use the shell convention 128+n.
@@ -132,6 +137,7 @@ class DenoBox implements ProviderSandbox {
       return { exitCode, stdout, stderr, durationMs: Date.now() - t0 };
     } finally {
       clearTimeout(timer);
+      clearTimeout(giveUp);
     }
   }
 

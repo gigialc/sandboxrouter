@@ -25,11 +25,19 @@ let bgCount = 0;
 
 function runCommand(command: string, env: Record<string, string>, timeoutMs: number) {
   return new Promise<{ statusCode: number | null; stdout: string; stderr: string }>((resolve) => {
-    const child = spawn("sh", ["-c", command], { cwd: root, env: { ...process.env, ...env } });
+    const child = spawn("sh", ["-c", command], { cwd: root, env: { ...process.env, ...env }, detached: true });
     let stdout = "";
     let stderr = "";
     let killed = false;
-    const t = setTimeout(() => ((killed = true), child.kill("SIGKILL")), timeoutMs);
+    // Kill the process group: on Linux /bin/sh (dash) leaves `sleep` running and holding the pipes otherwise.
+    const t = setTimeout(() => {
+      killed = true;
+      try {
+        process.kill(-child.pid!, "SIGKILL");
+      } catch {
+        child.kill("SIGKILL");
+      }
+    }, timeoutMs);
     child.stdout.on("data", (d) => (stdout += d));
     child.stderr.on("data", (d) => (stderr += d));
     child.on("close", (code) => {
