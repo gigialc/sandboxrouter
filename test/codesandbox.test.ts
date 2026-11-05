@@ -110,12 +110,12 @@ describe("codesandboxTier", () => {
     expect(codesandboxTier(2, 4).name).toBe("Nano");
     expect(codesandboxTier(1, 1).name).toBe("Pico");
     expect(codesandboxTier(1, 2).name).toBe("Nano");
-    expect(codesandboxTier(2, 1).name).toBe("Nano");
+    expect(codesandboxTier(2, 1).name).toBe("Pico");
     expect(codesandboxTier(3, 4).name).toBe("Micro");
     expect(codesandboxTier(8, 17).name).toBe("Medium");
     expect(codesandboxTier(200, 1).name).toBe("XLarge");
-    // Every tier is $0.0743 per vCPU-hour of its size (Pico counted at 1 vCPU).
-    for (const t of CODESANDBOX_TIERS) expect(t.usdHour / t.vcpu).toBeCloseTo(0.0743, 4);
+    // Pico's two vCPUs cost $0.03715 each per hour; other tiers cost $0.0743 per vCPU-hour.
+    for (const t of CODESANDBOX_TIERS) expect(t.usdHour / t.vcpu).toBeCloseTo(t.name === "Pico" ? 0.03715 : 0.0743, 5);
   });
 });
 

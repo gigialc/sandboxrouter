@@ -33,7 +33,8 @@ export class ModalProvider implements Provider {
     const app = await modal.apps.fromName(APP_NAME, { createIfMissing: true });
     const image = modal.images.fromRegistry(spec.image?.modal ?? "python:3.13-slim");
     const sb = await modal.sandboxes.create(app, image, {
-      cpu: spec.vcpu ?? DEFAULT_VCPU,
+      // Modal's cpu is physical cores (1 core = 2 vCPUs); the catalog and the spec count vCPUs.
+      cpu: (spec.vcpu ?? DEFAULT_VCPU) / 2,
       memoryMiB: Math.round((spec.memoryGb ?? DEFAULT_MEMORY_GB) * 1024),
       gpu: spec.gpu,
       timeoutMs: (spec.timeoutMinutes ?? 30) * 60_000,

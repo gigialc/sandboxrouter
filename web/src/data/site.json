@@ -1,6 +1,6 @@
 {
   "version": "0.2.0",
-  "generatedAt": "2026-11-05T13:11:11.561Z",
+  "generatedAt": "2026-11-05T17:11:05.146Z",
   "shapes": [
     "1x2",
     "2x4",
@@ -29,36 +29,36 @@
       ],
       "docs": "https://www.agent37.com/docs/agents-api/overview",
       "pricing": {
-        "vcpuHour": 0.006027397260273973,
-        "gbHour": 0,
-        "note": "per minute on fixed shapes (2 vCPU / 4 GB = $4.76/mo with disk); asleep = disk only ($0.09/GB-mo); gVisor isolation; prepaid wallet must hold 1 day of compute",
-        "source": "https://www.agent37.com/docs/agents-api/instance-sizing",
+        "vcpuHour": 0.0010958904109589042,
+        "gbHour": 0.0009589041095890411,
+        "note": "whole-minute billing: monthly shape total / 730 / 60; running estimate includes default disk (2 vCPU / 4 GB / 4 GB disk = $4.76/mo); sleeping/stopped disk $0.09/GB-mo; gVisor; $5 minimum top-up, wallet must hold one running day",
+        "source": "https://www.agent37.com/docs/agents-api/billing",
         "checked": "2026-11-05"
       },
       "computers": [],
       "prices": {
         "1x2": {
-          "usd": 0.006,
+          "usd": 0.0065,
           "unfit": null
         },
         "2x4": {
-          "usd": 0.006,
+          "usd": 0.0065,
           "unfit": null
         },
         "4x8": {
-          "usd": 0.0121,
+          "usd": 0.0128,
           "unfit": null
         },
         "8x16": {
-          "usd": 0.0351,
+          "usd": 0.038,
           "unfit": "max 4 vCPU"
         },
         "16x32": {
-          "usd": 0.0351,
+          "usd": 0.038,
           "unfit": "max 4 vCPU"
         },
         "32x128": {
-          "usd": 0.0351,
+          "usd": 0.038,
           "unfit": "max 4 vCPU"
         }
       }
@@ -83,9 +83,9 @@
       "pricing": {
         "vcpuHour": 0.017856,
         "gbHour": 0.008928,
-        "note": "per second; Default QoS class, Hong Kong and regions outside mainland China; disk above 15 GiB extra; size comes from the template (E2B-compatible API)",
+        "note": "per second; Default QoS, Hong Kong and regions outside mainland China; disk separately $0.00025308/GiB-h; code-interpreter-v1 template is 2 vCPU / 2 GiB with 10 GiB disk (E2B-compatible API)",
         "source": "https://www.alibabacloud.com/help/en/agent-sandbox/product-overview/billing-overview",
-        "checked": "2026-11-04"
+        "checked": "2026-11-05"
       },
       "computers": [],
       "prices": {
@@ -200,11 +200,11 @@
       ],
       "docs": "https://docs.aws.amazon.com/lambda/latest/dg/lambda-microvms-guide.html",
       "pricing": {
-        "vcpuHour": 0.0997,
-        "gbHour": 0.0132,
+        "vcpuHour": 0.09969984,
+        "gbHour": 0.01320012,
         "note": "us-east-1 ARM; billed on the image's baseline size (2 GB per vCPU) while running, per-second burst up to 4x; suspended VMs pay snapshot storage; needs a MicroVM image you build once",
         "source": "https://aws.amazon.com/lambda/pricing/",
-        "checked": "2026-11-04"
+        "checked": "2026-11-05"
       },
       "computers": [],
       "prices": {
@@ -470,9 +470,9 @@
       "pricing": {
         "vcpuHour": 0.072,
         "gbHour": 0.009,
-        "note": "bills active CPU and provisioned memory of the instance type; this is the full-CPU price; needs Workers Paid ($5/mo) and the bridge Worker in bridges/cloudflare",
+        "note": "10 ms billing on active CPU and allocated instance memory; full-CPU estimate excludes allocated disk ($0.000252/GB-h), Worker and Durable Objects charges; needs Workers Paid ($5/mo) and bridges/cloudflare",
         "source": "https://developers.cloudflare.com/containers/platform/pricing/",
-        "checked": "2026-11-04"
+        "checked": "2026-11-05"
       },
       "computers": [],
       "prices": {
@@ -523,9 +523,9 @@
       "pricing": {
         "vcpuHour": 0.0743,
         "gbHour": 0,
-        "note": "fixed VM tiers, credits at $0.01486 billed per started minute ($0.1486/h for 2 vCPU / 4 GB up to $4.7552/h for 64 / 128); free Build plan allows 10 concurrent VMs",
+        "note": "fixed tiers: Pico 2 vCPU / 1 GB $0.0743/h, Nano 2 / 4 $0.1486/h, up to 64 / 128 $4.7552/h; credits $0.01486, billed per started minute; Build free, 10 concurrent; Scale $170/mo incl. 1,100 credits",
         "source": "https://docs.together.ai/docs/together-code-sandbox-legacy",
-        "checked": "2026-11-04"
+        "checked": "2026-11-05"
       },
       "computers": [],
       "prices": {
@@ -838,9 +838,9 @@
       "pricing": {
         "vcpuHour": 0.0525,
         "gbHour": 0,
-        "note": "$0.105/h per 2 vCPU + 4 GiB, per second, up to 2 GiB per vCPU; needs an exe.dev subscription",
+        "note": "standalone reserved size, per second: $0.105/h per 2 vCPU / 4 GiB unit; stopped CPU/RAM free, retained disk separate; Personal from $15/mo (up to 16 vCPU / 32 GiB), Work $75/mo (32 / 64 without approval)",
         "source": "https://exe.dev/docs/standalone-vms.md",
-        "checked": "2026-11-04"
+        "checked": "2026-11-05"
       },
       "computers": [],
       "prices": {
@@ -941,9 +941,9 @@
       "pricing": {
         "vcpuHour": 0.04032,
         "gbHour": 0.0129,
-        "note": "per second on allocated size; sizes fixed by base snapshot, disk included; free tier 200 vCPU-h + 400 GiB-h/mo; paused VMs bill storage only",
+        "note": "per second on allocated fixed snapshot size; estimate includes disk at $0.000086/GiB-h; free monthly 200 vCPU-h, 400 GiB-h RAM, 60,000 GiB-h disk; Hobby $50/mo incl. $50 (max 8/16), Pro $500 (max 32/64); paused storage only",
         "source": "https://www.freestyle.sh/docs/vms/pricing-and-limits",
-        "checked": "2026-11-04"
+        "checked": "2026-11-05"
       },
       "computers": [],
       "prices": {
@@ -1152,9 +1152,9 @@
       "pricing": {
         "vcpuHour": 0.0055,
         "gbHour": 0.00275,
-        "note": "per second, disk included",
+        "note": "per second, no minimum runtime; running disk included; Starter $20/mo incl. $20 usage; paused disk $0.08/GB-month (default idle action deletes sandbox)",
         "source": "https://maritime.sh/pricing",
-        "checked": "2026-11-04"
+        "checked": "2026-11-05"
       },
       "computers": [
         "linux",
@@ -1208,36 +1208,36 @@
       ],
       "docs": "https://modal.com/docs/guide/sandbox",
       "pricing": {
-        "vcpuHour": 0.07096,
-        "gbHour": 0.0242,
-        "note": "sandbox rates, GPUs extra; region pinning x1.15-1.75",
+        "vcpuHour": 0.070956,
+        "gbHour": 0.024012,
+        "note": "sandbox rates, per second ($0.00003942 per physical core = 2 vCPUs); GPUs extra; region pinning x1.15-1.75; Starter includes $30/mo credit",
         "source": "https://modal.com/pricing",
-        "checked": "2026-11-04"
+        "checked": "2026-11-05"
       },
       "computers": [],
       "prices": {
         "1x2": {
-          "usd": 0.1194,
+          "usd": 0.119,
           "unfit": null
         },
         "2x4": {
-          "usd": 0.2387,
+          "usd": 0.238,
           "unfit": null
         },
         "4x8": {
-          "usd": 0.4774,
+          "usd": 0.4759,
           "unfit": null
         },
         "8x16": {
-          "usd": 0.9549,
+          "usd": 0.9518,
           "unfit": null
         },
         "16x32": {
-          "usd": 1.9098,
+          "usd": 1.9037,
           "unfit": null
         },
         "32x128": {
-          "usd": 5.3683,
+          "usd": 5.3441,
           "unfit": null
         }
       }
@@ -1528,7 +1528,7 @@
       "pricing": {
         "vcpuHour": 0.0504,
         "gbHour": 0.0162,
-        "note": "per second while active; paused bills storage only ($0.000108/GiB-h); sizes fixed by template (system templates 2 vCPU / 4 GiB); Free plan: 1 concurrent sandbox, $0.13/day allowance; bigger sizes need a team template on a paid plan",
+        "note": "per second active; superserve/base fixed at 2 vCPU / 4 GiB / 8 GiB disk; retained storage $0.000108/GiB-h (shared template plus changed blocks); Developer $20/mo incl. $20, max 4/16 with team templates; recurring Free allowance not published on pricing page",
         "source": "https://superserve.ai/pricing",
         "checked": "2026-11-05"
       },
@@ -1686,9 +1686,9 @@
       "pricing": {
         "vcpuHour": 0.128,
         "gbHour": 0.0212,
-        "note": "bills active CPU only; this is the 100%-CPU price, idle work costs less",
+        "note": "iad1; active CPU, provisioned RAM in minimum 1-minute increments (2 GB/vCPU); full-CPU estimate; Hobby free within quotas, Pro $20/mo usage credit; creations $0.60/million and retained snapshots $0.08/GB-month extra",
         "source": "https://vercel.com/docs/vercel-sandbox/pricing",
-        "checked": "2026-11-04"
+        "checked": "2026-11-05"
       },
       "computers": [],
       "prices": {
@@ -1785,9 +1785,9 @@
         "ios": 6
       },
       "size": "Android 15 phone emulator / iPhone simulator",
-      "note": "per-minute credits (Android 1/min, iOS 2/min) at the $0.05/credit overage rate; plans: Trial free (120 credits), Entry $20/mo (500), Individual $200/mo (5,000); no pause, an idle device is deleted after its inactivity timeout; the stream link is interactive; iOS has no shell",
+      "note": "per-minute credits (Android 1/min, iOS 2/min); displayed hourly prices use paid overage $0.05/credit; optional no-subscription Trial overage $0.06/credit ($3.60/h Android, $7.20/h iOS); Trial 120 one-time credits, Entry $20/mo incl. 500, Individual $200/mo incl. 5,000; no pause, idle devices deleted at timeout; interactive stream; iOS has no shell",
       "source": "https://limrun.com/pricing",
-      "checked": "2026-11-04",
+      "checked": "2026-11-05",
       "takeover": true,
       "credentials": [
         [
@@ -1804,9 +1804,9 @@
         "windows": 0.18,
         "android": 0.15
       },
-      "note": "per second while awake; asleep pays $0.08/GB-month of disk; Windows needs the Growth plan",
+      "note": "per second while awake; Starter $20/mo includes $20 usage; asleep pays $0.08/GB-month of disk; Windows needs Growth $100/mo incl. $100 usage",
       "source": "https://maritime.sh/pricing",
-      "checked": "2026-11-04",
+      "checked": "2026-11-05",
       "takeover": true,
       "size": "2 vCPU · 4 GB",
       "credentials": [

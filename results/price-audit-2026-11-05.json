@@ -1,0 +1,4159 @@
+[
+  {
+    "id": "agent37",
+    "kind": "sandbox",
+    "status": "changed",
+    "catalog": {
+      "pricing": {
+        "vcpuHour": 0.006027397260273973,
+        "gbHour": 0,
+        "note": "per minute on fixed shapes (2 vCPU / 4 GB = $4.76/mo with disk); asleep = disk only ($0.09/GB-mo); gVisor isolation; prepaid wallet must hold 1 day of compute",
+        "source": "https://www.agent37.com/docs/agents-api/instance-sizing",
+        "checked": "2026-11-05"
+      },
+      "limits": {
+        "maxVcpu": 4,
+        "maxMemoryGb": 32
+      },
+      "sizes": [
+        {
+          "vcpu": 2,
+          "memoryGb": 4,
+          "diskGb": 4,
+          "usdMonth": 4.76,
+          "usdHour": 0.006027397260273973
+        },
+        {
+          "vcpu": 4,
+          "memoryGb": 8,
+          "diskGb": 6,
+          "usdMonth": 9.34,
+          "usdHour": 0.012054794520547946
+        },
+        {
+          "vcpu": 4,
+          "memoryGb": 16,
+          "diskGb": 12,
+          "usdMonth": 15.48,
+          "usdHour": 0.019726027397260273
+        },
+        {
+          "vcpu": 4,
+          "memoryGb": 32,
+          "diskGb": 24,
+          "usdMonth": 27.76,
+          "usdHour": 0.035068493150684936
+        }
+      ],
+      "hourlyAt2x4": 0.006027397260273973,
+      "unfitAt2x4": null
+    },
+    "found": {
+      "vcpuHour": 0.0010958904109589042,
+      "gbHour": 0.0009589041095890411,
+      "sizes": [
+        {
+          "vcpu": 2,
+          "memoryGb": 4,
+          "usdHour": 0.006520547945205479,
+          "diskGb": 4,
+          "usdMonth": 4.76,
+          "usdMinute": 0.00010867579908675798
+        },
+        {
+          "vcpu": 4,
+          "memoryGb": 8,
+          "usdHour": 0.012794520547945205,
+          "diskGb": 6,
+          "usdMonth": 9.34,
+          "usdMinute": 0.0002132420091324201
+        },
+        {
+          "vcpu": 4,
+          "memoryGb": 16,
+          "usdHour": 0.021205479452054796,
+          "diskGb": 12,
+          "usdMonth": 15.48,
+          "usdMinute": 0.0003534246575342466
+        },
+        {
+          "vcpu": 4,
+          "memoryGb": 32,
+          "usdHour": 0.038027397260273973,
+          "diskGb": 24,
+          "usdMonth": 27.76,
+          "usdMinute": 0.0006337899543378996
+        }
+      ],
+      "maxVcpu": 4,
+      "maxMemoryGb": 32,
+      "billing": "Whole minutes; monthly rate / 730 / 60. Running bills CPU, RAM and reserved disk; transitions also bill as documented.",
+      "minimumPlan": "No subscription; prepaid wallet. Minimum top-up $5; create requires one day of the selected running rate in balance.",
+      "pausedCost": "Sleeping/stopped: $0.09 per reserved GB-month. Cold storage: $0.03 per compressed GB-month.",
+      "freeTier": "One-time $5 after adding an eligible card; not a recurring allowance, excluded from comparison. Three running instances before first top-up.",
+      "hourlyAt2x4": 0.006520547945205479,
+      "cheapestPaidPlanMax": {
+        "vcpu": 4,
+        "memoryGb": 32
+      },
+      "sizeTableAssessment": "All four shapes and default disks match. Imported usdHour is explicitly compute-only; usdMonth includes disk.",
+      "hourlyCostAssessment": "Uses compute-only imported usdHour and omits mandatory default disk. Correct to usdMonth / 730; leave imported compute-only table intact.",
+      "region": "Public default USD schedule; no separate regional price selected unless specified in the notes.",
+      "checked": "2026-11-05"
+    },
+    "evidence": [
+      {
+        "url": "https://www.agent37.com/docs/agents-api/instance-sizing",
+        "quote": "$4.76",
+        "checked": "2026-11-05",
+        "supports": "2 vCPU / 4 GB, default 4 GB disk, monthly total"
+      },
+      {
+        "url": "https://www.agent37.com/docs/agents-api/instance-sizing",
+        "quote": "$9.34",
+        "checked": "2026-11-05",
+        "supports": "4 / 8, default 6 GB disk, monthly total"
+      },
+      {
+        "url": "https://www.agent37.com/docs/agents-api/instance-sizing",
+        "quote": "$15.48",
+        "checked": "2026-11-05",
+        "supports": "4 / 16, default 12 GB disk, monthly total"
+      },
+      {
+        "url": "https://www.agent37.com/docs/agents-api/instance-sizing",
+        "quote": "$27.76",
+        "checked": "2026-11-05",
+        "supports": "4 / 32, default 24 GB disk, monthly total"
+      },
+      {
+        "url": "https://www.agent37.com/docs/agents-api/billing",
+        "quote": "$0.80",
+        "checked": "2026-11-05",
+        "supports": "vCPU-month"
+      },
+      {
+        "url": "https://www.agent37.com/docs/agents-api/billing",
+        "quote": "$0.70",
+        "checked": "2026-11-05",
+        "supports": "RAM GB-month"
+      },
+      {
+        "url": "https://www.agent37.com/docs/agents-api/billing",
+        "quote": "$0.09",
+        "checked": "2026-11-05",
+        "supports": "reserved disk GB-month"
+      },
+      {
+        "url": "https://www.agent37.com/docs/agents-api/billing",
+        "quote": "divided by 730 hours, divided by 60",
+        "checked": "2026-11-05",
+        "supports": "documented minute conversion"
+      },
+      {
+        "url": "https://www.agent37.com/docs/agents-api/billing",
+        "quote": "$5",
+        "checked": "2026-11-05",
+        "supports": "minimum top-up"
+      },
+      {
+        "url": "https://www.agent37.com/docs/agents-api/billing",
+        "quote": "$0.03",
+        "checked": "2026-11-05",
+        "supports": "cold storage GB-month"
+      }
+    ],
+    "notes": "Clear conversion is now public. Correct per-resource fields to $0.80/730 and $0.70/730; fixed-size running total includes disk. Default/gVisor rates only; VM compute is 2.5x and Performance compute 4x, excluded from this default comparison."
+  },
+  {
+    "id": "agentcore",
+    "kind": "sandbox",
+    "status": "ok",
+    "catalog": {
+      "pricing": {
+        "vcpuHour": 0.0895,
+        "gbHour": 0.00945,
+        "note": "per second; CPU billed on actual use (I/O wait free), memory on peak; fixed 2 vCPU / 8 GB session, this is the 100%-CPU price",
+        "source": "https://aws.amazon.com/bedrock/agentcore/pricing/",
+        "checked": "2026-11-04"
+      },
+      "limits": {
+        "maxVcpu": 2,
+        "maxMemoryGb": 8
+      },
+      "sizes": [],
+      "hourlyAt2x4": 0.2168,
+      "unfitAt2x4": null
+    },
+    "found": {
+      "vcpuHour": 0.0895,
+      "gbHour": 0.00945,
+      "sizes": [],
+      "maxVcpu": 2,
+      "maxMemoryGb": 8,
+      "billing": "Per-second actual CPU and peak memory up to each second; one-second minimum and 128 MB minimum memory billing; system overhead included.",
+      "minimumPlan": "Usage pricing; no monthly subscription published.",
+      "pausedCost": "Idle CPU is unbilled if no background work; retained peak memory continues to bill until termination. No separate paused mode established.",
+      "freeTier": "No recurring Code Interpreter-specific allowance established; promotional AWS credits excluded.",
+      "hourlyAt2x4": 0.2168,
+      "cheapestPaidPlanMax": {
+        "vcpu": 2,
+        "memoryGb": 8,
+        "plan": "Usage-based fixed Code Interpreter session"
+      },
+      "hourlyCostAssessment": "Correct for 2 active vCPUs and 4 GB peak billed memory; allocated capacity is not the memory billing quantity.",
+      "region": "Public default USD schedule; no separate regional price selected unless specified in the notes.",
+      "checked": "2026-11-05"
+    },
+    "evidence": [
+      {
+        "url": "https://aws.amazon.com/bedrock/agentcore/pricing/",
+        "quote": "$0.0895 per vCPU-hour",
+        "checked": "2026-11-05",
+        "supports": "Code Interpreter CPU"
+      },
+      {
+        "url": "https://aws.amazon.com/bedrock/agentcore/pricing/",
+        "quote": "$0.00945 per GB-hour",
+        "checked": "2026-11-05",
+        "supports": "Code Interpreter RAM"
+      },
+      {
+        "url": "https://aws.amazon.com/bedrock/agentcore/pricing/",
+        "quote": "1-second minimum",
+        "checked": "2026-11-05",
+        "supports": "billing"
+      },
+      {
+        "url": "https://aws.amazon.com/bedrock/agentcore/pricing/",
+        "quote": "128MB minimum memory billing",
+        "checked": "2026-11-05",
+        "supports": "floor"
+      },
+      {
+        "url": "https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/bedrock-agentcore-limits.html",
+        "quote": "2vCPU/8GB",
+        "checked": "2026-11-05",
+        "supports": "Code Interpreter hardware configuration per session"
+      }
+    ],
+    "notes": "Unit prices and fixed 2 vCPU / 8 GB session confirmed by public pricing and Code Interpreter quota documentation. Peak used memory, not the full 8 GB allocation, drives billed RAM."
+  },
+  {
+    "id": "alibaba",
+    "kind": "sandbox",
+    "status": "changed",
+    "catalog": {
+      "pricing": {
+        "vcpuHour": 0.017856,
+        "gbHour": 0.008928,
+        "note": "per second; Default QoS class, Hong Kong and regions outside mainland China; disk above 15 GiB extra; size comes from the template (E2B-compatible API)",
+        "source": "https://www.alibabacloud.com/help/en/agent-sandbox/product-overview/billing-overview",
+        "checked": "2026-11-04"
+      },
+      "limits": {
+        "maxVcpu": 2,
+        "maxMemoryGb": 2
+      },
+      "sizes": [],
+      "hourlyAt2x4": 0.071424,
+      "unfitAt2x4": "max 2 GB memory"
+    },
+    "found": {
+      "vcpuHour": 0.017856,
+      "gbHour": 0.008928,
+      "sizes": [
+        {
+          "vcpu": 2,
+          "memoryGb": 2,
+          "usdHour": 0.053568,
+          "template": "code-interpreter-v1",
+          "diskGb": 10
+        }
+      ],
+      "maxVcpu": null,
+      "maxMemoryGb": null,
+      "billing": "Per second, one-second minimum; invoices hourly. Active: CPU, RAM and disk.",
+      "minimumPlan": "Pay as you go; no recurring minimum published in billing overview.",
+      "pausedCost": "Deep hibernation/snapshots: disk only. Light hibernation: memory plus disk. International disk: $0.00025308/GiB-hour.",
+      "freeTier": "No recurring sandbox allowance established in the billing overview; the catalog claim of 15 GiB free disk is not supported by its current table.",
+      "hourlyAt2x4": null,
+      "region": "Hong Kong and regions outside mainland China; Default QoS. No separate US rate in this schedule.",
+      "cheapestPaidPlanMax": null,
+      "defaultTemplate": {
+        "name": "code-interpreter-v1",
+        "vcpu": 2,
+        "memoryGb": 2,
+        "diskGb": 10
+      },
+      "alternatives": [
+        {
+          "qos": "Economy",
+          "vcpuHour": 0.013716,
+          "gbHour": 0.006876
+        },
+        {
+          "qos": "Performance",
+          "vcpuHour": 0.027324,
+          "gbHour": 0.013896
+        }
+      ],
+      "hourlyCostAssessment": "Unit arithmetic matches Default QoS; default template is 2 / 2 and therefore cannot fulfil 2 / 4. Catalog limits are template caps, not provider maxima.",
+      "checked": "2026-11-05"
+    },
+    "evidence": [
+      {
+        "url": "https://www.alibabacloud.com/help/en/agent-sandbox/product-overview/billing-overview",
+        "quote": "USD 0.00000496/second",
+        "checked": "2026-11-05",
+        "supports": "Default international vCPU-second"
+      },
+      {
+        "url": "https://www.alibabacloud.com/help/en/agent-sandbox/product-overview/billing-overview",
+        "quote": "USD 0.00000248/second",
+        "checked": "2026-11-05",
+        "supports": "Default international GiB-second"
+      },
+      {
+        "url": "https://www.alibabacloud.com/help/en/agent-sandbox/product-overview/billing-overview",
+        "quote": "USD 0.00025308/GiB/hour",
+        "checked": "2026-11-05",
+        "supports": "international disk"
+      },
+      {
+        "url": "https://www.alibabacloud.com/help/en/agent-sandbox/product-overview/billing-overview",
+        "quote": "USD 0.013716/hour",
+        "checked": "2026-11-05",
+        "supports": "Economy CPU"
+      },
+      {
+        "url": "https://www.alibabacloud.com/help/en/agent-sandbox/product-overview/billing-overview",
+        "quote": "USD 0.006876/hour",
+        "checked": "2026-11-05",
+        "supports": "Economy RAM"
+      },
+      {
+        "url": "https://www.alibabacloud.com/help/en/agent-sandbox/product-overview/billing-overview",
+        "quote": "USD 0.027324/hour",
+        "checked": "2026-11-05",
+        "supports": "Performance CPU"
+      },
+      {
+        "url": "https://www.alibabacloud.com/help/en/agent-sandbox/product-overview/billing-overview",
+        "quote": "USD 0.013896/hour",
+        "checked": "2026-11-05",
+        "supports": "Performance RAM"
+      },
+      {
+        "url": "https://www.alibabacloud.com/help/en/agent-sandbox/user-guide/code-interpreter-v1-template",
+        "quote": "2 vCPU",
+        "checked": "2026-11-05",
+        "supports": "template CPU"
+      },
+      {
+        "url": "https://www.alibabacloud.com/help/en/agent-sandbox/user-guide/code-interpreter-v1-template",
+        "quote": "2048 MB",
+        "checked": "2026-11-05",
+        "supports": "template memory"
+      },
+      {
+        "url": "https://www.alibabacloud.com/help/en/agent-sandbox/user-guide/code-interpreter-v1-template",
+        "quote": "10240 MB",
+        "checked": "2026-11-05",
+        "supports": "template disk"
+      }
+    ],
+    "notes": "Rates confirmed. Remove unsupported free-disk wording; the current billing table charges active disk and publishes no included threshold. Public template defaults are CPU 2, memory 2048 MB, disk 10240 MB. Public maximum not established; do not substitute default resources for a provider-wide limit."
+  },
+  {
+    "id": "azure",
+    "kind": "sandbox",
+    "status": "conflict",
+    "catalog": {
+      "pricing": {
+        "vcpuHour": 0.03,
+        "gbHour": 0,
+        "note": "flat $0.03 per session-hour (built-in Shell pools), billed per allocated session in 1-hour increments, East US; needs a session pool you create once",
+        "source": "https://learn.microsoft.com/en-us/azure/container-apps/billing#dynamic-sessions",
+        "checked": "2026-11-04"
+      },
+      "limits": {
+        "maxVcpu": 1,
+        "maxMemoryGb": 2
+      },
+      "sizes": [],
+      "hourlyAt2x4": 0.03,
+      "unfitAt2x4": "max 1 vCPU"
+    },
+    "found": {
+      "vcpuHour": null,
+      "gbHour": null,
+      "sizes": [],
+      "maxVcpu": null,
+      "maxMemoryGb": null,
+      "billing": "Allocated built-in code-interpreter session duration, rounded in one-hour increments; Shell is listed among built-in interpreter types.",
+      "minimumPlan": "Azure subscription and a session pool; no separate monthly plan established for built-in sessions.",
+      "pausedCost": "Still billed while allocated; deallocation ends metering. No distinct Shell pause tariff established.",
+      "freeTier": "No Dynamic Sessions-specific free allowance verified. Container Apps CPU-second grants are not evidence of free sessions.",
+      "sessionHour": 0.03,
+      "hourlyAt2x4": null,
+      "region": "East US, USD retail Consumption meter Dynamic Sessions",
+      "cheapestPaidPlanMax": null,
+      "hourlyCostAssessment": "Flat-session rule matches meter. No public Shell CPU/RAM specification established; catalog 1 / 2 is an acknowledged placeholder.",
+      "checked": "2026-11-05"
+    },
+    "evidence": [
+      {
+        "url": "https://prices.azure.com/api/retail/prices?%24filter=serviceName+eq+%27Azure+Container+Apps%27+and+armRegionName+eq+%27eastus%27",
+        "quote": "\"retailPrice\":0.03",
+        "checked": "2026-11-05",
+        "supports": "USD/session-hour; meterName Dynamic Sessions, unitOfMeasure 1 Hour"
+      },
+      {
+        "url": "https://learn.microsoft.com/en-us/azure/container-apps/billing#dynamic-sessions",
+        "quote": "in increments of one hour",
+        "checked": "2026-11-05",
+        "supports": "allocated session granularity"
+      },
+      {
+        "url": "https://learn.microsoft.com/en-us/azure/container-apps/session-pool",
+        "quote": "PythonLTS, NodeLTS, Shell, and CustomContainer",
+        "checked": "2026-11-05",
+        "supports": "supported container types"
+      }
+    ],
+    "notes": "Price is confirmed, capacity is unresolved. Do not treat $0.03/session-hour as $0.03/vCPU-hour, or assert that a session fulfils 2 / 4. Public pricing API returns the meter; Shell tutorial and session-pool documentation do not state its CPU/RAM."
+  },
+  {
+    "id": "beam",
+    "kind": "sandbox",
+    "status": "conflict",
+    "catalog": {
+      "pricing": {
+        "vcpuHour": 0.05,
+        "gbHour": 0.01,
+        "note": "per second, Performance tier (sandbox default); Developer plan $20/mo incl. $20 credits; GPUs billed separately",
+        "source": "https://www.beam.cloud/pricing",
+        "checked": "2026-11-04"
+      },
+      "limits": {
+        "maxVcpu": 30,
+        "maxMemoryGb": 64
+      },
+      "sizes": [],
+      "hourlyAt2x4": 0.14,
+      "unfitAt2x4": null
+    },
+    "found": {
+      "vcpuHour": 0.05,
+      "gbHour": 0.01,
+      "sizes": [],
+      "maxVcpu": null,
+      "maxMemoryGb": null,
+      "billing": "Sandbox billing is per millisecond, not per second as the catalog note states.",
+      "minimumPlan": "Developer $20/month, including $20 usage. Team $89/month plus usage.",
+      "pausedCost": "Compute stops when stopped; storage currently not billed. Planned $0.0001/GB-hour is not a current charge.",
+      "freeTier": "No recurring free sandbox tier established on the pricing page.",
+      "hourlyAt2x4": 0.14,
+      "region": "Default hosted Performance tier",
+      "cheapestPaidPlanMax": {
+        "vcpu": null,
+        "memoryGb": null,
+        "note": "30 vCPU is account-wide concurrency, not a documented per-sandbox maximum."
+      },
+      "alternatives": [
+        {
+          "tier": "shared",
+          "vcpuHour": 0.011,
+          "gbHour": 0.0055,
+          "maxVcpu": 8,
+          "maxMemoryGb": 16
+        },
+        {
+          "tier": "spot",
+          "vcpuHour": 0.0063,
+          "gbHour": 0.00135
+        }
+      ],
+      "hourlyCostAssessment": "Performance arithmetic correct; cheaper Shared/Spot tiers require explicit opt-in and are not the default adapter selection.",
+      "checked": "2026-11-05"
+    },
+    "evidence": [
+      {
+        "url": "https://www.beam.cloud/pricing.md",
+        "quote": "$0.05",
+        "checked": "2026-11-05",
+        "supports": "Performance CPU-hour"
+      },
+      {
+        "url": "https://www.beam.cloud/pricing.md",
+        "quote": "$0.01",
+        "checked": "2026-11-05",
+        "supports": "Performance GiB-hour"
+      },
+      {
+        "url": "https://www.beam.cloud/pricing.md",
+        "quote": "Pay by the millisecond",
+        "checked": "2026-11-05",
+        "supports": "sandboxes"
+      },
+      {
+        "url": "https://www.beam.cloud/pricing.md",
+        "quote": "$20/month",
+        "checked": "2026-11-05",
+        "supports": "Developer minimum"
+      },
+      {
+        "url": "https://www.beam.cloud/pricing.md",
+        "quote": "30 vCPUs",
+        "checked": "2026-11-05",
+        "supports": "concurrent account quota"
+      },
+      {
+        "url": "https://www.beam.cloud/pricing.md",
+        "quote": "$0.011",
+        "checked": "2026-11-05",
+        "supports": "Shared CPU-hour"
+      },
+      {
+        "url": "https://www.beam.cloud/pricing.md",
+        "quote": "$0.0055",
+        "checked": "2026-11-05",
+        "supports": "Shared GiB-hour"
+      },
+      {
+        "url": "https://www.beam.cloud/pricing.md",
+        "quote": "$0.0063",
+        "checked": "2026-11-05",
+        "supports": "Spot CPU-hour"
+      },
+      {
+        "url": "https://www.beam.cloud/pricing.md",
+        "quote": "$0.00135",
+        "checked": "2026-11-05",
+        "supports": "Spot GiB-hour"
+      }
+    ],
+    "notes": "Conflict/unverified capacity: catalog max 30 CPU derives from concurrent account quota, and max 64 GB was not established as a per-sandbox limit. Preserve entry under conflict rule despite a clear granularity correction."
+  },
+  {
+    "id": "blaxel",
+    "kind": "sandbox",
+    "status": "conflict",
+    "catalog": {
+      "pricing": {
+        "vcpuHour": 0,
+        "gbHour": 0.0414,
+        "note": "billed on memory only ($0.0000115/GB-s), CPU scales with memory (~2 GB per core)",
+        "source": "https://blaxel.ai/pricing",
+        "checked": "2026-11-04"
+      },
+      "limits": {
+        "maxVcpu": 8,
+        "maxMemoryGb": 16
+      },
+      "sizes": [],
+      "hourlyAt2x4": 0.1656,
+      "unfitAt2x4": null
+    },
+    "found": {
+      "vcpuHour": 0,
+      "gbHour": 0.0414,
+      "sizes": [],
+      "maxVcpu": null,
+      "maxMemoryGb": null,
+      "billing": "Active running duration at $0.0000115 per allocated GB RAM-second; CPU bundled and scales with memory.",
+      "minimumPlan": "Pay as you go; no monthly subscription. Higher quota tiers depend on wallet top-ups.",
+      "pausedCost": "No compute in standby; memory/filesystem snapshots $0.20/GB-month; images $0.045/GB-month.",
+      "freeTier": "Up to $200 introductory credits, excluded; no recurring allowance established.",
+      "hourlyAt2x4": null,
+      "cheapestPaidPlanMax": {
+        "vcpu": null,
+        "memoryGb": null,
+        "status": "login-only"
+      },
+      "availability": {
+        "pricing": "HTTP 200",
+        "statusPage": "reports operational",
+        "api": "Unauthenticated GET redirects to login; authenticated operations not tested."
+      },
+      "hourlyCostAssessment": "RAM rate matches, but public docs give 8 GB -> 4 CPU and 16 GB -> 6 CPU, contradicting the formula at the catalog 8-CPU/16-GB cap. A linear 2-GB-per-core assumption is unsafe.",
+      "region": "Public default USD schedule; no separate regional price selected unless specified in the notes.",
+      "checked": "2026-11-05"
+    },
+    "evidence": [
+      {
+        "url": "https://blaxel.ai/pricing",
+        "quote": "$0.0000115",
+        "checked": "2026-11-05",
+        "supports": "RAM-second compute"
+      },
+      {
+        "url": "https://blaxel.ai/pricing",
+        "quote": "$0.20",
+        "checked": "2026-11-05",
+        "supports": "snapshot GB-month"
+      },
+      {
+        "url": "https://blaxel.ai/pricing",
+        "quote": "$0.045",
+        "checked": "2026-11-05",
+        "supports": "image GB-month"
+      },
+      {
+        "url": "https://docs.blaxel.ai/Security/Quotas.md",
+        "quote": "Quotas",
+        "checked": "2026-11-05",
+        "supports": "public docs direct tier limits to the authenticated console"
+      },
+      {
+        "url": "https://docs.blaxel.ai/Sandboxes/Overview.md",
+        "quote": "16 GB memory is allocated 6 CPU cores",
+        "checked": "2026-11-05",
+        "supports": "nonlinear mapping"
+      },
+      {
+        "url": "https://status.blaxel.ai",
+        "quote": "We’re fully operational",
+        "checked": "2026-11-05",
+        "supports": "public service status"
+      },
+      {
+        "url": "https://www.ycombinator.com/companies/blaxel",
+        "quote": "Acquired",
+        "checked": "2026-11-05",
+        "supports": "public ycdc_status metadata"
+      }
+    ],
+    "notes": "Pricing is live despite YC metadata reporting Acquired. API routing redirects to login; authenticated provisioning untested. Tier maxima are login-only. Memory/CPU mapping conflicts with the catalog; retain it unchanged and do not treat 16 GB as proof of 8 cores."
+  },
+  {
+    "id": "boat",
+    "kind": "sandbox",
+    "status": "ok",
+    "catalog": {
+      "pricing": {
+        "vcpuHour": 0.009,
+        "gbHour": 0,
+        "note": "fixed sizes billed per second ($0.018/h for 2 vCPU / 4 GB up to $0.20/h for 16 / 32); needs a plan from $20/mo, paid back as VM time",
+        "source": "https://docs.boat.dev/pricing.md",
+        "checked": "2026-11-04"
+      },
+      "limits": {
+        "maxVcpu": 16,
+        "maxMemoryGb": 32
+      },
+      "sizes": [
+        {
+          "type": "small",
+          "vcpu": 2,
+          "memoryGb": 4,
+          "usdHour": 0.018
+        },
+        {
+          "type": "default",
+          "vcpu": 4,
+          "memoryGb": 8,
+          "usdHour": 0.036
+        },
+        {
+          "type": "large",
+          "vcpu": 8,
+          "memoryGb": 16,
+          "usdHour": 0.072
+        },
+        {
+          "type": "xlarge",
+          "vcpu": 16,
+          "memoryGb": 32,
+          "usdHour": 0.2
+        }
+      ],
+      "hourlyAt2x4": 0.018,
+      "unfitAt2x4": null
+    },
+    "found": {
+      "vcpuHour": null,
+      "gbHour": null,
+      "sizes": [
+        {
+          "vcpu": 2,
+          "memoryGb": 4,
+          "usdHour": 0.018,
+          "name": "small"
+        },
+        {
+          "vcpu": 4,
+          "memoryGb": 8,
+          "usdHour": 0.036,
+          "name": "default"
+        },
+        {
+          "vcpu": 8,
+          "memoryGb": 16,
+          "usdHour": 0.072,
+          "name": "large"
+        },
+        {
+          "vcpu": 16,
+          "memoryGb": 32,
+          "usdHour": 0.2,
+          "name": "xlarge"
+        }
+      ],
+      "maxVcpu": 16,
+      "maxMemoryGb": 32,
+      "billing": "Per second while running; fixed shapes, no machine time when stopped.",
+      "minimumPlan": "$20/month per seat, all usable as VM time. xlarge needs $100/month or higher.",
+      "pausedCost": "Stopped disk retained at least 14 days at no machine-time charge. Saved snapshots beyond plan count: $0.056/snapshot/day.",
+      "freeTier": "Seven-day card-required trial only; excluded. No recurring free plan.",
+      "hourlyAt2x4": 0.018,
+      "cheapestPaidPlanMax": {
+        "vcpu": 8,
+        "memoryGb": 16,
+        "plan": "$20/month"
+      },
+      "sizeTableAssessment": "All four BOAT_SIZES rates and dimensions match.",
+      "hourlyCostAssessment": "Smallest fitting fixed size is correct. Plan, excess starts and excess saved snapshots remain additional costs.",
+      "region": "Public default USD schedule; no separate regional price selected unless specified in the notes.",
+      "checked": "2026-11-05"
+    },
+    "evidence": [
+      {
+        "url": "https://docs.boat.dev/pricing.md",
+        "quote": "$0.018",
+        "checked": "2026-11-05",
+        "supports": "small 2 / 4"
+      },
+      {
+        "url": "https://docs.boat.dev/pricing.md",
+        "quote": "$0.036",
+        "checked": "2026-11-05",
+        "supports": "default 4 / 8"
+      },
+      {
+        "url": "https://docs.boat.dev/pricing.md",
+        "quote": "$0.072",
+        "checked": "2026-11-05",
+        "supports": "large 8 / 16"
+      },
+      {
+        "url": "https://docs.boat.dev/pricing.md",
+        "quote": "$0.200",
+        "checked": "2026-11-05",
+        "supports": "xlarge 16 / 32"
+      },
+      {
+        "url": "https://docs.boat.dev/pricing.md",
+        "quote": "$20/mo",
+        "checked": "2026-11-05",
+        "supports": "minimum per-seat plan"
+      },
+      {
+        "url": "https://docs.boat.dev/pricing.md",
+        "quote": "$100",
+        "checked": "2026-11-05",
+        "supports": "xlarge minimum plan"
+      },
+      {
+        "url": "https://docs.boat.dev/pricing.md",
+        "quote": "$0.056",
+        "checked": "2026-11-05",
+        "supports": "excess saved snapshot/day"
+      }
+    ],
+    "notes": "Published total running prices match. xlarge is available self-serve only at $100/month+, not on the cheapest plan. Extra starts beyond plan limits cost $0.03–$0.07 each."
+  },
+  {
+    "id": "cloudflare",
+    "kind": "sandbox",
+    "status": "changed",
+    "catalog": {
+      "pricing": {
+        "vcpuHour": 0.072,
+        "gbHour": 0.009,
+        "note": "bills active CPU and provisioned memory of the instance type; this is the full-CPU price; needs Workers Paid ($5/mo) and the bridge Worker in bridges/cloudflare",
+        "source": "https://developers.cloudflare.com/containers/platform/pricing/",
+        "checked": "2026-11-04"
+      },
+      "limits": {
+        "maxVcpu": 4,
+        "maxMemoryGb": 12
+      },
+      "sizes": [
+        {
+          "name": "lite",
+          "vcpu": 0.0625,
+          "memoryGb": 0.25
+        },
+        {
+          "name": "basic",
+          "vcpu": 0.25,
+          "memoryGb": 1
+        },
+        {
+          "name": "standard-1",
+          "vcpu": 0.5,
+          "memoryGb": 4
+        },
+        {
+          "name": "standard-2",
+          "vcpu": 1,
+          "memoryGb": 6
+        },
+        {
+          "name": "standard-3",
+          "vcpu": 2,
+          "memoryGb": 8
+        },
+        {
+          "name": "standard-4",
+          "vcpu": 4,
+          "memoryGb": 12
+        }
+      ],
+      "hourlyAt2x4": 0.21599999999999997,
+      "unfitAt2x4": null
+    },
+    "found": {
+      "vcpuHour": 0.072,
+      "gbHour": 0.009,
+      "sizes": [
+        {
+          "vcpu": 0.0625,
+          "memoryGb": 0.25,
+          "usdHour": 0.006749999999999999,
+          "name": "lite",
+          "diskGb": 2,
+          "usdHourIncludingDisk": 0.007253999999999999
+        },
+        {
+          "vcpu": 0.25,
+          "memoryGb": 1,
+          "usdHour": 0.026999999999999996,
+          "name": "basic",
+          "diskGb": 4,
+          "usdHourIncludingDisk": 0.028007999999999995
+        },
+        {
+          "vcpu": 0.5,
+          "memoryGb": 4,
+          "usdHour": 0.072,
+          "name": "standard-1",
+          "diskGb": 8,
+          "usdHourIncludingDisk": 0.074016
+        },
+        {
+          "vcpu": 1,
+          "memoryGb": 6,
+          "usdHour": 0.126,
+          "name": "standard-2",
+          "diskGb": 12,
+          "usdHourIncludingDisk": 0.129024
+        },
+        {
+          "vcpu": 2,
+          "memoryGb": 8,
+          "usdHour": 0.21599999999999997,
+          "name": "standard-3",
+          "diskGb": 16,
+          "usdHourIncludingDisk": 0.22003199999999998
+        },
+        {
+          "vcpu": 4,
+          "memoryGb": 12,
+          "usdHour": 0.39599999999999996,
+          "name": "standard-4",
+          "diskGb": 20,
+          "usdHourIncludingDisk": 0.40103999999999995
+        }
+      ],
+      "maxVcpu": 4,
+      "maxMemoryGb": 12,
+      "billing": "10 ms increments. Active CPU, allocated RAM and allocated disk; default/US schedule.",
+      "minimumPlan": "Workers Paid $5/month; Workers and Durable Objects charges also apply.",
+      "pausedCost": "Container resource charges stop on sleep; separate Worker/DO/storage services can still charge.",
+      "freeTier": "No Containers on Workers Free. Paid includes 375 vCPU-min, 25 GiB-h RAM and 200 GB-h disk per month.",
+      "hourlyAt2x4": 0.216,
+      "hourlyAt2x4IncludingDisk": 0.220032,
+      "cheapestPaidPlanMax": {
+        "vcpu": 4,
+        "memoryGb": 12
+      },
+      "sizeTableAssessment": "All six instance CPU/RAM shapes match; the fitting 2 / 4 request receives standard-3 (2 / 8 / 16 GB disk).",
+      "hourlyCostAssessment": "Compute-only arithmetic and size selection match; disk is extra at $0.000252/GB-hour. Document omitted mandatory disk rather than silently changing the catalog-wide compute comparison convention.",
+      "region": "Public default USD schedule; no separate regional price selected unless specified in the notes.",
+      "checked": "2026-11-05"
+    },
+    "evidence": [
+      {
+        "url": "https://developers.cloudflare.com/containers/platform/pricing/",
+        "quote": "$0.000020",
+        "checked": "2026-11-05",
+        "supports": "vCPU-second"
+      },
+      {
+        "url": "https://developers.cloudflare.com/containers/platform/pricing/",
+        "quote": "$0.0000025",
+        "checked": "2026-11-05",
+        "supports": "GiB-second memory"
+      },
+      {
+        "url": "https://developers.cloudflare.com/containers/platform/pricing/",
+        "quote": "$0.00000007",
+        "checked": "2026-11-05",
+        "supports": "GB-second disk"
+      },
+      {
+        "url": "https://developers.cloudflare.com/containers/platform/pricing/",
+        "quote": "every 10ms",
+        "checked": "2026-11-05",
+        "supports": "billing granularity"
+      },
+      {
+        "url": "https://developers.cloudflare.com/containers/platform/pricing/",
+        "quote": "$5 USD",
+        "checked": "2026-11-05",
+        "supports": "Workers Paid minimum"
+      },
+      {
+        "url": "https://developers.cloudflare.com/containers/platform/pricing/",
+        "quote": "375 vCPU-minutes/month",
+        "checked": "2026-11-05",
+        "supports": "paid CPU allowance"
+      },
+      {
+        "url": "https://developers.cloudflare.com/containers/platform/pricing/",
+        "quote": "25 GiB-hours/month",
+        "checked": "2026-11-05",
+        "supports": "paid RAM allowance"
+      },
+      {
+        "url": "https://developers.cloudflare.com/containers/platform/pricing/",
+        "quote": "200 GB-hours/month",
+        "checked": "2026-11-05",
+        "supports": "paid disk allowance"
+      }
+    ],
+    "notes": "Correct the note to state 10 ms metering and separately billed disk/Worker/DO charges. Keep the established compute-only hourlyCost convention; the report supplies the disk-inclusive total explicitly."
+  },
+  {
+    "id": "codesandbox",
+    "kind": "sandbox",
+    "status": "changed",
+    "catalog": {
+      "pricing": {
+        "vcpuHour": 0.0743,
+        "gbHour": 0,
+        "note": "fixed VM tiers, credits at $0.01486 billed per started minute ($0.1486/h for 2 vCPU / 4 GB up to $4.7552/h for 64 / 128); free Build plan allows 10 concurrent VMs",
+        "source": "https://docs.together.ai/docs/together-code-sandbox-legacy",
+        "checked": "2026-11-04"
+      },
+      "limits": {
+        "maxVcpu": 64,
+        "maxMemoryGb": 128
+      },
+      "sizes": [
+        {
+          "name": "Pico",
+          "vcpu": 1,
+          "memoryGb": 1,
+          "usdHour": 0.0743
+        },
+        {
+          "name": "Nano",
+          "vcpu": 2,
+          "memoryGb": 4,
+          "usdHour": 0.1486
+        },
+        {
+          "name": "Micro",
+          "vcpu": 4,
+          "memoryGb": 8,
+          "usdHour": 0.2972
+        },
+        {
+          "name": "Small",
+          "vcpu": 8,
+          "memoryGb": 16,
+          "usdHour": 0.5944
+        },
+        {
+          "name": "Medium",
+          "vcpu": 16,
+          "memoryGb": 32,
+          "usdHour": 1.1888
+        },
+        {
+          "name": "Large",
+          "vcpu": 32,
+          "memoryGb": 64,
+          "usdHour": 2.3776
+        },
+        {
+          "name": "XLarge",
+          "vcpu": 64,
+          "memoryGb": 128,
+          "usdHour": 4.7552
+        }
+      ],
+      "hourlyAt2x4": 0.1486,
+      "unfitAt2x4": null
+    },
+    "found": {
+      "vcpuHour": null,
+      "gbHour": null,
+      "sizes": [
+        {
+          "vcpu": 2,
+          "memoryGb": 1,
+          "usdHour": 0.0743,
+          "name": "Pico"
+        },
+        {
+          "vcpu": 2,
+          "memoryGb": 4,
+          "usdHour": 0.1486,
+          "name": "Nano"
+        },
+        {
+          "vcpu": 4,
+          "memoryGb": 8,
+          "usdHour": 0.2972,
+          "name": "Micro"
+        },
+        {
+          "vcpu": 8,
+          "memoryGb": 16,
+          "usdHour": 0.5944,
+          "name": "Small"
+        },
+        {
+          "vcpu": 16,
+          "memoryGb": 32,
+          "usdHour": 1.1888,
+          "name": "Medium"
+        },
+        {
+          "vcpu": 32,
+          "memoryGb": 64,
+          "usdHour": 2.3776,
+          "name": "Large"
+        },
+        {
+          "vcpu": 64,
+          "memoryGb": 128,
+          "usdHour": 4.7552,
+          "name": "XLarge"
+        }
+      ],
+      "maxVcpu": 64,
+      "maxMemoryGb": 128,
+      "billing": "Credits at $0.01486, rounded up to each started minute.",
+      "minimumPlan": "Build has no subscription fee, with usage credits. Scale $170/month includes 1,100 credits and 250 concurrent VMs.",
+      "pausedCost": "Only VM runtime consumes runtime credits. Retained snapshot/storage tariff not established in this page.",
+      "freeTier": "Build allows 10 concurrent VMs; included recurring credit quantity not established in the inspected public source.",
+      "hourlyAt2x4": 0.1486,
+      "cheapestPaidPlanMax": {
+        "vcpu": null,
+        "memoryGb": null,
+        "note": "Largest public tier 64/128; Scale-specific ceiling not separately published."
+      },
+      "sizeTableAssessment": "All seven prices and RAM values match. Together lists Pico as 2 cores; catalog deliberately assigns 1.",
+      "hourlyCostAssessment": "Nano 2 / 4 remains $0.1486/h. Correct Pico to 2 CPU so a 2 / 1 request selects its published $0.0743/h size.",
+      "region": "Public default USD schedule; no separate regional price selected unless specified in the notes.",
+      "checked": "2026-11-05"
+    },
+    "evidence": [
+      {
+        "url": "https://docs.together.ai/docs/together-code-sandbox-legacy",
+        "quote": "$0.0743",
+        "checked": "2026-11-05",
+        "supports": "Pico 2 cores / 1 GB in Together table"
+      },
+      {
+        "url": "https://docs.together.ai/docs/together-code-sandbox-legacy",
+        "quote": "$0.1486",
+        "checked": "2026-11-05",
+        "supports": "Nano 2 / 4"
+      },
+      {
+        "url": "https://docs.together.ai/docs/together-code-sandbox-legacy",
+        "quote": "$0.2972",
+        "checked": "2026-11-05",
+        "supports": "Micro 4 / 8"
+      },
+      {
+        "url": "https://docs.together.ai/docs/together-code-sandbox-legacy",
+        "quote": "$0.5944",
+        "checked": "2026-11-05",
+        "supports": "Small 8 / 16"
+      },
+      {
+        "url": "https://docs.together.ai/docs/together-code-sandbox-legacy",
+        "quote": "$1.1888",
+        "checked": "2026-11-05",
+        "supports": "Medium 16 / 32"
+      },
+      {
+        "url": "https://docs.together.ai/docs/together-code-sandbox-legacy",
+        "quote": "$2.3776",
+        "checked": "2026-11-05",
+        "supports": "Large 32 / 64"
+      },
+      {
+        "url": "https://docs.together.ai/docs/together-code-sandbox-legacy",
+        "quote": "$4.7552",
+        "checked": "2026-11-05",
+        "supports": "XLarge 64 / 128"
+      },
+      {
+        "url": "https://docs.together.ai/docs/together-code-sandbox-legacy",
+        "quote": "$0.01486",
+        "checked": "2026-11-05",
+        "supports": "credit price"
+      },
+      {
+        "url": "https://docs.together.ai/docs/together-code-sandbox-legacy",
+        "quote": "$170",
+        "checked": "2026-11-05",
+        "supports": "Scale monthly minimum"
+      },
+      {
+        "url": "https://docs.together.ai/docs/together-code-sandbox-legacy",
+        "quote": "1,100",
+        "checked": "2026-11-05",
+        "supports": "included Scale credits"
+      },
+      {
+        "url": "https://docs.together.ai/docs/together-code-sandbox-legacy",
+        "quote": "4 minutes",
+        "checked": "2026-11-05",
+        "supports": "rounding example for 3m25s"
+      },
+      {
+        "url": "https://docs.together.ai/docs/together-code-sandbox-legacy",
+        "quote": "2 cores",
+        "checked": "2026-11-05",
+        "supports": "Pico CPU column; Nano also has two cores"
+      }
+    ],
+    "notes": "Together public legacy page lists Pico 2 cores, versus catalog 1. CodeSandbox web documentation returned HTTP 403, not a verified login gate; no second public schedule was retrieved. Update the clear published size correction. This is the deprecated SDK, not Together's successor product."
+  },
+  {
+    "id": "daytona",
+    "kind": "sandbox",
+    "status": "conflict",
+    "catalog": {
+      "pricing": {
+        "vcpuHour": 0.0504,
+        "gbHour": 0.0162,
+        "note": "per second, plus disk above 5 GiB",
+        "source": "https://www.daytona.io/pricing",
+        "checked": "2026-11-04"
+      },
+      "limits": {
+        "maxVcpu": 4,
+        "maxMemoryGb": 8
+      },
+      "sizes": [],
+      "hourlyAt2x4": 0.1656,
+      "unfitAt2x4": null
+    },
+    "found": {
+      "vcpuHour": 0.0504,
+      "gbHour": 0.0162,
+      "sizes": [],
+      "maxVcpu": null,
+      "maxMemoryGb": null,
+      "billing": "Per second; CPU and RAM while running; disk separately above the first 5 GiB.",
+      "minimumPlan": "No monthly fee; Tier 2 requires a $25 top-up and linked card.",
+      "pausedCost": "Stopped containers retain disk at $0.000108/GiB-hour above 5 GiB; archived container billing stops. VM state rules differ.",
+      "freeTier": "$200 introductory compute credit; excluded. Tier 1 requires email verification.",
+      "hourlyAt2x4": 0.1656,
+      "cheapestPaidPlanMax": null,
+      "defaultSnapshots": [
+        {
+          "vcpu": 1,
+          "memoryGb": 1,
+          "usdHour": 0.0666,
+          "name": "daytona-small",
+          "diskGb": 3
+        },
+        {
+          "vcpu": 2,
+          "memoryGb": 4,
+          "usdHour": 0.1656,
+          "name": "daytona-medium",
+          "diskGb": 8
+        },
+        {
+          "vcpu": 4,
+          "memoryGb": 8,
+          "usdHour": 0.3312,
+          "name": "daytona-large",
+          "diskGb": 10
+        }
+      ],
+      "hourlyCostAssessment": "Resource arithmetic correct; disk extra. Public org-tier quotas are not clearly per-sandbox maxima.",
+      "region": "Public default USD schedule; no separate regional price selected unless specified in the notes.",
+      "checked": "2026-11-05"
+    },
+    "evidence": [
+      {
+        "url": "https://www.daytona.io/pricing",
+        "quote": "$0.0504/h",
+        "checked": "2026-11-05",
+        "supports": "CPU"
+      },
+      {
+        "url": "https://www.daytona.io/pricing",
+        "quote": "$0.0162/h",
+        "checked": "2026-11-05",
+        "supports": "RAM"
+      },
+      {
+        "url": "https://www.daytona.io/pricing",
+        "quote": "$0.000108/h",
+        "checked": "2026-11-05",
+        "supports": "disk"
+      },
+      {
+        "url": "https://www.daytona.io/pricing",
+        "quote": "first 5 free",
+        "checked": "2026-11-05",
+        "supports": "included disk"
+      },
+      {
+        "url": "https://www.daytona.io/pricing",
+        "quote": "$200",
+        "checked": "2026-11-05",
+        "supports": "introductory credit"
+      },
+      {
+        "url": "https://www.daytona.io/docs/en/limits/",
+        "quote": "10 / 10GiB / 30GiB",
+        "checked": "2026-11-05",
+        "supports": "Tier 1 resources table"
+      },
+      {
+        "url": "https://www.daytona.io/docs/en/limits/",
+        "quote": "$25 top-up",
+        "checked": "2026-11-05",
+        "supports": "Tier 2 requirement"
+      },
+      {
+        "url": "https://www.daytona.io/docs/en/sandboxes/",
+        "quote": "daytona-large",
+        "checked": "2026-11-05",
+        "supports": "4 CPU / 8 GiB / 10 GiB snapshot"
+      },
+      {
+        "url": "https://www.daytona.io/docs/en/limits/",
+        "quote": "20",
+        "checked": "2026-11-05",
+        "supports": "Tier 1 RAM in later Limits table; conflicts with 10GiB Resources row"
+      }
+    ],
+    "notes": "Rates and snapshot sizes match. The limits page inconsistently gives Tier 1 memory as 10 GiB and 20 GiB, and labels org-wide tier resources separately from per-sandbox limits. Catalog 4 / 8 is a public snapshot size, not a verified maximum. Keep entry unchanged."
+  },
+  {
+    "id": "dedalus",
+    "kind": "sandbox",
+    "status": "ok",
+    "catalog": {
+      "pricing": {
+        "vcpuHour": 0.04536,
+        "gbHour": 0.01458,
+        "note": "per second while awake; sleeping machines bill storage only (10 GiB included on Hobby, 20 on Pro); Hobby plan max 4 vCPU / 16 GiB; private beta",
+        "source": "https://docs.dedaluslabs.ai/dcs/dm/pricing",
+        "checked": "2026-11-05"
+      },
+      "limits": {
+        "maxVcpu": 16,
+        "maxMemoryGb": 64
+      },
+      "sizes": [],
+      "hourlyAt2x4": 0.14904,
+      "unfitAt2x4": null
+    },
+    "found": {
+      "vcpuHour": 0.04536,
+      "gbHour": 0.01458,
+      "sizes": [],
+      "maxVcpu": 16,
+      "maxMemoryGb": 64,
+      "billing": "Per second while awake; persistent logical storage also bills during sleep.",
+      "minimumPlan": "Hobby $0/month. Pro $20/month includes $20 usage; additional usage charged separately.",
+      "pausedCost": "No compute; storage above allowance $0.0001/GiB-hour. Hobby includes 10 GiB, Pro 20 GiB.",
+      "freeTier": "Hobby: $20 one-time credit, 50 compute hours/month ceiling, 5 machines, max 4 vCPU / 16 GiB; not recurring free compute credit.",
+      "hourlyAt2x4": 0.14904,
+      "cheapestPaidPlanMax": {
+        "vcpu": 16,
+        "memoryGb": 64,
+        "plan": "Pro $20/month"
+      },
+      "hourlyCostAssessment": "Correct CPU/RAM calculation; extra retained storage remains separate.",
+      "region": "Public default USD schedule; no separate regional price selected unless specified in the notes.",
+      "checked": "2026-11-05"
+    },
+    "evidence": [
+      {
+        "url": "https://docs.dedaluslabs.ai/dcs/dm/pricing",
+        "quote": "$0.0000126",
+        "checked": "2026-11-05",
+        "supports": "vCPU-second"
+      },
+      {
+        "url": "https://docs.dedaluslabs.ai/dcs/dm/pricing",
+        "quote": "$0.00000405",
+        "checked": "2026-11-05",
+        "supports": "GiB-second"
+      },
+      {
+        "url": "https://docs.dedaluslabs.ai/dcs/dm/pricing",
+        "quote": "$20/mo",
+        "checked": "2026-11-05",
+        "supports": "Pro fee/credit"
+      },
+      {
+        "url": "https://docs.dedaluslabs.ai/dcs/dm/pricing",
+        "quote": "$0.0001/GiB-hour",
+        "checked": "2026-11-05",
+        "supports": "excess persistent storage"
+      },
+      {
+        "url": "https://docs.dedaluslabs.ai/dcs/dm/pricing",
+        "quote": "Up to 16",
+        "checked": "2026-11-05",
+        "supports": "Pro CPU maximum"
+      },
+      {
+        "url": "https://docs.dedaluslabs.ai/dcs/dm/pricing",
+        "quote": "Up to 64 GiB",
+        "checked": "2026-11-05",
+        "supports": "Pro RAM maximum"
+      }
+    ],
+    "notes": "Unit rates and limits match. The private-beta availability statement was not independently confirmed by the pricing document."
+  },
+  {
+    "id": "deno",
+    "kind": "sandbox",
+    "status": "conflict",
+    "catalog": {
+      "pricing": {
+        "vcpuHour": 0.1,
+        "gbHour": 0.025,
+        "note": "billed on CPU time, not wall clock (estimate assumes both vCPUs busy); fixed 2 vCPU, 0.75-4 GB, max 30 min lifetime; needs a paid Deno Deploy plan",
+        "source": "https://deno.com/sandbox",
+        "checked": "2026-11-04"
+      },
+      "limits": {
+        "maxVcpu": 2,
+        "maxMemoryGb": 4
+      },
+      "sizes": [],
+      "hourlyAt2x4": 0.30000000000000004,
+      "unfitAt2x4": null
+    },
+    "found": {
+      "vcpuHour": null,
+      "gbHour": null,
+      "sizes": [
+        {
+          "vcpu": 2,
+          "memoryGb": 4,
+          "usdHour": 0.3,
+          "source": "https://deno.com/sandbox"
+        },
+        {
+          "vcpu": 2,
+          "memoryGb": 4,
+          "usdHour": 0.164,
+          "source": "https://deno.com/blog/introducing-deno-sandbox"
+        }
+      ],
+      "maxVcpu": 2,
+      "maxMemoryGb": 4,
+      "billing": "Actual CPU time plus allocated memory time. Deploy describes memory per second; sub-second rounding for Sandbox CPU not stated.",
+      "minimumPlan": "Deploy Pro $20/month; Free does not include Sandbox. Builder $200/month.",
+      "pausedCost": "No separate paused tariff established. Persistent volume storage $0.20/GiB-month above plan allowance.",
+      "freeTier": "No Sandbox on Free. Pro includes shared meters: 50 CPU-h, 750 GiB-h memory, 5 GiB volumes; landing launch post still says 40 / 1,000.",
+      "hourlyAt2x4": null,
+      "cheapestPaidPlanMax": {
+        "vcpu": 2,
+        "memoryGb": 4,
+        "plan": "Deploy Pro"
+      },
+      "region": "Chicago (ord) used for US comparison; Amsterdam also supported, no region differential shown.",
+      "alternatives": [
+        {
+          "source": "https://deno.com/sandbox",
+          "vcpuHour": 0.1,
+          "gbHour": 0.025
+        },
+        {
+          "source": "https://deno.com/blog/introducing-deno-sandbox",
+          "vcpuHour": 0.05,
+          "gbHour": 0.016
+        }
+      ],
+      "hourlyCostAssessment": "Fixed two-core rule and 0.75–4 GB range match. Catalog prices match current landing/Deploy pages; official launch article disagrees.",
+      "checked": "2026-11-05"
+    },
+    "evidence": [
+      {
+        "url": "https://deno.com/sandbox",
+        "quote": "$0.10/CPU-hr",
+        "checked": "2026-11-05",
+        "supports": "current sandbox CPU"
+      },
+      {
+        "url": "https://deno.com/sandbox",
+        "quote": "$0.025/GiB-hr",
+        "checked": "2026-11-05",
+        "supports": "current sandbox memory"
+      },
+      {
+        "url": "https://deno.com/blog/introducing-deno-sandbox",
+        "quote": "$0.05/h",
+        "checked": "2026-11-05",
+        "supports": "launch CPU"
+      },
+      {
+        "url": "https://deno.com/blog/introducing-deno-sandbox",
+        "quote": "$0.016/GB-h",
+        "checked": "2026-11-05",
+        "supports": "launch memory"
+      },
+      {
+        "url": "https://deno.com/deploy/pricing",
+        "quote": "$20/month",
+        "checked": "2026-11-05",
+        "supports": "Pro subscription"
+      },
+      {
+        "url": "https://deno.com/deploy/pricing",
+        "quote": "50 hr",
+        "checked": "2026-11-05",
+        "supports": "Pro shared CPU allowance"
+      },
+      {
+        "url": "https://deno.com/deploy/pricing",
+        "quote": "750 GiB-hr",
+        "checked": "2026-11-05",
+        "supports": "Pro shared RAM allowance"
+      },
+      {
+        "url": "https://deno.com/deploy/pricing",
+        "quote": "$0.20/GiB-mo",
+        "checked": "2026-11-05",
+        "supports": "volume overage"
+      },
+      {
+        "url": "https://docs.deno.com/sandbox/",
+        "quote": "CPU: 2 vCPU",
+        "checked": "2026-11-05",
+        "supports": "fixed CPU"
+      },
+      {
+        "url": "https://docs.deno.com/sandbox/",
+        "quote": "768 MB to 4096 MB",
+        "checked": "2026-11-05",
+        "supports": "memory range"
+      },
+      {
+        "url": "https://docs.deno.com/sandbox/",
+        "quote": "30",
+        "checked": "2026-11-05",
+        "supports": "maximum minutes"
+      }
+    ],
+    "notes": "Memory is separately billed under both official schedules. Treat the old launch article versus current price pages as a conflict, as instructed; do not select or rewrite a rate. Public docs cap each session at 30 minutes."
+  },
+  {
+    "id": "e2b",
+    "kind": "sandbox",
+    "status": "conflict",
+    "catalog": {
+      "pricing": {
+        "vcpuHour": 0.0504,
+        "gbHour": 0.0162,
+        "note": "per second; Pro plan $150/mo",
+        "source": "https://e2b.dev/pricing",
+        "checked": "2026-11-04"
+      },
+      "limits": {
+        "maxVcpu": 8,
+        "maxMemoryGb": 8
+      },
+      "sizes": [],
+      "hourlyAt2x4": 0.1656,
+      "unfitAt2x4": null
+    },
+    "found": {
+      "vcpuHour": 0.0504,
+      "gbHour": 0.0162,
+      "sizes": [],
+      "maxVcpu": 8,
+      "maxMemoryGb": 8,
+      "billing": "Per second while running.",
+      "minimumPlan": "Hobby $0/month plus usage; Pro $150/month plus usage, no additional included usage credit.",
+      "pausedCost": "Compute billing stops on pause; unlimited retention documented. No separate paused-storage rate established in inspected pricing/billing pages.",
+      "freeTier": "Hobby $100 one-time credit; 20 concurrent, one-hour continuous sessions, 10 GiB disk. No recurring compute grant.",
+      "hourlyAt2x4": 0.1656,
+      "cheapestPaidPlanMax": {
+        "vcpu": 8,
+        "memoryGb": 8,
+        "plan": "Pro; 8+ requires contacting support for larger limits"
+      },
+      "hourlyCostAssessment": "Per-resource arithmetic correct; source unit prices multiplied by 3,600.",
+      "region": "Public default USD schedule; no separate regional price selected unless specified in the notes.",
+      "checked": "2026-11-05"
+    },
+    "evidence": [
+      {
+        "url": "https://e2b.dev/pricing",
+        "quote": "$0.000014/s",
+        "checked": "2026-11-05",
+        "supports": "1 vCPU-second"
+      },
+      {
+        "url": "https://e2b.dev/pricing",
+        "quote": "$0.0000045/s",
+        "checked": "2026-11-05",
+        "supports": "1 GiB-second"
+      },
+      {
+        "url": "https://e2b.dev/pricing",
+        "quote": "$150",
+        "checked": "2026-11-05",
+        "supports": "Pro monthly subscription"
+      },
+      {
+        "url": "https://e2b.dev/pricing",
+        "quote": "$100",
+        "checked": "2026-11-05",
+        "supports": "one-time credit"
+      },
+      {
+        "url": "https://docs.e2b.dev/billing",
+        "quote": "8+ GiB",
+        "checked": "2026-11-05",
+        "supports": "Pro memory ceiling is extensible by request"
+      },
+      {
+        "url": "https://docs.e2b.dev/billing",
+        "quote": "$0/month",
+        "checked": "2026-11-05",
+        "supports": "Hobby base fee"
+      },
+      {
+        "url": "https://docs.e2b.dev/billing",
+        "quote": "Unlimited",
+        "checked": "2026-11-05",
+        "supports": "paused retention"
+      }
+    ],
+    "notes": "Public numerical rates and standard sizes match. Pricing card says Hobby has default resources, but detailed pricing and billing docs permit up to 8 / 8; record that wording ambiguity without changing the confirmed shared maximum."
+  },
+  {
+    "id": "exedev",
+    "kind": "sandbox",
+    "status": "changed",
+    "catalog": {
+      "pricing": {
+        "vcpuHour": 0.0525,
+        "gbHour": 0,
+        "note": "$0.105/h per 2 vCPU + 4 GiB, per second, up to 2 GiB per vCPU; needs an exe.dev subscription",
+        "source": "https://exe.dev/docs/standalone-vms.md",
+        "checked": "2026-11-04"
+      },
+      "limits": {
+        "maxVcpu": 16,
+        "maxMemoryGb": 32
+      },
+      "sizes": [],
+      "hourlyAt2x4": 0.105,
+      "unfitAt2x4": null
+    },
+    "found": {
+      "vcpuHour": 0.0525,
+      "gbHour": 0,
+      "sizes": [
+        {
+          "vcpu": 1,
+          "memoryGb": 2,
+          "usdHour": 0.0525
+        },
+        {
+          "vcpu": 2,
+          "memoryGb": 4,
+          "usdHour": 0.105
+        },
+        {
+          "vcpu": 4,
+          "memoryGb": 8,
+          "usdHour": 0.21
+        },
+        {
+          "vcpu": 8,
+          "memoryGb": 16,
+          "usdHour": 0.42
+        },
+        {
+          "vcpu": 16,
+          "memoryGb": 32,
+          "usdHour": 0.84
+        },
+        {
+          "vcpu": 32,
+          "memoryGb": 64,
+          "usdHour": 1.68
+        }
+      ],
+      "maxVcpu": 32,
+      "maxMemoryGb": 64,
+      "billing": "Reserved standalone capacity per second; no time minimum, invoice rounded to cents.",
+      "minimumPlan": "Personal starts $15/month for 2 vCPU / 4 GiB pool; standalone usage is additional. Work regular $75/month (introductory discount excluded).",
+      "pausedCost": "Stopped standalone CPU/RAM unbilled; retained disk remains subject to plan allowances/usage. Disk overage rate not established here.",
+      "freeTier": "No recurring free standalone tier established.",
+      "hourlyAt2x4": 0.105,
+      "cheapestPaidPlanMax": {
+        "vcpu": 2,
+        "memoryGb": 4,
+        "plan": "Personal $15/month; larger Personal capacities cost more"
+      },
+      "hourlyCostAssessment": "2-GiB-per-vCPU rounding matches; Work permits up to 32 vCPU without approval, above catalog 16 / 32.",
+      "region": "Public default USD schedule; no separate regional price selected unless specified in the notes.",
+      "checked": "2026-11-05"
+    },
+    "evidence": [
+      {
+        "url": "https://exe.dev/docs/standalone-vms.md",
+        "quote": "$0.105",
+        "checked": "2026-11-05",
+        "supports": "2 vCPU / 4 GiB unit-hour"
+      },
+      {
+        "url": "https://exe.dev/docs/standalone-vms.md",
+        "quote": "up to 32 vCPUs",
+        "checked": "2026-11-05",
+        "supports": "Work self-serve ceiling"
+      },
+      {
+        "url": "https://exe.dev/docs/standalone-vms.md",
+        "quote": "up to 2 GiB of memory per vCPU",
+        "checked": "2026-11-05",
+        "supports": "memory constraint"
+      },
+      {
+        "url": "https://exe.dev/pricing",
+        "quote": "$15",
+        "checked": "2026-11-05",
+        "supports": "Personal minimum"
+      },
+      {
+        "url": "https://exe.dev/pricing",
+        "quote": "$75",
+        "checked": "2026-11-05",
+        "supports": "regular Work fee"
+      }
+    ],
+    "notes": "Update public self-serve maximum to 32 / 64, and state subscription requirements. The separate marketing usage option at $0.05/core-hour + $0.016/GiB-hour requires contacting the provider and is not the standalone reserved-capacity API tariff audited here."
+  },
+  {
+    "id": "freestyle",
+    "kind": "sandbox",
+    "status": "changed",
+    "catalog": {
+      "pricing": {
+        "vcpuHour": 0.04032,
+        "gbHour": 0.0129,
+        "note": "per second on allocated size; sizes fixed by base snapshot, disk included; free tier 200 vCPU-h + 400 GiB-h/mo; paused VMs bill storage only",
+        "source": "https://www.freestyle.sh/docs/vms/pricing-and-limits",
+        "checked": "2026-11-04"
+      },
+      "limits": {
+        "maxVcpu": 32,
+        "maxMemoryGb": 64
+      },
+      "sizes": [
+        {
+          "snapshot": "freestyle/ubuntu-sm",
+          "vcpu": 2,
+          "memoryGb": 4,
+          "diskGb": 16,
+          "usdHour": 0.13362
+        },
+        {
+          "snapshot": "freestyle/ubuntu",
+          "vcpu": 4,
+          "memoryGb": 8,
+          "diskGb": 32,
+          "usdHour": 0.26723
+        },
+        {
+          "snapshot": "freestyle/ubuntu-lg",
+          "vcpu": 8,
+          "memoryGb": 16,
+          "diskGb": 64,
+          "usdHour": 0.53446
+        },
+        {
+          "snapshot": "freestyle/ubuntu-xl",
+          "vcpu": 16,
+          "memoryGb": 32,
+          "diskGb": 128,
+          "usdHour": 1.06893
+        },
+        {
+          "snapshot": "freestyle/ubuntu-2xl",
+          "vcpu": 32,
+          "memoryGb": 64,
+          "diskGb": 128,
+          "usdHour": 2.12685
+        }
+      ],
+      "hourlyAt2x4": 0.13362,
+      "unfitAt2x4": null
+    },
+    "found": {
+      "vcpuHour": 0.04032,
+      "gbHour": 0.0129,
+      "sizes": [
+        {
+          "vcpu": 2,
+          "memoryGb": 4,
+          "usdHour": 0.13361599999999998,
+          "name": "freestyle/ubuntu-sm",
+          "diskGb": 16
+        },
+        {
+          "vcpu": 4,
+          "memoryGb": 8,
+          "usdHour": 0.26723199999999997,
+          "name": "freestyle/ubuntu",
+          "diskGb": 32
+        },
+        {
+          "vcpu": 8,
+          "memoryGb": 16,
+          "usdHour": 0.5344639999999999,
+          "name": "freestyle/ubuntu-lg",
+          "diskGb": 64
+        },
+        {
+          "vcpu": 16,
+          "memoryGb": 32,
+          "usdHour": 1.0689279999999999,
+          "name": "freestyle/ubuntu-xl",
+          "diskGb": 128
+        },
+        {
+          "vcpu": 32,
+          "memoryGb": 64,
+          "usdHour": 2.126848,
+          "name": "freestyle/ubuntu-2xl",
+          "diskGb": 128
+        }
+      ],
+      "maxVcpu": 32,
+      "maxMemoryGb": 64,
+      "billing": "Allocated CPU, memory and disk, metered per second. Published hourly disk rate $0.000086/GiB-hour.",
+      "minimumPlan": "Free available; Hobby $50/month minimum includes $50 usage; Pro $500/month includes $500.",
+      "pausedCost": "Storage only at $0.000086/GiB-hour after included allowance.",
+      "freeTier": "Monthly 200 vCPU-h, 400 GiB-h RAM, 60,000 GiB-h storage; 10 VMs, max 4 / 8. Applies to every plan; Free stops at allowances.",
+      "hourlyAt2x4": 0.133616,
+      "cheapestPaidPlanMax": {
+        "vcpu": 8,
+        "memoryGb": 16,
+        "plan": "Hobby $50/month"
+      },
+      "sizeTableAssessment": "All five imported Ubuntu sizes and disks verified. 64 / 128 ubuntu-3xl needs custom limits and is correctly excluded.",
+      "hourlyCostAssessment": "Includes disk correctly; rounds each fixed shape to five decimals. Exact 2 / 4 / 16 total is $0.133616 versus stored $0.13362.",
+      "region": "Public default USD schedule; no separate regional price selected unless specified in the notes.",
+      "checked": "2026-11-05"
+    },
+    "evidence": [
+      {
+        "url": "https://www.freestyle.sh/docs/vms/pricing-and-limits",
+        "quote": "$0.04032",
+        "checked": "2026-11-05",
+        "supports": "vCPU-hour"
+      },
+      {
+        "url": "https://www.freestyle.sh/docs/vms/pricing-and-limits",
+        "quote": "$0.0129",
+        "checked": "2026-11-05",
+        "supports": "GiB-hour"
+      },
+      {
+        "url": "https://www.freestyle.sh/docs/vms/pricing-and-limits",
+        "quote": "$0.000086",
+        "checked": "2026-11-05",
+        "supports": "disk GiB-hour"
+      },
+      {
+        "url": "https://www.freestyle.sh/docs/vms/pricing-and-limits",
+        "quote": "$50/month",
+        "checked": "2026-11-05",
+        "supports": "Hobby minimum"
+      },
+      {
+        "url": "https://www.freestyle.sh/docs/vms/pricing-and-limits",
+        "quote": "$500/month",
+        "checked": "2026-11-05",
+        "supports": "Pro minimum"
+      },
+      {
+        "url": "https://www.freestyle.sh/docs/vms/pricing-and-limits",
+        "quote": "200 per month",
+        "checked": "2026-11-05",
+        "supports": "CPU free allowance"
+      },
+      {
+        "url": "https://www.freestyle.sh/docs/vms/pricing-and-limits",
+        "quote": "400 per month",
+        "checked": "2026-11-05",
+        "supports": "RAM free allowance"
+      },
+      {
+        "url": "https://www.freestyle.sh/docs/vms/pricing-and-limits",
+        "quote": "60,000 per month",
+        "checked": "2026-11-05",
+        "supports": "disk free allowance"
+      },
+      {
+        "url": "https://www.freestyle.sh/docs/vms/base-snapshots",
+        "quote": "freestyle/ubuntu-2xl",
+        "checked": "2026-11-05",
+        "supports": "32 / 64 / 128 shape; max published Pro shape"
+      }
+    ],
+    "notes": "Clarify that disk is separately priced but included in the fixed-size estimate, and add the required paid-plan minimum. Imported shape arithmetic is correct to its declared rounding; no imported file changes."
+  },
+  {
+    "id": "hopx",
+    "kind": "sandbox",
+    "status": "conflict",
+    "catalog": {
+      "pricing": {
+        "vcpuHour": 0.0504,
+        "gbHour": 0.0162,
+        "note": "per second, plus storage; size comes from the template, not the request",
+        "source": "https://hopx.ai/pricing",
+        "checked": "2026-11-04"
+      },
+      "limits": {
+        "maxVcpu": 2,
+        "maxMemoryGb": 4
+      },
+      "sizes": [],
+      "hourlyAt2x4": 0.1656,
+      "unfitAt2x4": null
+    },
+    "found": {
+      "vcpuHour": 0.0504,
+      "gbHour": 0.0162,
+      "sizes": [],
+      "maxVcpu": null,
+      "maxMemoryGb": null,
+      "billing": "Per second; CPU/RAM plus storage $0.000108/GiB-hour.",
+      "minimumPlan": "No subscription or minimum commitment.",
+      "pausedCost": "Pricing says no idle charges; whether retained storage remains billed is not explicit.",
+      "freeTier": "$200 introductory credits; excluded. No recurring allowance established.",
+      "hourlyAt2x4": 0.1656,
+      "cheapestPaidPlanMax": null,
+      "hourlyCostAssessment": "Arithmetic matches rates, but code-interpreter template 2 / 4 allocation is not publicly confirmed.",
+      "region": "Public default USD schedule; no separate regional price selected unless specified in the notes.",
+      "checked": "2026-11-05"
+    },
+    "evidence": [
+      {
+        "url": "https://hopx.ai/pricing",
+        "quote": "$0.00001400/second",
+        "checked": "2026-11-05",
+        "supports": "CPU"
+      },
+      {
+        "url": "https://hopx.ai/pricing",
+        "quote": "$0.00000450/second",
+        "checked": "2026-11-05",
+        "supports": "GiB RAM"
+      },
+      {
+        "url": "https://hopx.ai/pricing",
+        "quote": "$0.00000003/second",
+        "checked": "2026-11-05",
+        "supports": "GiB disk"
+      },
+      {
+        "url": "https://hopx.ai/pricing",
+        "quote": "No subscriptions. No minimum commitments. No idle charges.",
+        "checked": "2026-11-05",
+        "supports": "plan/idle claims"
+      }
+    ],
+    "notes": "Catalog limits are an assumed default template size. Public configuration docs allow CPU 1–64 and RAM 512 MB–64 GB depending on plan, without establishing the default template or cheapest-plan ceiling. Leave unresolved values unchanged."
+  },
+  {
+    "id": "instabox",
+    "kind": "sandbox",
+    "status": "ok",
+    "catalog": {
+      "pricing": {
+        "vcpuHour": 0.004,
+        "gbHour": 0.00225,
+        "note": "per second while running on fixed sizes (2/4, 4/8, 8/16); paused or stopped boxes bill only /data beyond the included disk ($0.00011/GiB-h); Pro $20/mo includes $20 credits; free plan: 1 box at 4/8",
+        "source": "https://instabox.sh/docs/pricing.md",
+        "checked": "2026-11-05"
+      },
+      "limits": {
+        "maxVcpu": 8,
+        "maxMemoryGb": 16
+      },
+      "sizes": [
+        {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
+        {
+          "vcpu": 4,
+          "memoryGb": 8
+        },
+        {
+          "vcpu": 8,
+          "memoryGb": 16
+        },
+        {
+          "vcpu": 16,
+          "memoryGb": 32
+        },
+        {
+          "vcpu": 32,
+          "memoryGb": 64
+        }
+      ],
+      "hourlyAt2x4": 0.017,
+      "unfitAt2x4": null
+    },
+    "found": {
+      "vcpuHour": 0.004,
+      "gbHour": 0.00225,
+      "sizes": [
+        {
+          "vcpu": 2,
+          "memoryGb": 4,
+          "usdHour": 0.017
+        },
+        {
+          "vcpu": 4,
+          "memoryGb": 8,
+          "usdHour": 0.034
+        },
+        {
+          "vcpu": 8,
+          "memoryGb": 16,
+          "usdHour": 0.068
+        },
+        {
+          "vcpu": 16,
+          "memoryGb": 32,
+          "usdHour": 0.136
+        },
+        {
+          "vcpu": 32,
+          "memoryGb": 64,
+          "usdHour": 0.272
+        }
+      ],
+      "maxVcpu": 32,
+      "maxMemoryGb": 64,
+      "billing": "Allocated CPU/RAM per second while running; storage over plan allowance separately.",
+      "minimumPlan": "Free available. Pro $20/month includes $20 usage; Builder $100 includes $100; Team $500 includes $500.",
+      "pausedCost": "Disk only above plan allowance: $0.08/GiB-month (published approximate $0.00011/GiB-hour); snapshots free. Public limits specify that system disk, snapshots and paused memory are not billed.",
+      "freeTier": "One 4 vCPU / 8 GiB machine, fixed 20 GiB disk, 5 snapshots, 100 GiB monthly egress.",
+      "hourlyAt2x4": 0.017,
+      "cheapestPaidPlanMax": {
+        "vcpu": 8,
+        "memoryGb": 16,
+        "plan": "Pro"
+      },
+      "sizeTableAssessment": "Imported sizes match plan ceilings: 2/4, 4/8, 8/16, 16/32, 32/64. Catalog deliberately caps at Pro 8/16.",
+      "hourlyCostAssessment": "Correct smallest fitting shape, allocated CPU/RAM only.",
+      "region": "Public default USD schedule; no separate regional price selected unless specified in the notes.",
+      "checked": "2026-11-05"
+    },
+    "evidence": [
+      {
+        "url": "https://instabox.sh/docs/pricing.md",
+        "quote": "$0.004",
+        "checked": "2026-11-05",
+        "supports": "CPU-hour"
+      },
+      {
+        "url": "https://instabox.sh/docs/pricing.md",
+        "quote": "$0.00225",
+        "checked": "2026-11-05",
+        "supports": "GiB-hour"
+      },
+      {
+        "url": "https://instabox.sh/docs/pricing.md",
+        "quote": "$0.00011",
+        "checked": "2026-11-05",
+        "supports": "disk GiB-hour"
+      },
+      {
+        "url": "https://instabox.sh/docs/pricing.md",
+        "quote": "$20/month",
+        "checked": "2026-11-05",
+        "supports": "Pro"
+      },
+      {
+        "url": "https://instabox.sh/docs/pricing.md",
+        "quote": "$100/month",
+        "checked": "2026-11-05",
+        "supports": "Builder"
+      },
+      {
+        "url": "https://instabox.sh/docs/pricing.md",
+        "quote": "$500/month",
+        "checked": "2026-11-05",
+        "supports": "Team"
+      },
+      {
+        "url": "https://instabox.sh/docs/pricing.md",
+        "quote": "32 vCPU / 64 GiB",
+        "checked": "2026-11-05",
+        "supports": "Team maximum"
+      },
+      {
+        "url": "https://instabox.sh/docs/pricing.md",
+        "quote": "8 vCPU / 16 GiB",
+        "checked": "2026-11-05",
+        "supports": "Pro maximum"
+      },
+      {
+        "url": "https://instabox.sh/docs/limits.md",
+        "quote": "Pro: 2/4, 4/8, 8/16",
+        "checked": "2026-11-05",
+        "supports": "allowed fixed sizes; Builder extends to 16/32 and Team to 32/64"
+      }
+    ],
+    "notes": "Rates match. Catalog maximum is the cheapest paid Pro plan, while higher self-serve plans reach 32 / 64. Preserve the intentional Pro scope."
+  },
+  {
+    "id": "koyeb",
+    "kind": "sandbox",
+    "status": "conflict",
+    "catalog": {
+      "pricing": {
+        "vcpuHour": 0.0144,
+        "gbHour": 0,
+        "note": "per second; fixed Standard instance sizes (1 vCPU + 1 GB = $0.0144/h); sandboxes need a paid plan (Pro $29/mo); public preview",
+        "source": "https://www.koyeb.com/docs/reference/instances",
+        "checked": "2026-11-04"
+      },
+      "limits": {
+        "maxVcpu": 40,
+        "maxMemoryGb": 128
+      },
+      "sizes": [
+        {
+          "type": "nano",
+          "vcpu": 0.25,
+          "memoryGb": 0.25,
+          "usdHour": 0.0036
+        },
+        {
+          "type": "micro",
+          "vcpu": 0.5,
+          "memoryGb": 0.5,
+          "usdHour": 0.0072
+        },
+        {
+          "type": "small",
+          "vcpu": 1,
+          "memoryGb": 1,
+          "usdHour": 0.0144
+        },
+        {
+          "type": "medium",
+          "vcpu": 2,
+          "memoryGb": 2,
+          "usdHour": 0.0288
+        },
+        {
+          "type": "large",
+          "vcpu": 4,
+          "memoryGb": 4,
+          "usdHour": 0.0576
+        },
+        {
+          "type": "xlarge",
+          "vcpu": 8,
+          "memoryGb": 8,
+          "usdHour": 0.1152
+        },
+        {
+          "type": "2xlarge",
+          "vcpu": 16,
+          "memoryGb": 16,
+          "usdHour": 0.2304
+        },
+        {
+          "type": "3xlarge",
+          "vcpu": 24,
+          "memoryGb": 32,
+          "usdHour": 0.4608
+        },
+        {
+          "type": "4xlarge",
+          "vcpu": 32,
+          "memoryGb": 64,
+          "usdHour": 0.9216
+        },
+        {
+          "type": "5xlarge",
+          "vcpu": 40,
+          "memoryGb": 128,
+          "usdHour": 1.8432
+        }
+      ],
+      "hourlyAt2x4": 0.0576,
+      "unfitAt2x4": null
+    },
+    "found": {
+      "vcpuHour": 0.0144,
+      "gbHour": 0,
+      "sizes": [
+        {
+          "vcpu": 0.25,
+          "memoryGb": 0.25,
+          "usdHour": 0.0036,
+          "name": "nano"
+        },
+        {
+          "vcpu": 0.5,
+          "memoryGb": 0.5,
+          "usdHour": 0.0072,
+          "name": "micro"
+        },
+        {
+          "vcpu": 1,
+          "memoryGb": 1,
+          "usdHour": 0.0144,
+          "name": "small"
+        },
+        {
+          "vcpu": 2,
+          "memoryGb": 2,
+          "usdHour": 0.0288,
+          "name": "medium"
+        },
+        {
+          "vcpu": 4,
+          "memoryGb": 4,
+          "usdHour": 0.0576,
+          "name": "large"
+        },
+        {
+          "vcpu": 8,
+          "memoryGb": 8,
+          "usdHour": 0.1152,
+          "name": "xlarge"
+        },
+        {
+          "vcpu": 16,
+          "memoryGb": 16,
+          "usdHour": 0.2304,
+          "name": "2xlarge"
+        },
+        {
+          "vcpu": 24,
+          "memoryGb": 32,
+          "usdHour": 0.4608,
+          "name": "3xlarge"
+        },
+        {
+          "vcpu": 32,
+          "memoryGb": 64,
+          "usdHour": 0.9216,
+          "name": "4xlarge"
+        },
+        {
+          "vcpu": 40,
+          "memoryGb": 128,
+          "usdHour": 1.8432,
+          "name": "5xlarge"
+        }
+      ],
+      "maxVcpu": 40,
+      "maxMemoryGb": 128,
+      "billing": "Per second. Standard instance price includes its paired CPU/RAM allocation.",
+      "minimumPlan": "Announcement and current pricing: new accounts Pro $29/month with $10 compute, or Scale $299 with $100. Pricing FAQ also says any user can downgrade to Starter; eligibility conflict.",
+      "pausedCost": "Pricing FAQ: only unpaused Services are billed. Subscription fee remains; no separate sandbox snapshot/storage tariff established.",
+      "freeTier": "FAQ publishes a free web Service 0.1 CPU/512 MB/2 GB disk and free PostgreSQL, not free sandbox compute. New-account Starter eligibility conflicts with acquisition announcement.",
+      "hourlyAt2x4": 0.0576,
+      "cheapestPaidPlanMax": {
+        "vcpu": 40,
+        "memoryGb": 128,
+        "plan": "Largest Standard size; FAQ says all plans can use larger instances."
+      },
+      "sizeTableAssessment": "All ten Standard sizes/rates match. Largest Standard is 40 / 128; plan-specific access ceiling not separately stated.",
+      "hourlyCostAssessment": "Correct: 2 / 4 request selects large 4 / 4 at $0.0576/h; nominal per-vCPU field alone does not price RAM-heavy sizes.",
+      "region": "Public default USD schedule; no separate regional price selected unless specified in the notes.",
+      "checked": "2026-11-05"
+    },
+    "evidence": [
+      {
+        "url": "https://www.koyeb.com/docs/reference/instances",
+        "quote": "0.0036",
+        "checked": "2026-11-05",
+        "supports": "Standard nano hourly USD"
+      },
+      {
+        "url": "https://www.koyeb.com/docs/reference/instances",
+        "quote": "0.0072",
+        "checked": "2026-11-05",
+        "supports": "Standard micro hourly USD"
+      },
+      {
+        "url": "https://www.koyeb.com/docs/reference/instances",
+        "quote": "0.0144",
+        "checked": "2026-11-05",
+        "supports": "Standard small hourly USD"
+      },
+      {
+        "url": "https://www.koyeb.com/docs/reference/instances",
+        "quote": "0.0288",
+        "checked": "2026-11-05",
+        "supports": "Standard medium hourly USD"
+      },
+      {
+        "url": "https://www.koyeb.com/docs/reference/instances",
+        "quote": "0.0576",
+        "checked": "2026-11-05",
+        "supports": "Standard large hourly USD"
+      },
+      {
+        "url": "https://www.koyeb.com/docs/reference/instances",
+        "quote": "0.1152",
+        "checked": "2026-11-05",
+        "supports": "Standard xlarge hourly USD"
+      },
+      {
+        "url": "https://www.koyeb.com/docs/reference/instances",
+        "quote": "0.2304",
+        "checked": "2026-11-05",
+        "supports": "Standard 2xlarge hourly USD"
+      },
+      {
+        "url": "https://www.koyeb.com/docs/reference/instances",
+        "quote": "0.4608",
+        "checked": "2026-11-05",
+        "supports": "Standard 3xlarge hourly USD"
+      },
+      {
+        "url": "https://www.koyeb.com/docs/reference/instances",
+        "quote": "0.9216",
+        "checked": "2026-11-05",
+        "supports": "Standard 4xlarge hourly USD"
+      },
+      {
+        "url": "https://www.koyeb.com/docs/reference/instances",
+        "quote": "1.8432",
+        "checked": "2026-11-05",
+        "supports": "Standard 5xlarge hourly USD"
+      },
+      {
+        "url": "https://www.koyeb.com/pricing",
+        "quote": "$29/mo",
+        "checked": "2026-11-05",
+        "supports": "Pro"
+      },
+      {
+        "url": "https://www.koyeb.com/pricing",
+        "quote": "$10 included compute",
+        "checked": "2026-11-05",
+        "supports": "Pro credit"
+      },
+      {
+        "url": "https://www.koyeb.com/pricing",
+        "quote": "$299/mo",
+        "checked": "2026-11-05",
+        "supports": "Scale"
+      },
+      {
+        "url": "https://www.koyeb.com/blog/koyeb-is-joining-mistral-ai-to-build-the-future-of-ai-infrastructure",
+        "quote": "existing",
+        "checked": "2026-11-05",
+        "supports": "grandfathering discussed in acquisition FAQ"
+      },
+      {
+        "url": "https://www.koyeb.com/docs/faqs/pricing",
+        "quote": "only be charged for unpaused Services.",
+        "checked": "2026-11-05",
+        "supports": "stopped compute"
+      },
+      {
+        "url": "https://www.koyeb.com/docs/faqs/pricing",
+        "quote": "Larger instances are available through all plans.",
+        "checked": "2026-11-05",
+        "supports": "plan size availability"
+      },
+      {
+        "url": "https://www.koyeb.com/docs/faqs/pricing",
+        "quote": "downgrade to the Starter plan at any time",
+        "checked": "2026-11-05",
+        "supports": "conflicts with acquisition announcement new-account restriction"
+      }
+    ],
+    "notes": "All ten Standard instance rates match. Acquisition announcement restricts new users to paid plans and grandfathers existing Starter, but current pricing FAQ says users can downgrade to Starter at any time without that restriction. Record the plan-eligibility conflict; instance rate comparison itself is unchanged."
+  },
+  {
+    "id": "lambda",
+    "kind": "sandbox",
+    "status": "changed",
+    "catalog": {
+      "pricing": {
+        "vcpuHour": 0.0997,
+        "gbHour": 0.0132,
+        "note": "us-east-1 ARM; billed on the image's baseline size (2 GB per vCPU) while running, per-second burst up to 4x; suspended VMs pay snapshot storage; needs a MicroVM image you build once",
+        "source": "https://aws.amazon.com/lambda/pricing/",
+        "checked": "2026-11-04"
+      },
+      "limits": {
+        "maxVcpu": 4,
+        "maxMemoryGb": 8
+      },
+      "sizes": [],
+      "hourlyAt2x4": 0.2522,
+      "unfitAt2x4": null
+    },
+    "found": {
+      "vcpuHour": 0.09969984,
+      "gbHour": 0.01320012,
+      "sizes": [
+        {
+          "vcpu": 0.25,
+          "memoryGb": 0.5,
+          "usdHour": 0.03152502
+        },
+        {
+          "vcpu": 0.5,
+          "memoryGb": 1,
+          "usdHour": 0.06305004
+        },
+        {
+          "vcpu": 1.0,
+          "memoryGb": 2,
+          "usdHour": 0.12610008
+        },
+        {
+          "vcpu": 2.0,
+          "memoryGb": 4,
+          "usdHour": 0.25220016
+        },
+        {
+          "vcpu": 4.0,
+          "memoryGb": 8,
+          "usdHour": 0.50440032
+        }
+      ],
+      "maxVcpu": 4,
+      "maxMemoryGb": 8,
+      "billing": "Baseline reservation while running plus actual bursts, measured per second; 2 GB per vCPU; bursts up to 4x within the 4-vCPU/8-GB ceiling.",
+      "minimumPlan": "Usage pricing; no monthly subscription.",
+      "pausedCost": "No compute while suspended (up to 8 h). Snapshot storage $0.0001111111/GB-hour, reads $0.0015467699/GB, writes $0.0037977138/GB. Image retention minimum one week.",
+      "freeTier": "No MicroVM-specific recurring allowance established; do not apply ordinary Lambda request/GB-second free grants.",
+      "hourlyAt2x4": 0.25220016,
+      "region": "us-east-1, ARM/Graviton",
+      "cheapestPaidPlanMax": {
+        "vcpu": 4,
+        "memoryGb": 8
+      },
+      "hourlyCostAssessment": "Size rounding and 2:1 memory/CPU rule match; retain precision from the public per-second price list.",
+      "checked": "2026-11-05"
+    },
+    "evidence": [
+      {
+        "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSLambda/current/us-east-1/index.json",
+        "quote": "0.0000276944",
+        "checked": "2026-11-05",
+        "supports": "ARM vCPU-second USD"
+      },
+      {
+        "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSLambda/current/us-east-1/index.json",
+        "quote": "0.0000036667",
+        "checked": "2026-11-05",
+        "supports": "ARM GB-second USD"
+      },
+      {
+        "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSLambda/current/us-east-1/index.json",
+        "quote": "0.0001111111",
+        "checked": "2026-11-05",
+        "supports": "snapshot GB-hour USD"
+      },
+      {
+        "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSLambda/current/us-east-1/index.json",
+        "quote": "0.0015467699",
+        "checked": "2026-11-05",
+        "supports": "snapshot read GB USD"
+      },
+      {
+        "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSLambda/current/us-east-1/index.json",
+        "quote": "0.0037977138",
+        "checked": "2026-11-05",
+        "supports": "snapshot write GB USD"
+      },
+      {
+        "url": "https://aws.amazon.com/lambda/pricing/",
+        "quote": "up to 8GB / 4vCPU",
+        "checked": "2026-11-05",
+        "supports": "maximum"
+      },
+      {
+        "url": "https://aws.amazon.com/lambda/pricing/",
+        "quote": "Compute usage is billed per second.",
+        "checked": "2026-11-05",
+        "supports": "granularity"
+      },
+      {
+        "url": "https://aws.amazon.com/lambda/pricing/",
+        "quote": "1-week minimum retention period",
+        "checked": "2026-11-05",
+        "supports": "image storage"
+      }
+    ],
+    "notes": "The catalog rounded CPU and RAM rates. Replace with exact public per-second conversions ($0.09969984/vCPU-h and $0.01320012/GB-h). Source SKUs 6U84GHCW7DVGDQV9 and 7KTPAUAWTZHSC66Z. Snapshot charges excluded from running compute comparison."
+  },
+  {
+    "id": "maritime",
+    "kind": "sandbox",
+    "status": "changed",
+    "catalog": {
+      "pricing": {
+        "vcpuHour": 0.0055,
+        "gbHour": 0.00275,
+        "note": "per second, disk included",
+        "source": "https://maritime.sh/pricing",
+        "checked": "2026-11-04"
+      },
+      "limits": {
+        "maxVcpu": 16,
+        "maxMemoryGb": 64
+      },
+      "sizes": [],
+      "hourlyAt2x4": 0.022,
+      "unfitAt2x4": null
+    },
+    "found": {
+      "vcpuHour": 0.0055,
+      "gbHour": 0.00275,
+      "sizes": [],
+      "maxVcpu": 16,
+      "maxMemoryGb": 64,
+      "billing": "Per second, no minimum; running ephemeral disk included.",
+      "minimumPlan": "Starter $20/month includes $20 usage; Growth $100 and Scale $500 each include their fee in usage.",
+      "pausedCost": "If configured to pause, $0.08/GB-month disk. Default idle action ends sandbox and deletes disk.",
+      "freeTier": "Seven-day trial up to $20 usage, card required; excluded. No recurring free plan published.",
+      "hourlyAt2x4": 0.022,
+      "cheapestPaidPlanMax": {
+        "vcpu": 16,
+        "memoryGb": 64,
+        "plan": "Starter; concurrency differs by plan"
+      },
+      "hourlyCostAssessment": "Resource rates and max size match; plan minimum and paused disk missing from catalog note.",
+      "region": "No regional price selector; public default USD schedule.",
+      "checked": "2026-11-05"
+    },
+    "evidence": [
+      {
+        "url": "https://maritime.sh/pricing",
+        "quote": "$0.0055",
+        "checked": "2026-11-05",
+        "supports": "CPU-hour"
+      },
+      {
+        "url": "https://maritime.sh/pricing",
+        "quote": "$0.00275",
+        "checked": "2026-11-05",
+        "supports": "GB-hour"
+      },
+      {
+        "url": "https://maritime.sh/pricing",
+        "quote": "$20/mo",
+        "checked": "2026-11-05",
+        "supports": "Starter subscription"
+      },
+      {
+        "url": "https://maritime.sh/pricing",
+        "quote": "$0.08",
+        "checked": "2026-11-05",
+        "supports": "disk GB-month"
+      },
+      {
+        "url": "https://maritime.sh/pricing",
+        "quote": "16 vCPU and 64 GB",
+        "checked": "2026-11-05",
+        "supports": "sandbox maximum"
+      }
+    ],
+    "notes": "Add required monthly plan and paused storage to the note; rates and limits unchanged."
+  },
+  {
+    "id": "modal",
+    "kind": "sandbox",
+    "status": "conflict",
+    "catalog": {
+      "pricing": {
+        "vcpuHour": 0.07096,
+        "gbHour": 0.0242,
+        "note": "sandbox rates, GPUs extra; region pinning x1.15-1.75",
+        "source": "https://modal.com/pricing",
+        "checked": "2026-11-04"
+      },
+      "limits": {
+        "maxVcpu": 64,
+        "maxMemoryGb": 256
+      },
+      "sizes": [],
+      "hourlyAt2x4": 0.23872,
+      "unfitAt2x4": null
+    },
+    "found": {
+      "vcpuHour": null,
+      "gbHour": 0.024012,
+      "sizes": [],
+      "maxVcpu": null,
+      "maxMemoryGb": null,
+      "billing": "Per second; max(request, actual use) for CPU and RAM. API cpu is physical cores, each equivalent to two vCPUs.",
+      "minimumPlan": "Starter $0/month plus usage with $30 recurring credits; Team $250/month with $100 credits.",
+      "pausedCost": "No generic paused tariff established. Volumes $0.09/GiB-month after first 1 TiB; snapshot-specific tariff not established.",
+      "freeTier": "Starter $30/month credit; credits are not lower unit prices.",
+      "hourlyAt2x4": null,
+      "cheapestPaidPlanMax": null,
+      "alternatives": [
+        {
+          "basis": "Published physical core rate normalized to one vCPU",
+          "vcpuHour": 0.070956,
+          "gbHour": 0.024012,
+          "usdHour2x4": 0.23796
+        },
+        {
+          "basis": "Current adapter passes cpu=2 physical cores for vcpu=2",
+          "usdHour2x4": 0.379872
+        }
+      ],
+      "hourlyCostAssessment": "src/providers/modal.ts passes requested vcpu as physical cpu without dividing by two. Catalog normalizes CPU to virtual cores, so it understates actual adapter reservation. Printed sandbox rates also differ slightly from literal 3x standard rates.",
+      "region": "Public default USD schedule; no separate regional price selected unless specified in the notes.",
+      "checked": "2026-11-05"
+    },
+    "evidence": [
+      {
+        "url": "https://modal.com/pricing",
+        "quote": "$0.00003942",
+        "checked": "2026-11-05",
+        "supports": "physical CPU-core-second"
+      },
+      {
+        "url": "https://modal.com/pricing",
+        "quote": "$0.00000667",
+        "checked": "2026-11-05",
+        "supports": "RAM GiB-second"
+      },
+      {
+        "url": "https://modal.com/pricing",
+        "quote": "3x",
+        "checked": "2026-11-05",
+        "supports": "sandbox premium"
+      },
+      {
+        "url": "https://modal.com/pricing",
+        "quote": "$30",
+        "checked": "2026-11-05",
+        "supports": "Starter recurring credit"
+      },
+      {
+        "url": "https://modal.com/pricing",
+        "quote": "$250",
+        "checked": "2026-11-05",
+        "supports": "Team fee"
+      },
+      {
+        "url": "https://modal.com/pricing",
+        "quote": "$100",
+        "checked": "2026-11-05",
+        "supports": "Team credit"
+      },
+      {
+        "url": "https://modal.com/docs/guide/sandbox-resources",
+        "quote": "1 core = 2 vCPUs",
+        "checked": "2026-11-05",
+        "supports": "API unit conversion"
+      }
+    ],
+    "notes": "Do not apply a rate-only fix: CPU unit mapping must be resolved in the adapter, outside requested source-file scope. Catalog RAM .0242 differs from printed .00000667/second × 3600 = .024012. Public sandbox rate .00003942/physical-core-second ×3600=.141912; normalized 2 vCPU/4 GiB=.23796, current adapter 2 physical cores/4 GiB=.379872. Region pinning adds 1.15–1.75x. Catalog 64/256 maximum not verified."
+  },
+  {
+    "id": "morph",
+    "kind": "sandbox",
+    "status": "ok",
+    "catalog": {
+      "pricing": {
+        "vcpuHour": 0.05,
+        "gbHour": 0,
+        "note": "$0.05/MCU; MCU-hours = max(vCPU, RAM/4 GB, disk/16 GB); snapshots extra",
+        "source": "https://cloud.morph.so/web/pricing",
+        "checked": "2026-11-04"
+      },
+      "limits": {
+        "maxVcpu": 64,
+        "maxMemoryGb": 256
+      },
+      "sizes": [],
+      "hourlyAt2x4": 0.1,
+      "unfitAt2x4": null
+    },
+    "found": {
+      "vcpuHour": 0.05,
+      "gbHour": 0,
+      "sizes": [],
+      "maxVcpu": 64,
+      "maxMemoryGb": 256,
+      "billing": "MCU-hours; MCU=max(vCPU, ceil(RAM GiB/4), ceil(disk GiB/16)). Sub-hour rounding/minimum not stated.",
+      "minimumPlan": "Developer $0/month; purchase compute units. Team $40/month includes 1,000 MCUs, a bundled discount excluded from base MCU list rate.",
+      "pausedCost": "Snapshot storage uses the same pool: 5 TB snapshot-hours per MCU, rather than running compute.",
+      "freeTier": "Developer starts with zero MCUs; no recurring free compute grant.",
+      "hourlyAt2x4": 0.1,
+      "cheapestPaidPlanMax": {
+        "vcpu": 64,
+        "memoryGb": 256,
+        "plan": "Developer pay as you go; Team subscription permits 256/1024"
+      },
+      "hourlyCostAssessment": "Correct for adapter default disk 8 GiB (one MCU minimum). Formula ignores disk for arbitrary caller-supplied snapshots, whose size is unknown.",
+      "region": "Public default USD schedule; no separate regional price selected unless specified in the notes.",
+      "checked": "2026-11-05"
+    },
+    "evidence": [
+      {
+        "url": "https://cloud.morph.so/web/pricing",
+        "quote": "$0.05",
+        "checked": "2026-11-05",
+        "supports": "standard MCU rate"
+      },
+      {
+        "url": "https://cloud.morph.so/web/pricing",
+        "quote": "5 TB snapshot-hours",
+        "checked": "2026-11-05",
+        "supports": "snapshot allowance per MCU"
+      },
+      {
+        "url": "https://cloud.morph.so/web/pricing",
+        "quote": "Up to 64 vCPU",
+        "checked": "2026-11-05",
+        "supports": "Developer CPU maximum"
+      },
+      {
+        "url": "https://cloud.morph.so/web/pricing",
+        "quote": "Up to 256 GB",
+        "checked": "2026-11-05",
+        "supports": "Developer memory maximum"
+      },
+      {
+        "url": "https://cloud.morph.so/web/pricing",
+        "quote": "$40 / month",
+        "checked": "2026-11-05",
+        "supports": "Team bundle"
+      }
+    ],
+    "notes": "Base MCU rate and Developer cap match. A monthly bundle is a separate purchasing option; comparison uses standalone MCU list rate."
+  },
+  {
+    "id": "northflank",
+    "kind": "sandbox",
+    "status": "conflict",
+    "catalog": {
+      "pricing": {
+        "vcpuHour": 0.01667,
+        "gbHour": 0.00833,
+        "note": "per second on Northflank Cloud, ephemeral disk included; sandboxes run as deployment services (microVMs)",
+        "source": "https://northflank.com/pricing",
+        "checked": "2026-11-04"
+      },
+      "limits": {
+        "maxVcpu": 8,
+        "maxMemoryGb": 16
+      },
+      "sizes": [],
+      "hourlyAt2x4": 0.06666,
+      "unfitAt2x4": null
+    },
+    "found": {
+      "vcpuHour": 0.01667,
+      "gbHour": 0.00833,
+      "sizes": [
+        {
+          "vcpu": 2,
+          "memoryGb": 4,
+          "usdHour": 0.06667,
+          "name": "nf-compute-200"
+        }
+      ],
+      "maxVcpu": 32,
+      "maxMemoryGb": 488,
+      "billing": "Configured CPU/RAM per second. Persistent SSD $0.11657/GiB-month and egress $0.06/GB separate.",
+      "minimumPlan": "Free Sandbox plan available; pay as you go has no seat fee or mandatory subscription published.",
+      "pausedCost": "Adapter has no pause. Persistent storage retains its own billing; no separate stopped ephemeral tariff established.",
+      "freeTier": "Up to $20/month resources across two services, two jobs and one database.",
+      "hourlyAt2x4": null,
+      "cheapestPaidPlanMax": {
+        "vcpu": 32,
+        "memoryGb": 488,
+        "plan": "Public Northflank Cloud compute selector; availability by region not established"
+      },
+      "alternatives": [
+        {
+          "basis": "Unit rate arithmetic",
+          "usdHour2x4": 0.06666
+        },
+        {
+          "basis": "Published nf-compute-200 size price",
+          "usdHour2x4": 0.06667
+        }
+      ],
+      "hourlyCostAssessment": "Catalog uses continuous unit arithmetic although provider uses discrete compute plans; actual adapter selects a fitting PLANS entry. At 2/4, published shape price differs by $0.00001/hour, plausibly rounding but not silently resolved.",
+      "region": "Public default USD schedule; no separate regional price selected unless specified in the notes.",
+      "checked": "2026-11-05"
+    },
+    "evidence": [
+      {
+        "url": "https://northflank.com/pricing",
+        "quote": "$0.01667",
+        "checked": "2026-11-05",
+        "supports": "vCPU-hour"
+      },
+      {
+        "url": "https://northflank.com/pricing",
+        "quote": "$0.00833",
+        "checked": "2026-11-05",
+        "supports": "GB-hour"
+      },
+      {
+        "url": "https://northflank.com/pricing",
+        "quote": "$0.06667",
+        "checked": "2026-11-05",
+        "supports": "nf-compute-200 hourly"
+      },
+      {
+        "url": "https://northflank.com/pricing",
+        "quote": "32 vCPU · 488 GB",
+        "checked": "2026-11-05",
+        "supports": "largest public selector size"
+      },
+      {
+        "url": "https://northflank.com/pricing",
+        "quote": "$0.11657",
+        "checked": "2026-11-05",
+        "supports": "GiB-month storage"
+      },
+      {
+        "url": "https://northflank.com/pricing",
+        "quote": "$20/mo",
+        "checked": "2026-11-05",
+        "supports": "free resource ceiling"
+      }
+    ],
+    "notes": "Public calculator offers up to 32/488, adapter PLANS up to 32/128, and catalog caps at 8/16. These are distinct limits; the catalog cap is more restrictive than either public sizes or adapter selection. Unit and bundled prices disagree at rounding precision; retain both rather than guessing the authoritative invoice basis."
+  },
+  {
+    "id": "novita",
+    "kind": "sandbox",
+    "status": "ok",
+    "catalog": {
+      "pricing": {
+        "vcpuHour": 0.03528,
+        "gbHour": 0.01152,
+        "note": "per second ($0.0000098/vCPU/s, $0.0000032/GiB/s); size comes from the template; paused = storage only",
+        "source": "https://docs.novita.ai/guides/sandbox-pricing",
+        "checked": "2026-11-04"
+      },
+      "limits": {
+        "maxVcpu": 8,
+        "maxMemoryGb": 8
+      },
+      "sizes": [],
+      "hourlyAt2x4": 0.11664,
+      "unfitAt2x4": null
+    },
+    "found": {
+      "vcpuHour": 0.03528,
+      "gbHour": 0.01152,
+      "sizes": [],
+      "maxVcpu": 8,
+      "maxMemoryGb": 8,
+      "billing": "CPU and RAM per second while running; persistent storage billed daily.",
+      "minimumPlan": "Pay as you go; paid limits unlocked by top-up or approved credit line, no recurring subscription published.",
+      "pausedCost": "CPU/RAM stop; retained storage, templates and snapshots share 60 GB free per account, then $0.00009/GB-hour.",
+      "freeTier": "20 GB ephemeral storage per running sandbox; 60 GB persistent storage/account. Free quota: 2 CPU/4 GB, 5 concurrent, 1-hour sessions. $100 survey promotion excluded; no survey performed.",
+      "hourlyAt2x4": 0.11664,
+      "cheapestPaidPlanMax": {
+        "vcpu": 8,
+        "memoryGb": 8,
+        "plan": "Paid, 3-hour sessions, 100 concurrent"
+      },
+      "hourlyCostAssessment": "Per-second rates ×3600 exactly match.",
+      "region": "Public default USD schedule; no separate regional price selected unless specified in the notes.",
+      "checked": "2026-11-05"
+    },
+    "evidence": [
+      {
+        "url": "https://docs.novita.ai/guides/sandbox-pricing",
+        "quote": "$0.0000098/s",
+        "checked": "2026-11-05",
+        "supports": "one vCPU-second"
+      },
+      {
+        "url": "https://docs.novita.ai/guides/sandbox-pricing",
+        "quote": "$0.0000032/GiB/s",
+        "checked": "2026-11-05",
+        "supports": "memory"
+      },
+      {
+        "url": "https://docs.novita.ai/guides/sandbox-pricing",
+        "quote": "$0.00009/GB/h",
+        "checked": "2026-11-05",
+        "supports": "excess paused storage"
+      },
+      {
+        "url": "https://docs.novita.ai/guides/sandbox-pricing",
+        "quote": "60 GB",
+        "checked": "2026-11-05",
+        "supports": "account storage allowance"
+      },
+      {
+        "url": "https://docs.novita.ai/guides/sandbox-quota-limit",
+        "quote": "8",
+        "checked": "2026-11-05",
+        "supports": "paid CPU and memory maxima"
+      }
+    ],
+    "notes": "Compute rates and paid maximum match; free quota does not mean unlimited free compute."
+  },
+  {
+    "id": "openscale",
+    "kind": "sandbox",
+    "status": "conflict",
+    "catalog": {
+      "pricing": {
+        "vcpuHour": 0.0065,
+        "gbHour": 0.001,
+        "note": "per second on allocated size; no platform fee or minimum; paused = free; size comes from the template (E2B-compatible API); Singapore only; needs a pay-as-you-go key",
+        "source": "https://openscale.so/sandboxes",
+        "checked": "2026-11-05"
+      },
+      "limits": {
+        "maxVcpu": 8,
+        "maxMemoryGb": 16
+      },
+      "sizes": [],
+      "hourlyAt2x4": 0.017,
+      "unfitAt2x4": null
+    },
+    "found": {
+      "vcpuHour": 0.0065,
+      "gbHour": 0.001,
+      "sizes": [],
+      "maxVcpu": 8,
+      "maxMemoryGb": 16,
+      "billing": "Allocated CPU/RAM per second; 25 GB disk included.",
+      "minimumPlan": "No platform fee or minimum.",
+      "pausedCost": "Free; automatic pause after 5 idle minutes preserves memory/files.",
+      "freeTier": "$5 introductory credit advertised, excluded. No recurring allowance established.",
+      "hourlyAt2x4": null,
+      "cheapestPaidPlanMax": {
+        "vcpu": 8,
+        "memoryGb": 16,
+        "plan": "Pay as you go"
+      },
+      "region": "Singapore only in current public page.",
+      "timeLimit": "No session time limit; runs until deleted, auto-paused when idle.",
+      "defaultTemplate": {
+        "name": "base",
+        "vcpu": null,
+        "memoryGb": null
+      },
+      "theoreticalHourlyAt2x4": 0.017,
+      "hourlyCostAssessment": "Linear rates verified, but adapter uses base template whose allocation is not publicly established.",
+      "checked": "2026-11-05"
+    },
+    "evidence": [
+      {
+        "url": "https://openscale.so/sandboxes",
+        "quote": "$0.0065",
+        "checked": "2026-11-05",
+        "supports": "vCPU-hour"
+      },
+      {
+        "url": "https://openscale.so/sandboxes",
+        "quote": "$0.001",
+        "checked": "2026-11-05",
+        "supports": "GiB-hour"
+      },
+      {
+        "url": "https://openscale.so/sandboxes",
+        "quote": "1–8 vCPU",
+        "checked": "2026-11-05",
+        "supports": "CPU range"
+      },
+      {
+        "url": "https://openscale.so/sandboxes",
+        "quote": "16 GB",
+        "checked": "2026-11-05",
+        "supports": "RAM maximum"
+      },
+      {
+        "url": "https://openscale.so/sandboxes",
+        "quote": "No session time limit",
+        "checked": "2026-11-05",
+        "supports": "duration"
+      },
+      {
+        "url": "https://openscale.so/sandboxes",
+        "quote": "Paused sandboxes cost nothing.",
+        "checked": "2026-11-05",
+        "supports": "pause"
+      }
+    ],
+    "notes": "Default base CPU/RAM remains unresolved. Public site answers the duration question explicitly. Do not turn the requested 2 / 4 into an asserted template size; no authenticated template lookup attempted."
+  },
+  {
+    "id": "runloop",
+    "kind": "sandbox",
+    "status": "ok",
+    "catalog": {
+      "pricing": {
+        "vcpuHour": 0.108,
+        "gbHour": 0.0252,
+        "note": "per second, plus disk; pause (suspend) is a Pro-plan feature",
+        "source": "https://www.runloop.ai/pricing",
+        "checked": "2026-11-04"
+      },
+      "limits": {
+        "maxVcpu": 16,
+        "maxMemoryGb": 64
+      },
+      "sizes": [],
+      "hourlyAt2x4": 0.31679999999999997,
+      "unfitAt2x4": null
+    },
+    "found": {
+      "vcpuHour": 0.108,
+      "gbHour": 0.0252,
+      "sizes": [
+        {
+          "vcpu": 0.5,
+          "memoryGb": 1,
+          "usdHour": 0.0806,
+          "diskGb": 4
+        },
+        {
+          "vcpu": 1,
+          "memoryGb": 2,
+          "usdHour": 0.1598,
+          "diskGb": 4
+        },
+        {
+          "vcpu": 2,
+          "memoryGb": 4,
+          "usdHour": 0.3195,
+          "diskGb": 8
+        },
+        {
+          "vcpu": 2,
+          "memoryGb": 8,
+          "usdHour": 0.4231,
+          "diskGb": 16
+        },
+        {
+          "vcpu": 4,
+          "memoryGb": 16,
+          "usdHour": 0.8407,
+          "diskGb": 16
+        },
+        {
+          "vcpu": 8,
+          "memoryGb": 32,
+          "usdHour": 1.676,
+          "diskGb": 16
+        }
+      ],
+      "maxVcpu": 16,
+      "maxMemoryGb": 64,
+      "billing": "Per second. CPU/RAM plus disk $0.00034236/GB-hour; snapshots $0.000072/GB-hour.",
+      "minimumPlan": "Basic has no subscription fee; Pro $250/month plus usage, required for suspend/resume.",
+      "pausedCost": "CPU and RAM stop; storage continues. Basic includes 100 GB, Pro 1 TB storage allowance.",
+      "freeTier": "$50 introductory Pro trial excluded. Basic recurring storage allowance, no recurring compute credit established.",
+      "hourlyAt2x4": 0.3168,
+      "cheapestPaidPlanMax": {
+        "vcpu": 16,
+        "memoryGb": 64,
+        "plan": "Basic usage/custom sizes; per-plan lower ceiling not published"
+      },
+      "hourlyCostAssessment": "Compute arithmetic correct. Adapter uses CUSTOM_SIZE, default 16 GiB disk when unspecified, not the 8 GiB medium preset. Full default running estimate before storage allowance: $0.32227776/h.",
+      "region": "Public default USD schedule; no separate regional price selected unless specified in the notes.",
+      "checked": "2026-11-05"
+    },
+    "evidence": [
+      {
+        "url": "https://www.runloop.ai/pricing",
+        "quote": "$0.108",
+        "checked": "2026-11-05",
+        "supports": "CPU-hour"
+      },
+      {
+        "url": "https://www.runloop.ai/pricing",
+        "quote": "$0.0252",
+        "checked": "2026-11-05",
+        "supports": "GB-hour"
+      },
+      {
+        "url": "https://www.runloop.ai/pricing",
+        "quote": "$0.00034236",
+        "checked": "2026-11-05",
+        "supports": "disk GB-hour"
+      },
+      {
+        "url": "https://www.runloop.ai/pricing",
+        "quote": "$0.000072",
+        "checked": "2026-11-05",
+        "supports": "snapshot GB-hour"
+      },
+      {
+        "url": "https://www.runloop.ai/pricing",
+        "quote": "$250",
+        "checked": "2026-11-05",
+        "supports": "Pro monthly"
+      },
+      {
+        "url": "https://docs.runloop.ai/docs/devboxes/configuration/sizes",
+        "quote": "max is 16 cores",
+        "checked": "2026-11-05",
+        "supports": "custom CPU maximum"
+      },
+      {
+        "url": "https://docs.runloop.ai/docs/devboxes/configuration/sizes",
+        "quote": "max is 64GiB",
+        "checked": "2026-11-05",
+        "supports": "custom RAM maximum"
+      },
+      {
+        "url": "https://docs.runloop.ai/docs/devboxes/configuration/sizes",
+        "quote": "16GiB",
+        "checked": "2026-11-05",
+        "supports": "default custom disk"
+      }
+    ],
+    "notes": "Rates and custom size maxima match. Public predefined totals include disk and are rounded, so are not interchangeable with compute-only estimate."
+  },
+  {
+    "id": "sprites",
+    "kind": "sandbox",
+    "status": "conflict",
+    "catalog": {
+      "pricing": {
+        "vcpuHour": 0.0385,
+        "gbHour": 0.021875,
+        "note": "bills actual CPU and memory use; this is the full-use price; storage extra",
+        "source": "https://fly.io/sprites",
+        "checked": "2026-11-04"
+      },
+      "limits": {
+        "maxVcpu": 8,
+        "maxMemoryGb": 8
+      },
+      "sizes": [],
+      "hourlyAt2x4": 0.16449999999999998,
+      "unfitAt2x4": null
+    },
+    "found": {
+      "vcpuHour": 0.0385,
+      "gbHour": 0.021875,
+      "sizes": [],
+      "maxVcpu": null,
+      "maxMemoryGb": null,
+      "billing": "Actual cumulative CPU and actual RAM usage; public page describes hourly metering, without specifying smaller rounding granularity.",
+      "minimumPlan": "Pay as you go; optional plans, no required subscription published.",
+      "pausedCost": "Warm/cold compute unbilled. Cold storage $0.000027/GB-hour; hot storage $0.000683/GB-hour while awake.",
+      "freeTier": "Introductory $1/$30 credits and invoices under $5 waived as described publicly; excluded from list-rate comparison.",
+      "hourlyAt2x4": 0.1645,
+      "cheapestPaidPlanMax": null,
+      "hourlyCostAssessment": "Arithmetic correct for 2 CPU-hours and 4 RAM GB-hours consumed, not a reservation. Public fixed capacity of 8 / 8 not established.",
+      "region": "Public default USD schedule; no separate regional price selected unless specified in the notes.",
+      "checked": "2026-11-05"
+    },
+    "evidence": [
+      {
+        "url": "https://fly.io/sprites",
+        "quote": "$0.0385 / CPU-hour",
+        "checked": "2026-11-05",
+        "supports": "CPU"
+      },
+      {
+        "url": "https://fly.io/sprites",
+        "quote": "$0.021875 / GB-hour",
+        "checked": "2026-11-05",
+        "supports": "RAM"
+      },
+      {
+        "url": "https://fly.io/sprites",
+        "quote": "$0.000683 / GB-hour",
+        "checked": "2026-11-05",
+        "supports": "hot disk"
+      },
+      {
+        "url": "https://fly.io/sprites",
+        "quote": "$0.000027 / GB-hour",
+        "checked": "2026-11-05",
+        "supports": "cold disk"
+      },
+      {
+        "url": "https://docs.sprites.dev/working-with-sprites/",
+        "quote": "100 GB",
+        "checked": "2026-11-05",
+        "supports": "filesystem capacity"
+      }
+    ],
+    "notes": "Rate confirmed; catalog cap is explicitly based on reports rather than a published per-Sprite limit. Treat capacity as unresolved, preserve entry. Persistent filesystem is 100 GB, billed on used storage, not allocated capacity."
+  },
+  {
+    "id": "superserve",
+    "kind": "sandbox",
+    "status": "changed",
+    "catalog": {
+      "pricing": {
+        "vcpuHour": 0.0504,
+        "gbHour": 0.0162,
+        "note": "per second while active; paused bills storage only ($0.000108/GiB-h); sizes fixed by template (system templates 2 vCPU / 4 GiB); Free plan: 1 concurrent sandbox, $0.13/day allowance; bigger sizes need a team template on a paid plan",
+        "source": "https://superserve.ai/pricing",
+        "checked": "2026-11-05"
+      },
+      "limits": {
+        "maxVcpu": 2,
+        "maxMemoryGb": 4
+      },
+      "sizes": [],
+      "hourlyAt2x4": 0.1656,
+      "unfitAt2x4": null
+    },
+    "found": {
+      "vcpuHour": 0.0504,
+      "gbHour": 0.0162,
+      "sizes": [
+        {
+          "vcpu": 2,
+          "memoryGb": 4,
+          "usdHour": 0.1656,
+          "name": "superserve/base",
+          "diskGb": 8
+        }
+      ],
+      "maxVcpu": 16,
+      "maxMemoryGb": 64,
+      "billing": "Allocated CPU and RAM per second while active; retained storage $0.000108/GiB-hour.",
+      "minimumPlan": "Developer $20/month includes $20 usage; Pro $250 includes $250. Resource docs also name a Free plan, but current pricing does not quantify its recurring allowance or eligibility.",
+      "pausedCost": "Retained storage only: shared template once, plus per-sandbox changed blocks; do not multiply full template disk by sandbox count.",
+      "freeTier": "Pricing says start free but provides no recurring free quota. Older catalog $0.13/day cannot be confirmed from current pricing; omit that claim.",
+      "hourlyAt2x4": 0.1656,
+      "cheapestPaidPlanMax": {
+        "vcpu": 4,
+        "memoryGb": 16,
+        "plan": "Developer"
+      },
+      "defaultTemplate": {
+        "name": "superserve/base",
+        "vcpu": 2,
+        "memoryGb": 4,
+        "diskGb": 8
+      },
+      "hourlyCostAssessment": "Fixed 2 / 4 rule matches system template. Catalog 2/4 limit deliberately matches default, not custom-template maximum.",
+      "region": "Public default USD schedule; no separate regional price selected unless specified in the notes.",
+      "checked": "2026-11-05"
+    },
+    "evidence": [
+      {
+        "url": "https://superserve.ai/pricing",
+        "quote": "$0.0504",
+        "checked": "2026-11-05",
+        "supports": "vCPU-hour"
+      },
+      {
+        "url": "https://superserve.ai/pricing",
+        "quote": "$0.0162",
+        "checked": "2026-11-05",
+        "supports": "GiB-hour"
+      },
+      {
+        "url": "https://superserve.ai/pricing",
+        "quote": "$0.000108",
+        "checked": "2026-11-05",
+        "supports": "retained storage GiB-hour"
+      },
+      {
+        "url": "https://superserve.ai/pricing",
+        "quote": "$20",
+        "checked": "2026-11-05",
+        "supports": "Developer monthly"
+      },
+      {
+        "url": "https://superserve.ai/pricing",
+        "quote": "$250",
+        "checked": "2026-11-05",
+        "supports": "Pro monthly"
+      },
+      {
+        "url": "https://docs.superserve.ai/templates/overview.md",
+        "quote": "2 · 4096 MiB · 8192 MiB",
+        "checked": "2026-11-05",
+        "supports": "system-template CPU / RAM / disk"
+      },
+      {
+        "url": "https://docs.superserve.ai/templates/build-spec.md",
+        "quote": "Default | 1 vCPU | 1 GiB (1024 MiB)",
+        "checked": "2026-11-05",
+        "supports": "new BuildSpec defaults, separate context"
+      }
+    ],
+    "notes": "Resolve the apparent 1/1 versus 2/4 conflict by scope: BuildSpec defaults for newly built templates are 1/1; system templates including superserve/base are 2/4. Update minimum-plan and storage notes, remove uncorroborated recurring allowance."
+  },
+  {
+    "id": "tensorlake",
+    "kind": "sandbox",
+    "status": "ok",
+    "catalog": {
+      "pricing": {
+        "vcpuHour": 0.07,
+        "gbHour": 0.015,
+        "note": "bills active CPU (floor 20% of allocation); this is the full-use price; Pro plan is lower",
+        "source": "https://www.tensorlake.ai/pricing",
+        "checked": "2026-11-04"
+      },
+      "limits": {
+        "maxVcpu": 4,
+        "maxMemoryGb": 16
+      },
+      "sizes": [],
+      "hourlyAt2x4": 0.2,
+      "unfitAt2x4": null
+    },
+    "found": {
+      "vcpuHour": 0.07,
+      "gbHour": 0.015,
+      "sizes": [],
+      "maxVcpu": 4,
+      "maxMemoryGb": 16,
+      "billing": "Active CPU with 20% allocated floor; allocated RAM/disk. Usage pooled and rounded to whole $0.01 compute units; time granularity not stated.",
+      "minimumPlan": "Usage Credits prepaid packs from $5, no subscription. Pro $250/month includes $250 and lower rates (.042 CPU-h, .009 GB-h, .0001 disk GB-h).",
+      "pausedCost": "Snapshot storage $0.07/GB-month, fixed 30-day month. Snapshot/resume listed on Pro.",
+      "freeTier": "One sandbox, 1 CPU / 1 GB / 10 GB disk, 2-hour sessions; no recurring credit-meter limit published.",
+      "hourlyAt2x4": 0.2,
+      "cheapestPaidPlanMax": {
+        "vcpu": 4,
+        "memoryGb": 16,
+        "plan": "Usage Credits; Pro separately reaches 16/64"
+      },
+      "hourlyCostAssessment": "Correct full-CPU compute estimate for Usage Credits; disk $0.0002/GB-hour is extra. Actual CPU usage may lower cost to floor.",
+      "region": "Public default USD schedule; no separate regional price selected unless specified in the notes.",
+      "checked": "2026-11-05"
+    },
+    "evidence": [
+      {
+        "url": "https://www.tensorlake.ai/pricing",
+        "quote": "$0.07",
+        "checked": "2026-11-05",
+        "supports": "Usage Credits CPU-hour and snapshot GB-month"
+      },
+      {
+        "url": "https://www.tensorlake.ai/pricing",
+        "quote": "$0.015",
+        "checked": "2026-11-05",
+        "supports": "Usage Credits GB-hour"
+      },
+      {
+        "url": "https://www.tensorlake.ai/pricing",
+        "quote": "$0.0002",
+        "checked": "2026-11-05",
+        "supports": "disk GB-hour"
+      },
+      {
+        "url": "https://www.tensorlake.ai/pricing",
+        "quote": "$0.01",
+        "checked": "2026-11-05",
+        "supports": "CU value"
+      },
+      {
+        "url": "https://www.tensorlake.ai/pricing",
+        "quote": "$5",
+        "checked": "2026-11-05",
+        "supports": "smallest pack"
+      },
+      {
+        "url": "https://www.tensorlake.ai/pricing",
+        "quote": "$250",
+        "checked": "2026-11-05",
+        "supports": "Pro monthly"
+      },
+      {
+        "url": "https://www.tensorlake.ai/pricing",
+        "quote": "20%",
+        "checked": "2026-11-05",
+        "supports": "CPU floor"
+      },
+      {
+        "url": "https://www.tensorlake.ai/pricing",
+        "quote": "4 vCPU · 16 GB",
+        "checked": "2026-11-05",
+        "supports": "Usage Credits ceiling"
+      }
+    ],
+    "notes": "Rates and cheapest paid-plan maxima match; retain the Usage Credits basis. Pro is a separate subscription rate schedule, not silently substituted."
+  },
+  {
+    "id": "upstash",
+    "kind": "sandbox",
+    "status": "conflict",
+    "catalog": {
+      "pricing": {
+        "vcpuHour": 0.1,
+        "gbHour": 0,
+        "note": "billed per active CPU core-hour only (memory and idle time free); estimate assumes every core of the box busy; fixed sizes 2/4, 4/8, 8/16",
+        "source": "https://upstash.com/pricing/box",
+        "checked": "2026-11-04"
+      },
+      "limits": {
+        "maxVcpu": 8,
+        "maxMemoryGb": 16
+      },
+      "sizes": [
+        {
+          "size": "small",
+          "vcpu": 2,
+          "memoryGb": 4
+        },
+        {
+          "size": "medium",
+          "vcpu": 4,
+          "memoryGb": 8
+        },
+        {
+          "size": "large",
+          "vcpu": 8,
+          "memoryGb": 16
+        }
+      ],
+      "hourlyAt2x4": 0.2,
+      "unfitAt2x4": null
+    },
+    "found": {
+      "vcpuHour": null,
+      "gbHour": 0,
+      "sizes": [
+        {
+          "vcpu": 2,
+          "memoryGb": 4,
+          "usdHour": 0.2,
+          "name": "small"
+        },
+        {
+          "vcpu": 4,
+          "memoryGb": 8,
+          "usdHour": null,
+          "name": "medium",
+          "usdHourAlternatives": [
+            0.4,
+            0.8
+          ]
+        },
+        {
+          "vcpu": 8,
+          "memoryGb": 16,
+          "usdHour": null,
+          "name": "large",
+          "usdHourAlternatives": [
+            0.8,
+            3.2
+          ]
+        }
+      ],
+      "maxVcpu": 8,
+      "maxMemoryGb": 16,
+      "billing": "Actual active core-hours; no CPU charge while idle. Exact sub-hour billing rounding not published.",
+      "minimumPlan": "Pay as you go, no monthly fee. Keep-alive is a separate fixed $8/$16/$32 monthly tariff.",
+      "pausedCost": "No active CPU; retained disk/snapshots $0.10/GB-month on PAYG. Keep-alive includes CPU/storage.",
+      "freeTier": "5 CPU-hours/month, 10 concurrent boxes.",
+      "hourlyAt2x4": 0.2,
+      "cheapestPaidPlanMax": {
+        "vcpu": 8,
+        "memoryGb": 16,
+        "plan": "Pay as you go"
+      },
+      "region": "AWS us-east-1",
+      "alternatives": [
+        {
+          "basis": "FAQ implies uniform per-core rate",
+          "vcpuHour": 0.1
+        },
+        {
+          "basis": "Size table explicitly labels active CPU-hour rates",
+          "small": 0.1,
+          "medium": 0.2,
+          "large": 0.4
+        }
+      ],
+      "sizeTableAssessment": "CPU/RAM shapes match. Medium disk is 30 GB in table but 20 GB in FAQ and how-it-works docs.",
+      "hourlyCostAssessment": "Small 2/4 full-use $0.20/h agrees under both per-core interpretations. Medium/large costs are unresolved. No source clearly labels .10/.20/.40 as whole-box hourly totals.",
+      "checked": "2026-11-05"
+    },
+    "evidence": [
+      {
+        "url": "https://upstash.com/pricing/box.md",
+        "quote": "$0.1/active CPU hour",
+        "checked": "2026-11-05",
+        "supports": "Small"
+      },
+      {
+        "url": "https://upstash.com/pricing/box.md",
+        "quote": "$0.2/active CPU hour",
+        "checked": "2026-11-05",
+        "supports": "Medium"
+      },
+      {
+        "url": "https://upstash.com/pricing/box.md",
+        "quote": "$0.4/active CPU hour",
+        "checked": "2026-11-05",
+        "supports": "Large"
+      },
+      {
+        "url": "https://upstash.com/pricing/box.md",
+        "quote": "one hour costs $0.2",
+        "checked": "2026-11-05",
+        "supports": "FAQ two-core example"
+      },
+      {
+        "url": "https://upstash.com/pricing/box",
+        "quote": "$0.1 / GB per month",
+        "checked": "2026-11-05",
+        "supports": "storage"
+      },
+      {
+        "url": "https://upstash.com/pricing/box",
+        "quote": "5 CPU hours per month.",
+        "checked": "2026-11-05",
+        "supports": "free CPU"
+      },
+      {
+        "url": "https://upstash.com/pricing/box",
+        "quote": "$8/month",
+        "checked": "2026-11-05",
+        "supports": "small keep-alive"
+      }
+    ],
+    "notes": "Explicit conflict: FAQ uses core-hours and $0.20 for two fully active cores; size table and machine-readable schedule say $0.10/$0.20/$0.40 per active CPU hour by size. Do not reinterpret those as box-hour prices. Preserve catalog until clarified."
+  },
+  {
+    "id": "vercel",
+    "kind": "sandbox",
+    "status": "changed",
+    "catalog": {
+      "pricing": {
+        "vcpuHour": 0.128,
+        "gbHour": 0.0212,
+        "note": "bills active CPU only; this is the 100%-CPU price, idle work costs less",
+        "source": "https://vercel.com/docs/vercel-sandbox/pricing",
+        "checked": "2026-11-04"
+      },
+      "limits": {
+        "maxVcpu": 8,
+        "maxMemoryGb": 16
+      },
+      "sizes": [],
+      "hourlyAt2x4": 0.3408,
+      "unfitAt2x4": null
+    },
+    "found": {
+      "vcpuHour": 0.128,
+      "gbHour": 0.0212,
+      "sizes": [],
+      "maxVcpu": 8,
+      "maxMemoryGb": 16,
+      "billing": "Actual cumulative CPU time; allocated RAM billed in minimum one-minute increments; $0.60 per million creations.",
+      "minimumPlan": "Hobby free within hard quotas. Pro starts $20/month with $20 usage credit shared across Vercel.",
+      "pausedCost": "Snapshots $0.08/GB-month; optional drives $0.05/GB-month in iad1, reads/writes separate. No running CPU/RAM once stopped.",
+      "freeTier": "Monthly 5 CPU-hours, 420 GB-hours RAM, 5,000 creations, 20 GB transfer. Snapshot/drive storage 15 GB lifetime allowance each.",
+      "hourlyAt2x4": 0.3408,
+      "cheapestPaidPlanMax": {
+        "vcpu": 8,
+        "memoryGb": 16,
+        "plan": "Pro; Hobby 4/8"
+      },
+      "region": "iad1 (Washington DC), documented default.",
+      "hourlyCostAssessment": "Full-use CPU/RAM arithmetic and 2 GB/vCPU pairing match. Additional creation/storage/network charges excluded.",
+      "checked": "2026-11-05"
+    },
+    "evidence": [
+      {
+        "url": "https://vercel.com/docs/vercel-sandbox/pricing",
+        "quote": "$0.128/hour",
+        "checked": "2026-11-05",
+        "supports": "CPU"
+      },
+      {
+        "url": "https://vercel.com/docs/vercel-sandbox/pricing",
+        "quote": "$0.0212/GB-hour",
+        "checked": "2026-11-05",
+        "supports": "RAM"
+      },
+      {
+        "url": "https://vercel.com/docs/vercel-sandbox/pricing",
+        "quote": "1 minute minimum increments",
+        "checked": "2026-11-05",
+        "supports": "RAM billing"
+      },
+      {
+        "url": "https://vercel.com/docs/vercel-sandbox/pricing",
+        "quote": "$0.60/1M",
+        "checked": "2026-11-05",
+        "supports": "creations"
+      },
+      {
+        "url": "https://vercel.com/docs/vercel-sandbox/pricing",
+        "quote": "$0.08/GB-month",
+        "checked": "2026-11-05",
+        "supports": "snapshots"
+      },
+      {
+        "url": "https://vercel.com/docs/vercel-sandbox/pricing",
+        "quote": "$20/month",
+        "checked": "2026-11-05",
+        "supports": "Pro credit"
+      },
+      {
+        "url": "https://vercel.com/docs/vercel-sandbox/pricing",
+        "quote": "5 hours/month",
+        "checked": "2026-11-05",
+        "supports": "free CPU"
+      },
+      {
+        "url": "https://vercel.com/docs/vercel-sandbox/pricing",
+        "quote": "420 GB-hours/month",
+        "checked": "2026-11-05",
+        "supports": "free RAM"
+      }
+    ],
+    "notes": "Add minimum one-minute memory billing, region, Hobby/Pro plan basis and retained snapshot cost to note; no rate or ceiling change."
+  },
+  {
+    "id": "aws-workspaces",
+    "kind": "computer",
+    "status": "conflict",
+    "catalog": {
+      "os": {
+        "windows": 0.15,
+        "linux": 0.138
+      },
+      "size": "2 vCPU · 4 GB (stream.standard.medium)",
+      "note": "us-east-1, Always-On/On-Demand fleet you provision once (fleet + stack), plus $0.05/h MCP session fee (first 10 h per region per month free); Windows adds $6.42 per AI-agent user per month; watch link is truly view-only but a person can't take control; no shell or files",
+      "source": "https://aws.amazon.com/workspaces/applications/pricing/",
+      "checked": "2026-11-04"
+    },
+    "found": {
+      "vcpuHour": null,
+      "gbHour": null,
+      "sizes": [
+        {
+          "vcpu": 2,
+          "memoryGb": 4,
+          "usdHour": 0.15,
+          "os": "windows"
+        },
+        {
+          "vcpu": 2,
+          "memoryGb": 4,
+          "usdHour": null,
+          "os": "linux"
+        }
+      ],
+      "maxVcpu": null,
+      "maxMemoryGb": null,
+      "billing": "Windows fleet rounded up to hours; Linux fleet per second, 15-minute minimum. Agent MCP $0.05/hour metered per second in addition.",
+      "minimumPlan": "No monthly subscription; requires a provisioned fleet. Windows additionally $6.42 per AI-agent user/month.",
+      "pausedCost": "On-Demand stopped fleet $0.025/hour; Always-On fleet billed fully even without a session. Deleting MCP session does not terminate fleet billing.",
+      "freeTier": "First 10 MCP session-hours per region/month free; fleet and licences remain separately billable.",
+      "os": {
+        "windows": 0.15,
+        "linux": null
+      },
+      "cheapestPaidPlanMax": null,
+      "region": "us-east-1",
+      "alternatives": [
+        {
+          "source": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonAppStream/current/us-east-1/index.json",
+          "os": {
+            "windows": 0.15,
+            "linux": 0.138
+          },
+          "linuxImage": "Rocky Linux"
+        },
+        {
+          "source": "https://aws.amazon.com/workspaces/applications/pricing/",
+          "basis": "Opening Rocky Linux example says .084 fleet/hour",
+          "os": {
+            "linux": 0.134
+          }
+        }
+      ],
+      "checked": "2026-11-05"
+    },
+    "evidence": [
+      {
+        "url": "https://aws.amazon.com/workspaces/applications/pricing/",
+        "quote": "$0.084",
+        "checked": "2026-11-05",
+        "supports": "Rocky example opening"
+      },
+      {
+        "url": "https://aws.amazon.com/workspaces/applications/pricing/",
+        "quote": "$0.088",
+        "checked": "2026-11-05",
+        "supports": "same example calculation"
+      },
+      {
+        "url": "https://aws.amazon.com/workspaces/applications/pricing/",
+        "quote": "$0.05",
+        "checked": "2026-11-05",
+        "supports": "MCP session-hour"
+      },
+      {
+        "url": "https://aws.amazon.com/workspaces/applications/pricing/",
+        "quote": "$6.42",
+        "checked": "2026-11-05",
+        "supports": "Windows agent licence/month"
+      },
+      {
+        "url": "https://aws.amazon.com/workspaces/applications/pricing/",
+        "quote": "$0.025",
+        "checked": "2026-11-05",
+        "supports": "stopped instance-hour"
+      },
+      {
+        "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonAppStream/current/us-east-1/index.json",
+        "quote": "0.0880000000",
+        "checked": "2026-11-05",
+        "supports": "Rocky fleet SKU price"
+      },
+      {
+        "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonAppStream/current/us-east-1/index.json",
+        "quote": "0.1000000000",
+        "checked": "2026-11-05",
+        "supports": "Windows fleet SKU price"
+      }
+    ],
+    "notes": "Public AWS JSON lists Rocky stream.standard.medium fleet .088/h and Windows .10/h; add .05 MCP fee. Pricing page introduces Rocky example at .084/h but its calculation uses .088/h, an internal conflict. Preserve existing entry. Chosen size 2/4 is not provider maximum. JSON SKUs E9H27G48B7D7E9ME (Rocky), YRQ27XGJJA8K8EM2 (Windows)."
+  },
+  {
+    "id": "daytona",
+    "kind": "computer",
+    "status": "ok",
+    "catalog": {
+      "os": {
+        "linux": 0.0666
+      },
+      "size": "1 vCPU · 1 GB",
+      "note": "per second while running; default container snapshot is 1 vCPU / 1 GiB / 3 GiB (daytona-small in daytona.io/docs/en/sandboxes), larger snapshots cost more; stopped keeps the disk ($0.000108/GiB-h past 5 GiB); live view is a signed noVNC preview URL, watch mode is client-side view-only; Windows needs a Tier 3 org, not routed",
+      "source": "https://www.daytona.io/pricing",
+      "checked": "2026-11-04"
+    },
+    "found": {
+      "vcpuHour": null,
+      "gbHour": null,
+      "sizes": [
+        {
+          "vcpu": 1,
+          "memoryGb": 1,
+          "usdHour": 0.0666,
+          "os": "linux",
+          "diskGb": 3
+        }
+      ],
+      "maxVcpu": null,
+      "maxMemoryGb": null,
+      "billing": "Per second; CPU and RAM while running; disk separately above the first 5 GiB.",
+      "minimumPlan": "No monthly fee; Tier 2 requires a $25 top-up and linked card.",
+      "pausedCost": "Stopped containers retain disk at $0.000108/GiB-hour above 5 GiB; archived container billing stops. VM state rules differ.",
+      "freeTier": "$200 introductory compute credit; excluded. Tier 1 requires email verification.",
+      "os": {
+        "linux": 0.0666
+      },
+      "cheapestPaidPlanMax": null,
+      "region": "Public default USD schedule; no separate regional price selected unless specified in the notes.",
+      "checked": "2026-11-05"
+    },
+    "evidence": [
+      {
+        "url": "https://www.daytona.io/docs/en/sandboxes/",
+        "quote": "daytona-small",
+        "checked": "2026-11-05",
+        "supports": "default desktop snapshot; resource row 1 CPU / 1 GiB / 3 GiB"
+      },
+      {
+        "url": "https://www.daytona.io/pricing",
+        "quote": "$0.0504/h",
+        "checked": "2026-11-05",
+        "supports": "CPU"
+      },
+      {
+        "url": "https://www.daytona.io/pricing",
+        "quote": "$0.0162/h",
+        "checked": "2026-11-05",
+        "supports": "RAM"
+      }
+    ],
+    "notes": "Default daytona-small snapshot 1 CPU / 1 GiB / 3 GiB confirmed; compute cost is .0504+.0162. Windows is not a routed OS here. Provider-wide capacity ambiguity is recorded in the separate sandbox entry."
+  },
+  {
+    "id": "e2b",
+    "kind": "computer",
+    "status": "ok",
+    "catalog": {
+      "os": {
+        "linux": 0.5328
+      },
+      "size": "8 vCPU · 8 GB",
+      "note": "per second while running; the public `desktop` template is 8 vCPU / 8 GiB (cpu_count=8, memory_mb=8192 in github.com/e2b-dev/desktop template/build_prod.py); live view is noVNC with a password in the URL, watch mode is client-side view-only; Hobby caps a session at 1 h, Pro at 24 h",
+      "source": "https://e2b.dev/pricing",
+      "checked": "2026-11-04"
+    },
+    "found": {
+      "vcpuHour": null,
+      "gbHour": null,
+      "sizes": [
+        {
+          "vcpu": 8,
+          "memoryGb": 8,
+          "usdHour": 0.5328,
+          "os": "linux"
+        }
+      ],
+      "maxVcpu": 8,
+      "maxMemoryGb": 8,
+      "billing": "Per second while running.",
+      "minimumPlan": "Hobby $0/month plus usage; Pro $150/month plus usage, no additional included usage credit.",
+      "pausedCost": "Compute billing stops on pause; unlimited retention documented. No separate paused-storage rate established in inspected pricing/billing pages.",
+      "freeTier": "Hobby $100 one-time credit; 20 concurrent, one-hour continuous sessions, 10 GiB disk. No recurring compute grant.",
+      "os": {
+        "linux": 0.5328
+      },
+      "cheapestPaidPlanMax": {
+        "vcpu": 8,
+        "memoryGb": 8,
+        "plan": "Pro; 8+ requires contacting support for larger limits"
+      },
+      "region": "Public default USD schedule; no separate regional price selected unless specified in the notes.",
+      "checked": "2026-11-05"
+    },
+    "evidence": [
+      {
+        "url": "https://raw.githubusercontent.com/e2b-dev/desktop/main/template/build_prod.py",
+        "quote": "cpu_count=8",
+        "checked": "2026-11-05",
+        "supports": "desktop CPU"
+      },
+      {
+        "url": "https://raw.githubusercontent.com/e2b-dev/desktop/main/template/build_prod.py",
+        "quote": "memory_mb=8192",
+        "checked": "2026-11-05",
+        "supports": "desktop RAM"
+      },
+      {
+        "url": "https://e2b.dev/pricing",
+        "quote": "$0.000014/s",
+        "checked": "2026-11-05",
+        "supports": "1 vCPU-second"
+      },
+      {
+        "url": "https://e2b.dev/pricing",
+        "quote": "$0.0000045/s",
+        "checked": "2026-11-05",
+        "supports": "1 GiB-second"
+      }
+    ],
+    "notes": "Public production desktop build specifies 8 CPU / 8192 MiB. Price = (8×.000014 + 8×.0000045)×3600. This validates the default OS rate despite the separate Hobby wording ambiguity."
+  },
+  {
+    "id": "limrun",
+    "kind": "computer",
+    "status": "changed",
+    "catalog": {
+      "os": {
+        "android": 3,
+        "ios": 6
+      },
+      "size": "Android 15 phone emulator / iPhone simulator",
+      "note": "per-minute credits (Android 1/min, iOS 2/min) at the $0.05/credit overage rate; plans: Trial free (120 credits), Entry $20/mo (500), Individual $200/mo (5,000); no pause, an idle device is deleted after its inactivity timeout; the stream link is interactive; iOS has no shell",
+      "source": "https://limrun.com/pricing",
+      "checked": "2026-11-04"
+    },
+    "found": {
+      "vcpuHour": null,
+      "gbHour": null,
+      "sizes": [],
+      "maxVcpu": null,
+      "maxMemoryGb": null,
+      "billing": "Android emulator 1 credit/minute; iOS simulator 2 credits/minute. Paid overage $0.05/credit. Exact partial-minute rounding not stated.",
+      "minimumPlan": "Entry $20/month includes 500 credits; Individual $200 includes 5,000. Optional Trial overage requires no monthly subscription but costs $0.06/credit.",
+      "pausedCost": "No device pause in routed SDK; idle emulator is deleted at inactivity timeout. Build-instance warm rates are a separate product.",
+      "freeTier": "Trial 120 one-time credits; excluded. Not renewed by optional overage.",
+      "os": {
+        "android": 3,
+        "ios": 6
+      },
+      "cheapestPaidPlanMax": null,
+      "alternatives": [
+        {
+          "plan": "Trial optional overage, no subscription",
+          "os": {
+            "android": 3.6,
+            "ios": 7.2
+          }
+        },
+        {
+          "plan": "Paid included allowance, if fully consumed",
+          "os": {
+            "android": 2.4,
+            "ios": 4.8
+          }
+        }
+      ],
+      "region": "Public default USD schedule; no separate regional price selected unless specified in the notes.",
+      "checked": "2026-11-05"
+    },
+    "evidence": [
+      {
+        "url": "https://limrun.com/pricing",
+        "quote": "$0.05/credit overage",
+        "checked": "2026-11-05",
+        "supports": "paid rate"
+      },
+      {
+        "url": "https://limrun.com/pricing",
+        "quote": "$0.06/credit overage",
+        "checked": "2026-11-05",
+        "supports": "optional Trial rate"
+      },
+      {
+        "url": "https://limrun.com/pricing",
+        "quote": "$20.00/month",
+        "checked": "2026-11-05",
+        "supports": "Entry"
+      },
+      {
+        "url": "https://limrun.com/pricing",
+        "quote": "$200.00/month",
+        "checked": "2026-11-05",
+        "supports": "Individual"
+      },
+      {
+        "url": "https://limrun.com/pricing",
+        "quote": "120",
+        "checked": "2026-11-05",
+        "supports": "one-time Trial credits"
+      },
+      {
+        "url": "https://limrun.com/pricing",
+        "quote": "500",
+        "checked": "2026-11-05",
+        "supports": "Entry allowance"
+      }
+    ],
+    "notes": "Existing hourly values match paid overage. Clarify that no-fee Trial overage has a different unit price, and that $0.04/credit examples allocate the monthly allowance rather than state marginal overage. No public emulator CPU/RAM maximum established."
+  },
+  {
+    "id": "maritime",
+    "kind": "computer",
+    "status": "changed",
+    "catalog": {
+      "os": {
+        "linux": 0.12,
+        "windows": 0.18,
+        "android": 0.15
+      },
+      "size": "2 vCPU · 4 GB",
+      "note": "per second while awake; asleep pays $0.08/GB-month of disk; Windows needs the Growth plan",
+      "source": "https://maritime.sh/pricing",
+      "checked": "2026-11-04"
+    },
+    "found": {
+      "vcpuHour": null,
+      "gbHour": null,
+      "sizes": [
+        {
+          "vcpu": 2,
+          "memoryGb": 4,
+          "usdHour": 0.12,
+          "os": "linux"
+        }
+      ],
+      "maxVcpu": null,
+      "maxMemoryGb": null,
+      "billing": "Per second while awake, no hourly minimum.",
+      "minimumPlan": "Starter $20/month includes $20 usage. Windows requires Growth $100/month including $100 usage.",
+      "pausedCost": "$0.08/GB-month retained disk, metered per second asleep.",
+      "freeTier": "Seven-day trial, up to $20 usage, excluded; no recurring free tier.",
+      "os": {
+        "linux": 0.12,
+        "windows": 0.18,
+        "android": 0.15
+      },
+      "cheapestPaidPlanMax": {
+        "vcpu": 2,
+        "memoryGb": 4,
+        "plan": "Starter default desktop; configurable maximum not published"
+      },
+      "region": "Public default USD schedule; no separate regional price selected unless specified in the notes.",
+      "checked": "2026-11-05"
+    },
+    "evidence": [
+      {
+        "url": "https://maritime.sh/pricing",
+        "quote": "$0.12",
+        "checked": "2026-11-05",
+        "supports": "Linux hourly"
+      },
+      {
+        "url": "https://maritime.sh/pricing",
+        "quote": "$0.18",
+        "checked": "2026-11-05",
+        "supports": "Windows hourly"
+      },
+      {
+        "url": "https://maritime.sh/pricing",
+        "quote": "$0.15",
+        "checked": "2026-11-05",
+        "supports": "Android hourly"
+      },
+      {
+        "url": "https://maritime.sh/pricing",
+        "quote": "$100/mo",
+        "checked": "2026-11-05",
+        "supports": "Growth monthly"
+      }
+    ],
+    "notes": "All OS hourly prices match. Add explicit monthly plan minimums to note. Linux 2/4 allocation is explicit; Windows/Android share catalog size but separate public hardware specifications were not established."
+  },
+  {
+    "id": "mobilerun",
+    "kind": "computer",
+    "status": "ok",
+    "catalog": {
+      "os": {
+        "android": 1.8
+      },
+      "size": "Android cloud phone (virtual, EU)",
+      "note": "$0.03 per device minute past the plan allowance (Developer $20/mo incl. 600 min, Startup $99, Scaleup $299); Free has 60 min/month; stopped phones keep apps and data and bill no minutes; live view is a WebRTC stream for @mobilerun/react, always controllable; no shell",
+      "source": "https://mobilerun.ai/pricing",
+      "checked": "2026-11-04"
+    },
+    "found": {
+      "vcpuHour": null,
+      "gbHour": null,
+      "sizes": [],
+      "maxVcpu": null,
+      "maxMemoryGb": null,
+      "billing": "$0.03 per device-minute beyond included usage; exact fractional-minute rounding not stated.",
+      "minimumPlan": "Free available. Developer $20/month includes 600 minutes; Startup $99 includes 3,000; Scaleup $299 includes 9,000.",
+      "pausedCost": "Stopped phones retain apps/data and consume no device-minutes.",
+      "freeTier": "60 device-minutes/month, one concurrent phone.",
+      "os": {
+        "android": 1.8
+      },
+      "cheapestPaidPlanMax": {
+        "vcpu": null,
+        "memoryGb": null,
+        "plan": "Developer: five concurrent phones; per-phone hardware unpublished"
+      },
+      "region": "Catalog uses EU virtual Android phones; pricing page shows one global overage schedule.",
+      "checked": "2026-11-05"
+    },
+    "evidence": [
+      {
+        "url": "https://mobilerun.ai/pricing",
+        "quote": "$0.03",
+        "checked": "2026-11-05",
+        "supports": "device-minute overage"
+      },
+      {
+        "url": "https://mobilerun.ai/pricing",
+        "quote": "$20",
+        "checked": "2026-11-05",
+        "supports": "Developer monthly"
+      },
+      {
+        "url": "https://mobilerun.ai/pricing",
+        "quote": "600",
+        "checked": "2026-11-05",
+        "supports": "Developer minutes"
+      },
+      {
+        "url": "https://mobilerun.ai/pricing",
+        "quote": "$99",
+        "checked": "2026-11-05",
+        "supports": "Startup monthly"
+      },
+      {
+        "url": "https://mobilerun.ai/pricing",
+        "quote": "$299",
+        "checked": "2026-11-05",
+        "supports": "Scaleup monthly"
+      },
+      {
+        "url": "https://mobilerun.ai/pricing",
+        "quote": "60",
+        "checked": "2026-11-05",
+        "supports": "Free monthly minutes"
+      }
+    ],
+    "notes": "Catalog hourly value correctly converts paid overage .03×60. Included minutes and plan fees are separate. Hardware limits unavailable in public price source."
+  },
+  {
+    "id": "orgo",
+    "kind": "computer",
+    "status": "ok",
+    "catalog": {
+      "os": {
+        "linux": 0.055
+      },
+      "size": "2 vCPU · 8 GB",
+      "note": "Medium Linux by the hour from credit, billed per second; stopped pays only its 40 GB disk. Other sizes need a paid plan (Starter $29/mo). Windows is not hourly: Scale plan ($399/mo) or a $15/mo licence plus a Medium. The live view is a VNC websockify URL whose token is full control, for a noVNC client",
+      "source": "https://www.orgo.ai/pricing.md",
+      "checked": "2026-11-04",
+      "planOnly": [
+        "windows"
+      ]
+    },
+    "found": {
+      "vcpuHour": null,
+      "gbHour": null,
+      "sizes": [
+        {
+          "vcpu": 0.5,
+          "memoryGb": 4,
+          "usdHour": 0.023,
+          "name": "Small"
+        },
+        {
+          "vcpu": 2,
+          "memoryGb": 8,
+          "usdHour": 0.055,
+          "name": "Medium"
+        },
+        {
+          "vcpu": 4,
+          "memoryGb": 16,
+          "usdHour": 0.11,
+          "name": "Large"
+        },
+        {
+          "vcpu": 6,
+          "memoryGb": 32,
+          "usdHour": 0.202,
+          "name": "XL"
+        }
+      ],
+      "maxVcpu": 6,
+      "maxMemoryGb": 32,
+      "billing": "Hourly Linux rates metered per second from prepaid balance, no hourly minimum. Credit must cover one hour of all hourly computers before creation.",
+      "minimumPlan": "Medium Linux PAYG has no monthly fee. Starter $29/month includes one always-on Medium. Windows: Scale $399/month or other paid plan plus $15 licence and Medium capacity ($47 addon total).",
+      "pausedCost": "Medium hourly disk $0.0027/hour; always-on subscription remains due when stopped.",
+      "freeTier": "Eligible new accounts receive $5 one-time starting credit; excluded. No recurring free runtime.",
+      "os": {
+        "linux": 0.055,
+        "windows": null
+      },
+      "planOnly": [
+        "windows"
+      ],
+      "cheapestPaidPlanMax": {
+        "vcpu": 2,
+        "memoryGb": 8,
+        "plan": "Starter included capacity; self-serve addons up to XL 6/32"
+      },
+      "defaultTemplate": {
+        "vcpu": 2,
+        "memoryGb": 8,
+        "diskGb": 40
+      },
+      "region": "Public default USD schedule; no separate regional price selected unless specified in the notes.",
+      "checked": "2026-11-05"
+    },
+    "evidence": [
+      {
+        "url": "https://www.orgo.ai/pricing.md",
+        "quote": "$0.055/hr",
+        "checked": "2026-11-05",
+        "supports": "Medium running"
+      },
+      {
+        "url": "https://www.orgo.ai/pricing.md",
+        "quote": "$0.0027/hr",
+        "checked": "2026-11-05",
+        "supports": "Medium stopped"
+      },
+      {
+        "url": "https://www.orgo.ai/pricing.md",
+        "quote": "$0.023/hr",
+        "checked": "2026-11-05",
+        "supports": "Small running"
+      },
+      {
+        "url": "https://www.orgo.ai/pricing.md",
+        "quote": "$0.11/hr",
+        "checked": "2026-11-05",
+        "supports": "Large running"
+      },
+      {
+        "url": "https://www.orgo.ai/pricing.md",
+        "quote": "$0.202/hr",
+        "checked": "2026-11-05",
+        "supports": "XL running"
+      },
+      {
+        "url": "https://www.orgo.ai/pricing.md",
+        "quote": "$29/mo",
+        "checked": "2026-11-05",
+        "supports": "Starter"
+      },
+      {
+        "url": "https://www.orgo.ai/pricing.md",
+        "quote": "$399/mo",
+        "checked": "2026-11-05",
+        "supports": "Scale"
+      },
+      {
+        "url": "https://www.orgo.ai/pricing.md",
+        "quote": "$15/mo",
+        "checked": "2026-11-05",
+        "supports": "Windows licence"
+      },
+      {
+        "url": "https://www.orgo.ai/pricing.md",
+        "quote": "$47",
+        "checked": "2026-11-05",
+        "supports": "Windows Medium addon"
+      }
+    ],
+    "notes": "All routed prices/plan-only flags match. Adapter explicitly requests Medium 2/8/40; API omission default 1/4 does not apply. 2XL 8/64 is request-only and excluded."
+  }
+]

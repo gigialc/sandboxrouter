@@ -48,42 +48,40 @@ Estimated list price while running, 2 vCPU / 4 GB (`npx @sandboxrouter/sdk provi
 
 | Provider | $/hr | Notes | Source |
 |---|---|---|---|
-| Agent37 | $0.006 | Per minute on fixed shapes (2 vCPU / 4 GB = $4.76/mo with disk); asleep = disk only ($0.09/GB-mo); gVisor isolation; prepaid wallet must hold 1 day of compute | [pricing](https://www.agent37.com/docs/agents-api/instance-sizing) |
+| Agent37 | $0.007 | Whole-minute billing: monthly shape total / 730 / 60; running estimate includes default disk (2 vCPU / 4 GB / 4 GB disk = $4.76/mo); sleeping/stopped disk $0.09/GB-mo; gVisor; $5 minimum top-up, wallet must hold one running day | [pricing](https://www.agent37.com/docs/agents-api/billing) |
 | InstaBox | $0.017 | Per second while running on fixed sizes (2/4, 4/8, 8/16); paused or stopped boxes bill only /data beyond the included disk ($0.00011/GiB-h); Pro $20/mo includes $20 credits; free plan: 1 box at 4/8 | [pricing](https://instabox.sh/docs/pricing.md) |
 | OpenScale Sandboxes | $0.017 | Per second on allocated size; no platform fee or minimum; paused = free; size comes from the template (E2B-compatible API); Singapore only; needs a pay-as-you-go key | [pricing](https://openscale.so/sandboxes) |
 | Boat | $0.018 | Fixed sizes billed per second ($0.018/h for 2 vCPU / 4 GB up to $0.20/h for 16 / 32); needs a plan from $20/mo, paid back as VM time | [pricing](https://docs.boat.dev/pricing.md) |
-| Maritime | $0.022 | Per second, disk included | [pricing](https://maritime.sh/pricing) |
+| Maritime | $0.022 | Per second, no minimum runtime; running disk included; Starter $20/mo incl. $20 usage; paused disk $0.08/GB-month (default idle action deletes sandbox) | [pricing](https://maritime.sh/pricing) |
 | Koyeb Sandboxes | $0.058 | Per second; fixed Standard instance sizes (1 vCPU + 1 GB = $0.0144/h); sandboxes need a paid plan (Pro $29/mo); public preview | [pricing](https://www.koyeb.com/docs/reference/instances) |
 | Northflank | $0.067 | Per second on Northflank Cloud, ephemeral disk included; sandboxes run as deployment services (microVMs) | [pricing](https://northflank.com/pricing) |
 | Morph Cloud | $0.100 | $0.05/MCU; MCU-hours = max(vCPU, RAM/4 GB, disk/16 GB); snapshots extra | [pricing](https://cloud.morph.so/web/pricing) |
-| exe.dev | $0.105 | $0.105/h per 2 vCPU + 4 GiB, per second, up to 2 GiB per vCPU; needs an exe.dev subscription | [pricing](https://exe.dev/docs/standalone-vms.md) |
+| exe.dev | $0.105 | Standalone reserved size, per second: $0.105/h per 2 vCPU / 4 GiB unit; stopped CPU/RAM free, retained disk separate; Personal from $15/mo (up to 16 vCPU / 32 GiB), Work $75/mo (32 / 64 without approval) | [pricing](https://exe.dev/docs/standalone-vms.md) |
 | Novita AI Agent Sandbox | $0.117 | Per second ($0.0000098/vCPU/s, $0.0000032/GiB/s); size comes from the template; paused = storage only | [pricing](https://docs.novita.ai/guides/sandbox-pricing) |
-| Freestyle | $0.134 | Per second on allocated size; sizes fixed by base snapshot, disk included; free tier 200 vCPU-h + 400 GiB-h/mo; paused VMs bill storage only | [pricing](https://www.freestyle.sh/docs/vms/pricing-and-limits) |
+| Freestyle | $0.134 | Per second on allocated fixed snapshot size; estimate includes disk at $0.000086/GiB-h; free monthly 200 vCPU-h, 400 GiB-h RAM, 60,000 GiB-h disk; Hobby $50/mo incl. $50 (max 8/16), Pro $500 (max 32/64); paused storage only | [pricing](https://www.freestyle.sh/docs/vms/pricing-and-limits) |
 | Beam | $0.140 | Per second, Performance tier (sandbox default); Developer plan $20/mo incl. $20 credits; GPUs billed separately | [pricing](https://www.beam.cloud/pricing) |
-| CodeSandbox SDK (Together) | $0.149 | Fixed VM tiers, credits at $0.01486 billed per started minute ($0.1486/h for 2 vCPU / 4 GB up to $4.7552/h for 64 / 128); free Build plan allows 10 concurrent VMs | [pricing](https://docs.together.ai/docs/together-code-sandbox-legacy) |
+| CodeSandbox SDK (Together) | $0.149 | Fixed tiers: Pico 2 vCPU / 1 GB $0.0743/h, Nano 2 / 4 $0.1486/h, up to 64 / 128 $4.7552/h; credits $0.01486, billed per started minute; Build free, 10 concurrent; Scale $170/mo incl. 1,100 credits | [pricing](https://docs.together.ai/docs/together-code-sandbox-legacy) |
 | Dedalus Machines | $0.149 | Per second while awake; sleeping machines bill storage only (10 GiB included on Hobby, 20 on Pro); Hobby plan max 4 vCPU / 16 GiB; private beta | [pricing](https://docs.dedaluslabs.ai/dcs/dm/pricing) |
 | Fly.io Sprites | $0.164 | Bills actual CPU and memory use; this is the full-use price; storage extra | [pricing](https://fly.io/sprites) |
 | Blaxel | $0.166 | Billed on memory only ($0.0000115/GB-s), CPU scales with memory (~2 GB per core) | [pricing](https://blaxel.ai/pricing) |
 | Daytona | $0.166 | Per second, plus disk above 5 GiB | [pricing](https://www.daytona.io/pricing) |
 | E2B | $0.166 | Per second; Pro plan $150/mo | [pricing](https://e2b.dev/pricing) |
 | HOPX | $0.166 | Per second, plus storage; size comes from the template, not the request | [pricing](https://hopx.ai/pricing) |
-| Superserve | $0.166 | Per second while active; paused bills storage only ($0.000108/GiB-h); sizes fixed by template (system templates 2 vCPU / 4 GiB); Free plan: 1 concurrent sandbox, $0.13/day allowance; bigger sizes need a team template on a paid plan | [pricing](https://superserve.ai/pricing) |
+| Superserve | $0.166 | Per second active; superserve/base fixed at 2 vCPU / 4 GiB / 8 GiB disk; retained storage $0.000108/GiB-h (shared template plus changed blocks); Developer $20/mo incl. $20, max 4/16 with team templates; recurring Free allowance not published on pricing page | [pricing](https://superserve.ai/pricing) |
 | Tensorlake | $0.200 | Bills active CPU (floor 20% of allocation); this is the full-use price; Pro plan is lower | [pricing](https://www.tensorlake.ai/pricing) |
-| OpenScale | set by the template (1 to 8 vCPU, up to 16 GB) | `timeoutMs` | template (E2B builder) | yes (memory + disk, paused free) | E2B-compatible API via the `e2b` SDK at sandbox.openscale.so; Singapore only; needs a pay-as-you-go key. |
-| Superserve | fixed 2 vCPU / 4 GB (system templates); a team template sets its own size | auto-pause after the lifetime (not delete) | template name or id | yes (memory + disk) | Plain REST; data plane uses a per-sandbox token, re-activated on 401/503. |
 | Upstash Box | $0.200 | Billed per active CPU core-hour only (memory and idle time free); estimate assumes every core of the box busy; fixed sizes 2/4, 4/8, 8/16 | [pricing](https://upstash.com/pricing/box) |
-| Cloudflare Sandbox | $0.216 | Bills active CPU and provisioned memory of the instance type; this is the full-CPU price; needs Workers Paid ($5/mo) and the bridge Worker in bridges/cloudflare | [pricing](https://developers.cloudflare.com/containers/platform/pricing/) |
+| Cloudflare Sandbox | $0.216 | 10 ms billing on active CPU and allocated instance memory; full-CPU estimate excludes allocated disk ($0.000252/GB-h), Worker and Durable Objects charges; needs Workers Paid ($5/mo) and bridges/cloudflare | [pricing](https://developers.cloudflare.com/containers/platform/pricing/) |
 | Amazon Bedrock AgentCore Code Interpreter | $0.217 | Per second; CPU billed on actual use (I/O wait free), memory on peak; fixed 2 vCPU / 8 GB session, this is the 100%-CPU price | [pricing](https://aws.amazon.com/bedrock/agentcore/pricing/) |
-| Modal | $0.239 | Sandbox rates, GPUs extra; region pinning x1.15-1.75 | [pricing](https://modal.com/pricing) |
-| AWS Lambda MicroVMs | $0.252 | Us-east-1 ARM; billed on the image's baseline size (2 GB per vCPU) while running, per-second burst up to 4x; suspended VMs pay snapshot storage; needs a MicroVM image you build once | [pricing](https://aws.amazon.com/lambda/pricing/) |
+| Modal | $0.238 | Sandbox rates, per second ($0.00003942 per physical core = 2 vCPUs); GPUs extra; region pinning x1.15-1.75; Starter includes $30/mo credit | [pricing](https://modal.com/pricing) |
+| AWS Lambda MicroVMs | $0.252 | us-east-1 ARM; billed on the image's baseline size (2 GB per vCPU) while running, per-second burst up to 4x; suspended VMs pay snapshot storage; needs a MicroVM image you build once | [pricing](https://aws.amazon.com/lambda/pricing/) |
 | Deno Sandbox | $0.300 | Billed on CPU time, not wall clock (estimate assumes both vCPUs busy); fixed 2 vCPU, 0.75-4 GB, max 30 min lifetime; needs a paid Deno Deploy plan | [pricing](https://deno.com/sandbox) |
 | Runloop | $0.317 | Per second, plus disk; pause (suspend) is a Pro-plan feature | [pricing](https://www.runloop.ai/pricing) |
-| Vercel Sandbox | $0.341 | Bills active CPU only; this is the 100%-CPU price, idle work costs less | [pricing](https://vercel.com/docs/vercel-sandbox/pricing) |
+| Vercel Sandbox | $0.341 | iad1; active CPU, provisioned RAM in minimum 1-minute increments (2 GB/vCPU); full-CPU estimate; Hobby free within quotas, Pro $20/mo usage credit; creations $0.60/million and retained snapshots $0.08/GB-month extra | [pricing](https://vercel.com/docs/vercel-sandbox/pricing) |
 | Azure Container Apps dynamic sessions | skipped (max 1 vCPU) | Flat $0.03 per session-hour (built-in Shell pools), billed per allocated session in 1-hour increments, East US; needs a session pool you create once | [pricing](https://learn.microsoft.com/en-us/azure/container-apps/billing#dynamic-sessions) |
-| Alibaba Cloud Agent Sandbox | skipped (max 2 GB memory) | Per second; Default QoS class, Hong Kong and regions outside mainland China; disk above 15 GiB extra; size comes from the template (E2B-compatible API) | [pricing](https://www.alibabacloud.com/help/en/agent-sandbox/product-overview/billing-overview) |
+| Alibaba Cloud Agent Sandbox | skipped (max 2 GB memory) | Per second; Default QoS, Hong Kong and regions outside mainland China; disk separately $0.00025308/GiB-h; code-interpreter-v1 template is 2 vCPU / 2 GiB with 10 GiB disk (E2B-compatible API) | [pricing](https://www.alibabacloud.com/help/en/agent-sandbox/product-overview/billing-overview) |
 | Docker (local) | free | Runs on your own machine; free, but shares your kernel, so weaker isolation than a cloud micro-VM | [pricing](https://docs.docker.com/engine/) |
 
-Checked 2026-11-04.
+Checked 2026-11-04 to 2026-11-05.
 
 ## Install
 

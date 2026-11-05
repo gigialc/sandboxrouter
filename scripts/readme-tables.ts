@@ -12,8 +12,12 @@ for (const c of rows) {
   const why = unfit(c.id, {});
   const price = c.local ? "free" : why ? `skipped (${why})` : `$${hourlyCost(c.id).toFixed(3)}`;
   const note = (c.pricing.note ?? "").replace(/\|/g, "/");
-  console.log(`| ${c.name} | ${price} | ${note[0]?.toUpperCase() ?? ""}${note.slice(1)} | [pricing](${c.pricing.source}) |`);
+    // Capitalize a leading plain word ("per second" -> "Per second"), but not codes like "us-east-1" or "iad1".
+  const shown = /^[a-z]+(?:-[a-z]+)*(?=[\s,;:(]|$)/.test(note) ? note[0].toUpperCase() + note.slice(1) : note;
+  console.log(`| ${c.name} | ${price} | ${shown} | [pricing](${c.pricing.source}) |`);
 }
+const dates = CATALOG.filter((c) => !c.local).map((c) => c.pricing.checked).sort();
+console.log(`\nChecked ${dates[0] === dates.at(-1) ? dates[0] : `${dates[0]} to ${dates.at(-1)}`}.`);
 console.log("\n---\n");
 console.log("| Provider | Env |");
 console.log("|---|---|");
