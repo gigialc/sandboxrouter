@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { MobileNav } from "@/components/MobileNav";
 import { REPO, site } from "@/lib/site";
 
 export function Logo({ className = "" }: { className?: string }) {
@@ -36,6 +37,7 @@ export function Nav() {
               {n.label}
             </Link>
           ))}
+          <MobileNav links={NAV} />
           <a href={REPO} className="rounded-full bg-ink px-4 py-1.5 text-[13px] font-medium text-bg hover:bg-ink-2">
             GitHub
           </a>
