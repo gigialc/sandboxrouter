@@ -259,7 +259,7 @@ A sandbox the provider already stopped is just dropped from the ledger. `sandbox
 
 ### Compatibility
 
-`check` runs the same 13 steps against a real account: create; stdout, stderr and exit code; env and cwd; UTF-8 output; live streaming; a binary file round-trip; a 1 MB file; reading a missing file is an error; files written by `writeFile` are visible to commands and the other way round; a command timeout; pause and resume; kill; and the killed sandbox is really gone.
+`check` runs the same 14 steps against a real account: create; stdout, stderr and exit code; env and cwd; UTF-8 output; live streaming; a binary file round-trip; a 1 MB file; reading a missing file is an error; files written by `writeFile` are visible to commands and the other way round; a command timeout rejects with the contract's error; the timed-out command was really stopped; pause and resume; kill; and the killed sandbox is really gone.
 
 ```bash
 sandboxrouter check --provider koyeb    # one provider
@@ -268,7 +268,7 @@ sandboxrouter check --all --save        # every configured provider; writes resu
 
 It prints one line per step and exits 1 if any fails. `checkProvider(router, id)` does the same from code. Saved runs make this table (`node --import tsx scripts/readme-tables.ts --write`), and a nightly workflow re-runs it with the repo's provider keys, committing only when a result changes (so the date is when the current result was first seen). Every adapter also has mock-API tests in `npm test`; this table is only real runs.
 
-| Provider | Real-account check (13 steps) | Result since |
+| Provider | Real-account check (14 steps) | Result since |
 |---|---|---|
 | Agent37 | not run yet | |
 | InstaBox | not run yet | |
@@ -302,7 +302,7 @@ It prints one line per step and exits 1 if any fails. `checkProvider(router, id)
 | Vercel Sandbox | not run yet | |
 | Azure Container Apps dynamic sessions | not run yet | |
 | Alibaba Cloud Agent Sandbox | not run yet | |
-| Docker (local) | 13/13 passed | 2026-11-05, v0.2.0 |
+| Docker (local) | 13/14 passed; not covered by this run: exec: timed-out command was stopped | 2026-11-05, v0.2.0 |
 
 ## HTTP API
 
@@ -400,7 +400,7 @@ Capabilities in the catalog describe what each **adapter** implements, not every
 - [x] Python client
 - [x] Leaderboard built from `bench --share` reports
 - [x] Leak cleanup: a local ledger, `ls` and `gc`
-- [x] One 13-step real-account check for every adapter, with a compatibility table and a nightly run
+- [x] One 14-step real-account check for every adapter, with a compatibility table and a nightly run
 - [ ] Every adapter run against a real account (see the Compatibility table)
 - [ ] Snapshots and forks as a routed operation
 - [ ] A hosted copy of the leaderboard page

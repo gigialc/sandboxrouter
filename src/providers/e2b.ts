@@ -1,5 +1,5 @@
 import { ProviderError, type ExecOptions, type ExecResult, type Provider, type ProviderId, type ProviderSandbox, type SandboxSpec } from "../types.js";
-import { optionalImport, toBytes } from "../util.js";
+import { DEFAULT_EXEC_TIMEOUT_S, optionalImport, timeoutError, toBytes } from "../util.js";
 import type {
   ActionResult,
   ComputerAction,
@@ -93,16 +93,18 @@ export class E2BProvider implements Provider, ComputerProvider {
 export interface E2BLikeSandbox {
   readonly sandboxId: string;
   commands: {
+    /** Started in the background: returns a handle to wait on or kill. */
     run(
       cmd: string,
       opts: {
         cwd?: string;
         envs?: Record<string, string>;
         timeoutMs?: number;
+        background: true;
         onStdout?: (chunk: string) => void;
         onStderr?: (chunk: string) => void;
       },
-    ): Promise<{ exitCode: number; stdout: string; stderr: string }>;
+    ): Promise<E2BCommandHandle>;
   };
   files: {
     write(path: string, data: Uint8Array): Promise<unknown>;
@@ -110,6 +112,14 @@ export interface E2BLikeSandbox {
   };
   kill(): Promise<unknown>;
   pause(): Promise<unknown>;
+}
+
+/** A background command (the SDK's CommandHandle). */
+export interface E2BCommandHandle {
+  /** Resolves when the command exits; like the SDK, rejects with CommandExitError on a nonzero exit. */
+  wait(): Promise<{ exitCode: number; stdout: string; stderr: string }>;
+  /** SIGKILL the command inside the sandbox. */
+  kill(): Promise<boolean>;
 }
 
 /** exec/files/kill over an E2B-style SDK sandbox. `provider` labels errors. No pause. */
@@ -124,21 +134,42 @@ export class E2BCompatBox implements ProviderSandbox {
 
   async exec(cmd: string, opts: ExecOptions = {}): Promise<ExecResult> {
     const t0 = Date.now();
+    const seconds = opts.timeoutSeconds ?? DEFAULT_EXEC_TIMEOUT_S;
+    let timer: NodeJS.Timeout | undefined;
+    const expired = new Promise<"timeout">((resolve) => {
+      timer = setTimeout(() => resolve("timeout"), seconds * 1000);
+      timer.unref();
+    });
     try {
-      const r = await this.sbx.commands.run(cmd, {
+      // The command runs in the background so the deadline can kill it: the SDK's own `timeoutMs`
+      // only stops listening, and the process would keep running (and billing) in the sandbox.
+      // That stream deadline is set past ours so it never ends a command we still want.
+      const handle = await this.sbx.commands.run(cmd, {
         cwd: opts.cwd,
         envs: opts.env,
-        timeoutMs: (opts.timeoutSeconds ?? 60) * 1000,
+        background: true,
+        timeoutMs: (seconds + 15) * 1000,
         onStdout: opts.onStdout,
         onStderr: opts.onStderr,
       });
+      const finished = handle.wait();
+      const r = await Promise.race([finished, expired]);
+      if (r === "timeout") {
+        finished.catch(() => {});
+        await handle.kill().catch(() => {});
+        throw timeoutError(this.provider, seconds);
+      }
       return { exitCode: r.exitCode, stdout: r.stdout, stderr: r.stderr, durationMs: Date.now() - t0 };
     } catch (err: any) {
+      if (err instanceof ProviderError) throw err;
       // The SDK throws CommandExitError for a nonzero exit; that's a result, not a failure.
       if (err?.name === "CommandExitError" || typeof err?.exitCode === "number") {
         return { exitCode: err.exitCode, stdout: err.stdout ?? "", stderr: err.stderr ?? "", durationMs: Date.now() - t0 };
       }
+      if (err?.name === "TimeoutError") throw timeoutError(this.provider, seconds);
       throw new ProviderError(this.provider, err?.message ?? String(err));
+    } finally {
+      clearTimeout(timer);
     }
   }
 
@@ -279,8 +310,9 @@ class E2BComputer implements ProviderComputer {
     return { frameId: ++this.frame, imageB64: Buffer.from(png).toString("base64"), mime: "image/png", ...pngSize(png) };
   }
 
-  private run(cmd: string) {
-    return this.sbx.commands.run(cmd);
+  /** Run a desktop command, with an explicit timeout rather than the SDK's 60 s default. */
+  private run(cmd: string, timeoutSeconds = 60) {
+    return this.sbx.commands.run(cmd, { timeoutMs: timeoutSeconds * 1000 });
   }
 
   private async withModifier<T>(modifier: string | undefined, fn: () => Promise<T>): Promise<T> {
@@ -373,8 +405,10 @@ class E2BComputer implements ProviderComputer {
       case "hold_key": {
         if (!a.text) throw new ActionError("hold_key needs text");
         const keys = xdoKeys(a.text).map(sh).join(" ");
-        const secs = Math.max(0, a.duration ?? 1);
-        await this.run(`xdotool keydown ${keys}; sleep ${secs}; xdotool keyup ${keys}`);
+        const secs = a.duration ?? 1;
+        if (!(secs >= 0 && secs <= 100)) throw new ActionError("duration must be 0 to 100 seconds");
+        // The SDK's default command timeout is 60 s and would end a longer hold with the key still down.
+        await this.run(`xdotool keydown ${keys}; sleep ${secs}; xdotool keyup ${keys}`, secs + 30);
         return {};
       }
       case "wait":

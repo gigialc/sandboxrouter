@@ -1,6 +1,6 @@
 {
   "version": "0.2.0",
-  "generatedAt": "2026-11-05T20:13:21.638Z",
+  "generatedAt": "2026-11-06T00:56:25.724Z",
   "shapes": [
     "1x2",
     "2x4",
@@ -772,7 +772,9 @@
         "passed": 13,
         "failed": [],
         "skipped": [],
-        "notRun": [],
+        "notRun": [
+          "exec: timed-out command was stopped"
+        ],
         "notes": [],
         "steps": {
           "create": "pass",
@@ -785,6 +787,7 @@
           "files: missing file is an error": "pass",
           "files: visible to commands": "pass",
           "exec: command timeout": "pass",
+          "exec: timed-out command was stopped": "not run",
           "pause and resume": "pass",
           "kill": "pass",
           "killed sandbox is gone": "pass"
@@ -1884,6 +1887,7 @@
     "files: missing file is an error",
     "files: visible to commands",
     "exec: command timeout",
+    "exec: timed-out command was stopped",
     "pause and resume",
     "kill",
     "killed sandbox is gone"

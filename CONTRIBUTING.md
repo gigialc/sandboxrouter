@@ -23,7 +23,7 @@ Node 20+ (CI uses 22; the Fly Sprites SDK wants 24). No provider accounts are ne
 
 ```bash
 export KOYEB_API_TOKEN=...                       # the env vars for that provider: `npx tsx src/cli.ts providers`
-npx tsx src/cli.ts check --provider koyeb --save # 13 real steps; any FAIL line is a bug
+npx tsx src/cli.ts check --provider koyeb --save # 14 real steps; any FAIL line is a bug
 npx tsx src/cli.ts bench --provider koyeb --share --label "your city"   # cold starts, writes results/*.json
 ```
 
@@ -49,11 +49,12 @@ Please use the provider's **public list price** for self-serve accounts. No nego
 One adapter file, one test file, and a few one-line registrations. Copy a plain-REST adapter close to the new one, e.g. [`src/providers/dedalus.ts`](src/providers/dedalus.ts) or [`src/providers/koyeb.ts`](src/providers/koyeb.ts) (or [`alibaba.ts`](src/providers/alibaba.ts) for an E2B-compatible API).
 
 1. `src/providers/<id>.ts`: a class implementing `Provider` and `ProviderSandbox` from [`src/types.ts`](src/types.ts). Start it with a comment that lists the wire protocol you used and links the docs.
-   - `exec` must honor `cwd`, `env` and `timeoutSeconds` (throw `ProviderError` with `command timed out after Ns`), and call `onStdout`/`onStderr` as output arrives if the provider can stream.
+   - `exec` must honor `cwd`, `env` and `timeoutSeconds`, and call `onStdout`/`onStderr` as output arrives if the provider can stream.
+   - A command that outlives `timeoutSeconds` must be **stopped** (not just abandoned) and `exec` must reject with `timeoutError(id, seconds)` from [`src/util.ts`](src/util.ts), i.e. `ProviderError("<id>: command timed out after Ns")`. The same file has the pieces: `wrapCommand` for cwd/env when the API lacks them, `guardTimeout` to run a command under coreutils `timeout` when the API cannot kill a running command, and `killedByTimeout` to recognise a timeout kill (exit 124/137/143 after the deadline) and tell it from a command that exits 124 by itself. The router adds a 30 s grace deadline on top (`EXEC_GRACE_S`), but that is a net, not the mechanism.
    - `readFile`/`writeFile` must be binary-safe.
    - `pause()` only if the provider keeps the disk; `connect(id)` must resume a paused sandbox.
    - Prefer plain `fetch` over an SDK. If an SDK is required, load it with `optionalImport` and add it to `peerDependenciesMeta` as optional.
-2. `test/<id>.test.ts`: a local mock HTTP server that follows the provider's API and really runs the commands in a temp dir. It must pass on macOS and Linux (CI runs Ubuntu). Kill whole process groups on timeouts.
+2. `test/<id>.test.ts`: a local mock (an HTTP server following the provider's API, or `vi.mock` of its SDK) that really runs the commands with `sh` in a temp dir, honouring cwd, env and the vendor's timeout behaviour. Call `describeConformance("<id>", { provider, dir })` from [`test/conformance.ts`](test/conformance.ts) so the adapter is held to the same contract as every other (output, env and cwd, streaming, binary files, timeout kill, connect, pause and resume, kill), then add the vendor-specific checks (spec mapping, error mapping). It must pass on macOS and Linux (CI runs Ubuntu); macOS has no coreutils `timeout`, so mocks that need one add a shim (see `test/koyeb.test.ts`). Kill whole process groups on timeouts.
 3. Register it: the id in `ProviderId` (`src/types.ts`), a catalog entry (and an `hourlyCost` rule for fixed sizes) in `src/catalog.ts`, `defaultProviders()` in `src/router.ts`, an export in `src/index.ts`, and the npm package (or `null`) in `web/src/lib/site.ts`.
 4. Docs: the intro list, the Install note and the "How each adapter maps the spec" row in `README.md`, then regenerate the tables and site data as above.
 

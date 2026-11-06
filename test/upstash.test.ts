@@ -17,7 +17,7 @@ let root = "";
 const seen: { method: string; path: string; query: string; key?: string; body?: any }[] = [];
 const boxes = new Map<string, string>();
 /** How the next exec-stream should end: normally, split across writes, or with an error event. */
-let streamMode: "normal" | "split" | "error" = "normal";
+let streamMode: "normal" | "split" | "error" | "error-split" = "normal";
 
 function run(argv: string[], onData?: (s: string) => void): Promise<{ code: number; out: string; err: string }> {
   return new Promise((resolve) => {
@@ -71,6 +71,11 @@ beforeAll(async () => {
       const r = await run(body.command, (s) => res.write(s));
       if (streamMode === "error") {
         res.end(`event: error\ndata: ${JSON.stringify({ error: "box crashed" })}\n\n`);
+      } else if (streamMode === "error-split") {
+        // A read that ends exactly after "event: error" (12 chars, longer than the exit marker).
+        res.write("event: error");
+        await new Promise((r) => setTimeout(r, 30));
+        res.end(`\ndata: ${JSON.stringify({ error: "box crashed" })}\n\n`);
       } else if (streamMode === "split") {
         res.write("event: ex");
         await new Promise((r) => setTimeout(r, 30));
@@ -180,6 +185,19 @@ describe("UpstashProvider", () => {
       const out: string[] = [];
       const r = await sbx.exec("printf abc; exit 2", { onStdout: (c) => out.push(c) });
       expect(r).toMatchObject({ exitCode: 2, stdout: "abc" });
+      expect(out.join("")).toBe("abc");
+    } finally {
+      streamMode = "normal";
+    }
+  });
+
+  it("recognises an error event whose marker is split across network reads", async () => {
+    streamMode = "error-split";
+    try {
+      const sbx = await p().create({});
+      const out: string[] = [];
+      await expect(sbx.exec("printf abc", { onStdout: (c) => out.push(c) })).rejects.toThrow("exec-stream: box crashed");
+      // Nothing of the marker leaked into the output.
       expect(out.join("")).toBe("abc");
     } finally {
       streamMode = "normal";

@@ -1,7 +1,7 @@
 import { randomBytes } from "node:crypto";
 import * as zlib from "node:zlib";
 import { ProviderError, type ExecOptions, type ExecResult, type Provider, type ProviderSandbox, type SandboxSpec } from "../types.js";
-import { dirname, optionalImport, shq, toBytes, wrapCommand } from "../util.js";
+import { dirname, killedByTimeout, optionalImport, shq, timeoutError, toBytes, wrapCommand } from "../util.js";
 
 /**
  * Amazon Bedrock AgentCore Code Interpreter: AWS-managed sandboxes (2 vCPU / 8 GB, 10 GB disk) with a
@@ -398,7 +398,10 @@ class AgentCoreSandbox implements ProviderSandbox {
     // base64 keeps the user's command intact through whatever quoting the service applies.
     const command = `timeout -k 5 ${timeout} bash -c "$(echo ${b64} | base64 -d)"`;
     const r = await this.command(command, { onStdout: opts.onStdout, onStderr: opts.onStderr, timeoutMs: (timeout + 60) * 1000 });
-    return { ...r, durationMs: Date.now() - t0 };
+    const durationMs = Date.now() - t0;
+    // `timeout` leaves exit 124 (or 137 after SIGKILL) when it had to stop the command.
+    if (killedByTimeout(r.exitCode, durationMs, timeout)) throw timeoutError(ID, timeout);
+    return { ...r, durationMs };
   }
 
   async writeFile(path: string, content: string | Uint8Array): Promise<void> {

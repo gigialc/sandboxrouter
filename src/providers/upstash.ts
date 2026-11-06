@@ -209,7 +209,8 @@ const ERROR = "event: error\n";
 
 /** Longest tail of `buf` that could be the start of an event marker split across reads. */
 function heldBack(buf: string): number {
-  for (let n = Math.min(buf.length, EXIT.length - 1); n > 0; n--) {
+  // Hold back up to one character short of the longer marker, so a read ending inside either one waits.
+  for (let n = Math.min(buf.length, Math.max(EXIT.length, ERROR.length) - 1); n > 0; n--) {
     const tail = buf.slice(-n);
     if (EXIT.startsWith(tail) || ERROR.startsWith(tail)) return n;
   }

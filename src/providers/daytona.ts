@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { ProviderError, type ExecOptions, type ExecResult, type Provider, type ProviderSandbox, type SandboxSpec } from "../types.js";
-import { optionalImport, toBytes, wrapCommand } from "../util.js";
+import { DEFAULT_EXEC_TIMEOUT_S, optionalImport, timeoutError, toBytes, wrapCommand } from "../util.js";
 import type {
   ActionResult,
   ComputerAction,
@@ -65,10 +65,13 @@ export class DaytonaProvider implements Provider, ComputerProvider {
     return new DaytonaBox(sbx);
   }
 
-  /** Reattach; a paused (stopped) sandbox is started again. */
+  /**
+   * Reattach. Daytona stops, archives or pauses idle sandboxes on its own schedule (and pause()
+   * stops them), so whatever state the sandbox is in, it is brought back to started first.
+   */
   async connect(nativeId: string): Promise<ProviderSandbox> {
     const sbx = await (await this.daytona()).get(nativeId);
-    if (sbx.state === "stopped") await sbx.start();
+    await ensureStarted(sbx);
     return new DaytonaBox(sbx);
   }
 
@@ -109,7 +112,7 @@ export class DaytonaProvider implements Provider, ComputerProvider {
   /** Reattach; a stopped, paused or archived computer is started again, desktop included. */
   async connectComputer(nativeId: string): Promise<ProviderComputer> {
     const sbx = await (await this.daytona()).get(nativeId);
-    if (sbx.state !== "started") await sbx.start();
+    await ensureStarted(sbx);
     await startDesktop(sbx);
     return new DaytonaComputer(sbx);
   }
@@ -121,21 +124,13 @@ class DaytonaBox implements ProviderSandbox {
     this.nativeId = sbx.id;
   }
 
+  /**
+   * Every command runs in a throwaway session. Unlike `executeCommand`, a session keeps stdout and
+   * stderr apart and lets the deadline be enforced here: deleting the session ends the command.
+   */
   async exec(cmd: string, opts: ExecOptions = {}): Promise<ExecResult> {
-    if (opts.onStdout || opts.onStderr) return this.execStreaming(cmd, opts);
     const t0 = Date.now();
-    try {
-      const r = await this.sbx.process.executeCommand(cmd, opts.cwd, opts.env, opts.timeoutSeconds ?? 60);
-      // Daytona merges stdout and stderr into `result` here.
-      return { exitCode: r.exitCode, stdout: r.result, stderr: "", durationMs: Date.now() - t0 };
-    } catch (err: any) {
-      throw new ProviderError("daytona", err?.message ?? String(err));
-    }
-  }
-
-  /** Streaming goes through a throwaway session, which also keeps stdout and stderr apart. */
-  private async execStreaming(cmd: string, opts: ExecOptions): Promise<ExecResult> {
-    const t0 = Date.now();
+    const seconds = opts.timeoutSeconds ?? DEFAULT_EXEC_TIMEOUT_S;
     const session = `sbr-${randomUUID()}`;
     const proc = this.sbx.process;
     let stdout = "";
@@ -158,9 +153,11 @@ class DaytonaBox implements ProviderSandbox {
           opts.onStderr?.(c);
         },
       );
-      const limit = (opts.timeoutSeconds ?? 60) * 1000;
-      const timedOut = await Promise.race([logs.then(() => false), sleep(limit).then(() => true)]);
-      if (timedOut) throw new ProviderError("daytona", `command timed out after ${limit / 1000}s`);
+      const timedOut = await Promise.race([logs.then(() => false), sleep(seconds * 1000).then(() => true)]);
+      if (timedOut) {
+        logs.catch(() => {});
+        throw timeoutError("daytona", seconds);
+      }
       const done = await proc.getSessionCommand(session, cmdId);
       return { exitCode: done.exitCode ?? -1, stdout, stderr, durationMs: Date.now() - t0 };
     } catch (err: any) {
@@ -188,6 +185,35 @@ class DaytonaBox implements ProviderSandbox {
   async kill(): Promise<void> {
     await this.sbx.delete();
   }
+}
+
+/** How long start() may take from stopped or paused (seconds). */
+const START_TIMEOUT_S = 60;
+/** Starting an archived sandbox restores its disk from storage first, which grows with its size. */
+const ARCHIVED_START_TIMEOUT_S = 600;
+/** States Daytona moves through on its own; the sandbox is polled until it leaves them. */
+const SETTLING = new Set(["stopping", "pausing", "archiving", "snapshotting", "resizing", "forking"]);
+/** States on the way to started: someone else already woke it, so wait for that rather than start twice. */
+const WAKING = new Set(["starting", "resuming", "restoring", "pulling_snapshot", "creating"]);
+
+/**
+ * Bring a sandbox to "started" from any state Daytona can leave it in: stopped and paused get a
+ * plain start, archived gets a long one, transitional states are waited out, and anything that
+ * cannot be started (destroyed, error, build failures) is an error up front.
+ */
+async function ensureStarted(sbx: DaytonaSandbox): Promise<void> {
+  const deadline = Date.now() + ARCHIVED_START_TIMEOUT_S * 1000;
+  while (SETTLING.has(String(sbx.state))) {
+    if (Date.now() > deadline) throw new ProviderError("daytona", `sandbox ${sbx.id} is still ${sbx.state} after ${ARCHIVED_START_TIMEOUT_S}s`);
+    await sleep(1000);
+    await sbx.refreshData();
+  }
+  const state = String(sbx.state);
+  if (state === "started") return;
+  if (WAKING.has(state)) return sbx.waitUntilStarted(ARCHIVED_START_TIMEOUT_S);
+  if (state === "archived") return sbx.start(ARCHIVED_START_TIMEOUT_S);
+  if (state === "stopped" || state === "paused") return sbx.start(START_TIMEOUT_S);
+  throw new ProviderError("daytona", `sandbox ${sbx.id} is in state "${state}" and cannot be started`);
 }
 
 /** Minutes without activity before Daytona stops a computer (disk kept, billing stops). */

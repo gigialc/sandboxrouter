@@ -238,6 +238,10 @@ function splitBody(body: Record<string, any>): { spec: SandboxSpec; route: Route
   const route: Record<string, unknown> = {};
   const spec: Record<string, unknown> = {};
   for (const [k, v] of Object.entries(body)) ((ROUTE_KEYS as readonly string[]).includes(k) ? route : spec)[k] = v;
+  // A provider id the catalog does not know is the client's mistake, not a routing failure.
+  const ids = route.provider === undefined ? [] : ([] as unknown[]).concat(route.provider);
+  const unknown = ids.filter((id) => !CATALOG.some((c) => c.id === id));
+  if (unknown.length) throw new HttpError(400, `unknown provider: ${unknown.join(", ")}`);
   return { spec: spec as SandboxSpec, route: route as RouteOptions };
 }
 
