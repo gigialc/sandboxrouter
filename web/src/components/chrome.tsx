@@ -18,6 +18,7 @@ export function Logo({ className = "" }: { className?: string }) {
 const NAV = [
   { href: "/#providers", label: "Providers" },
   { href: "/#desktops", label: "Desktops" },
+  { href: "/benchmarks", label: "Benchmarks" },
   { href: "/docs", label: "Docs" },
   { href: "/playground", label: "Playground" },
 ];
@@ -51,6 +52,7 @@ export function Footer() {
         <Logo className="text-ink-2" />
         <span>Free and open source. MIT. v{site.version}</span>
         <div className="flex gap-6 sm:ml-auto">
+          <Link href="/benchmarks" className="hover:text-ink">Benchmarks</Link>
           <Link href="/docs" className="hover:text-ink">Docs</Link>
           <Link href="/playground" className="hover:text-ink">Playground</Link>
           <a href={REPO} className="hover:text-ink">GitHub</a>
