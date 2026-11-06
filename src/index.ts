@@ -57,7 +57,6 @@ export { SuperserveProvider } from "./providers/superserve.js";
 export { InstaboxProvider, INSTABOX_SIZES, instaboxSize } from "./providers/instabox.js";
 export { Agent37Provider, AGENT37_SHAPES, agent37Shape } from "./providers/agent37.js";
 export { NovitaProvider } from "./providers/novita.js";
-export { LangSmithProvider, langsmithSize } from "./providers/langsmith.js";
 export { UpstashProvider } from "./providers/upstash.js";
 export { OrgoProvider } from "./providers/orgo.js";
 export { MobilerunProvider } from "./providers/mobilerun.js";

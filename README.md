@@ -68,7 +68,6 @@ Estimated list price while running, 2 vCPU / 4 GB (`npx @sandboxrouter/sdk provi
 | E2B | $0.166 | Per second; Pro plan $150/mo | [pricing](https://e2b.dev/pricing) |
 | HOPX | $0.166 | Per second, plus storage; size comes from the template, not the request | [pricing](https://hopx.ai/pricing) |
 | Superserve | $0.166 | Per second active; superserve/base fixed at 2 vCPU / 4 GiB / 8 GiB disk; retained storage $0.000108/GiB-h (shared template plus changed blocks); Developer $20/mo incl. $20, max 4/16 with team templates; recurring Free allowance not published on pricing page | [pricing](https://superserve.ai/pricing) |
-| LangSmith Sandboxes | $0.189 | Per second; memory must be 2 to 6 GiB per vCPU; storage $0.000123/GiB-h; 8 LSU ($8) of sandbox usage a month included; Developer plan max 10 sandboxes | [pricing](https://www.langchain.com/pricing) |
 | Tensorlake | $0.200 | Bills active CPU (floor 20% of allocation); this is the full-use price; Pro plan is lower | [pricing](https://www.tensorlake.ai/pricing) |
 | Upstash Box | $0.200 | Billed per active CPU core-hour only (memory and idle time free); estimate assumes every core of the box busy; fixed sizes 2/4, 4/8, 8/16 | [pricing](https://upstash.com/pricing/box) |
 | Cloudflare Sandbox | $0.216 | 10 ms billing on active CPU and allocated instance memory; full-CPU estimate excludes allocated disk ($0.000252/GB-h), Worker and Durable Objects charges; needs Workers Paid ($5/mo) and bridges/cloudflare | [pricing](https://developers.cloudflare.com/containers/platform/pricing/) |
@@ -138,7 +137,6 @@ Set the keys for the providers you want. Providers without keys are skipped.
 | HOPX | `HOPX_API_KEY` |
 | InstaBox | `INSTABOX_API_KEY` |
 | Koyeb Sandboxes | `KOYEB_API_TOKEN` |
-| LangSmith Sandboxes | `LANGSMITH_API_KEY` |
 | Maritime | `MARITIME_API_KEY` |
 | Modal | `MODAL_TOKEN_ID` + `MODAL_TOKEN_SECRET` |
 | Morph Cloud | `MORPH_API_KEY` |
@@ -290,7 +288,6 @@ It prints one line per step and exits 1 if any fails. `checkProvider(router, id)
 | E2B | not run yet | |
 | HOPX | not run yet | |
 | Superserve | not run yet | |
-| LangSmith Sandboxes | not run yet | |
 | Tensorlake | not run yet | |
 | Upstash Box | not run yet | |
 | Cloudflare Sandbox | not run yet | |

@@ -22,7 +22,7 @@ jobs:
           node-version: 22
       - run: npm ci
       # Provider SDKs that are peer dependencies but not dev dependencies.
-      - run: npm i --no-save @beamcloud/beam-js @codesandbox/sdk @deno/sandbox novita-sandbox langsmith ws
+      - run: npm i --no-save @beamcloud/beam-js @codesandbox/sdk @deno/sandbox novita-sandbox
         continue-on-error: true
       - id: check
         name: Check every configured provider
@@ -65,7 +65,6 @@ jobs:
           NORTHFLANK_API_TOKEN: ${{ secrets.NORTHFLANK_API_TOKEN }}
           NORTHFLANK_PROJECT_ID: ${{ secrets.NORTHFLANK_PROJECT_ID }}
           NOVITA_API_KEY: ${{ secrets.NOVITA_API_KEY }}
-          LANGSMITH_API_KEY: ${{ secrets.LANGSMITH_API_KEY }}
           OPENSCALE_API_KEY: ${{ secrets.OPENSCALE_API_KEY }}
           RUNLOOP_API_KEY: ${{ secrets.RUNLOOP_API_KEY }}
           SPRITES_TOKEN: ${{ secrets.SPRITES_TOKEN }}
@@ -116,7 +115,6 @@ jobs:
           NORTHFLANK_API_TOKEN: ${{ secrets.NORTHFLANK_API_TOKEN }}
           NORTHFLANK_PROJECT_ID: ${{ secrets.NORTHFLANK_PROJECT_ID }}
           NOVITA_API_KEY: ${{ secrets.NOVITA_API_KEY }}
-          LANGSMITH_API_KEY: ${{ secrets.LANGSMITH_API_KEY }}
           OPENSCALE_API_KEY: ${{ secrets.OPENSCALE_API_KEY }}
           RUNLOOP_API_KEY: ${{ secrets.RUNLOOP_API_KEY }}
           SPRITES_TOKEN: ${{ secrets.SPRITES_TOKEN }}
