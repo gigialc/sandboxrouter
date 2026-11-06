@@ -241,7 +241,7 @@ with sr.create(vcpu=2, memory_gb=4, strategy="cheapest") as sbx:
         <p>
           <code>bench</code> starts real sandboxes on every provider you have keys for, times them, kills them, and prints a
           table. <code>--share</code> also writes a report you can add to the repo&apos;s <code>results/</code> folder in a pull
-          request; the cold-start column in the <a href="/#providers">provider table</a> is built from those reports.
+          request; the <a href="/benchmarks">benchmarks page</a> and the cold-start column in the <a href="/#providers">provider table</a> are built from those reports.
         </p>
         <CodeBlock title="terminal" code={`npx @sandboxrouter/sdk bench --runs 5 --share --label "SF, home wifi"`} />
         <p>
