@@ -124,6 +124,7 @@ export const PACKAGE: Record<string, string | null> = {
   lambda: "@smithy/signature-v4 @aws-crypto/sha256-js @aws-sdk/credential-provider-node",
   alibaba: "e2b",
   novita: "novita-sandbox",
+  langsmith: "langsmith ws",
   beam: "@beamcloud/beam-js",
   codesandbox: "@codesandbox/sdk",
   deno: "@deno/sandbox",

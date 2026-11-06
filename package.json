@@ -52,6 +52,7 @@
     "hopx",
     "ios",
     "koyeb",
+    "langsmith",
     "limrun",
     "maritime",
     "mobilerun",
@@ -94,7 +95,8 @@
     "@beamcloud/beam-js": ">=1.1.6",
     "@codesandbox/sdk": ">=2.4",
     "@deno/sandbox": ">=0.13.0 <0.14.0",
-    "novita-sandbox": ">=2"
+    "novita-sandbox": ">=2",
+    "langsmith": ">=0.11"
   },
   "peerDependenciesMeta": {
     "e2b": {
@@ -161,6 +163,9 @@
       "optional": true
     },
     "novita-sandbox": {
+      "optional": true
+    },
+    "langsmith": {
       "optional": true
     }
   },

@@ -16,6 +16,7 @@ export type ProviderId =
   | "exedev"
   | "docker"
   | "novita"
+  | "langsmith"
   | "alibaba"
   | "upstash"
   | "koyeb"
