@@ -31,6 +31,8 @@ let n = 0;
 let failNextCreate = false;
 /** Drop the next exec stream right after `started`, so the adapter must call /wait. */
 let dropNextStream = false;
+/** Make the next exec's server-side timeout fire after this many ms, ahead of the adapter's own guard. */
+let serverTimeoutNextMs: number | undefined;
 const results = new Map<string, { status: string; return_code: number; timed_out: boolean }>();
 
 beforeAll(async () => {
@@ -169,7 +171,8 @@ beforeAll(async () => {
       const timer = setTimeout(() => {
         timedOut = true;
         killGroup();
-      }, (body.timeout ?? 3600) * 1000);
+      }, serverTimeoutNextMs ?? (body.timeout ?? 3600) * 1000);
+      serverTimeoutNextMs = undefined;
       const drop = dropNextStream;
       dropNextStream = false;
       if (drop) setTimeout(() => res.destroy(), 50);
@@ -182,10 +185,11 @@ beforeAll(async () => {
       child.on("close", (code) => {
         done = true;
         clearTimeout(timer);
-        const rc = timedOut ? -1 : (code ?? 137);
+        // What a real account sends at the timeout: status timed_out, return_code 124, timed_out true.
+        const rc = timedOut ? 124 : (code ?? 137);
         const r = { status: timedOut ? "timed_out" : rc === 0 ? "succeeded" : "failed", return_code: rc, timed_out: timedOut };
         results.set(execId, r);
-        event({ type: "exit", status: r.status, return_code: r.return_code });
+        event({ type: "exit", status: r.status, return_code: r.return_code, ...(timedOut ? { timed_out: true } : {}) });
         res.end();
       });
       return;
@@ -260,6 +264,12 @@ describe("SailProvider", () => {
     const req = seen.find((s) => s.path.endsWith("/exec"))!;
     expect(req.body.env).toEqual({ GREETING: "it's me" });
     expect(req.body.timeout).toBe(17);
+  });
+
+  it("treats Sail's own timed_out exit as the contract's timeout error", async () => {
+    const sbx = await provider().create({});
+    serverTimeoutNextMs = 300;
+    await expect(sbx.exec("sleep 5", { timeoutSeconds: 4 })).rejects.toMatchObject({ message: "sail: command timed out after 4s" });
   });
 
   it("asks /wait for the result when the stream drops before the exit event", async () => {
