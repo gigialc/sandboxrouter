@@ -68,7 +68,7 @@ export default function BenchmarksPage() {
         </tbody>
       </table>
 
-      <div className="mt-16 grid gap-12 border-t border-line pt-10 lg:grid-cols-2">
+      <div className="mt-16 grid grid-cols-1 gap-12 border-t border-line pt-10 lg:grid-cols-2">
         <section className="prose-sr max-w-xl">
           <h2>What is measured</h2>
           <p>

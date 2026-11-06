@@ -51,7 +51,7 @@ export function Footer() {
       <div className="flex flex-col gap-4 px-5 sm:px-10 py-10 text-[13px] text-muted sm:flex-row sm:items-center">
         <Logo className="text-ink-2" />
         <span>Free and open source. MIT. v{site.version}</span>
-        <div className="flex gap-6 sm:ml-auto">
+        <div className="flex flex-wrap gap-x-6 gap-y-3 sm:ml-auto">
           <Link href="/benchmarks" className="hover:text-ink">Benchmarks</Link>
           <Link href="/docs" className="hover:text-ink">Docs</Link>
           <Link href="/playground" className="hover:text-ink">Playground</Link>
@@ -79,6 +79,14 @@ export function Button({ href, children, primary = false }: { href: string; chil
       {children}
     </Link>
   );
+}
+
+/**
+ * A table that is wider than a phone scrolls sideways inside this box instead of widening the page.
+ * Below `sm` it runs to the screen edges (cancelling the page's px-5), so the cut-off reads as "more this way".
+ */
+export function TableScroll({ children }: { children: React.ReactNode }) {
+  return <div className="-mx-5 overflow-x-auto px-5 sm:mx-0 sm:px-0">{children}</div>;
 }
 
 export function SectionTitle({ id, kicker, children }: { id?: string; kicker?: string; children: React.ReactNode }) {

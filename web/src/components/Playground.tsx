@@ -154,10 +154,10 @@ export function Playground() {
     setBusy(null);
   }
 
-  const field = "w-full border border-line bg-bg px-3 py-2 text-sm outline-none focus:border-line-2";
+  const field = "w-full border border-line bg-bg px-3 py-2 text-base outline-none sm:text-sm focus:border-line-2";
 
   return (
-    <div className="grid gap-6 px-5 sm:px-10 lg:grid-cols-[22rem_1fr]">
+    <div className="grid grid-cols-1 gap-6 px-5 sm:px-10 lg:grid-cols-[22rem_minmax(0,1fr)]">
       <div className="space-y-6">
         <section className="border border-line p-5">
           <h2 className="font-normal">1. Connect your server</h2>
@@ -261,7 +261,7 @@ export function Playground() {
             onChange={(e) => setCmd(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && sbx && !busy && run()}
             aria-label="Command"
-            className="flex-1 border border-line bg-panel px-3 py-2 font-mono text-sm text-ink-2 outline-none"
+            className="min-w-0 flex-1 border border-line bg-panel px-3 py-2 font-mono text-base text-ink-2 outline-none sm:text-sm"
           />
           <button
             onClick={run}

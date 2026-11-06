@@ -46,7 +46,7 @@ await sbx.kill();`;
       )}
       {p.pricing.note && <p className="mt-5 max-w-2xl text-[14px] leading-6 text-ink-2">{p.pricing.note[0].toUpperCase() + p.pricing.note.slice(1)}.</p>}
 
-      <div className="mt-12 grid gap-12 md:grid-cols-2">
+      <div className="mt-12 grid grid-cols-1 gap-12 md:grid-cols-2">
         <section>
           <h2 className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted">Price per hour</h2>
           <table className="mt-4 w-full text-[13px]">
@@ -129,7 +129,7 @@ await sbx.kill();`;
         )}
       </section>
 
-      <div className="mt-12 grid gap-4">
+      <div className="mt-12 grid grid-cols-1 gap-4">
         <CodeBlock title="setup" code={setup} />
         <CodeBlock title={`use ${p.name}`} code={code} />
       </div>
