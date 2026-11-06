@@ -1,6 +1,6 @@
 # sandboxrouter
 
-**One API for every sandbox.** A free, open-source router for the places an AI agent can run code: Agent37, Alibaba Cloud, AWS (Bedrock AgentCore and Lambda MicroVMs), Azure Container Apps, Beam, Blaxel, Boat, Cloudflare, CodeSandbox, Daytona, Dedalus Machines, Deno, E2B, exe.dev, Fly.io Sprites, Freestyle, HOPX, InstaBox, Koyeb, Maritime, Modal, Morph, Northflank, Novita, OpenScale, Runloop, Superserve, Tensorlake, Upstash Box and Vercel, plus Docker on your own machine. It picks a provider by price, speed or capability, and falls back to the next one when a provider is down or rate-limited.
+**One API for every sandbox.** A free, open-source router for the places an AI agent can run code: Agent37, Alibaba Cloud, AWS (Bedrock AgentCore and Lambda MicroVMs), Azure Container Apps, Beam, Blaxel, Boat, Cloudflare, CodeSandbox, Daytona, Dedalus Machines, Deno, E2B, exe.dev, Fly.io Sprites, Freestyle, HOPX, InstaBox, Koyeb, Maritime, Modal, Morph, Northflank, Novita, OpenScale, Runloop, Sail, Superserve, Tensorlake, Upstash Box and Vercel, plus Docker on your own machine. It picks a provider by price, speed or capability, and falls back to the next one when a provider is down or rate-limited.
 
 Not every adapter has run against a real account yet. The [Prices](#prices) table shows which have passed the real-account check and which are built from docs and tested against mocks only.
 
@@ -64,6 +64,7 @@ How to read it:
 | Agent37 | $0.007 | none | not run yet | Whole-minute billing: monthly shape total / 730 / 60; running estimate includes default disk (2 vCPU / 4 GB / 4 GB disk = $4.76/mo); sleeping/stopped disk $0.09/GB-mo; gVisor; $5 minimum top-up, wallet must hold one running day | [pricing](https://www.agent37.com/docs/agents-api/billing) |
 | Boat | $0.018 | $20/mo (credited) | not run yet | Fixed sizes billed per second ($0.018/h for 2 vCPU / 4 GB up to $0.20/h for 16 / 32); needs a plan from $20/mo, paid back as VM time | [pricing](https://docs.boat.dev/pricing.md) |
 | Maritime | $0.022 | $20/mo (credited) | passed (2026-11-06) | Per second, no minimum runtime; running disk included; Starter $20/mo incl. $20 usage; paused disk $0.08/GB-month (default idle action deletes sandbox) | [pricing](https://maritime.sh/pricing) |
+| Sailboxes (Sail Research) | up to $0.062 | none | not run yet | Per second on what the box uses (CPU time, RAM it holds, disk $0.0007/GiB-h), billed per minute; RAM counts the VM's file cache, up to the 16 GiB minimum limit, so file-heavy work can hold more than you asked for; paused/sleeping free; creation $0.01 at 2-4 vCPU on the free plan ($5/mo credit with a card), waived on Pro $250/mo | [pricing](https://docs.sailresearch.com/sailboxes-pricing.md) |
 | Northflank | $0.067 | none | not run yet | Per second on Northflank Cloud, ephemeral disk included; sandboxes run as deployment services (microVMs) | [pricing](https://northflank.com/pricing) |
 | Morph Cloud | $0.100 | none | not run yet | $0.05/MCU; MCU-hours = max(vCPU, RAM/4 GB, disk/16 GB); snapshots extra | [pricing](https://cloud.morph.so/web/pricing) |
 | exe.dev | $0.105 | $15/mo | not run yet | Standalone reserved size, per second: $0.105/h per 2 vCPU / 4 GiB unit; stopped CPU/RAM free, retained disk separate; Personal from $15/mo (up to 16 vCPU / 32 GiB), Work $75/mo (32 / 64 without approval) | [pricing](https://exe.dev/docs/standalone-vms.md) |
@@ -102,7 +103,7 @@ Checked 2026-11-04 to 2026-11-06.
 ```bash
 npm i @sandboxrouter/sdk
 # then the SDK of each provider you use (Agent37, Azure, AgentCore, Boat, Cloudflare, Dedalus, exe.dev, Freestyle, InstaBox, Koyeb,
-# Lambda, Maritime, Superserve, Upstash and Docker need none; the AWS ones need the signing packages below):
+# Lambda, Maritime, Sail, Superserve, Upstash and Docker need none; the AWS ones need the signing packages below):
 npm i e2b                       # E2B (also Alibaba Cloud and OpenScale)
 npm i @daytonaio/sdk            # Daytona
 npm i modal                     # Modal
@@ -159,6 +160,7 @@ Set the keys for the providers you want. Providers without keys are skipped.
 | Novita AI Agent Sandbox | `NOVITA_API_KEY` |
 | OpenScale Sandboxes | `OPENSCALE_API_KEY` |
 | Runloop | `RUNLOOP_API_KEY` |
+| Sailboxes (Sail Research) | `SAIL_API_KEY` |
 | Superserve | `SUPERSERVE_API_KEY` |
 | Tensorlake | `TENSORLAKE_API_KEY` |
 | Upstash Box | `UPSTASH_BOX_API_KEY` |
@@ -302,6 +304,7 @@ It prints one line per step and exits 1 if any fails. `checkProvider(router, id)
 | Agent37 | not run yet | |
 | Boat | not run yet | |
 | Maritime | 14/14 passed | 2026-11-06, v0.2.0 |
+| Sailboxes (Sail Research) | not run yet | |
 | Northflank | not run yet | |
 | Morph Cloud | not run yet | |
 | exe.dev | not run yet | |
@@ -410,6 +413,7 @@ with sr.create(vcpu=2, memory_gb=4, strategy="cheapest") as sbx:
 | Koyeb | smallest Standard instance that fits | auto-delete delay (max 24 h) | any Docker image | no | Plain REST; streams over SSE. Public preview. |
 | Lambda MicroVMs | image baseline (2 GB per vCPU) | `maximumDurationInSeconds` | your MicroVM image | yes (suspend/resume) | Runs the bundled in-VM server for exec and files. |
 | Novita | set by the template | `timeoutMs` | template | yes (memory + disk) | `novita-sandbox` SDK (an E2B fork). |
+| Sail | `vcpu_count`; memory is a limit of at least 16 GiB | `max_lifetime_seconds` (counts paused time) | `debian` (default) or `devbox` base | yes (memory + disk) | Plain REST, no SDK. Streams NDJSON. Billed on what the box uses, not the limits. A paused box resumes on the next call. |
 | Upstash Box | smallest of 3 fixed sizes that fits | TTL (max 3 days) | runtime name (node, python, ...) | no | Plain REST; billed on active CPU only. |
 | Docker (local) | `--cpus`, `--memory` | container exits at the lifetime | any image | yes (`docker pause`) | Your machine, shared kernel. Never auto-routed; use `{ provider: "docker" }`. |
 
@@ -420,6 +424,7 @@ Capabilities in the catalog describe what each **adapter** implements, not every
 - [x] More providers: Morph, Fly.io Sprites, Blaxel, Tensorlake, Runloop, HOPX, Northflank, Boat, exe.dev, Cloudflare (via a bridge Worker), Docker (local)
 - [x] More providers: Koyeb, Freestyle, Deno, Beam, CodeSandbox, Upstash Box, Novita, Alibaba Cloud, Azure Container Apps sessions, AWS Bedrock AgentCore, AWS Lambda MicroVMs
 - [x] YC sandbox startups: Agent37 (F26), Dedalus Machines (S25), InstaBox (P26), OpenScale (S22), Superserve (F26)
+- [x] Sail Research Sailboxes
 - [ ] More E2B-compatible clouds (PPIO, UCloud, Baidu) and Google Agent Engine sandboxes
 - [x] Neutral routing: price decides, ties alphabetical, no privileged slot
 - [x] Desktops and phones from 7 providers (Linux, Windows, Android, iOS), routed by price per OS

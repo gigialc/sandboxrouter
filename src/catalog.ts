@@ -462,6 +462,21 @@ ENTRIES.push(
     docs: "https://docs.superserve.ai",
   },
   {
+    id: "sail",
+    name: "Sailboxes (Sail Research)",
+    pricing: {
+      vcpuHour: 0.015,
+      gbHour: 0.008,
+      note: "per second on what the box uses (CPU time, RAM it holds, disk $0.0007/GiB-h), billed per minute; RAM counts the VM's file cache, up to the 16 GiB minimum limit, so file-heavy work can hold more than you asked for; paused/sleeping free; creation $0.01 at 2-4 vCPU on the free plan ($5/mo credit with a card), waived on Pro $250/mo",
+      source: "https://docs.sailresearch.com/sailboxes-pricing.md",
+      checked: "2026-11-06",
+    },
+    capabilities: ["pause"],
+    limits: { maxVcpu: 64, maxMemoryGb: 512 },
+    credentials: [["SAIL_API_KEY"]],
+    docs: "https://docs.sailresearch.com/sailboxes.md",
+  },
+  {
     id: "openscale",
     name: "OpenScale Sandboxes",
     pricing: {
@@ -650,6 +665,7 @@ const BILLING: Record<ProviderId, Pick<ProviderInfo, "billing" | "plan">> = {
   openscale: { billing: "allocated" },
   runloop: { billing: "allocated" },
   sprites: { billing: "active-cpu" },
+  sail: { billing: "active-cpu" },
   superserve: {
     billing: "allocated",
     plan: { usdMonth: 20, credited: true, unclear: true, note: "Developer plan; the page offers a free start but doesn't say what it includes", checked: P },

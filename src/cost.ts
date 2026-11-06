@@ -160,6 +160,21 @@ export const BILL_READERS: Partial<Record<ProviderId, Reader>> = {
     return { usd: round(cents / 100), seconds: Math.round(seconds), source: `maritime metered-usage (integer cents; ${model})` };
   },
 
+  async sail(e) {
+    const h = { Authorization: `Bearer ${process.env.SAIL_API_KEY}` };
+    const api = (process.env.SAILBOX_API_URL ?? "https://sailbox-api.sailresearch.com").replace(/\/+$/, "").replace(/\/v1$/, "");
+    const q = new URLSearchParams({ from: hourFloor(e.startedAt!), to: hourCeil(e.endedAt!), sailbox_id: e.sandboxId! });
+    const j = await getJson(`${api}/v1/sailboxes/spend?${q}`, h);
+    const row = (j.sailboxes ?? []).find((s: any) => s.sailbox_id === e.sandboxId);
+    if (!row) return { source: "sail /sailboxes/spend: not posted yet (a few minutes)" };
+    const fees = j.creation_fees_waived ? "creation fee waived" : `${row.creation_count ?? 0} creation charge`;
+    return {
+      usd: round((row.cost_usd_nanos ?? 0) / 1e9),
+      seconds: Math.round(row.running_seconds ?? 0),
+      source: `sail /sailboxes/spend cost_usd_nanos (estimate at list rates; ${fees}; ${Math.round(row.vcpu_seconds ?? 0)} vCPU-s, ${Math.round(row.memory_gib_seconds ?? 0)} GiB-s)`,
+    };
+  },
+
   async e2b() {
     return { source: "no billing API: compare the console usage tab (console.e2b.dev, Usage)" };
   },

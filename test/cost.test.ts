@@ -100,6 +100,6 @@ describe("settle", () => {
     const r = run();
     r.entries[0].provider = "e2b";
     expect((await settle(r)).entries[0].bill?.source).toMatch(/no billing API/);
-    expect(Object.keys(BILL_READERS).sort()).toEqual(["blaxel", "daytona", "e2b", "maritime", "openscale"]);
+    expect(Object.keys(BILL_READERS).sort()).toEqual(["blaxel", "daytona", "e2b", "maritime", "openscale", "sail"]);
   });
 });
