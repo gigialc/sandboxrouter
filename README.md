@@ -272,9 +272,9 @@ It prints one line per step and exits 1 if any fails. `checkProvider(router, id)
 |---|---|---|
 | Agent37 | not run yet | |
 | InstaBox | not run yet | |
-| OpenScale Sandboxes | not run yet | |
+| OpenScale Sandboxes | 14/14 passed | 2026-11-06, v0.2.0 |
 | Boat | not run yet | |
-| Maritime | not run yet | |
+| Maritime | 14/14 passed | 2026-11-06, v0.2.0 |
 | Koyeb Sandboxes | not run yet | |
 | Northflank | not run yet | |
 | Morph Cloud | not run yet | |
@@ -285,9 +285,9 @@ It prints one line per step and exits 1 if any fails. `checkProvider(router, id)
 | CodeSandbox SDK (Together) | not run yet | |
 | Dedalus Machines | not run yet | |
 | Fly.io Sprites | not run yet | |
-| Blaxel | not run yet | |
-| Daytona | not run yet | |
-| E2B | not run yet | |
+| Blaxel | 13/13 passed; n/a: pause and resume | 2026-11-06, v0.2.0 |
+| Daytona | 14/14 passed | 2026-11-06, v0.2.0 |
+| E2B | 14/14 passed | 2026-11-06, v0.2.0 |
 | HOPX | not run yet | |
 | Superserve | not run yet | |
 | LangSmith Sandboxes | not run yet | |
@@ -302,7 +302,7 @@ It prints one line per step and exits 1 if any fails. `checkProvider(router, id)
 | Vercel Sandbox | not run yet | |
 | Azure Container Apps dynamic sessions | not run yet | |
 | Alibaba Cloud Agent Sandbox | not run yet | |
-| Docker (local) | 13/14 passed; not covered by this run: exec: timed-out command was stopped | 2026-11-05, v0.2.0 |
+| Docker (local) | 14/14 passed | 2026-11-06, v0.2.0 |
 
 ## HTTP API
 
@@ -360,7 +360,7 @@ with sr.create(vcpu=2, memory_gb=4, strategy="cheapest") as sbx:
 | Vercel | `vcpus` (2 GB each) | `timeout` | `runtime` | no | Max 8 vCPU. |
 | Morph | via a cached base snapshot per shape | `ttlSeconds` | snapshot id | yes (memory + disk) | First create of a new shape builds a snapshot. Files over SSH. |
 | Fly.io Sprites | `cpus`, `ramMB` (may be ignored) | none: `kill()` or `gc` deletes | no | no | Sprites idle for free on their own. |
-| Blaxel | memory (CPU follows) | `ttl` | image | yes (archive, disk only) | Idle sandboxes go to free standby on their own. |
+| Blaxel | memory (CPU follows) | `ttl` | image | no (archiving is a per-workspace preview) | Idle sandboxes go to free standby on their own. |
 | Tensorlake | `cpus`, `memoryMb` | idle timeout | image | yes (memory + disk) | Output is line-based. |
 | Runloop | snapped to Runloop's custom sizes | `keep_alive_time_seconds` (max 48 h) | blueprint | yes (Pro plan) | Commands start in the home directory. |
 | HOPX | set by the template | timeout | template | yes (memory + disk) | Size requests aren't applied, so the router only sends default-size work. |

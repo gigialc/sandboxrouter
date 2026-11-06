@@ -1,0 +1,85 @@
+{
+  "tool": "sandboxrouter-check",
+  "version": "0.2.0",
+  "date": "2026-11-06T01:06:19.226Z",
+  "platform": "darwin-arm64",
+  "provider": "blaxel",
+  "sandboxId": "blaxel:04970897-c20d-4d31-a187-c1f2117a93ef",
+  "results": [
+    {
+      "step": "create",
+      "ms": 1697,
+      "status": "pass",
+      "detail": "blaxel:04970897-c20d-4d31-a187-c1f2117a93ef, ~$0.1656/hr"
+    },
+    {
+      "step": "exec: stdout, stderr, exit code",
+      "ms": 590,
+      "status": "pass"
+    },
+    {
+      "step": "exec: env and cwd",
+      "ms": 236,
+      "status": "pass"
+    },
+    {
+      "step": "exec: UTF-8 output",
+      "ms": 507,
+      "status": "pass"
+    },
+    {
+      "step": "exec: streaming",
+      "ms": 3210,
+      "status": "pass",
+      "detail": "first output after 178 ms"
+    },
+    {
+      "step": "files: binary round-trip",
+      "ms": 1957,
+      "status": "pass"
+    },
+    {
+      "step": "files: 1 MB round-trip",
+      "ms": 2443,
+      "status": "pass"
+    },
+    {
+      "step": "files: missing file is an error",
+      "ms": 178,
+      "status": "pass"
+    },
+    {
+      "step": "files: visible to commands",
+      "ms": 1018,
+      "status": "pass"
+    },
+    {
+      "step": "exec: command timeout",
+      "ms": 3178,
+      "status": "pass",
+      "detail": "threw after 3178 ms"
+    },
+    {
+      "step": "exec: timed-out command was stopped",
+      "ms": 6505,
+      "status": "pass"
+    },
+    {
+      "step": "pause and resume",
+      "status": "skip",
+      "ms": 0,
+      "detail": "adapter has no pause"
+    },
+    {
+      "step": "kill",
+      "ms": 6567,
+      "status": "pass"
+    },
+    {
+      "step": "killed sandbox is gone",
+      "ms": 286,
+      "status": "pass"
+    }
+  ],
+  "ok": true
+}

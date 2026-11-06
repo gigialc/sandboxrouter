@@ -158,9 +158,13 @@ class MaritimeSandbox implements ProviderSandbox {
     const seconds = opts.timeoutSeconds ?? DEFAULT_EXEC_TIMEOUT_S;
     const body = { cmd, cwd: opts.cwd, env: opts.env, timeoutSeconds: seconds };
     const streaming = !!(opts.onStdout || opts.onStderr);
+    // A real account answers a command that passes its limit with 504 command_timeout (or, while
+    // streaming, an "error" event with that code); either is the contract's timeout error.
     const res = await this.data("POST", "/commands", {
       json: body,
       headers: streaming ? { Accept: "text/event-stream" } : {},
+    }).catch((err) => {
+      throw isCommandTimeout(err) ? timeoutError("maritime", seconds) : err;
     });
 
     let result: MaritimeCommand | undefined;
@@ -170,7 +174,10 @@ class MaritimeSandbox implements ProviderSandbox {
         if (ev.event === "stdout") opts.onStdout?.(payload);
         else if (ev.event === "stderr") opts.onStderr?.(payload);
         else if (ev.event === "result") result = payload;
-        else if (ev.event === "error") throw new ProviderError("maritime", `${payload?.code ?? "error"}: ${payload?.message ?? ev.data}`);
+        else if (ev.event === "error") {
+          if (payload?.code === "command_timeout") throw timeoutError("maritime", seconds);
+          throw new ProviderError("maritime", `${payload?.code ?? "error"}: ${payload?.message ?? ev.data}`);
+        }
       }
       if (!result) throw new ProviderError("maritime", "output stream closed before the command finished");
     } else {
@@ -269,4 +276,8 @@ class MaritimeComputer implements ProviderComputer {
 
 function clamp(n: number, lo: number, hi: number) {
   return Math.min(hi, Math.max(lo, n));
+}
+
+function isCommandTimeout(err: any): boolean {
+  return err instanceof ProviderError && err.status === 504 && /command_timeout/.test(err.message);
 }

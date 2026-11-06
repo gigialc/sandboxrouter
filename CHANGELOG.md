@@ -5,6 +5,9 @@ All notable changes. Versions follow [semver](https://semver.org/); while the ve
 ## Unreleased (next: 0.3.0)
 
 ### Added
+- First real-account runs: E2B, Daytona, Maritime and OpenScale pass all 13 steps; Blaxel passes 12 of 12 (no pause).
+- First bench report (results/bench-2026-11-06-home-eu.json); the site's provider table shows its cold-start times.
+- `npm run secrets:push -- --only <ids>` uploads just the providers whose accounts are ready.
 - LangSmith Sandboxes (LangChain) via the `langsmith` SDK (`LANGSMITH_API_KEY`; streaming needs `ws`). Memory is kept within the 2 to 6 GiB per vCPU LangSmith allows; `timeoutMinutes` becomes the idle stop, and a stopped sandbox is deleted a day later.
 - Sign-up status for gated providers (`access` in the catalog, `accessLabel()`): InstaBox and Dedalus are waitlisted, Koyeb isn't taking new accounts since joining Mistral. `providers`, `route`, the README and the site say so. Routing is unchanged: anyone who already has a key still gets routed there.
 - 16 more sandbox providers, for 31 cloud providers plus Docker:
@@ -23,10 +26,13 @@ All notable changes. Versions follow [semver](https://semver.org/); while the ve
 - Website: full-width layout, white page, black ink.
 
 ### Fixed
+- Daytona: pause always failed on a real account because sandboxes were created ephemeral (`autoDeleteInterval: 0`); a stopped sandbox is now deleted a minute later instead. Streaming commands that call `exit` no longer hang. Daytona's own timeout (a 408) is read as the contract's timeout error.
+- Blaxel: pause removed (archiving is a preview Blaxel enables per workspace), `kill()` waits for the asynchronous delete, and API errors no longer read "[object Object]".
 - Modal: the adapter asked for twice the CPU it meant to (Modal counts physical cores, 1 core = 2 vCPUs).
 - The exec timeout contract now holds on every provider: a command that outlives `timeoutSeconds` is stopped inside the sandbox and `exec` rejects with `<provider>: command timed out after Ns`. Before, E2B (and OpenScale, Novita, Alibaba), Vercel, Morph, Docker, HOPX and Northflank left the process running after the client gave up; Lambda, Cloudflare, exe.dev, AgentCore, Azure, Boat, Maritime, Modal and Blaxel returned the kill as an ordinary exit code; Beam's non-streaming exec waited for the command before starting its timer. `RoutedSandbox.exec` also bounds every call at the timeout plus 30 s with the same error, should an adapter miss its deadline, and `sandboxrouter check` fails a provider that returns a timed-out command as a result or lets it keep running.
 - `wrapCommand` (used by 17 adapters for cwd/env) ran the command in the wrong directory when `cwd` did not exist and `env` was set, because `cd` was joined with `;` to the exports. Every step is now chained with `&&` and the command is grouped, so a missing cwd stops it.
-- Daytona's non-streaming exec merged stderr into stdout; every command now runs through a session, which keeps them apart.
+- Daytona's non-streaming exec merged stderr into stdout; stderr now goes to a temp file that is read back. Streaming commands run in a throwaway session, which keeps them apart too. Plain commands don't use a session, because on a real account session logs end output that has no trailing newline with one.
+- Maritime and Blaxel: a real account reports a command past its limit as an error (Maritime: 504 `command_timeout`; Blaxel: 422 "process timed out"), which is now the contract's timeout error.
 - Daytona: `connect()` only restarted a `stopped` sandbox. Daytona also archives and pauses idle sandboxes on its own, so those (and sandboxes caught mid-transition) are now brought back too, with a longer wait for an archived one, and a sandbox that cannot be started (destroyed, error) is reported instead of failing on the first command.
 - Dedalus: `readFile` asked for 256 KiB chunks through an endpoint that returns at most 64 KiB per stream, so files over about 48 KiB came back corrupted; chunks now fit the cap, and command output past the cap is assembled from the events feed instead of being cut. A streamed command no longer repeats output when a page of events carries no cursor.
 - E2B desktops: `hold_key` ran under the SDK's default 60 s command timeout, so a longer hold ended with the key still down; the command now gets a timeout past the hold, and holds over 100 s are refused.

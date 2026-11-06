@@ -51,9 +51,10 @@ export class DaytonaProvider implements Provider, ComputerProvider {
     const base = {
       envVars: spec.env,
       labels: spec.metadata,
-      // Minutes of inactivity before Daytona stops it; delete right after stop.
+      // Minutes of inactivity before Daytona stops it; deleted a minute after it stops. Not 0:
+      // that makes the sandbox ephemeral, which is fixed at creation and rules out pause.
       autoStopInterval: Math.max(1, Math.round(spec.timeoutMinutes ?? 30)),
-      autoDeleteInterval: 0,
+      autoDeleteInterval: 1,
     };
     const sbx = spec.image?.daytona
       ? await d.create({
@@ -125,10 +126,40 @@ class DaytonaBox implements ProviderSandbox {
   }
 
   /**
-   * Every command runs in a throwaway session. Unlike `executeCommand`, a session keeps stdout and
-   * stderr apart and lets the deadline be enforced here: deleting the session ends the command.
+   * executeCommand merges stderr into stdout, so stderr goes to a temp file that is read back.
+   * Daytona enforces the timeout itself: the command is stopped and the SDK throws a 408
+   * (DaytonaProcessExecutionTimeoutError). Streaming goes through a throwaway session instead,
+   * whose logs keep the two apart and whose deadline is enforced here: deleting the session ends
+   * the command. Sessions aren't used for every command because their logs end output that has no
+   * trailing newline with one (`printf hi` reads back as "hi\n").
    */
   async exec(cmd: string, opts: ExecOptions = {}): Promise<ExecResult> {
+    if (opts.onStdout || opts.onStderr) return this.execSession(cmd, opts);
+    const t0 = Date.now();
+    const seconds = opts.timeoutSeconds ?? DEFAULT_EXEC_TIMEOUT_S;
+    const errFile = `/tmp/sbr-stderr-${randomUUID()}`;
+    // cwd and env go in the command, so a missing cwd stops it from running, as in the session path.
+    const command = `{\n${wrapCommand(`(\n${cmd}\n)`, { cwd: opts.cwd, env: opts.env })}\n} 2>${errFile}`;
+    try {
+      const r = await this.sbx.process.executeCommand(command, undefined, undefined, seconds);
+      let stderr = "";
+      try {
+        stderr = Buffer.from(await this.sbx.fs.downloadFile(errFile)).toString("utf8");
+      } catch {
+        // No stderr file (e.g. the command removed /tmp): report none.
+      }
+      this.sbx.process.executeCommand(`rm -f ${errFile}`).catch(() => {});
+      return { exitCode: r.exitCode, stdout: r.result, stderr, durationMs: Date.now() - t0 };
+    } catch (err: any) {
+      if (err?.name === "DaytonaProcessExecutionTimeoutError" || err?.constructor?.name === "DaytonaProcessExecutionTimeoutError" || err?.statusCode === 408) {
+        this.sbx.process.executeCommand(`rm -f ${errFile}`).catch(() => {});
+        throw timeoutError("daytona", seconds);
+      }
+      throw new ProviderError("daytona", err?.message ?? String(err));
+    }
+  }
+
+  private async execSession(cmd: string, opts: ExecOptions): Promise<ExecResult> {
     const t0 = Date.now();
     const seconds = opts.timeoutSeconds ?? DEFAULT_EXEC_TIMEOUT_S;
     const session = `sbr-${randomUUID()}`;
@@ -138,7 +169,8 @@ class DaytonaBox implements ProviderSandbox {
     try {
       await proc.createSession(session);
       const { cmdId } = await proc.executeSessionCommand(session, {
-        command: wrapCommand(cmd, { cwd: opts.cwd, env: opts.env }),
+        // A subshell, so `exit` in the command ends it rather than the session's shell.
+        command: wrapCommand(`(\n${cmd}\n)`, { cwd: opts.cwd, env: opts.env }),
         runAsync: true,
       });
       const logs = proc.getSessionCommandLogs(

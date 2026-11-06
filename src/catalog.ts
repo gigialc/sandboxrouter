@@ -170,7 +170,7 @@ const ENTRIES: ProviderInfo[] = [
       source: "https://blaxel.ai/pricing",
       checked: "2026-11-04",
     },
-    capabilities: ["pause", "custom-image"],
+    capabilities: ["custom-image"],
     // Self-serve caps are per-tier and not published; these are conservative.
     limits: { maxVcpu: 8, maxMemoryGb: 16 },
     credentials: [["BL_API_KEY", "BL_WORKSPACE"]],

@@ -25,6 +25,8 @@ const deleted: string[] = [];
 const children = new Set<ChildProcess>();
 const sandboxes = new Map<string, FakeSandbox>();
 let killEarly = false;
+/** Answer a timeout the way a real account does: 422 "process timed out after N seconds". */
+let timeoutAs422 = false;
 let pids = 0;
 
 const killGroup = (c: ChildProcess) => {
@@ -32,6 +34,7 @@ const killGroup = (c: ChildProcess) => {
     process.kill(-c.pid!, "SIGKILL");
   } catch {}
 };
+let deleteDelayMs = 0;
 const fail = (status: number, detail: string) => Object.assign(new Error(`Sandbox request failed with status ${status}: ${detail}`), { status });
 
 class FakeSandbox {
@@ -54,7 +57,7 @@ class FakeSandbox {
       execs.push(request);
       if (request.workingDir && !existsSync(request.workingDir)) throw fail(400, `chdir ${request.workingDir}: no such file or directory`);
       const envs = Object.fromEntries((this.cfg.envs ?? []).map((e: any) => [e.name, e.value]));
-      return new Promise<any>((resolve) => {
+      return new Promise<any>((resolve, reject) => {
         const child = spawn("sh", ["-c", request.command], { cwd: request.workingDir ?? root, env: { ...process.env, ...envs, ...(request.env ?? {}) }, detached: true });
         children.add(child);
         const pid = String(++pids);
@@ -67,6 +70,7 @@ class FakeSandbox {
         child.on("close", (code) => {
           clearTimeout(timer);
           children.delete(child);
+          if (killed && timeoutAs422) return reject(fail(422, `process timed out after ${request.timeout} seconds`));
           const status = killed ? "killed" : code === 0 ? "completed" : "failed";
           resolve({ pid, name: request.name ?? pid, command: request.command, status, exitCode: code ?? 137, stdout, stderr, logs: stdout + stderr, workingDir: request.workingDir ?? "/", startedAt: "", completedAt: "" });
         });
@@ -96,7 +100,11 @@ class FakeSandbox {
   }
   async delete() {
     deleted.push(this.metadata.name);
-    this.status = "TERMINATED";
+    // Deletion is asynchronous on Blaxel: the sandbox reads as TERMINATING for a while first.
+    if (deleteDelayMs) {
+      this.status = "TERMINATING";
+      setTimeout(() => (this.status = "TERMINATED"), deleteDelayMs);
+    } else this.status = "TERMINATED";
     return {};
   }
 }
@@ -135,6 +143,7 @@ const p = () => new BlaxelProvider("bl_test", "ws_test");
 beforeEach(() => {
   creates.length = ttls.length = execs.length = archived.length = deleted.length = 0;
   killEarly = false;
+  timeoutAs422 = false;
 });
 
 afterAll(() => {
@@ -164,7 +173,8 @@ describe("BlaxelProvider", () => {
     expect(creates[1]).toEqual({ image: "blaxel/base-image:latest", memory: 4096, region: "eu-lon-1", envs: [], labels: undefined, ttl: "5m" });
     await p().create({ memoryGb: 16, vcpu: 1 });
     expect(creates[2].memory).toBe(16384);
-    expect(sbx.pause).toBeTypeOf("function");
+    // No pause: archiving is a per-workspace preview, and a real account answers 403.
+    expect(sbx.pause).toBeUndefined();
   });
 
   it("execs with workingDir, env and timeout, waiting for completion; a failed status is a result", async () => {
@@ -183,6 +193,12 @@ describe("BlaxelProvider", () => {
     await expect(sbx.exec("sleep 5", { timeoutSeconds: 5 })).rejects.toMatchObject({ name: "ProviderError", message: "blaxel: command killed before it finished" });
   });
 
+  it("reads a real account's 422 \"process timed out\" as the contract's timeout error", async () => {
+    const sbx = await p().create({});
+    timeoutAs422 = true;
+    await expect(sbx.exec("sleep 5", { timeoutSeconds: 1 })).rejects.toMatchObject({ name: "ProviderError", message: "blaxel: command timed out after 1s" });
+  });
+
   it("carries the SDK's status into ProviderError", async () => {
     await expect(p().connect("sandbox-nope")).rejects.toMatchObject({ name: "ProviderError", status: 404, message: expect.stringContaining("sandbox-nope not found") });
     await expect(p().create({ memoryGb: 1024 })).rejects.toMatchObject({ status: 400 });
@@ -191,18 +207,21 @@ describe("BlaxelProvider", () => {
     await expect(sbx.exec("true", { cwd: join(root, "nope") })).rejects.toMatchObject({ status: 400 });
   });
 
-  it("pauses by clearing the ttl and archiving; connect unarchives; kill deletes", async () => {
+  it("connect unarchives a sandbox archived elsewhere; kill waits until the sandbox is terminated", async () => {
     const sbx = await p().create({});
     const inst = sandboxes.get(sbx.nativeId)!;
-    await sbx.pause!();
-    expect(ttls).toEqual([{ name: sbx.nativeId, ttl: null }]);
-    expect(archived).toEqual([sbx.nativeId]);
-    expect(inst.status).toBe("ARCHIVED");
+    await inst.archive();
     const again = await p().connect(sbx.nativeId);
     expect(inst.status).toBe("DEPLOYED");
     expect((await again.exec("echo back")).stdout).toBe("back\n");
-    await again.kill();
+    deleteDelayMs = 700;
+    try {
+      await again.kill();
+    } finally {
+      deleteDelayMs = 0;
+    }
     expect(deleted).toEqual([sbx.nativeId]);
+    expect(inst.status).toBe("TERMINATED");
     await expect(p().connect(sbx.nativeId)).rejects.toMatchObject({ status: 404 });
   });
 });

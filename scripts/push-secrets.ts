@@ -6,6 +6,9 @@
 //   # fill in the keys you have, leave the rest empty
 //   npm run secrets:push -- --dry-run   show which names would be set, without uploading
 //   npm run secrets:push                upload every filled-in key
+//   npm run secrets:push -- --only e2b,daytona   upload just those providers' keys (e.g. leave out
+//                                       accounts that aren't funded yet, so the nightly run doesn't
+//                                       record them as failing)
 import { spawnSync } from "node:child_process";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { CATALOG } from "../src/catalog.js";
@@ -13,7 +16,10 @@ import { COMPUTER_ENTRIES } from "../src/computers.js";
 
 const FILE = new URL("../.env.providers", import.meta.url);
 const FIRST = ["agent37", "instabox", "openscale", "boat", "maritime", "koyeb", "e2b", "daytona"];
-const args = new Set(process.argv.slice(2));
+const argv = process.argv.slice(2);
+const args = new Set(argv);
+const onlyAt = argv.indexOf("--only");
+const only = onlyAt >= 0 ? new Set((argv[onlyAt + 1] ?? "").split(",").map((s) => s.trim()).filter(Boolean)) : null;
 
 const sandboxes = CATALOG.filter((c) => !c.local).sort(
   (a, b) => (FIRST.indexOf(a.id) + 1 || 99) - (FIRST.indexOf(b.id) + 1 || 99) || a.id.localeCompare(b.id),
@@ -74,6 +80,17 @@ for (const raw of readFileSync(FILE, "utf8").split("\n")) {
     continue;
   }
   values.set(key, value);
+}
+if (only) {
+  const unknown = [...only].filter((id) => !sandboxes.some((c) => c.id === id) && !COMPUTER_ENTRIES.some((c) => c.id === id));
+  if (unknown.length || !only.size) {
+    console.error(`--only needs provider ids, e.g. --only e2b,daytona${unknown.length ? `; unknown: ${unknown.join(", ")}` : ""}`);
+    process.exit(1);
+  }
+  const wanted = new Set(
+    [...sandboxes, ...COMPUTER_ENTRIES].filter((c) => only.has(c.id)).flatMap((c) => c.credentials.flat()),
+  );
+  for (const key of [...values.keys()]) if (!wanted.has(key)) values.delete(key);
 }
 if (!values.size) {
   console.log("Nothing to upload: every key in .env.providers is blank.");

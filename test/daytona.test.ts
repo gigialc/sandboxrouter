@@ -13,7 +13,10 @@ import { describeConformance } from "./conformance.js";
  * `sh -c` in a temp dir: createSession, executeSessionCommand({command, runAsync}) -> {cmdId},
  * getSessionCommandLogs(session, cmdId, onStdout, onStderr) (resolves when the command ends),
  * getSessionCommand -> {id, command, exitCode}, deleteSession (ends the session's running
- * commands, as the real one does); `fs.uploadFile(Buffer, path)` / `fs.downloadFile(path)`;
+ * commands, as the real one does); `executeCommand(command, cwd, env, timeout)` -> {exitCode, result}
+ * with stdout and stderr merged into `result`, which stops the command at its timeout and throws a
+ * 408 DaytonaProcessExecutionTimeoutError, as the real one does (checked against a real account);
+ * `fs.uploadFile(Buffer, path)` / `fs.downloadFile(path)`;
  * `setAutoDeleteInterval`, `stop`, `start`, `delete`, `state`. The desktop side (computerUse) is
  * covered by daytona-desktop.test.ts.
  */
@@ -111,8 +114,20 @@ class FakeSandbox {
       for (const c of sess.values()) killGroup(c.child);
       this.sessions.delete(session);
     },
-    executeCommand: async () => {
-      throw new Error("not used by the sandbox adapter");
+    executeCommand: async (command: string, cwd?: string, env?: Record<string, string>, timeout?: number) => {
+      this.alive();
+      calls.push(["executeCommand", command, cwd, env, timeout]);
+      const child = spawn("sh", ["-c", command], { cwd: cwd ?? root, env: { ...process.env, ...(this.params.envVars ?? {}), ...(env ?? {}) }, detached: true });
+      children.push(child);
+      let result = "";
+      child.stdout!.on("data", (d) => (result += d));
+      child.stderr!.on("data", (d) => (result += d));
+      const code = await new Promise<number | "timeout">((resolve) => {
+        const timer = timeout ? setTimeout(() => (killGroup(child), resolve("timeout")), timeout * 1000) : undefined;
+        child.on("close", (c, signal) => (clearTimeout(timer), resolve(c ?? (signal ? 137 : -1))));
+      });
+      if (code === "timeout") throw Object.assign(new Error("command execution timeout"), { name: "DaytonaProcessExecutionTimeoutError", statusCode: 408 });
+      return { exitCode: code, result };
     },
   };
 
@@ -221,14 +236,14 @@ describe("DaytonaProvider", () => {
       envVars: { A: "1" },
       labels: { team: "x" },
       autoStopInterval: 20,
-      autoDeleteInterval: 0,
+      autoDeleteInterval: 1,
       image: "python:3.12",
       resources: { cpu: 4, memory: 8 },
     });
     expect((await sbx.exec("echo $A")).stdout).toBe("1\n");
     await sbx.kill();
     await (await p().create({})).kill();
-    expect(created[1]).toEqual({ autoStopInterval: 30, autoDeleteInterval: 0 });
+    expect(created[1]).toEqual({ autoStopInterval: 30, autoDeleteInterval: 1 });
     expect(created[1]).not.toHaveProperty("image");
     await (await p().create({ timeoutMinutes: 0.2 })).kill();
     expect(created[2].autoStopInterval).toBe(1);
@@ -236,29 +251,47 @@ describe("DaytonaProvider", () => {
     await expect(p().create({})).rejects.toThrow(/quota/);
   });
 
-  it("runs every command in a throwaway session, async, with cwd and env wrapped into the command", async () => {
+  it("runs a plain command with executeCommand, stderr through a temp file, cwd and env wrapped in", async () => {
     const sbx = await p().create({});
-    const r = await sbx.exec('printf "%s %s" "$X" "$(pwd)"', { cwd: root, env: { X: "y" } });
-    expect(r.stdout.split(" ")[0]).toBe("y");
-    const [session] = sdk("createSession").map((c) => c[1]);
-    expect(session).toMatch(/^sbr-[0-9a-f-]{36}$/);
-    expect(sdk("executeSessionCommand")).toEqual([[session, { command: `cd '${root}' && export X='y' && {\nprintf "%s %s" "$X" "$(pwd)"\n}`, runAsync: true }]]);
-    expect(sdk("deleteSession")).toEqual([[sbx.nativeId, session]]);
-    // A second command gets its own session; nothing is left behind either way.
-    expect((await sbx.exec("exit 3")).exitCode).toBe(3);
-    expect(new Set(sdk("createSession").map((c) => c[1])).size).toBe(2);
-    expect(sdk("deleteSession")).toHaveLength(2);
+    const r = await sbx.exec('printf "%s %s" "$X" "$(pwd)"; printf oops >&2; exit 3', { cwd: root, env: { X: "y" } });
+    expect(r).toMatchObject({ exitCode: 3, stdout: `y ${root}`, stderr: "oops" });
+    const [[command, cwd, env, timeout]] = sdk("executeCommand");
+    expect(command).toMatch(new RegExp(`^\\{\\ncd '${root}' && export X='y' && \\{\\n\\(\\n[^]*\\n\\)\\n\\}\\n\\} 2>/tmp/sbr-stderr-[0-9a-f-]{36}$`));
+    // Daytona's own cwd/env params are left unset; the timeout is Daytona's to enforce.
+    expect([cwd, env, timeout]).toEqual([undefined, undefined, 60]);
+    // No session for a plain command (session logs add a newline to output that lacks one).
+    expect(sdk("createSession")).toEqual([]);
+    // The stderr file is removed afterwards.
+    await new Promise((res) => setTimeout(res, 100));
+    expect(sdk("executeCommand").at(-1)![0]).toMatch(/^rm -f \/tmp\/sbr-stderr-/);
     await sbx.kill();
   });
 
-  it("enforces the deadline itself and ends the command by deleting its session", async () => {
+  it("maps Daytona's own timeout (408) onto the contract's error", async () => {
     const sbx = await p().create({});
     const t0 = Date.now();
     await expect(sbx.exec("sleep 5", { timeoutSeconds: 0.5 })).rejects.toMatchObject({ name: "ProviderError", message: "daytona: command timed out after 0.5s" });
     expect(Date.now() - t0).toBeLessThan(2000);
-    expect(sdk("deleteSession")).toHaveLength(1);
+    await sbx.kill();
+  });
+
+  it("streams through a throwaway session, in a subshell, and enforces its deadline by deleting the session", async () => {
+    const sbx = await p().create({});
+    const out: string[] = [];
+    const r = await sbx.exec("echo a; exit 3", { cwd: root, env: { X: "y" }, onStdout: (c) => out.push(c) });
+    expect(r).toMatchObject({ exitCode: 3, stdout: "a\n" });
+    expect(out.join("")).toBe("a\n");
+    const [session] = sdk("createSession").map((c) => c[1]);
+    expect(session).toMatch(/^sbr-[0-9a-f-]{36}$/);
+    expect(sdk("executeSessionCommand")).toEqual([[session, { command: `cd '${root}' && export X='y' && {\n(\necho a; exit 3\n)\n}`, runAsync: true }]]);
+    expect(sdk("deleteSession")).toEqual([[sbx.nativeId, session]]);
+
+    const t0 = Date.now();
+    await expect(sbx.exec("sleep 5", { timeoutSeconds: 0.5, onStdout: () => {} })).rejects.toMatchObject({ name: "ProviderError", message: "daytona: command timed out after 0.5s" });
+    expect(Date.now() - t0).toBeLessThan(2000);
+    expect(sdk("deleteSession")).toHaveLength(2);
     const child = children.at(-1)!;
-    await new Promise((r) => setTimeout(r, 200));
+    await new Promise((res) => setTimeout(res, 200));
     expect(child.exitCode !== null || child.signalCode !== null).toBe(true);
     await sbx.kill();
   });

@@ -1,0 +1,52 @@
+{
+  "tool": "sandboxrouter",
+  "version": "0.2.0",
+  "date": "2026-11-06T00:41:50.288Z",
+  "label": "home laptop, Europe (CET)",
+  "runs": 5,
+  "spec": {},
+  "node": "v22.22.0",
+  "platform": "darwin-arm64",
+  "rows": [
+    {
+      "provider": "e2b",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 332,
+      "medianExecMs": 169,
+      "hourlyUsd": 0.1656
+    },
+    {
+      "provider": "openscale",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 350,
+      "medianExecMs": 992,
+      "hourlyUsd": 0.017
+    },
+    {
+      "provider": "daytona",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 363,
+      "medianExecMs": 403,
+      "hourlyUsd": 0.1656
+    },
+    {
+      "provider": "blaxel",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 1090,
+      "medianExecMs": 247,
+      "hourlyUsd": 0.1656
+    },
+    {
+      "provider": "maritime",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 1231,
+      "medianExecMs": 188,
+      "hourlyUsd": 0.022
+    }
+  ]
+}

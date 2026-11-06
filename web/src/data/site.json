@@ -1,6 +1,6 @@
 {
   "version": "0.2.0",
-  "generatedAt": "2026-11-06T00:56:25.724Z",
+  "generatedAt": "2026-11-06T01:06:35.376Z",
   "shapes": [
     "1x2",
     "2x4",
@@ -361,7 +361,6 @@
       "name": "Blaxel",
       "local": false,
       "capabilities": [
-        "pause",
         "custom-image"
       ],
       "limits": {
@@ -383,7 +382,33 @@
         "checked": "2026-11-04"
       },
       "access": null,
-      "check": null,
+      "check": {
+        "date": "2026-11-06T01:06:19.226Z",
+        "version": "0.2.0",
+        "passed": 13,
+        "failed": [],
+        "skipped": [
+          "pause and resume"
+        ],
+        "notRun": [],
+        "notes": [],
+        "steps": {
+          "create": "pass",
+          "exec: stdout, stderr, exit code": "pass",
+          "exec: env and cwd": "pass",
+          "exec: UTF-8 output": "pass",
+          "exec: streaming": "pass",
+          "files: binary round-trip": "pass",
+          "files: 1 MB round-trip": "pass",
+          "files: missing file is an error": "pass",
+          "files: visible to commands": "pass",
+          "exec: command timeout": "pass",
+          "exec: timed-out command was stopped": "pass",
+          "pause and resume": "skip",
+          "kill": "pass",
+          "killed sandbox is gone": "pass"
+        }
+      },
       "computers": [],
       "prices": {
         "1x2": {
@@ -601,7 +626,31 @@
         "checked": "2026-11-04"
       },
       "access": null,
-      "check": null,
+      "check": {
+        "date": "2026-11-06T01:02:30.029Z",
+        "version": "0.2.0",
+        "passed": 14,
+        "failed": [],
+        "skipped": [],
+        "notRun": [],
+        "notes": [],
+        "steps": {
+          "create": "pass",
+          "exec: stdout, stderr, exit code": "pass",
+          "exec: env and cwd": "pass",
+          "exec: UTF-8 output": "pass",
+          "exec: streaming": "pass",
+          "files: binary round-trip": "pass",
+          "files: 1 MB round-trip": "pass",
+          "files: missing file is an error": "pass",
+          "files: visible to commands": "pass",
+          "exec: command timeout": "pass",
+          "exec: timed-out command was stopped": "pass",
+          "pause and resume": "pass",
+          "kill": "pass",
+          "killed sandbox is gone": "pass"
+        }
+      },
       "computers": [
         "linux"
       ],
@@ -767,14 +816,12 @@
       },
       "access": null,
       "check": {
-        "date": "2026-11-05T18:17:55.354Z",
+        "date": "2026-11-06T01:03:56.949Z",
         "version": "0.2.0",
-        "passed": 13,
+        "passed": 14,
         "failed": [],
         "skipped": [],
-        "notRun": [
-          "exec: timed-out command was stopped"
-        ],
+        "notRun": [],
         "notes": [],
         "steps": {
           "create": "pass",
@@ -787,7 +834,7 @@
           "files: missing file is an error": "pass",
           "files: visible to commands": "pass",
           "exec: command timeout": "pass",
-          "exec: timed-out command was stopped": "not run",
+          "exec: timed-out command was stopped": "pass",
           "pause and resume": "pass",
           "kill": "pass",
           "killed sandbox is gone": "pass"
@@ -847,7 +894,31 @@
         "checked": "2026-11-04"
       },
       "access": null,
-      "check": null,
+      "check": {
+        "date": "2026-11-06T01:02:09.238Z",
+        "version": "0.2.0",
+        "passed": 14,
+        "failed": [],
+        "skipped": [],
+        "notRun": [],
+        "notes": [],
+        "steps": {
+          "create": "pass",
+          "exec: stdout, stderr, exit code": "pass",
+          "exec: env and cwd": "pass",
+          "exec: UTF-8 output": "pass",
+          "exec: streaming": "pass",
+          "files: binary round-trip": "pass",
+          "files: 1 MB round-trip": "pass",
+          "files: missing file is an error": "pass",
+          "files: visible to commands": "pass",
+          "exec: command timeout": "pass",
+          "exec: timed-out command was stopped": "pass",
+          "pause and resume": "pass",
+          "kill": "pass",
+          "killed sandbox is gone": "pass"
+        }
+      },
       "computers": [
         "linux"
       ],
@@ -1292,7 +1363,31 @@
         "checked": "2026-11-05"
       },
       "access": null,
-      "check": null,
+      "check": {
+        "date": "2026-11-06T01:05:50.852Z",
+        "version": "0.2.0",
+        "passed": 14,
+        "failed": [],
+        "skipped": [],
+        "notRun": [],
+        "notes": [],
+        "steps": {
+          "create": "pass",
+          "exec: stdout, stderr, exit code": "pass",
+          "exec: env and cwd": "pass",
+          "exec: UTF-8 output": "pass",
+          "exec: streaming": "pass",
+          "files: binary round-trip": "pass",
+          "files: 1 MB round-trip": "pass",
+          "files: missing file is an error": "pass",
+          "files: visible to commands": "pass",
+          "exec: command timeout": "pass",
+          "exec: timed-out command was stopped": "pass",
+          "pause and resume": "pass",
+          "kill": "pass",
+          "killed sandbox is gone": "pass"
+        }
+      },
       "computers": [
         "linux",
         "windows",
@@ -1572,7 +1667,31 @@
         "checked": "2026-11-05"
       },
       "access": null,
-      "check": null,
+      "check": {
+        "date": "2026-11-06T01:03:15.296Z",
+        "version": "0.2.0",
+        "passed": 14,
+        "failed": [],
+        "skipped": [],
+        "notRun": [],
+        "notes": [],
+        "steps": {
+          "create": "pass",
+          "exec: stdout, stderr, exit code": "pass",
+          "exec: env and cwd": "pass",
+          "exec: UTF-8 output": "pass",
+          "exec: streaming": "pass",
+          "files: binary round-trip": "pass",
+          "files: 1 MB round-trip": "pass",
+          "files: missing file is an error": "pass",
+          "files: visible to commands": "pass",
+          "exec: command timeout": "pass",
+          "exec: timed-out command was stopped": "pass",
+          "pause and resume": "pass",
+          "kill": "pass",
+          "killed sandbox is gone": "pass"
+        }
+      },
       "computers": [],
       "prices": {
         "1x2": {
@@ -2029,6 +2148,60 @@
       "docs": "https://docs.orgo.ai/api-reference/introduction"
     }
   ],
-  "leaderboard": [],
-  "submissions": []
+  "leaderboard": [
+    {
+      "provider": "e2b",
+      "name": "E2B",
+      "submissions": 1,
+      "medianCreateMs": 332,
+      "medianExecMs": 169,
+      "successRate": 1,
+      "hourlyUsd": 0.1656
+    },
+    {
+      "provider": "openscale",
+      "name": "OpenScale Sandboxes",
+      "submissions": 1,
+      "medianCreateMs": 350,
+      "medianExecMs": 992,
+      "successRate": 1,
+      "hourlyUsd": 0.017
+    },
+    {
+      "provider": "daytona",
+      "name": "Daytona",
+      "submissions": 1,
+      "medianCreateMs": 363,
+      "medianExecMs": 403,
+      "successRate": 1,
+      "hourlyUsd": 0.1656
+    },
+    {
+      "provider": "blaxel",
+      "name": "Blaxel",
+      "submissions": 1,
+      "medianCreateMs": 1090,
+      "medianExecMs": 247,
+      "successRate": 1,
+      "hourlyUsd": 0.1656
+    },
+    {
+      "provider": "maritime",
+      "name": "Maritime",
+      "submissions": 1,
+      "medianCreateMs": 1231,
+      "medianExecMs": 188,
+      "successRate": 1,
+      "hourlyUsd": 0.022
+    }
+  ],
+  "submissions": [
+    {
+      "date": "2026-11-06T00:41:50.288Z",
+      "label": "home laptop, Europe (CET)",
+      "platform": "darwin-arm64",
+      "runs": 5,
+      "providers": 5
+    }
+  ]
 }
