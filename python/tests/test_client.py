@@ -52,7 +52,7 @@ class ClientTest(unittest.TestCase):
         self.assertEqual(usable, ["modal"])
 
     def test_sandbox_lifecycle_with_fallback(self):
-        with self.sr.create(vcpu=2, env={"X": "1"}) as sbx:
+        with self.sr.create(vcpu=1, memory_gb=1, env={"X": "1"}) as sbx:
             self.assertEqual(sbx.provider, "daytona")
             self.assertEqual([a["provider"] for a in sbx.attempts], ["maritime", "daytona"])
             self.assertEqual(sbx.exec("ls").stdout, "ran: ls\n")
