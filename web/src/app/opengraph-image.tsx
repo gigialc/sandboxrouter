@@ -5,7 +5,7 @@ export const alt = "sandboxrouter: one API for every sandbox";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-const ACCENT = "#3d2bff";
+const ACCENT = "#007f4f";
 
 /** The link preview: the pitch plus the three cheapest open-sign-up providers at 2 vCPU / 4 GB, from the same data as the site. */
 export default function OpengraphImage() {
