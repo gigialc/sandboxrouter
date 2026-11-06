@@ -1,7 +1,7 @@
 import { randomBytes } from "node:crypto";
 import { DEFAULT_MEMORY_GB, DEFAULT_VCPU } from "../catalog.js";
 import { ProviderError, type ExecOptions, type ExecResult, type Provider, type ProviderSandbox, type SandboxSpec } from "../types.js";
-import { dirname, optionalImport, shq, toBytes, wrapCommand } from "../util.js";
+import { DEFAULT_EXEC_TIMEOUT_S, dirname, guardTimeout, killedByTimeout, optionalImport, shq, timeoutError, toBytes, wrapCommand } from "../util.js";
 
 type NorthflankModule = typeof import("@northflank/js-client");
 type NorthflankClient = InstanceType<NorthflankModule["ApiClient"]>;
@@ -132,19 +132,16 @@ class NorthflankBox implements ProviderSandbox {
   }
 
   /**
-   * Exec has no cwd/env/timeout, so cwd/env are wrapped into the command, the command runs
-   * under `timeout` when the image has it, and the deadline is also enforced here.
+   * Exec has no cwd/env/timeout, so cwd/env are wrapped into the command, the sandbox kills the
+   * command at the deadline (`guardTimeout`), and this side gives up a little later as a fallback.
    */
   async exec(cmd: string, opts: ExecOptions = {}): Promise<ExecResult> {
     const t0 = Date.now();
-    const secs = opts.timeoutSeconds ?? 60;
-    const script = shq(wrapCommand(cmd, { cwd: opts.cwd, env: opts.env }));
-    const guarded = `if command -v timeout >/dev/null 2>&1; then exec timeout ${secs} /bin/sh -c ${script}; else exec /bin/sh -c ${script}; fi`;
-    const r = await this.run(["/bin/sh", "-c", guarded], secs * 1000 + 10_000, opts);
+    const secs = opts.timeoutSeconds ?? DEFAULT_EXEC_TIMEOUT_S;
+    const guarded = guardTimeout(wrapCommand(cmd, { cwd: opts.cwd, env: opts.env }), secs);
+    const r = await this.run(["/bin/sh", "-c", guarded], secs * 1000 + 10_000, opts, undefined, () => timeoutError("northflank", secs));
     const durationMs = Date.now() - t0;
-    if (durationMs >= secs * 1000 && [124, 137, 143].includes(r.exitCode)) {
-      throw new ProviderError("northflank", `command timed out after ${secs}s`);
-    }
+    if (killedByTimeout(r.exitCode, durationMs, secs)) throw timeoutError("northflank", secs);
     return { ...r, durationMs };
   }
 
@@ -170,12 +167,13 @@ class NorthflankBox implements ProviderSandbox {
     await call(() => this.nf.delete.service({ parameters: this.params }));
   }
 
-  /** One exec session: optional stdin, streamed stdout/stderr, exit code. */
+  /** One exec session: optional stdin, streamed stdout/stderr, exit code. `expired` is thrown when limitMs passes. */
   private async run(
     command: string[],
     limitMs: number,
     opts: Pick<ExecOptions, "onStdout" | "onStderr"> = {},
     stdin?: string,
+    expired: () => ProviderError = () => timeoutError("northflank", Math.round(limitMs / 1000)),
   ): Promise<Omit<ExecResult, "durationMs">> {
     const t0 = Date.now();
     let session: NorthflankSession;
@@ -209,7 +207,7 @@ class NorthflankBox implements ProviderSandbox {
     });
     try {
       const res = await Promise.race([session.waitForCommandResult(), failed, timedOut]);
-      if (res === "timeout") throw new ProviderError("northflank", `command timed out after ${Math.round((Date.now() - t0) / 1000)}s`);
+      if (res === "timeout") throw expired();
       return { exitCode: typeof res.exitCode === "number" ? res.exitCode : -1, stdout, stderr };
     } catch (err: any) {
       if (err instanceof ProviderError) throw err;

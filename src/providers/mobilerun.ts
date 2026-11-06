@@ -94,6 +94,15 @@ export class MobilerunProvider implements ComputerProvider {
   }
 }
 
+/**
+ * The SDK's APIConnectionTimeoutError (its error classes don't set `name`, so the class name is
+ * what identifies it), or a gateway timeout from the server-side wait.
+ */
+function isWaitTimeout(err: unknown): boolean {
+  const e = err as { constructor?: { name?: string }; name?: string; status?: number } | undefined;
+  return e?.constructor?.name === "APIConnectionTimeoutError" || e?.name === "APIConnectionTimeoutError" || e?.status === 408 || e?.status === 504;
+}
+
 /** Block until the device is ready; the server-side wait can time out, so retry until our deadline. */
 async function waitReady(client: MobilerunClient, id: string): Promise<MobilerunDevice> {
   const deadline = Date.now() + READY_DEADLINE_MS;
@@ -101,9 +110,7 @@ async function waitReady(client: MobilerunClient, id: string): Promise<Mobilerun
     try {
       return await client.devices.waitReady(id, { timeout: 120_000 });
     } catch (err) {
-      const e = err as { name?: string; status?: number };
-      const timedOut = e?.name === "APIConnectionTimeoutError" || e?.status === 408 || e?.status === 504;
-      if (!timedOut || Date.now() > deadline) throw toProviderError(err, `device ${id} did not become ready`);
+      if (!isWaitTimeout(err) || Date.now() > deadline) throw toProviderError(err, `device ${id} did not become ready`);
       const d = await guard(client.devices.retrieve(id));
       if (d.state === "ready") return d;
       if (d.state === "terminated") throw new ProviderError(ID, `device ${id} was terminated while starting: ${d.stateMessage}`);

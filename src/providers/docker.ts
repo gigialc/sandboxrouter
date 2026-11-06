@@ -2,7 +2,7 @@ import { spawn, spawnSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import { DEFAULT_MEMORY_GB, DEFAULT_VCPU } from "../catalog.js";
 import { ProviderError, type ExecOptions, type ExecResult, type Provider, type ProviderSandbox, type SandboxSpec } from "../types.js";
-import { dirname, shq, toBytes } from "../util.js";
+import { DEFAULT_EXEC_TIMEOUT_S, dirname, guardTimeout, killedByTimeout, shq, timeoutError, toBytes } from "../util.js";
 
 /**
  * Local sandboxes in Docker containers, through the `docker` CLI. Free and needs no account, so it
@@ -65,16 +65,18 @@ class DockerBox implements ProviderSandbox {
   ) {}
 
   exec(cmd: string, opts: ExecOptions = {}): Promise<ExecResult> {
+    const seconds = opts.timeoutSeconds ?? DEFAULT_EXEC_TIMEOUT_S;
     const args = ["exec", "-i"];
     if (opts.cwd) args.push("-w", opts.cwd);
     for (const [k, v] of Object.entries(opts.env ?? {})) args.push("-e", `${k}=${v}`);
-    args.push(this.nativeId, "sh", "-c", cmd);
-    return run(this.bin, args, { timeoutMs: (opts.timeoutSeconds ?? 60) * 1000, onStdout: opts.onStdout, onStderr: opts.onStderr }).then(
-      (r) => {
-        if (r.timedOut) throw new ProviderError("docker", `command timed out after ${opts.timeoutSeconds ?? 60}s`);
-        return { exitCode: r.code ?? -1, stdout: r.stdout, stderr: r.stderr, durationMs: r.ms };
-      },
-    );
+    // The command is killed inside the container: Docker does not stop an exec'd process when its
+    // client dies, so killing `docker exec` alone would leave it running. The client-side limit
+    // only covers a container that stops answering.
+    args.push(this.nativeId, "sh", "-c", guardTimeout(cmd, seconds));
+    return run(this.bin, args, { timeoutMs: (seconds + 10) * 1000, onStdout: opts.onStdout, onStderr: opts.onStderr }).then((r) => {
+      if (r.timedOut || killedByTimeout(r.code ?? -1, r.ms, seconds)) throw timeoutError("docker", seconds);
+      return { exitCode: r.code ?? -1, stdout: r.stdout, stderr: r.stderr, durationMs: r.ms };
+    });
   }
 
   async writeFile(path: string, content: string | Uint8Array): Promise<void> {
@@ -148,6 +150,8 @@ function run(
       clearTimeout(timer);
       resolve({ code, stdout, stderr, bytes: opts.binary ? new Uint8Array(Buffer.concat(out)) : undefined, ms: Date.now() - t0, timedOut });
     });
+    // A command that exits before reading its stdin makes the pipe raise EPIPE; the exit code already tells the story.
+    child.stdin.on("error", () => {});
     if (opts.stdin) child.stdin.end(Buffer.from(opts.stdin));
     else child.stdin.end();
   });

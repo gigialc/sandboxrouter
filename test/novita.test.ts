@@ -11,13 +11,19 @@ function fakeSandbox(id = "sbx_nov") {
     calls,
     sandboxId: id,
     commands: {
+      // Like the SDK with `background: true`: a handle whose wait() rejects with CommandExitError on a nonzero exit.
       run: vi.fn(async (cmd: string, opts: any) => {
         calls.push(["run", cmd, opts]);
-        if (cmd === "exit 3") throw Object.assign(new Error("exit status 3"), { name: "CommandExitError", exitCode: 3, stdout: "", stderr: "boom" });
         if (cmd === "explode") throw Object.assign(new Error("sandbox unreachable"), { name: "SandboxError" });
         opts?.onStdout?.("one\n");
         opts?.onStderr?.("two\n");
-        return { exitCode: 0, stdout: "one\n", stderr: "two\n" };
+        return {
+          wait: async () => {
+            if (cmd === "exit 3") throw Object.assign(new Error("exit status 3"), { name: "CommandExitError", exitCode: 3, stdout: "", stderr: "boom" });
+            return { exitCode: 0, stdout: "one\n", stderr: "two\n" };
+          },
+          kill: vi.fn(async () => true),
+        };
       }),
     },
     files: {
@@ -63,7 +69,8 @@ describe("NovitaProvider", () => {
     const r = await box.exec("echo hi", { cwd: "/tmp", env: { B: "2" }, timeoutSeconds: 5, onStdout: (c) => out.push(`o:${c}`), onStderr: (c) => out.push(`e:${c}`) });
     expect(r).toMatchObject({ exitCode: 0, stdout: "one\n", stderr: "two\n" });
     expect(out).toEqual(["o:one\n", "e:two\n"]);
-    expect(sbx.calls[0][2]).toMatchObject({ cwd: "/tmp", envs: { B: "2" }, timeoutMs: 5000 });
+    // Started in the background so the adapter can kill it at its own deadline; the SDK's stream timeout sits past that.
+    expect(sbx.calls[0][2]).toMatchObject({ cwd: "/tmp", envs: { B: "2" }, background: true, timeoutMs: 20_000 });
   });
 
   it("returns a nonzero exit as a result and other failures as ProviderError('novita')", async () => {

@@ -1,6 +1,6 @@
 import { randomBytes } from "node:crypto";
 import { ProviderError, type ExecOptions, type ExecResult, type Provider, type ProviderSandbox, type SandboxSpec } from "../types.js";
-import { dirname, shq, toBytes, wrapCommand } from "../util.js";
+import { dirname, killedByTimeout, shq, timeoutError, toBytes, wrapCommand } from "../util.js";
 
 /**
  * exe.dev standalone VMs over the HTTPS API (no SDK needed).
@@ -213,10 +213,16 @@ class ExeDevSandbox implements ProviderSandbox {
         stderr += e;
         opts.onStderr?.(e);
       }
-      if (!running) return { exitCode: r.exitCode, stdout, stderr, durationMs: Date.now() - t0 };
+      if (!running) {
+        const durationMs = Date.now() - t0;
+        // `timeout -k 5` on the VM leaves exit 124 (or 137 after SIGKILL) when it had to stop the command.
+        if (killedByTimeout(r.exitCode, durationMs, timeout)) throw timeoutError(ID, timeout);
+        return { exitCode: r.exitCode, stdout, stderr, durationMs };
+      }
       if (Date.now() > deadline) {
+        // The VM's own `timeout` should have ended it a minute ago: stop it from here as a last resort.
         await this.p.ssh(this.nativeId, `pkill -f ${shq(`${dir}/cmd`)}; rm -rf ${dir}`).catch(() => {});
-        throw new ProviderError(ID, `command still running ${timeout + 60}s after it started`);
+        throw timeoutError(ID, timeout);
       }
       script = report(outOff, errOff);
     }

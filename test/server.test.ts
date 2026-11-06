@@ -89,6 +89,14 @@ describe("HTTP API", () => {
     }
   });
 
+  it("answers 400, not 500, for a provider id that does not exist", async () => {
+    for (const path of ["/v1/route", "/v1/sandboxes"]) {
+      const r = await api(path, { method: "POST", body: JSON.stringify({ provider: ["nope", "e2b"] }) });
+      expect(r.status).toBe(400);
+      expect((await r.json()).error).toBe("unknown provider: nope");
+    }
+  });
+
   it("returns 400 for bad input and 502 when routing fails", async () => {
     expect((await api("/v1/sandboxes", { method: "POST", body: "{nope" })).status).toBe(400);
     expect((await api("/v1/sandboxes/e2b:x/exec", { method: "POST", body: "{}" })).status).toBe(400);

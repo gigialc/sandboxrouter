@@ -1,6 +1,6 @@
 import { DEFAULT_MEMORY_GB, DEFAULT_VCPU } from "../catalog.js";
 import { ProviderError, type ExecOptions, type ExecResult, type Provider, type ProviderSandbox, type SandboxSpec } from "../types.js";
-import { dirname, optionalImport, shq, toBytes } from "../util.js";
+import { DEFAULT_EXEC_TIMEOUT_S, dirname, optionalImport, shq, timeoutError, toBytes } from "../util.js";
 
 /**
  * Beam (beam.cloud) sandboxes via the official `@beamcloud/beam-js` SDK (checked against 1.1.6).
@@ -138,13 +138,15 @@ class BeamBox implements ProviderSandbox {
 
   async exec(cmd: string, opts: ExecOptions = {}): Promise<ExecResult> {
     const t0 = Date.now();
-    const limit = (opts.timeoutSeconds ?? 60) * 1000;
+    const seconds = opts.timeoutSeconds ?? DEFAULT_EXEC_TIMEOUT_S;
+    const limit = seconds * 1000;
     const streaming = !!(opts.onStdout || opts.onStderr);
     const env = this.env || opts.env ? { ...this.env, ...opts.env } : undefined;
     let proc: BeamProcess;
     try {
-      // wait: true lets short commands come back inline, saving the status/stdout/stderr polls.
-      proc = await this.sb.execShell(cmd, { cwd: opts.cwd, env, wait: !streaming });
+      // Never `wait: true`: that call returns only when the command exits, so the deadline below
+      // could not start until it was already too late to enforce.
+      proc = await this.sb.execShell(cmd, { cwd: opts.cwd, env, wait: false });
     } catch (err) {
       throw fail(err, "exec");
     }
@@ -166,7 +168,7 @@ class BeamBox implements ProviderSandbox {
       if (r === "timeout") {
         work.catch(() => {});
         await proc.kill().catch(() => {});
-        throw new ProviderError(ID, `command timed out after ${limit / 1000}s`);
+        throw timeoutError(ID, seconds);
       }
       return { ...r, durationMs: Date.now() - t0 };
     } catch (err) {

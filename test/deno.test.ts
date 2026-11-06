@@ -1,6 +1,6 @@
 import { spawn } from "node:child_process";
 import { promises as fs, mkdtempSync, rmSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { constants as osConstants, tmpdir } from "node:os";
 import { join } from "node:path";
 import { Readable } from "node:stream";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
@@ -23,7 +23,8 @@ function fakeSandbox(id: string) {
       calls.push(["spawn", { command, ...options }]);
       const child = spawn(command, options.args, { cwd: options.cwd ?? root, env: { ...process.env, ...(options.env ?? {}) } });
       const status = new Promise<{ code: number; signal: string | null; success: boolean }>((resolve) =>
-        child.on("close", (code, signal) => resolve({ code: code ?? 0, signal, success: code === 0 })),
+        // Like the Deno SDK: a signal death has a negative code (minus the signal number) and the signal's name.
+        child.on("close", (code, signal) => resolve({ code: code ?? -(osConstants.signals[signal!] ?? 0), signal, success: code === 0 })),
       );
       return {
         stdout: Readable.toWeb(child.stdout) as ReadableStream<Uint8Array>,
@@ -147,6 +148,12 @@ describe("DenoProvider", () => {
     });
     expect(events).toEqual(["out:one", "err:two", "out:three"]);
     expect(r).toMatchObject({ exitCode: 4, stdout: "one\nthree\n", stderr: "two\n" });
+  });
+
+  it("reports a signal death the way a shell would, as 128 plus the signal number", async () => {
+    const sbx = await p().create({});
+    expect((await sbx.exec("kill -9 $$")).exitCode).toBe(137);
+    expect((await sbx.exec("kill -TERM $$")).exitCode).toBe(143);
   });
 
   it("kills a command that outlives its timeout", async () => {

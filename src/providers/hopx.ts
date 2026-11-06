@@ -1,5 +1,5 @@
 import { ProviderError, type ExecOptions, type ExecResult, type Provider, type ProviderSandbox, type SandboxSpec } from "../types.js";
-import { optionalImport, toBytes } from "../util.js";
+import { DEFAULT_EXEC_TIMEOUT_S, optionalImport, timeoutError, toBytes } from "../util.js";
 
 type HopxModule = typeof import("@hopx-ai/sdk");
 // Sandbox has a private constructor, so take the instance type from create().
@@ -59,34 +59,36 @@ class HopxBox implements ProviderSandbox {
   async exec(cmd: string, opts: ExecOptions = {}): Promise<ExecResult> {
     if (opts.onStdout || opts.onStderr) return this.execStreaming(cmd, opts);
     const t0 = Date.now();
+    const seconds = opts.timeoutSeconds ?? DEFAULT_EXEC_TIMEOUT_S;
     try {
+      // The agent kills the command at `timeout` and reports it as an EXECUTION_TIMEOUT error.
       const r = await this.sbx.commands.run(cmd, {
-        timeout: opts.timeoutSeconds ?? 60,
+        timeout: seconds,
         workingDir: opts.cwd,
         env: opts.env,
       });
       // A nonzero exit comes back as a normal response with exit_code set.
       return { exitCode: r.exit_code ?? -1, stdout: r.stdout ?? "", stderr: r.stderr ?? "", durationMs: Date.now() - t0 };
     } catch (err) {
-      throw fail(err);
+      throw fail(err, seconds);
     }
   }
 
   /** Streams over the agent's WebSocket (/execute/stream) with the code run as bash. */
   private async execStreaming(cmd: string, opts: ExecOptions): Promise<ExecResult> {
     const t0 = Date.now();
-    const seconds = opts.timeoutSeconds ?? 60;
+    const seconds = opts.timeoutSeconds ?? DEFAULT_EXEC_TIMEOUT_S;
     let stdout = "";
     let stderr = "";
     let exitCode: number | undefined;
+    const stream = this.sbx.runCodeStream(cmd, {
+      language: "bash",
+      timeout: seconds,
+      workingDir: opts.cwd,
+      env: opts.env,
+    }) as AsyncIterableIterator<HopxStreamMessage>;
     const run = async () => {
-      const stream = this.sbx.runCodeStream(cmd, {
-        language: "bash",
-        timeout: seconds,
-        workingDir: opts.cwd,
-        env: opts.env,
-      });
-      for await (const m of stream as AsyncIterable<HopxStreamMessage>) {
+      for await (const m of stream) {
         if (m.type === "stdout") {
           stdout += m.data;
           opts.onStdout?.(m.data);
@@ -96,20 +98,25 @@ class HopxBox implements ProviderSandbox {
         } else if (m.type === "result") {
           exitCode = m.exit_code;
         } else if (m.type === "error") {
-          const msg = m.code === "EXECUTION_TIMEOUT" ? `command timed out after ${seconds}s` : m.error;
-          throw new ProviderError("hopx", msg);
+          throw m.code === "EXECUTION_TIMEOUT" ? timeoutError("hopx", seconds) : new ProviderError("hopx", m.error);
         }
       }
     };
     try {
       // The agent enforces the timeout; the extra grace covers a stream that never closes.
-      const graceMs = (seconds + 30) * 1000;
-      const timedOut = await Promise.race([run().then(() => false), sleep(graceMs).then(() => true)]);
-      if (timedOut) throw new ProviderError("hopx", `command timed out after ${seconds}s`);
+      const graceMs = (seconds + 15) * 1000;
+      const finished = run();
+      const timedOut = await Promise.race([finished.then(() => false), sleep(graceMs).then(() => true)]);
+      if (timedOut) {
+        // Close the stream (and its WebSocket) now that nobody will read it.
+        finished.catch(() => {});
+        await stream.return?.().catch(() => {});
+        throw timeoutError("hopx", seconds);
+      }
       if (exitCode === undefined) throw new ProviderError("hopx", "stream closed before the command finished");
       return { exitCode, stdout, stderr, durationMs: Date.now() - t0 };
     } catch (err) {
-      throw fail(err);
+      throw fail(err, seconds);
     }
   }
 
@@ -158,8 +165,10 @@ const STATUS_BY_NAME: Record<string, number> = {
   SandboxExpiredError: 410,
 };
 
-function fail(err: any): ProviderError {
+/** Map an SDK error; with `timeoutSeconds`, the agent's execution-timeout errors become the contract's timeout error. */
+function fail(err: any, timeoutSeconds?: number): ProviderError {
   if (err instanceof ProviderError) return err;
+  if (timeoutSeconds !== undefined && (err?.code === "EXECUTION_TIMEOUT" || err?.name === "TimeoutError")) return timeoutError("hopx", timeoutSeconds);
   const status = err?.statusCode ?? err?.response?.status ?? STATUS_BY_NAME[err?.name];
   return new ProviderError("hopx", err?.message ?? String(err), status);
 }

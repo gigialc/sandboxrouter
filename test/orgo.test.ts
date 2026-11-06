@@ -14,6 +14,8 @@ const disk = new Map<string, Buffer>();
 const exported = new Map<string, Buffer>();
 const PNG = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 9, 9]);
 let status = "running";
+/** GET polls left before a resuming/starting computer reports running. */
+let transitionPolls = 0;
 
 const COMPUTER = (os = "linux", resolution = "1280x720x24") => ({
   id: "a3bb189e-8bf9-3888-9912-ace4e6543002",
@@ -73,7 +75,16 @@ beforeAll(async () => {
       if (body.os === "windows") return send(403, { error: "Windows needs a Scale plan or a Windows licence", code: "WINDOWS_REQUIRES_SCALE" });
       return send(201, { ...COMPUTER(body.os, body.resolution), name: body.name, workspace_id: body.workspace_id });
     }
-    if (p === c && req.method === "GET") return send(200, { ...COMPUTER(), workspace_id: undefined });
+    if (p === c && req.method === "GET") {
+      // A resume or start takes a few polls before the computer reports running.
+      if (transitionPolls > 0 && --transitionPolls === 0) status = "running";
+      return send(200, { ...COMPUTER(), workspace_id: undefined });
+    }
+    if (p === `${c}/resume`) {
+      status = "resuming";
+      transitionPolls = 2;
+      return send(202, { success: true, status: "resuming" });
+    }
     if (p === c && req.method === "DELETE") return send(200, { success: true });
     if (p === `${c}/screenshot`) {
       if (url.searchParams.get("response_format") === "binary") {
@@ -100,8 +111,9 @@ beforeAll(async () => {
       return send(200, { success: true });
     }
     if (p === `${c}/start`) {
-      status = "running";
-      return send(200, { success: true });
+      status = "starting";
+      transitionPolls = 2;
+      return send(202, { success: true, status: "starting" });
     }
     if (p === "/api/files/upload") {
       const f = form!.file as { name: string; bytes: Buffer };
@@ -127,6 +139,7 @@ afterAll(() => mock.close());
 beforeEach(() => {
   calls.length = 0;
   status = "running";
+  transitionPolls = 0;
 });
 
 const orgo = (workspace?: string) => new OrgoProvider("sk_live_test", `${base}/api`, workspace);
@@ -292,6 +305,15 @@ describe("Orgo computers", () => {
     await expect(c.viewer!("watch")).rejects.toThrow(/view-only/);
     expect(new OrgoProvider("k").wsOrigin()).toBe("wss://www.orgo.ai");
   });
+
+  it("connect resumes a suspended computer and waits until it is running", async () => {
+    status = "suspended";
+    const c = await orgo().connectComputer(CID);
+    expect(calls.some((x) => x.method === "POST" && x.path === `/api/computers/${CID}/resume`)).toBe(true);
+    // Resume answers 202 while the computer is still coming back; connect must poll until running.
+    expect(calls.filter((x) => x.method === "GET" && x.path === `/api/computers/${CID}`).length).toBeGreaterThanOrEqual(3);
+    expect((await c.info()).status).toBe("ready");
+  }, 15_000);
 
   it("sleeps by stopping, connect starts it again, delete removes it", async () => {
     const c = await orgo().connectComputer(CID);

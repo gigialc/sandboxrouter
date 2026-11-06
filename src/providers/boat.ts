@@ -1,6 +1,6 @@
 import { BOAT_SIZES } from "../catalog.js";
 import { ProviderError, type ExecOptions, type ExecResult, type Provider, type ProviderSandbox, type SandboxSpec } from "../types.js";
-import { dirname, shq, toBytes, wrapCommand } from "../util.js";
+import { DEFAULT_EXEC_TIMEOUT_S, dirname, killedByTimeout, shq, timeoutError, toBytes, wrapCommand } from "../util.js";
 
 /**
  * Boat (boat.dev) over plain REST. One host, one key: Authorization: Bearer boat_... (BOAT_API_KEY).
@@ -183,9 +183,11 @@ class BoatSandbox implements ProviderSandbox {
   async exec(cmd: string, opts: ExecOptions = {}): Promise<ExecResult> {
     const t0 = Date.now();
     const streaming = !!(opts.onStdout || opts.onStderr);
+    // Boat caps a command at 600 s; it stops the command at the deadline and flags it as timedOut.
+    const seconds = Math.min(600, Math.max(1, Math.round(opts.timeoutSeconds ?? DEFAULT_EXEC_TIMEOUT_S)));
     const res = await this.call("POST", "/commands", {
       command: wrapCommand(cmd, { cwd: opts.cwd, env: opts.env }),
-      timeoutSeconds: Math.min(600, Math.max(1, Math.round(opts.timeoutSeconds ?? 60))),
+      timeoutSeconds: seconds,
       stream: streaming,
     });
 
@@ -212,7 +214,9 @@ class BoatSandbox implements ProviderSandbox {
       if (result.stdout) opts.onStdout?.(result.stdout);
       if (result.stderr) opts.onStderr?.(result.stderr);
     }
-    return { exitCode: result.exitCode ?? -1, stdout: result.stdout ?? "", stderr: result.stderr ?? "", durationMs: Date.now() - t0 };
+    const durationMs = Date.now() - t0;
+    if (result.timedOut || killedByTimeout(result.exitCode ?? -1, durationMs, seconds)) throw timeoutError(ID, seconds);
+    return { exitCode: result.exitCode ?? -1, stdout: result.stdout ?? "", stderr: result.stderr ?? "", durationMs };
   }
 
   async writeFile(path: string, content: string | Uint8Array): Promise<void> {

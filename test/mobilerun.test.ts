@@ -256,6 +256,21 @@ describe("Mobilerun computers", () => {
     expect(sdk("devices.terminate")).toEqual([["dev_1"]]);
   });
 
+  it("keeps waiting when the server-side waitReady times out, like the SDK's APIConnectionTimeoutError", async () => {
+    // The SDK's error classes don't set `name`: only the class identifies them.
+    class APIConnectionTimeoutError extends Error {}
+    let attempts = 0;
+    devices.waitReady = rec("devices.waitReady", () => {
+      if (++attempts === 1) throw new APIConnectionTimeoutError("Request timed out.");
+      state = "ready";
+      return device();
+    });
+    devices.retrieve = rec("devices.retrieve", () => device({ state: "creating" }));
+    const c = await p().createComputer({});
+    expect(c.nativeId).toBe("dev_1");
+    expect(sdk("devices.waitReady")).toHaveLength(2);
+  });
+
   it("wraps SDK errors as ProviderError", async () => {
     devices.retrieve = async () => {
       throw Object.assign(new Error("404 device not found"), { status: 404 });

@@ -1,6 +1,6 @@
 import { DEFAULT_MEMORY_GB, DEFAULT_VCPU } from "../catalog.js";
 import { ProviderError, type ExecOptions, type ExecResult, type Provider, type ProviderSandbox, type SandboxSpec } from "../types.js";
-import { optionalImport, toBytes, wrapCommand } from "../util.js";
+import { DEFAULT_EXEC_TIMEOUT_S, killedByTimeout, optionalImport, timeoutError, toBytes, wrapCommand } from "../util.js";
 
 type VercelModule = typeof import("@vercel/sandbox");
 type VercelSandbox = Awaited<ReturnType<VercelModule["Sandbox"]["get"]>>;
@@ -52,9 +52,12 @@ class VercelBox implements ProviderSandbox {
 
   async exec(cmd: string, opts: ExecOptions = {}): Promise<ExecResult> {
     const t0 = Date.now();
-    const signal = AbortSignal.timeout((opts.timeoutSeconds ?? 60) * 1000);
+    const seconds = opts.timeoutSeconds ?? DEFAULT_EXEC_TIMEOUT_S;
+    // `timeoutMs` makes the sandbox SIGKILL the process at the deadline. The abort signal only
+    // guards this client's wait, so it runs a little longer and never ends a healthy command.
+    const signal = AbortSignal.timeout((seconds + 15) * 1000);
     try {
-      const params = { cmd: "sh", args: ["-c", wrapCommand(cmd)], cwd: opts.cwd, env: opts.env, signal };
+      const params = { cmd: "sh", args: ["-c", wrapCommand(cmd)], cwd: opts.cwd, env: opts.env, signal, timeoutMs: seconds * 1000 };
       if (opts.onStdout || opts.onStderr) {
         const running = await this.sbx.runCommand({ ...params, detached: true });
         let stdout = "";
@@ -69,12 +72,16 @@ class VercelBox implements ProviderSandbox {
           }
         }
         const done = await running.wait({ signal });
+        if (killedByTimeout(done.exitCode, Date.now() - t0, seconds)) throw timeoutError("vercel", seconds);
         return { exitCode: done.exitCode, stdout, stderr, durationMs: Date.now() - t0 };
       }
       const r = await this.sbx.runCommand(params);
+      if (killedByTimeout(r.exitCode, Date.now() - t0, seconds)) throw timeoutError("vercel", seconds);
       const [stdout, stderr] = await Promise.all([r.stdout(), r.stderr()]);
       return { exitCode: r.exitCode, stdout, stderr, durationMs: Date.now() - t0 };
     } catch (err: any) {
+      if (err instanceof ProviderError) throw err;
+      if (err?.name === "TimeoutError" || err?.name === "AbortError") throw timeoutError("vercel", seconds);
       throw new ProviderError("vercel", err?.message ?? String(err));
     }
   }

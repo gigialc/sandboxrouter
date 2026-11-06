@@ -12,6 +12,8 @@ import { DedalusProvider } from "../src/providers/dedalus.js";
  * and expose full output at /output.
  */
 let server: Server;
+/** The real API's inline output cap per stream. */
+const OUTPUT_CAP = 64 * 1024;
 let base = "";
 let root = "";
 const seen: { method: string; path: string; auth?: string; body?: any }[] = [];
@@ -93,11 +95,19 @@ beforeAll(async () => {
       const ex = executions.get(m[1]);
       if (!ex) return send(404, { error_code: "NOT_FOUND", message: "execution not found", retryable: false });
       if (req.method === "DELETE") return send(200, {});
-      if (m[2] === "/output") return send(200, { execution_id: m[1], stdout: ex.stdout, stderr: ex.stderr, stdout_bytes: 0, stderr_bytes: 0, stdout_truncated: false, stderr_truncated: false });
+      if (m[2] === "/output") {
+        // Like the real API: each inline stream is capped at 64 KiB and flagged when cut.
+        const cap = (s: string) => ({ text: s.slice(0, OUTPUT_CAP), truncated: s.length > OUTPUT_CAP });
+        const o = cap(ex.stdout);
+        const e = cap(ex.stderr);
+        return send(200, { execution_id: m[1], stdout: o.text, stderr: e.text, stdout_bytes: ex.stdout.length, stderr_bytes: ex.stderr.length, stdout_truncated: o.truncated, stderr_truncated: e.truncated });
+      }
       if (m[2] === "/events") {
         const from = Number(url.searchParams.get("cursor") ?? 0);
         const items = ex.events.slice(from, from + 2); // small pages to exercise the cursor
-        return send(200, { items, next_cursor: String(from + items.length) });
+        // Like the real API (next_cursor is optional): a page that drains the feed carries no cursor.
+        const more = from + items.length < ex.events.length;
+        return send(200, more ? { items, next_cursor: String(from + items.length) } : { items });
       }
       return send(200, { execution_id: m[1], machine_id: "m-1", status: ex.status, exit_code: ex.exit_code, signal: ex.signal, error_code: ex.error_code });
     }
@@ -166,6 +176,14 @@ describe("DedalusProvider", () => {
     expect(r.stdout).toBe("one\nthree\n");
   });
 
+  it("returns output past the 64 KiB inline cap in full, assembled from the events feed", async () => {
+    const sbx = await p().create({});
+    const r = await sbx.exec("head -c 100000 /dev/zero | tr '\\0' x; head -c 70000 /dev/zero | tr '\\0' y >&2");
+    expect(r.stdout.length).toBe(100_000);
+    expect(r.stderr.length).toBe(70_000);
+    expect(r.stdout).toMatch(/^x+$/);
+  });
+
   it("reports a command timeout", async () => {
     const sbx = await p().create({});
     await expect(sbx.exec("sleep 5", { timeoutSeconds: 1 })).rejects.toThrow(/timed out after 1s/);
@@ -182,7 +200,7 @@ describe("DedalusProvider", () => {
     await sbx.writeFile(join(root, "empty"), "");
     expect((await sbx.readFile(join(root, "empty"))).length).toBe(0);
     await expect(sbx.readFile(join(root, "missing"))).rejects.toMatchObject({ status: 404 });
-  });
+  }, 30_000);
 
   it("sleeps on pause, wakes on connect, and force-deletes on kill", async () => {
     const sbx = await p().create({});
