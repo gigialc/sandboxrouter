@@ -50,7 +50,6 @@ Estimated list price while running, 2 vCPU / 4 GB (`npx @sandboxrouter/sdk provi
 |---|---|---|---|
 | Agent37 | $0.007 | Whole-minute billing: monthly shape total / 730 / 60; running estimate includes default disk (2 vCPU / 4 GB / 4 GB disk = $4.76/mo); sleeping/stopped disk $0.09/GB-mo; gVisor; $5 minimum top-up, wallet must hold one running day | [pricing](https://www.agent37.com/docs/agents-api/billing) |
 | InstaBox (sign-up waitlisted) | $0.017 | Per second while running on fixed sizes (2/4, 4/8, 8/16); paused or stopped boxes bill only /data beyond the included disk ($0.00011/GiB-h); Pro $20/mo includes $20 credits; free plan: 1 box at 4/8 | [pricing](https://instabox.sh/docs/pricing.md) |
-| OpenScale Sandboxes | $0.017 | Per second on allocated size; no platform fee or minimum; paused = free; size comes from the template (E2B-compatible API); Singapore only; needs a pay-as-you-go key | [pricing](https://openscale.so/sandboxes) |
 | Boat | $0.018 | Fixed sizes billed per second ($0.018/h for 2 vCPU / 4 GB up to $0.20/h for 16 / 32); needs a plan from $20/mo, paid back as VM time | [pricing](https://docs.boat.dev/pricing.md) |
 | Maritime | $0.022 | Per second, no minimum runtime; running disk included; Starter $20/mo incl. $20 usage; paused disk $0.08/GB-month (default idle action deletes sandbox) | [pricing](https://maritime.sh/pricing) |
 | Koyeb Sandboxes (not taking new accounts) | $0.058 | Per second; fixed Standard instance sizes (1 vCPU + 1 GB = $0.0144/h); sandboxes need a paid plan (Pro $29/mo); public preview | [pricing](https://www.koyeb.com/docs/reference/instances) |
@@ -64,8 +63,6 @@ Estimated list price while running, 2 vCPU / 4 GB (`npx @sandboxrouter/sdk provi
 | Dedalus Machines (sign-up waitlisted) | $0.149 | Per second while awake; sleeping machines bill storage only (10 GiB included on Hobby, 20 on Pro); Hobby plan max 4 vCPU / 16 GiB; private beta | [pricing](https://docs.dedaluslabs.ai/dcs/dm/pricing) |
 | Fly.io Sprites | $0.164 | Bills actual CPU and memory use; this is the full-use price; storage extra | [pricing](https://fly.io/sprites) |
 | Blaxel | $0.166 | Billed on memory only ($0.0000115/GB-s), CPU scales with memory (~2 GB per core) | [pricing](https://blaxel.ai/pricing) |
-| Daytona | $0.166 | Per second, plus disk above 5 GiB | [pricing](https://www.daytona.io/pricing) |
-| E2B | $0.166 | Per second; Pro plan $150/mo | [pricing](https://e2b.dev/pricing) |
 | HOPX | $0.166 | Per second, plus storage; size comes from the template, not the request | [pricing](https://hopx.ai/pricing) |
 | Superserve | $0.166 | Per second active; superserve/base fixed at 2 vCPU / 4 GiB / 8 GiB disk; retained storage $0.000108/GiB-h (shared template plus changed blocks); Developer $20/mo incl. $20, max 4/16 with team templates; recurring Free allowance not published on pricing page | [pricing](https://superserve.ai/pricing) |
 | LangSmith Sandboxes | $0.189 | Per second; memory must be 2 to 6 GiB per vCPU; storage $0.000123/GiB-h; 8 LSU ($8) of sandbox usage a month included; Developer plan max 10 sandboxes | [pricing](https://www.langchain.com/pricing) |
@@ -78,8 +75,11 @@ Estimated list price while running, 2 vCPU / 4 GB (`npx @sandboxrouter/sdk provi
 | Deno Sandbox | $0.300 | Billed on CPU time, not wall clock (estimate assumes both vCPUs busy); fixed 2 vCPU, 0.75-4 GB, max 30 min lifetime; needs a paid Deno Deploy plan | [pricing](https://deno.com/sandbox) |
 | Runloop | $0.317 | Per second, plus disk; pause (suspend) is a Pro-plan feature | [pricing](https://www.runloop.ai/pricing) |
 | Vercel Sandbox | $0.341 | iad1; active CPU, provisioned RAM in minimum 1-minute increments (2 GB/vCPU); full-CPU estimate; Hobby free within quotas, Pro $20/mo usage credit; creations $0.60/million and retained snapshots $0.08/GB-month extra | [pricing](https://vercel.com/docs/vercel-sandbox/pricing) |
+| OpenScale Sandboxes | skipped (default size 2 vCPU / 1 GB; more needs image.openscale) | Per second on allocated size; no platform fee or minimum; paused = free; size comes from the template (E2B-compatible API); Singapore only; needs a pay-as-you-go key | [pricing](https://openscale.so/sandboxes) |
 | Azure Container Apps dynamic sessions | skipped (max 1 vCPU) | Flat $0.03 per session-hour (built-in Shell pools), billed per allocated session in 1-hour increments, East US; needs a session pool you create once | [pricing](https://learn.microsoft.com/en-us/azure/container-apps/billing#dynamic-sessions) |
+| Daytona | skipped (default size 1 vCPU / 1 GB; more needs image.daytona) | Per second, plus disk above 5 GiB | [pricing](https://www.daytona.io/pricing) |
 | Alibaba Cloud Agent Sandbox | skipped (max 2 GB memory) | Per second; Default QoS, Hong Kong and regions outside mainland China; disk separately $0.00025308/GiB-h; code-interpreter-v1 template is 2 vCPU / 2 GiB with 10 GiB disk (E2B-compatible API) | [pricing](https://www.alibabacloud.com/help/en/agent-sandbox/product-overview/billing-overview) |
+| E2B | skipped (default size 2 vCPU / 0.5 GB; more needs image.e2b) | Per second; Pro plan $150/mo | [pricing](https://e2b.dev/pricing) |
 | Docker (local) | free | Runs on your own machine; free, but shares your kernel, so weaker isolation than a cloud micro-VM | [pricing](https://docs.docker.com/engine/) |
 
 Checked 2026-11-04 to 2026-11-05.
@@ -264,6 +264,15 @@ A sandbox the provider already stopped is just dropped from the ledger. `sandbox
 
 `--share` writes a JSON report (timings, your label, Node version and platform; never keys, env or error text). Open a PR adding it to [`results/`](results/). `sandboxrouter leaderboard` builds one static HTML page from every report there, taking the median of each submission's medians so one submitter can't dominate. Host the page anywhere static files go.
 
+### Real cost
+
+Prices in the catalog are list prices. `cost` checks them against real bills: it starts one sandbox per provider at a known size, records the size the sandbox really has (`nproc` and `MemTotal`), keeps every core busy for a fixed time (some providers bill active CPU only), kills it, and predicts the cost from list price × wall time. `cost settle` then reads what the provider charged for that sandbox, from Daytona's usage analytics, Blaxel's metrics API and Maritime's metered usage. E2B and OpenScale have no billing API, so their bill is read from the dashboard. Bills post late on some providers (Daytona can take up to 48 h), so rerun `settle` until every row has one.
+
+```bash
+sandboxrouter cost run --minutes 10           # every configured cloud provider, 2 vCPU / 4 GB
+sandboxrouter cost settle results/cost/cost-2026-11-06-16-58.json
+```
+
 ### Compatibility
 
 `check` runs the same 14 steps against a real account: create; stdout, stderr and exit code; env and cwd; UTF-8 output; live streaming; a binary file round-trip; a 1 MB file; reading a missing file is an error; files written by `writeFile` are visible to commands and the other way round; a command timeout rejects with the contract's error; the timed-out command was really stopped; pause and resume; kill; and the killed sandbox is really gone.
@@ -279,7 +288,6 @@ It prints one line per step and exits 1 if any fails. `checkProvider(router, id)
 |---|---|---|
 | Agent37 | not run yet | |
 | InstaBox | not run yet | |
-| OpenScale Sandboxes | 14/14 passed | 2026-11-06, v0.2.0 |
 | Boat | not run yet | |
 | Maritime | 14/14 passed | 2026-11-06, v0.2.0 |
 | Koyeb Sandboxes | not run yet | |
@@ -293,8 +301,6 @@ It prints one line per step and exits 1 if any fails. `checkProvider(router, id)
 | Dedalus Machines | not run yet | |
 | Fly.io Sprites | not run yet | |
 | Blaxel | 13/13 passed; n/a: pause and resume | 2026-11-06, v0.2.0 |
-| Daytona | 0/14 passed; failed: create | 2026-11-06, v0.2.0 |
-| E2B | 14/14 passed | 2026-11-06, v0.2.0 |
 | HOPX | not run yet | |
 | Superserve | not run yet | |
 | LangSmith Sandboxes | not run yet | |
@@ -307,8 +313,11 @@ It prints one line per step and exits 1 if any fails. `checkProvider(router, id)
 | Deno Sandbox | not run yet | |
 | Runloop | not run yet | |
 | Vercel Sandbox | not run yet | |
+| OpenScale Sandboxes | 14/14 passed | 2026-11-06, v0.2.0 |
 | Azure Container Apps dynamic sessions | not run yet | |
+| Daytona | 0/14 passed; failed: create | 2026-11-06, v0.2.0 |
 | Alibaba Cloud Agent Sandbox | not run yet | |
+| E2B | 14/14 passed | 2026-11-06, v0.2.0 |
 | Docker (local) | 14/14 passed | 2026-11-06, v0.2.0 |
 
 ## HTTP API

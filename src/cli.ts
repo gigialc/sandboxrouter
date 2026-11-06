@@ -3,6 +3,7 @@ import { parseArgs } from "node:util";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { platform, arch } from "node:os";
 import { bench, benchMarkdown } from "./bench.js";
+import { costMarkdown, costRun, settle, type CostRun } from "./cost.js";
 import { checkProvider } from "./check.js";
 import { gc, listOpen } from "./gc.js";
 import { loadReports, makeReport, renderLeaderboard } from "./leaderboard.js";
@@ -25,6 +26,12 @@ Usage:
   sandboxrouter gc        [--all | --older-than MIN] [--dry-run]
                           kill leaked sandboxes: by default those past their lifetime
   sandboxrouter bench     [--runs 3] [--provider a,b] [--json] [--share [--label "where you ran it"]]
+  sandboxrouter cost run  [--provider a,b] [--minutes 10] [--vcpu 2 --memory 4] [--no-load] [--out FILE]
+                          start one sandbox per provider for a fixed time with every core busy, record
+                          the size it really got and the list-price prediction
+  sandboxrouter cost settle FILE
+                          read what each provider actually billed for those sandboxes (rerun until all
+                          bills have posted) and print predicted vs billed
   sandboxrouter leaderboard [results-dir] [--out leaderboard.html]
   sandboxrouter desktop   [--os linux|windows|android|ios] [--user ID] [--control]
                           get or create a computer and print a link to watch (or take over) its screen
@@ -68,6 +75,8 @@ const { values, positionals } = parseArgs({
     save: { type: "boolean" },
     "older-than": { type: "string" },
     "dry-run": { type: "boolean" },
+    minutes: { type: "string" },
+    "no-load": { type: "boolean" },
   },
 });
 
@@ -224,6 +233,36 @@ async function main() {
       console.log(`\nwrote ${file}. Add it to results/ in a PR to github.com/gigialc/sandboxrouter to put it on the leaderboard.`);
     }
     return;
+  }
+
+  if (cmd === "cost") {
+    const version = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8")).version;
+    if (rest[0] === "run") {
+      const ids = providers ?? (router.registered().filter((id) => router.isConfigured(id) && id !== "docker") as ProviderId[]);
+      if (!ids.length) return console.error("No providers configured. Set at least one API key (see --help).");
+      const run = await costRun({
+        router,
+        providers: ids,
+        minutes: num(values.minutes) ?? 10,
+        spec,
+        load: !values["no-load"],
+        version,
+        onProgress: (m) => console.error(m),
+      });
+      const file = values.out ?? `results/cost/cost-${run.date.slice(0, 16).replace(/[:T]/g, "-")}.json`;
+      mkdirSync(file.replace(/\/[^/]*$/, "") || ".", { recursive: true });
+      writeFileSync(file, JSON.stringify(await settle(run), null, 2) + "\n");
+      console.log(costMarkdown(run));
+      console.log(`\nwrote ${file}. Bills post late on some providers: run "sandboxrouter cost settle ${file}" again later.`);
+      return;
+    }
+    if (rest[0] === "settle" && rest[1]) {
+      const run = (await settle(JSON.parse(readFileSync(rest[1], "utf8")) as CostRun)) as CostRun;
+      writeFileSync(rest[1], JSON.stringify(run, null, 2) + "\n");
+      console.log(costMarkdown(run));
+      return;
+    }
+    return console.error('Usage: sandboxrouter cost run [...] | sandboxrouter cost settle FILE');
   }
 
   if (cmd === "leaderboard") {

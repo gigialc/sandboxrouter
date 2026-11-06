@@ -22,7 +22,7 @@ jobs:
           node-version: 22
       - run: npm ci
       # Provider SDKs that are peer dependencies but not dev dependencies.
-      - run: npm i --no-save @beamcloud/beam-js @codesandbox/sdk @deno/sandbox novita-sandbox langsmith ws
+      - run: npm i --no-save --legacy-peer-deps @beamcloud/beam-js @codesandbox/sdk @deno/sandbox novita-sandbox langsmith ws
         continue-on-error: true
       - id: check
         name: Check every configured provider

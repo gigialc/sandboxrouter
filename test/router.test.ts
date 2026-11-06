@@ -30,17 +30,18 @@ describe("routing", () => {
   it("skips providers without credentials", async () => {
     const r = new Router({ providers: fakes({ maritime: { configured: false } }) });
     expect(r.plan()[0]).toMatchObject({ provider: "maritime", skip: "not configured" });
-    expect((await r.create()).provider).toBe("daytona");
+    // daytona and e2b are next by price, but their default images are smaller than 2 vCPU / 4 GB
+    expect((await r.create()).provider).toBe("modal");
   });
 
   it("falls back down the list and records every attempt", async () => {
-    const r = new Router({ providers: fakes({ maritime: { fail: "429 concurrency_limit" }, daytona: { fail: "503" } }) });
+    const r = new Router({ providers: fakes({ maritime: { fail: "429 concurrency_limit" }, modal: { fail: "503" } }) });
     const sbx = await r.create();
-    expect(sbx.provider).toBe("e2b");
+    expect(sbx.provider).toBe("vercel");
     expect(sbx.attempts.map((a) => [a.provider, a.ok])).toEqual([
       ["maritime", false],
-      ["daytona", false],
-      ["e2b", true],
+      ["modal", false],
+      ["vercel", true],
     ]);
     expect(sbx.attempts[0].error).toContain("429");
   });
@@ -54,7 +55,8 @@ describe("routing", () => {
     const r = new Router({ providers: ALL.map((id) => new FakeProvider(id, { fail: `${id} down` })) });
     const err = await r.create().catch((e) => e);
     expect(err).toBeInstanceOf(RouterError);
-    expect(err.attempts).toHaveLength(5);
+    // daytona and e2b aren't tried: their default images are smaller than the default size
+    expect(err.attempts.map((a: { provider: string }) => a.provider)).toEqual(["maritime", "modal", "vercel"]);
   });
 
   it("cheapest sorts by estimated hourly price", () => {
@@ -82,14 +84,14 @@ describe("routing", () => {
 
   it("uses an explicit provider list in the given order", async () => {
     const r = new Router({ providers: fakes({ vercel: { fail: "nope" } }) });
-    const sbx = await r.create({}, { provider: ["vercel", "e2b"] });
-    expect(sbx.provider).toBe("e2b");
+    const sbx = await r.create({}, { provider: ["vercel", "modal"] });
+    expect(sbx.provider).toBe("modal");
   });
 
   it("reports an unknown provider id as a skipped candidate, and create refuses it", async () => {
     const r = new Router({ providers: fakes() });
-    const plan = r.plan({}, { provider: ["nope" as never, "e2b"] });
-    expect(plan.map((c) => [c.provider, c.skip])).toEqual([["nope", "unknown provider"], ["e2b", undefined]]);
+    const plan = r.plan({}, { provider: ["nope" as never, "modal"] });
+    expect(plan.map((c) => [c.provider, c.skip])).toEqual([["nope", "unknown provider"], ["modal", undefined]]);
     const err = await r.create({}, { provider: "nope" as never }).catch((e) => e);
     expect(err).toBeInstanceOf(RouterError);
     expect(err.message).toMatch(/nope \(unknown provider\)/);
@@ -154,14 +156,15 @@ describe("streaming and pause", () => {
     const a = await r.create({}, { provider: "maritime" });
     expect(a.canPause).toBe(false);
     await expect(a.pause()).rejects.toThrow(/maritime does not support pause/);
-    const b = await r.create({}, { provider: "e2b" });
+    const b = await r.create({ vcpu: 2, memoryGb: 0.5 }, { provider: "e2b" });
     await b.pause();
     expect(b.canPause).toBe(true);
   });
 
   it("require pause filters to pause-capable adapters", () => {
     const r = new Router({ providers: fakes() });
-    expect(r.plan({}, { require: ["pause"] }).filter((c) => !c.skip).map((c) => c.provider)).toEqual(["maritime", "daytona", "e2b"]);
+    const small = { vcpu: 1, memoryGb: 0.5 };
+    expect(r.plan(small, { require: ["pause"] }).filter((c) => !c.skip).map((c) => c.provider)).toEqual(["maritime", "daytona", "e2b"]);
   });
 });
 
@@ -174,8 +177,11 @@ describe("ids and prices", () => {
 
   it("prices 2 vCPU / 4 GB at published rates", () => {
     expect(hourlyCost("maritime")).toBeCloseTo(0.022, 4);
-    expect(hourlyCost("e2b")).toBeCloseTo(0.1656, 4);
-    expect(hourlyCost("daytona")).toBeCloseTo(0.1656, 4);
+    // E2B, Daytona and OpenScale run their default image's size unless given an image
+    expect(hourlyCost("e2b")).toBeCloseTo(2 * 0.0504 + 0.5 * 0.0162, 4);
+    expect(hourlyCost("e2b", { image: { e2b: "my-template" } })).toBeCloseTo(0.1656, 4);
+    expect(hourlyCost("daytona")).toBeCloseTo(0.0504 + 0.0162, 4);
+    expect(hourlyCost("daytona", { image: { daytona: "python:3.12" } })).toBeCloseTo(0.1656, 4);
     expect(hourlyCost("modal")).toBeCloseTo(0.238, 2);
     expect(hourlyCost("vercel")).toBeCloseTo(0.3408, 4);
     expect(hourlyCost("morph")).toBeCloseTo(0.1, 4);
@@ -189,6 +195,15 @@ describe("ids and prices", () => {
     expect(hourlyCost("exedev")).toBeCloseTo(0.105, 4);
     // 2 vCPU / 4 GB rents Cloudflare's standard-3 (2 vCPU, 8 GiB)
     expect(hourlyCost("cloudflare")).toBeCloseTo(2 * 0.072 + 8 * 0.009, 4);
+  });
+
+  it("skips a provider whose default image is smaller than the request, unless an image is given", () => {
+    expect(unfit("e2b", {})).toBe("default size 2 vCPU / 0.5 GB; more needs image.e2b");
+    expect(unfit("e2b", { vcpu: 2, memoryGb: 0.5 })).toBeNull();
+    expect(unfit("e2b", { vcpu: 2, memoryGb: 4, image: { e2b: "big-template" } })).toBeNull();
+    expect(unfit("openscale", { vcpu: 2, memoryGb: 2 })).toMatch(/default size 2 vCPU \/ 1 GB/);
+    expect(unfit("daytona", { vcpu: 2, memoryGb: 1 })).toMatch(/default size 1 vCPU \/ 1 GB/);
+    expect(unfit("daytona", { vcpu: 2, memoryGb: 4, image: { daytona: "python:3.12" } })).toBeNull();
   });
 
   it("prices fixed-size providers by the size they actually rent", () => {
@@ -206,7 +221,8 @@ describe("ids and prices", () => {
     const names = CATALOG.map((c) => c.name);
     expect(names).toEqual([...names].sort((a, b) => a.localeCompare(b)));
     // Alibaba's default template (2 vCPU / 2 GB) and Azure's sessions are fixed below the default size.
-    for (const c of CATALOG) if (!["alibaba", "azure"].includes(c.id)) expect(unfit(c.id, {})).toBeNull();
+    // E2B, Daytona and OpenScale default images are smaller too (measured in real sandboxes).
+    for (const c of CATALOG) if (!["alibaba", "azure", "e2b", "daytona", "openscale"].includes(c.id)) expect(unfit(c.id, {})).toBeNull();
     expect(CATALOG.filter((c) => c.local).map((c) => c.id)).toEqual(["docker"]);
     expect(new Set(CATALOG.map((c) => hourlyCost(c.id))).size).toBeGreaterThan(1);
   });

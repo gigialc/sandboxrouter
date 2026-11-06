@@ -1,3 +1,4 @@
+import { fixedSize } from "../src/catalog.js";
 import { existsSync, realpathSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { Router } from "../src/router.js";
@@ -40,7 +41,7 @@ export function describeConformance(name: string, opts: ConformanceOptions) {
     async function start() {
       const p = await opts.provider();
       const router = new Router({ providers: [p], ledger: false });
-      const sbx = await router.create(opts.spec ?? {}, { provider: p.id, fallback: false });
+      const sbx = await router.create(opts.spec ?? { ...fixedSize(p.id) }, { provider: p.id, fallback: false });
       return { p, router, sbx };
     }
 
