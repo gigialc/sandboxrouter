@@ -54,6 +54,7 @@ _SPEC_KEYS = {
     "provider": "provider",
     "strategy": "strategy",
     "fallback": "fallback",
+    "create_timeout_seconds": "createTimeoutSeconds",
     "require": "require",
 }
 
@@ -107,7 +108,8 @@ class Client:
 
     def create(self, **spec: Any) -> "Sandbox":
         """Start a sandbox. Spec: vcpu, memory_gb, gpu, env, timeout_minutes, image, metadata.
-        Routing: provider (str or list), strategy ("default" | "cheapest" | "fastest"), fallback, require."""
+        Routing: provider (str or list), strategy ("default" | "cheapest" | "fastest"), fallback
+        (True, False or "any"), create_timeout_seconds, require."""
         d = self._json("POST", "/v1/sandboxes", _camel(spec))
         return Sandbox(self, d["id"], d["provider"], d.get("estimatedHourlyUsd"), d.get("attempts", []))
 

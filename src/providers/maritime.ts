@@ -34,8 +34,15 @@ export class MaritimeProvider implements Provider, ComputerProvider {
     return !!this.apiKey;
   }
 
-  /** @internal */
-  async request(method: string, url: string, init: { json?: unknown; bytes?: Uint8Array; headers?: Record<string, string> } = {}): Promise<Response> {
+  /**
+   * @internal Every request has a deadline (`timeoutMs`, default 60 s), so a server that accepts
+   * the connection and never answers is an error the router can fall back from, not a hang.
+   */
+  async request(
+    method: string,
+    url: string,
+    init: { json?: unknown; bytes?: Uint8Array; headers?: Record<string, string>; timeoutMs?: number } = {},
+  ): Promise<Response> {
     const headers: Record<string, string> = { ...init.headers };
     let body: BodyInit | undefined;
     if (init.json !== undefined) {
@@ -45,7 +52,14 @@ export class MaritimeProvider implements Provider, ComputerProvider {
       headers["Content-Type"] = "application/octet-stream";
       body = init.bytes as unknown as BodyInit;
     }
-    const res = await fetch(url, { method, headers, body });
+    const ms = init.timeoutMs ?? REQUEST_TIMEOUT_MS;
+    let res: Response;
+    try {
+      res = await fetch(url, { method, headers, body, signal: AbortSignal.timeout(ms) });
+    } catch (err: any) {
+      if (err?.name === "TimeoutError") throw new ProviderError(this.id, `${method} ${new URL(url).pathname}: no answer after ${ms / 1000}s`);
+      throw err;
+    }
     if (!res.ok) {
       const text = await res.text();
       let detail = text.slice(0, 300);
@@ -138,7 +152,7 @@ class MaritimeSandbox implements ProviderSandbox {
   }
 
   /** Data plane call; on 401 re-reads the sandbox once in case the secret was rotated. */
-  private async data(method: string, path: string, init: { json?: unknown; bytes?: Uint8Array; headers?: Record<string, string> } = {}) {
+  private async data(method: string, path: string, init: { json?: unknown; bytes?: Uint8Array; headers?: Record<string, string>; timeoutMs?: number } = {}) {
     const go = () =>
       this.p.request(method, `${this.sbx.dataPlaneUrl}${path}`, {
         ...init,
@@ -163,6 +177,8 @@ class MaritimeSandbox implements ProviderSandbox {
     const res = await this.data("POST", "/commands", {
       json: body,
       headers: streaming ? { Accept: "text/event-stream" } : {},
+      // Covers reading the stream too; the server stops the command at its own limit first.
+      timeoutMs: (seconds + 30) * 1000,
     }).catch((err) => {
       throw isCommandTimeout(err) ? timeoutError("maritime", seconds) : err;
     });
@@ -193,11 +209,11 @@ class MaritimeSandbox implements ProviderSandbox {
   }
 
   async writeFile(path: string, content: string | Uint8Array): Promise<void> {
-    await this.data("PUT", `/files?path=${encodeURIComponent(path)}`, { bytes: toBytes(content) });
+    await this.data("PUT", `/files?path=${encodeURIComponent(path)}`, { bytes: toBytes(content), timeoutMs: FILE_TIMEOUT_MS });
   }
 
   async readFile(path: string): Promise<Uint8Array> {
-    const res = await this.data("GET", `/files?path=${encodeURIComponent(path)}`);
+    const res = await this.data("GET", `/files?path=${encodeURIComponent(path)}`, { timeoutMs: FILE_TIMEOUT_MS });
     return new Uint8Array(await res.arrayBuffer());
   }
 
@@ -281,3 +297,6 @@ function clamp(n: number, lo: number, hi: number) {
 function isCommandTimeout(err: any): boolean {
   return err instanceof ProviderError && err.status === 504 && /command_timeout/.test(err.message);
 }
+
+const REQUEST_TIMEOUT_MS = 60_000;
+const FILE_TIMEOUT_MS = 300_000;

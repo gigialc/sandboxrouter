@@ -9,7 +9,7 @@ import { loadReports, makeReport, renderLeaderboard } from "./leaderboard.js";
 import { CATALOG, accessLabel, hourlyCost } from "./catalog.js";
 import { Router } from "./router.js";
 import { createApp } from "./server.js";
-import { RouterError, type Capability, type ProviderId, type SandboxSpec, type Strategy } from "./types.js";
+import { RouterError, type Capability, type ProviderId, type RouteOptions, type SandboxSpec, type Strategy } from "./types.js";
 
 const HELP = `sandboxrouter: one API for every sandbox provider
 
@@ -33,7 +33,8 @@ Usage:
 
 Spec flags:   --vcpu N  --memory GB  --gpu T4  --timeout MIN
 Route flags:  --provider e2b[,modal,...]  --strategy cheapest|fastest
-              --no-fallback  --require gpu,custom-image
+              --no-fallback  --fallback-any (also on setup errors like a bad key)
+              --create-timeout SEC (per provider, default 120)  --require gpu,custom-image
 
 Keys: one env var group per provider; "sandboxrouter providers" lists them and shows which are set.`;
 
@@ -47,6 +48,8 @@ const { values, positionals } = parseArgs({
     provider: { type: "string" },
     strategy: { type: "string" },
     "no-fallback": { type: "boolean" },
+    "fallback-any": { type: "boolean" },
+    "create-timeout": { type: "string" },
     require: { type: "string" },
     keep: { type: "boolean" },
     runs: { type: "string" },
@@ -78,10 +81,11 @@ const spec: SandboxSpec = {
   timeoutMinutes: num(values.timeout),
 };
 const providers = list(values.provider) as ProviderId[] | undefined;
-const route = {
+const route: RouteOptions = {
   provider: providers,
   strategy: values.strategy as Strategy | undefined,
-  fallback: values["no-fallback"] ? false : undefined,
+  fallback: values["no-fallback"] ? false : values["fallback-any"] ? "any" : undefined,
+  createTimeoutSeconds: num(values["create-timeout"]),
   require: list(values.require) as Capability[] | undefined,
 };
 
@@ -255,10 +259,14 @@ async function main() {
     const port = num(values.port) ?? Number(process.env.PORT ?? 8787);
     const host = values.host ?? "127.0.0.1";
     const origins = list(values.cors);
+    const loopback = /^(127\.\d+\.\d+\.\d+|::1|localhost)$/.test(host);
+    if (!process.env.SANDBOXROUTER_TOKEN && !loopback) {
+      throw new RouterError(`refusing to listen on ${host} without SANDBOXROUTER_TOKEN: anyone who can reach it could start sandboxes on your keys`);
+    }
     createApp(router, undefined, origins).listen(port, host, () => {
       console.log(`sandboxrouter listening on http://${host}:${port}`);
       if (origins?.length) console.log(`browser access allowed from: ${origins.join(", ")}`);
-      if (!process.env.SANDBOXROUTER_TOKEN) console.log("warning: SANDBOXROUTER_TOKEN is not set, so the API is unauthenticated");
+      if (!process.env.SANDBOXROUTER_TOKEN) console.log("note: SANDBOXROUTER_TOKEN is not set; any program on this machine can use the API");
     });
     return;
   }
