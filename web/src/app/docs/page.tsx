@@ -108,8 +108,9 @@ router.create(spec, { require: ["pause"] })         // only providers that can p
 
         <h2 id="fallback">Fallback</h2>
         <p>
-          If a create fails (rate limit, outage, plan limit), the router tries the next candidate. The sandbox you get back
-          lists every attempt:
+          If a provider looks unavailable (a timeout, a network error, 429 or 5xx, or a create that takes longer than{" "}
+          <code>createTimeoutSeconds</code>, default 120), the router tries the next candidate. The sandbox you get back lists
+          every attempt:
         </p>
         <CodeBlock
           code={`sbx.attempts
@@ -117,9 +118,13 @@ router.create(spec, { require: ["pause"] })         // only providers that can p
 //   { provider: "e2b", ok: true, ms: 840 } ]`}
         />
         <p>
-          Pass <code>fallback: false</code> to try only the first candidate. If every candidate fails, <code>create</code> throws
-          a <code>RouterError</code> with the same <code>attempts</code>. Commands never fall back, because a sandbox&apos;s state
-          lives on one provider.
+          A setup error (400, 401, 402, 403, 404 or 422: a bad key, no billing, a bad image or request) stops instead, so a
+          mistake isn&apos;t hidden by quietly sending the work to another, maybe pricier, provider. Pass{" "}
+          <code>fallback: &quot;any&quot;</code> to fall back on every error, or <code>fallback: false</code> to try only the
+          first candidate. If every candidate fails, <code>create</code> throws a <code>RouterError</code> with the same{" "}
+          <code>attempts</code>. A sandbox that turns up after its create timed out is killed, or left in the ledger for{" "}
+          <code>sandboxrouter gc</code> if that fails. Commands never fall back, because a sandbox&apos;s state lives on one
+          provider.
         </p>
 
         <h2 id="streaming">Streaming output</h2>
@@ -182,7 +187,7 @@ const { url } = await desk.viewer("control", { reason: "Please sign in" });`}
         <CodeBlock
           title="terminal"
           code={`SANDBOXROUTER_TOKEN=secret npx @sandboxrouter/sdk serve --port 8787
-# allow a website (like this one's Playground) to call it from the browser:
+# allow a website (like this one's Playground) to call it from the browser (needs the token):
 SANDBOXROUTER_TOKEN=secret npx @sandboxrouter/sdk serve --cors https://your-site.example`}
         />
         <table>
@@ -196,7 +201,7 @@ SANDBOXROUTER_TOKEN=secret npx @sandboxrouter/sdk serve --cors https://your-site
             {[
               ["GET /v1/providers", ""],
               ["POST /v1/route", "same as create; returns the candidate order"],
-              ["POST /v1/sandboxes", "{ vcpu, memoryGb, gpu, env, timeoutMinutes, image, provider, strategy, fallback, require }"],
+              ["POST /v1/sandboxes", "{ vcpu, memoryGb, gpu, env, timeoutMinutes, image, provider, strategy, fallback, createTimeoutSeconds, require }"],
               ["POST /v1/sandboxes/:id/exec", "{ cmd, cwd, env, timeoutSeconds, stream }"],
               ["PUT /v1/sandboxes/:id/files?path=", "raw bytes"],
               ["GET /v1/sandboxes/:id/files?path=", ""],

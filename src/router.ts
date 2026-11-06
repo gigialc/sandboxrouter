@@ -49,6 +49,7 @@ import { MobilerunProvider } from "./providers/mobilerun.js";
 import { LimrunProvider } from "./providers/limrun.js";
 import { WorkspacesAgentProvider } from "./providers/workspaces.js";
 import {
+  ProviderError,
   RouterError,
   type Attempt,
   type ExecOptions,
@@ -206,29 +207,56 @@ export class Router {
 
     const attempts: Attempt[] = [];
     const tries = route.fallback === false ? usable.slice(0, 1) : usable;
+    const limitS = route.createTimeoutSeconds ?? DEFAULT_CREATE_TIMEOUT_S;
     for (const c of tries) {
       const t0 = Date.now();
+      const pending = this.provider(c.provider).create(spec);
+      let timedOut = false;
       try {
-        const box = await this.provider(c.provider).create(spec);
+        const box = await withDeadline(pending, limitS * 1000, () => {
+          timedOut = true;
+          return new ProviderError(c.provider, `create timed out after ${limitS}s`);
+        });
         attempts.push({ provider: c.provider, ok: true, ms: Date.now() - t0 });
         const sbx = new RoutedSandbox(c.provider, box, attempts, c.estimatedHourlyUsd, this.ledger);
-        const now = Date.now();
-        this.ledger?.open({
-          id: sbx.id,
-          provider: c.provider,
-          createdAt: new Date(now).toISOString(),
-          expiresAt: new Date(now + (spec.timeoutMinutes ?? 30) * 60_000).toISOString(),
-          usdHour: c.estimatedHourlyUsd,
-        });
+        this.record(sbx, c.estimatedHourlyUsd, spec.timeoutMinutes);
         return sbx;
       } catch (err) {
+        // A create that answers after we gave up still made a sandbox: record it, then kill it,
+        // so it can't bill unseen. If the kill fails, the ledger entry is left for `gc`.
+        if (timedOut) pending.then((late) => this.discard(c.provider, late, c.estimatedHourlyUsd, spec.timeoutMinutes), () => {});
         attempts.push({ provider: c.provider, ok: false, ms: Date.now() - t0, error: (err as Error).message });
+        const status = err instanceof ProviderError ? err.status : undefined;
+        if (route.fallback !== "any" && status !== undefined && SETUP_ERRORS.has(status)) {
+          throw new RouterError(
+            `${(err as Error).message.replace(/[.\s]+$/, "")}. This looks like a setup problem with ${c.provider} (key, billing, image or request), ` +
+              `so the router stopped instead of moving the work to another provider; pass fallback: "any" to fall back on every error`,
+            attempts,
+          );
+        }
       }
     }
     throw new RouterError(
       `all providers failed: ${attempts.map((a) => `${a.provider}: ${a.error}`).join(" | ")}`,
       attempts,
     );
+  }
+
+  private record(sbx: RoutedSandbox, usdHour: number, timeoutMinutes?: number) {
+    const now = Date.now();
+    this.ledger?.open({
+      id: sbx.id,
+      provider: sbx.provider,
+      createdAt: new Date(now).toISOString(),
+      expiresAt: new Date(now + (timeoutMinutes ?? 30) * 60_000).toISOString(),
+      usdHour,
+    });
+  }
+
+  private discard(provider: ProviderId, box: ProviderSandbox, usdHour: number, timeoutMinutes?: number) {
+    const sbx = new RoutedSandbox(provider, box, [], usdHour, this.ledger);
+    this.record(sbx, usdHour, timeoutMinutes);
+    return sbx.kill().catch(() => {});
   }
 
   /** Every provider that sells computers (desktops/phones): sandbox providers that do, plus desktop-only ones. */
@@ -339,6 +367,12 @@ export function parseId(id: string): { provider: ProviderId; nativeId: string } 
 function round(n: number) {
   return Math.round(n * 10000) / 10000;
 }
+
+/** Seconds to wait for one provider's create before trying the next (RouteOptions.createTimeoutSeconds). */
+export const DEFAULT_CREATE_TIMEOUT_S = 120;
+
+/** HTTP statuses that mean the request or the account is wrong, not that the provider is down. */
+const SETUP_ERRORS = new Set([400, 401, 402, 403, 404, 422]);
 
 /** Seconds past a command's timeout before the router stops waiting for the adapter. */
 export const EXEC_GRACE_S = 30;

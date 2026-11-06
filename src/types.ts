@@ -71,8 +71,16 @@ export interface RouteOptions {
   provider?: ProviderId | ProviderId[];
   /** How to order candidates when no explicit list is given. Default: cheapest. */
   strategy?: Strategy;
-  /** Try the next candidate if a create fails (default true). */
-  fallback?: boolean;
+  /**
+   * What to do when a create fails. `true` (default): try the next candidate when the provider
+   * looks unavailable (timeout, network error, 429, 5xx, or an error without a status), but stop on
+   * a setup error (400, 401, 402, 403, 404, 422: a bad key, no billing, a bad image or request), so
+   * a mistake isn't hidden by quietly moving the work to another, maybe pricier, provider.
+   * `"any"`: try the next candidate on every error. `false`: only the first candidate.
+   */
+  fallback?: boolean | "any";
+  /** Seconds to wait for each provider's create before moving on (default 120). */
+  createTimeoutSeconds?: number;
   /** Capabilities every candidate must have. */
   require?: Capability[];
 }

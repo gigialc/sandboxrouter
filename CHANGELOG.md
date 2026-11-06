@@ -22,10 +22,13 @@ All notable changes. Versions follow [semver](https://semver.org/); while the ve
 - `test/conformance.ts`: the sandbox contract as a shared test suite that every adapter runs against its mock, and mock tests for the 13 adapters that had none (Blaxel, Boat, Cloudflare, Docker, exe.dev, HOPX, Modal, Morph, Northflank, Runloop, Sprites, Tensorlake, Vercel) plus the E2B and Daytona sandbox paths.
 
 ### Changed
+- Fallback only moves on when a provider looks unavailable (timeout, network error, 429, 5xx, or no status). A setup error (400, 401, 402, 403, 404, 422: a bad key, no billing, a bad image or request) stops routing with a message saying so, instead of quietly sending the work to another, maybe pricier, provider. `fallback: "any"` (CLI `--fallback-any`) restores falling back on every error.
+- The HTTP server needs `SANDBOXROUTER_TOKEN` when CORS is on (`createApp` throws) or when `serve --host` is not a loopback address (it refuses to start). The token is compared in constant time.
 - Providers that can't take the requested size are listed after the ones that can, with the reason.
 - Website: full-width layout, white page, black ink.
 
 ### Fixed
+- A provider whose create never answered stalled `router.create` instead of falling back. Each create now has a time limit (`createTimeoutSeconds`, default 120; CLI `--create-timeout`); a sandbox that turns up after it is recorded in the ledger and killed, so it can't bill unseen. Maritime's HTTP requests also have deadlines (60 s; a command's timeout plus 30 s; 5 min for files).
 - Daytona: pause always failed on a real account because sandboxes were created ephemeral (`autoDeleteInterval: 0`); a stopped sandbox is now deleted a minute later instead. Streaming commands that call `exit` no longer hang. Daytona's own timeout (a 408) is read as the contract's timeout error.
 - Blaxel: pause removed (archiving is a preview Blaxel enables per workspace), `kill()` waits for the asynchronous delete, and API errors no longer read "[object Object]".
 - Modal: the adapter asked for twice the CPU it meant to (Modal counts physical cores, 1 core = 2 vCPUs).

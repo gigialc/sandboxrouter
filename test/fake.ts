@@ -1,4 +1,4 @@
-import type { ExecOptions, ExecResult, Provider, ProviderId, ProviderSandbox, SandboxSpec } from "../src/types.js";
+import { ProviderError, type ExecOptions, type ExecResult, type Provider, type ProviderId, type ProviderSandbox, type SandboxSpec } from "../src/types.js";
 
 /** In-memory provider for router/server tests. */
 export class FakeProvider implements Provider {
@@ -8,8 +8,12 @@ export class FakeProvider implements Provider {
 
   constructor(
     readonly id: ProviderId,
-    /** `hang`: exec never settles, like an adapter that lost its connection. */
-    public opts: { configured?: boolean; fail?: string; pause?: boolean; hang?: boolean } = {},
+    /**
+     * `hang`: exec never settles, like an adapter that lost its connection. `failStatus`: the HTTP
+     * status `fail` carries. `createMs`: create takes this long (and still makes a sandbox).
+     * `killFails`: kill rejects.
+     */
+    public opts: { configured?: boolean; fail?: string; failStatus?: number; pause?: boolean; hang?: boolean; createMs?: number; killFails?: boolean } = {},
   ) {}
 
   configured() {
@@ -17,11 +21,15 @@ export class FakeProvider implements Provider {
   }
 
   async create(spec: SandboxSpec): Promise<ProviderSandbox> {
-    if (this.opts.fail) throw new Error(this.opts.fail);
+    if (this.opts.createMs) await new Promise((r) => setTimeout(r, this.opts.createMs));
+    if (this.opts.fail) throw this.opts.failStatus ? new ProviderError(this.id, this.opts.fail, this.opts.failStatus) : new Error(this.opts.fail);
     this.created.push(spec);
     const box = new FakeBox(`${this.id}-${++this.n}`);
     if (this.opts.pause === false) (box as { pause?: unknown }).pause = undefined;
     if (this.opts.hang) box.exec = () => new Promise<ExecResult>(() => {});
+    if (this.opts.killFails) box.kill = async () => {
+      throw new Error("kill failed");
+    };
     this.live.set(box.nativeId, box);
     return box;
   }

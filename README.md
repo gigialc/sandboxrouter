@@ -165,6 +165,13 @@ const b = await router.create({ gpu: "A10G", image: { modal: "pytorch/pytorch:la
 // Pin providers in order and turn fallback off
 const c = await router.create({}, { provider: ["maritime", "e2b"], fallback: false });
 
+// Fallback moves on when a provider is down: a timeout, a network error, 429 or 5xx, and a create
+// that takes longer than createTimeoutSeconds (default 120; a sandbox that turns up later is
+// killed, or left in the ledger for `gc`). A setup error (400, 401, 402, 403, 404, 422: a bad key,
+// no billing, a bad image) stops instead, so a mistake isn't hidden by a pricier provider.
+// fallback: "any" falls back on every error.
+const e = await router.create({}, { fallback: "any", createTimeoutSeconds: 300 });
+
 // Per-provider images: each provider names its templates differently
 const d = await router.create({ image: { maritime: "python", e2b: "code-interpreter-v1", modal: "python:3.13-slim" } });
 
@@ -314,7 +321,7 @@ SANDBOXROUTER_TOKEN=secret npx @sandboxrouter/sdk serve
 |---|---|---|
 | `GET` | `/v1/providers` | |
 | `POST` | `/v1/route` | same as create; returns the candidate order |
-| `POST` | `/v1/sandboxes` | `{ vcpu, memoryGb, gpu, env, timeoutMinutes, image, metadata, provider, strategy, fallback, require }` |
+| `POST` | `/v1/sandboxes` | `{ vcpu, memoryGb, gpu, env, timeoutMinutes, image, metadata, provider, strategy, fallback, createTimeoutSeconds, require }` |
 | `POST` | `/v1/sandboxes/:id/exec` | `{ cmd, cwd, env, timeoutSeconds, stream }`. With `stream: true` the answer is `text/event-stream`: `stdout` and `stderr` events, then `result` |
 | `POST` | `/v1/sandboxes/:id/pause` | |
 | `PUT` | `/v1/sandboxes/:id/files?path=` | raw bytes |
@@ -335,7 +342,7 @@ curl -s localhost:8787/v1/sandboxes -H "Authorization: Bearer secret" \
 # {"id":"maritime:sbx-k3m7q2ab","provider":"maritime","estimatedHourlyUsd":0.022,"attempts":[...]}
 ```
 
-Provider keys stay on the server. Clients only hold `SANDBOXROUTER_TOKEN`. It binds to `127.0.0.1` by default.
+Provider keys stay on the server. Clients only hold `SANDBOXROUTER_TOKEN`. It binds to `127.0.0.1` by default. Without a token it only starts on a loopback address with CORS off: `--cors` (any browser page could otherwise start sandboxes on your keys) and a public `--host` both need `SANDBOXROUTER_TOKEN`.
 
 ### Python
 

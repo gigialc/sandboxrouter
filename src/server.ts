@@ -1,3 +1,4 @@
+import { timingSafeEqual } from "node:crypto";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { CATALOG, hourlyCost } from "./catalog.js";
 import { Router, type RoutedSandbox } from "./router.js";
@@ -9,7 +10,7 @@ import { ProviderError, RouterError, type RouteOptions, type SandboxSpec } from 
  *
  *   GET    /v1/providers
  *   POST   /v1/route                      dry run: which providers would be tried, in order
- *   POST   /v1/sandboxes                  { vcpu, memoryGb, ..., provider, strategy, fallback, require }
+ *   POST   /v1/sandboxes                  { vcpu, memoryGb, ..., provider, strategy, fallback, require, createTimeoutSeconds }
  *   POST   /v1/sandboxes/:id/exec         { cmd, cwd, env, timeoutSeconds, stream }
  *          stream: true answers text/event-stream: `stdout`/`stderr` events (JSON string chunks),
  *          then one `result` event (the ExecResult), or an `error` event
@@ -35,6 +36,18 @@ export function createApp(
   /** Browser origins allowed to call this server (e.g. the website's Playground). Off by default. */
   corsOrigins: string[] = (process.env.SANDBOXROUTER_CORS ?? "").split(",").map((s) => s.trim()).filter(Boolean),
 ) {
+  // With CORS on, any page open in a browser on this machine can call the server (Chrome even
+  // lets a public page reach localhost, which the Private-Network header below allows), so it
+  // would start sandboxes on these provider keys. A token is required for that.
+  if (corsOrigins.length && !token) {
+    throw new Error("CORS is on but SANDBOXROUTER_TOKEN is not set: browser pages could start sandboxes on your keys. Set a token, or turn CORS off.");
+  }
+  const expected = token ? Buffer.from(`Bearer ${token}`) : undefined;
+  const authorized = (req: IncomingMessage) => {
+    if (!expected) return true;
+    const got = Buffer.from(req.headers.authorization ?? "");
+    return got.length === expected.length && timingSafeEqual(got, expected);
+  };
   const live = new Map<string, RoutedSandbox>();
 
   const cors = (req: IncomingMessage, res: ServerResponse) => {
@@ -63,7 +76,7 @@ export function createApp(
     }
 
     if (url.pathname === "/health") return json(res, 200, { ok: true });
-    if (token && req.headers.authorization !== `Bearer ${token}`) return json(res, 401, { error: "unauthorized" });
+    if (!authorized(req)) return json(res, 401, { error: "unauthorized" });
     if (parts[0] !== "v1") return json(res, 404, { error: "not found" });
 
     const box = async (id: string) => live.get(id) ?? router.get(id);
@@ -232,7 +245,7 @@ class HttpError extends Error {
   }
 }
 
-const ROUTE_KEYS = ["provider", "strategy", "fallback", "require"] as const;
+const ROUTE_KEYS = ["provider", "strategy", "fallback", "require", "createTimeoutSeconds"] as const;
 
 function splitBody(body: Record<string, any>): { spec: SandboxSpec; route: RouteOptions } {
   const route: Record<string, unknown> = {};
