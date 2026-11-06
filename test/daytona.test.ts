@@ -27,6 +27,7 @@ const calls: [string, ...unknown[]][] = [];
 const live = new Map<string, FakeSandbox>();
 const children: ChildProcess[] = [];
 let createError: Error | undefined;
+let startError: Error | undefined;
 let nextId = 1;
 
 const killGroup = (c: ChildProcess) => {
@@ -192,8 +193,19 @@ vi.mock("@daytonaio/sdk", () => ({
       created.push(params);
       if (createError) throw createError;
       const s = new FakeSandbox(params);
+      if (startError) {
+        // Real Daytona: the sandbox exists (state "error") but create throws without returning it.
+        s.state = "error";
+        live.set(s.id, s);
+        throw startError;
+      }
       live.set(s.id, s);
       return s;
+    }
+    async *list(query?: { labels?: Record<string, string> }) {
+      calls.push(["list", query]);
+      for (const s of live.values())
+        if (Object.entries(query?.labels ?? {}).every(([k, v]) => s.params?.labels?.[k] === v)) yield s;
     }
     async get(id: string) {
       calls.push(["get", id]);
@@ -213,6 +225,7 @@ beforeEach(() => {
   created.length = 0;
   configs.length = 0;
   createError = undefined;
+  startError = undefined;
 });
 
 afterAll(() => {
@@ -234,7 +247,7 @@ describe("DaytonaProvider", () => {
     const sbx = await p().create({ vcpu: 4, memoryGb: 8, timeoutMinutes: 20, env: { A: "1" }, metadata: { team: "x" }, image: { daytona: "python:3.12" } });
     expect(created[0]).toEqual({
       envVars: { A: "1" },
-      labels: { team: "x" },
+      labels: { team: "x", "sandboxrouter-create": expect.stringMatching(/^[0-9a-f-]{36}$/) },
       autoStopInterval: 20,
       autoDeleteInterval: 1,
       image: "python:3.12",
@@ -243,12 +256,21 @@ describe("DaytonaProvider", () => {
     expect((await sbx.exec("echo $A")).stdout).toBe("1\n");
     await sbx.kill();
     await (await p().create({})).kill();
-    expect(created[1]).toEqual({ autoStopInterval: 30, autoDeleteInterval: 1 });
+    expect(created[1]).toEqual({ autoStopInterval: 30, autoDeleteInterval: 1, labels: { "sandboxrouter-create": expect.any(String) } });
     expect(created[1]).not.toHaveProperty("image");
     await (await p().create({ timeoutMinutes: 0.2 })).kill();
     expect(created[2].autoStopInterval).toBe(1);
     createError = new Error("Insufficient resources in the organization's quota");
     await expect(p().create({})).rejects.toThrow(/quota/);
+  });
+
+  it("deletes a sandbox Daytona created but couldn't start, found by its per-create tag", async () => {
+    const keep = await p().create({});
+    startError = new Error("Sandbox failed to start: Error response from daemon: unexpected end of JSON input");
+    await expect(p().create({ metadata: { team: "x" } })).rejects.toThrow(/failed to start/);
+    const tag = created[1].labels["sandboxrouter-create"];
+    expect(sdk("list")).toEqual([[{ labels: { "sandboxrouter-create": tag } }]]);
+    expect([...live.values()].map((s) => s.id)).toEqual([keep.nativeId]);
   });
 
   it("runs a plain command with executeCommand, stderr through a temp file, cwd and env wrapped in", async () => {

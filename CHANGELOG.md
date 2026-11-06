@@ -5,6 +5,7 @@ All notable changes. Versions follow [semver](https://semver.org/); while the ve
 ## Unreleased (next: 0.3.0)
 
 ### Added
+- `sandboxrouter cost run` / `cost settle`: a real-cost check. Runs a sandbox per provider for a fixed time with every core busy, records the size it really got, and compares the list-price prediction with what the provider billed (Daytona, Blaxel and Maritime usage APIs; E2B and OpenScale from the dashboard).
 - First real-account runs: E2B, Daytona, Maritime and OpenScale pass all 13 steps; Blaxel passes 12 of 12 (no pause).
 - First bench report (results/bench-2026-11-06-home-eu.json); the site's provider table shows its cold-start times.
 - `npm run secrets:push -- --only <ids>` uploads just the providers whose accounts are ready.
@@ -22,12 +23,15 @@ All notable changes. Versions follow [semver](https://semver.org/); while the ve
 - `test/conformance.ts`: the sandbox contract as a shared test suite that every adapter runs against its mock, and mock tests for the 13 adapters that had none (Blaxel, Boat, Cloudflare, Docker, exe.dev, HOPX, Modal, Morph, Northflank, Runloop, Sprites, Tensorlake, Vercel) plus the E2B and Daytona sandbox paths.
 
 ### Changed
+- E2B, OpenScale and Daytona are skipped for requests bigger than their default image, and priced at that size. Measured inside real sandboxes, their default images give 2 vCPU / 0.5 GB (E2B), 2 vCPU / 1 GB (OpenScale) and 1 vCPU / 1 GB (Daytona) whatever size is asked for, so a 2 vCPU / 4 GB request used to be priced at 4 GB and handed a much smaller machine. Pass an image (`image.e2b` template, `image.openscale` template, `image.daytona` image) to get a bigger size; then the request is priced as asked. `check`, `bench` and `cost run` use the default size for these three. New catalog field `defaultSize`; `fixedSize()` and `fittingSpec()` in the catalog.
 - Fallback only moves on when a provider looks unavailable (timeout, network error, 429, 5xx, or no status). A setup error (400, 401, 402, 403, 404, 422: a bad key, no billing, a bad image or request) stops routing with a message saying so, instead of quietly sending the work to another, maybe pricier, provider. `fallback: "any"` (CLI `--fallback-any`) restores falling back on every error.
 - The HTTP server needs `SANDBOXROUTER_TOKEN` when CORS is on (`createApp` throws) or when `serve --host` is not a loopback address (it refuses to start). The token is compared in constant time.
 - Providers that can't take the requested size are listed after the ones that can, with the reason.
 - Website: full-width layout, white page, black ink.
 
 ### Fixed
+- Daytona: a sandbox Daytona created but couldn't start (state "error") is now deleted. The SDK throws without returning it, so each create is tagged and the tag is looked up on failure.
+- The nightly live check installs the optional provider SDKs with `--legacy-peer-deps`, since Beam's SDK still pins TypeScript 5.
 - A provider whose create never answered stalled `router.create` instead of falling back. Each create now has a time limit (`createTimeoutSeconds`, default 120; CLI `--create-timeout`); a sandbox that turns up after it is recorded in the ledger and killed, so it can't bill unseen. Maritime's HTTP requests also have deadlines (60 s; a command's timeout plus 30 s; 5 min for files).
 - Daytona: pause always failed on a real account because sandboxes were created ephemeral (`autoDeleteInterval: 0`); a stopped sandbox is now deleted a minute later instead. Streaming commands that call `exit` no longer hang. Daytona's own timeout (a 408) is read as the contract's timeout error.
 - Blaxel: pause removed (archiving is a preview Blaxel enables per workspace), `kill()` waits for the asynchronous delete, and API errors no longer read "[object Object]".

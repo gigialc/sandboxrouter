@@ -37,13 +37,13 @@ describe("HTTP API", () => {
   });
 
   it("creates with fallback, execs, moves files, and deletes", async () => {
-    const created = await api("/v1/sandboxes", { method: "POST", body: JSON.stringify({ vcpu: 2, env: { X: "1" } }) });
+    const created = await api("/v1/sandboxes", { method: "POST", body: JSON.stringify({ vcpu: 1, memoryGb: 1, env: { X: "1" } }) });
     expect(created.status).toBe(201);
     const sbx = await created.json();
     expect(sbx.provider).toBe("daytona");
     expect(sbx.attempts.map((a: any) => a.provider)).toEqual(["maritime", "daytona"]);
     const daytona = fakes.find((f) => f.id === "daytona")!;
-    expect(daytona.created.at(-1)).toEqual({ vcpu: 2, env: { X: "1" } });
+    expect(daytona.created.at(-1)).toEqual({ vcpu: 1, memoryGb: 1, env: { X: "1" } });
 
     const id = encodeURIComponent(sbx.id);
     const ex = await (await api(`/v1/sandboxes/${id}/exec`, { method: "POST", body: JSON.stringify({ cmd: "ls" }) })).json();

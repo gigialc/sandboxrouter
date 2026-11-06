@@ -1,3 +1,4 @@
+import { fixedSize } from "./catalog.js";
 import type { Router, RoutedSandbox } from "./router.js";
 import type { ProviderId, SandboxSpec } from "./types.js";
 
@@ -67,7 +68,7 @@ export async function checkProvider(
 
   let sbx: RoutedSandbox | undefined;
   await step("create", async () => {
-    sbx = await router.create({ timeoutMinutes: 10, ...opts.spec }, { provider, fallback: false });
+    sbx = await router.create({ timeoutMinutes: 10, ...fixedSize(provider), ...opts.spec }, { provider, fallback: false });
     return `${sbx.id}, ~$${sbx.estimatedHourlyUsd}/hr`;
   });
   if (!sbx) return { provider, results, ok: false };

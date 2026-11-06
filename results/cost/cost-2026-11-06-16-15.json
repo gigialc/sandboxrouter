@@ -1,0 +1,110 @@
+{
+  "tool": "sandboxrouter-cost",
+  "version": "0.2.0",
+  "date": "2026-11-06T16:15:49.706Z",
+  "minutes": 10,
+  "load": true,
+  "entries": [
+    {
+      "provider": "e2b",
+      "requested": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "listUsdHour": 0.1656,
+      "startedAt": "2026-11-06T16:05:42.699Z",
+      "sandboxId": "ini53bnncjaxxsnrxmk5r",
+      "delivered": {
+        "vcpu": 2,
+        "memoryMb": 473
+      },
+      "deliveredUsdHour": 0.108283,
+      "endedAt": "2026-11-06T16:15:43.370Z",
+      "seconds": 601,
+      "predictedUsd": 0.027646,
+      "bill": {
+        "source": "no billing API: compare the console usage tab (console.e2b.dev, Usage)",
+        "at": "2026-11-06T16:18:50.105Z"
+      }
+    },
+    {
+      "provider": "daytona",
+      "requested": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "listUsdHour": 0.1656,
+      "startedAt": "2026-11-06T16:05:42.700Z",
+      "error": "all providers failed: daytona: Sandbox failed to start: Error response from daemon: unexpected end of JSON input"
+    },
+    {
+      "provider": "maritime",
+      "requested": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "listUsdHour": 0.022,
+      "startedAt": "2026-11-06T16:05:42.700Z",
+      "sandboxId": "sbx-4g3xrqqsjileqsqi",
+      "delivered": {
+        "vcpu": 2,
+        "memoryMb": 3942
+      },
+      "deliveredUsdHour": 0.021586,
+      "endedAt": "2026-11-06T16:15:47.592Z",
+      "seconds": 605,
+      "predictedUsd": 0.003697,
+      "bill": {
+        "usd": 0,
+        "seconds": 594,
+        "source": "maritime metered-usage (integer cents; no usage plan on this account)",
+        "at": "2026-11-06T16:15:49.707Z"
+      }
+    },
+    {
+      "provider": "openscale",
+      "requested": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "listUsdHour": 0.017,
+      "startedAt": "2026-11-06T16:05:42.703Z",
+      "sandboxId": "id8993caf3bajud6eyef",
+      "delivered": {
+        "vcpu": 2,
+        "memoryMb": 985
+      },
+      "deliveredUsdHour": 0.013962,
+      "endedAt": "2026-11-06T16:15:43.642Z",
+      "seconds": 601,
+      "predictedUsd": 0.002838,
+      "bill": {
+        "source": "no billing HTTP API: `openscale balance` before and after, or the dashboard",
+        "at": "2026-11-06T16:18:50.106Z"
+      }
+    },
+    {
+      "provider": "blaxel",
+      "requested": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "listUsdHour": 0.1656,
+      "startedAt": "2026-11-06T16:05:42.703Z",
+      "sandboxId": "d291719b-5165-4ea8-ae26-98eb36352b78",
+      "delivered": {
+        "vcpu": 2,
+        "memoryMb": 3938
+      },
+      "deliveredUsdHour": 0.1656,
+      "endedAt": "2026-11-06T16:15:49.706Z",
+      "seconds": 607,
+      "predictedUsd": 0.027922,
+      "bill": {
+        "usd": 0.001426,
+        "source": "blaxel /metrics cost (USD)",
+        "at": "2026-11-06T16:18:50.106Z"
+      }
+    }
+  ]
+}

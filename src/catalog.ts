@@ -13,6 +13,12 @@ export interface ProviderInfo {
   /** Capabilities this adapter actually implements, not everything the provider markets. */
   capabilities: Capability[];
   limits: { maxVcpu: number; maxMemoryGb: number };
+  /**
+   * The size every sandbox gets unless a custom image (template, snapshot) is passed, whatever
+   * vcpu/memoryGb ask for. Measured inside real sandboxes (nproc, MemTotal). The router skips the
+   * provider for requests bigger than this and prices it at this size.
+   */
+  defaultSize?: { vcpu: number; memoryGb: number; measured: string };
   /** Runs on your own machine (Docker). Never chosen automatically; name it to use it. */
   local?: boolean;
   /** Env vars the adapter reads. Any one group being fully set means "configured". */
@@ -81,6 +87,8 @@ const ENTRIES: ProviderInfo[] = [
     },
     capabilities: ["pause", "custom-image"],
     limits: { maxVcpu: 8, maxMemoryGb: 8 },
+    // The default template; a bigger size needs a template built with --cpu-count / --memory-mb.
+    defaultSize: { vcpu: 2, memoryGb: 0.5, measured: "2026-11-06" },
     credentials: [["E2B_API_KEY"]],
     docs: "https://e2b.dev/docs",
   },
@@ -96,6 +104,8 @@ const ENTRIES: ProviderInfo[] = [
     },
     capabilities: ["pause", "custom-image"],
     limits: { maxVcpu: 4, maxMemoryGb: 8 },
+    // The default snapshot; resources only apply when creating from an image (image.daytona).
+    defaultSize: { vcpu: 1, memoryGb: 1, measured: "2026-11-06" },
     credentials: [["DAYTONA_API_KEY"]],
     docs: "https://www.daytona.io/docs",
   },
@@ -434,6 +444,8 @@ ENTRIES.push(
     },
     capabilities: ["pause", "custom-image"],
     limits: { maxVcpu: 8, maxMemoryGb: 16 },
+    // The "base" template; size comes from the template.
+    defaultSize: { vcpu: 2, memoryGb: 1, measured: "2026-11-06" },
     credentials: [["OPENSCALE_API_KEY"]],
     docs: "https://openscale.so/sandboxes",
   },
@@ -628,8 +640,22 @@ export const DEFAULT_VCPU = 2;
 export const DEFAULT_MEMORY_GB = 4;
 
 /** Estimated USD per hour for this spec on this provider (list price, while running). */
+/** The size the sandbox will really have when it's fixed by the default image, else null. */
+export function fixedSize(id: ProviderId, spec: SandboxSpec = {}): { vcpu: number; memoryGb: number } | null {
+  const d = info(id).defaultSize;
+  return d && !spec.image?.[id] ? { vcpu: d.vcpu, memoryGb: d.memoryGb } : null;
+}
+
+/** A spec this provider can take as-is: its default size if it has one, else the router default. */
+export function fittingSpec(id: ProviderId): { vcpu: number; memoryGb: number } {
+  return fixedSize(id) ?? { vcpu: DEFAULT_VCPU, memoryGb: DEFAULT_MEMORY_GB };
+}
+
 export function hourlyCost(id: ProviderId, spec: SandboxSpec = {}): number {
   const { pricing } = info(id);
+  // You get, and pay for, the default image's size whatever you asked for.
+  const fixed = fixedSize(id, spec);
+  if (fixed) return fixed.vcpu * pricing.vcpuHour + fixed.memoryGb * pricing.gbHour;
   const vcpu = spec.vcpu ?? DEFAULT_VCPU;
   let mem = spec.memoryGb ?? DEFAULT_MEMORY_GB;
   // Vercel fixes memory at 2 GB per vCPU.
@@ -689,5 +715,8 @@ export function unfit(id: ProviderId, spec: SandboxSpec, require: Capability[] =
   for (const c of needs) if (!p.capabilities.includes(c)) return `no ${c} support`;
   if ((spec.vcpu ?? DEFAULT_VCPU) > p.limits.maxVcpu) return `max ${p.limits.maxVcpu} vCPU`;
   if ((spec.memoryGb ?? DEFAULT_MEMORY_GB) > p.limits.maxMemoryGb) return `max ${p.limits.maxMemoryGb} GB memory`;
+  const fixed = fixedSize(id, spec);
+  if (fixed && ((spec.vcpu ?? DEFAULT_VCPU) > fixed.vcpu || (spec.memoryGb ?? DEFAULT_MEMORY_GB) > fixed.memoryGb))
+    return `default size ${fixed.vcpu} vCPU / ${fixed.memoryGb} GB; more needs image.${id}`;
   return null;
 }

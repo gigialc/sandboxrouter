@@ -34,7 +34,8 @@ export default function BenchmarksPage() {
             <th className="py-3 pr-4 font-normal">Cold start (median)</th>
             <th className="hidden py-3 pr-4 font-normal sm:table-cell">Command round trip</th>
             <th className="hidden py-3 pr-4 font-normal md:table-cell">Succeeded</th>
-            <th className="py-3 font-normal">List price, 2 vCPU / 4 GB</th>
+            <th className="hidden py-3 pr-4 font-normal md:table-cell">Size</th>
+            <th className="py-3 font-normal">List price</th>
           </tr>
         </thead>
         <tbody>
@@ -62,6 +63,9 @@ export default function BenchmarksPage() {
                 </div>
               </td>
               <td className="hidden py-3 pr-4 font-mono tnum text-ink-2 md:table-cell">{Math.round(r.successRate * 100)}%</td>
+              <td className="hidden py-3 pr-4 font-mono tnum text-ink-2 md:table-cell">
+                {r.size.vcpu} vCPU / {r.size.memoryGb} GB
+              </td>
               <td className="py-3 font-mono tnum text-ink-2">{usd(r.hourlyUsd)}/hr</td>
             </tr>
           ))}
@@ -72,7 +76,8 @@ export default function BenchmarksPage() {
         <section className="prose-sr max-w-xl">
           <h2>What is measured</h2>
           <p>
-            Each run asks one provider for a 2 vCPU / 4 GB sandbox, with fallback off, and times how long until it is usable:
+            Each run asks one provider for a 2 vCPU / 4 GB sandbox, or for its default size where the
+            default image fixes the size whatever you ask (E2B, OpenScale and Daytona; the Size column says which), with fallback off, and times how long until it is usable:
             that&apos;s the <strong>cold start</strong>. Then it runs <code>echo ok</code> and times the answer: the{" "}
             <strong>command round trip</strong>. Then it kills the sandbox. A run counts as failed if any of that goes wrong.
           </p>

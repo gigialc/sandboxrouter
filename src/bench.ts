@@ -1,4 +1,4 @@
-import { CATALOG, hourlyCost } from "./catalog.js";
+import { CATALOG, fixedSize, hourlyCost } from "./catalog.js";
 import { loadBench, median, saveBench, type BenchData } from "./bench-store.js";
 import { Router } from "./router.js";
 import type { ProviderId, SandboxSpec } from "./types.js";
@@ -43,7 +43,7 @@ export async function bench(opts: {
       let box;
       try {
         const t0 = performance.now();
-        box = await router.create(spec, { provider: id, fallback: false });
+        box = await router.create({ ...fixedSize(id), ...spec }, { provider: id, fallback: false });
         createMs.push(Math.round(performance.now() - t0));
         const t1 = performance.now();
         const r = await box.exec("echo ok");
@@ -63,7 +63,7 @@ export async function bench(opts: {
       failures,
       medianCreateMs: median(createMs),
       medianExecMs: median(execMs),
-      hourlyUsd: hourlyCost(id, spec),
+      hourlyUsd: hourlyCost(id, { ...fixedSize(id), ...spec }),
       lastError,
     });
   }
@@ -75,7 +75,7 @@ export function benchMarkdown(rows: BenchRow[]): string {
   const name = (id: ProviderId) => CATALOG.find((c) => c.id === id)!.name;
   const ms = (n?: number) => (n === undefined ? "n/a" : `${n} ms`);
   const lines = [
-    "| # | Provider | Cold start (median) | Exec round trip | $/hr (2 vCPU, 4 GB) | Success |",
+    "| # | Provider | Cold start (median) | Exec round trip | $/hr (list, size run) | Success |",
     "|---|---|---|---|---|---|",
     ...rows.map(
       (r, i) =>
