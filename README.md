@@ -293,7 +293,7 @@ It prints one line per step and exits 1 if any fails. `checkProvider(router, id)
 | Dedalus Machines | not run yet | |
 | Fly.io Sprites | not run yet | |
 | Blaxel | 13/13 passed; n/a: pause and resume | 2026-11-06, v0.2.0 |
-| Daytona | 14/14 passed | 2026-11-06, v0.2.0 |
+| Daytona | 0/14 passed; failed: create | 2026-11-06, v0.2.0 |
 | E2B | 14/14 passed | 2026-11-06, v0.2.0 |
 | HOPX | not run yet | |
 | Superserve | not run yet | |

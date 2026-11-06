@@ -1,82 +1,82 @@
 {
   "tool": "sandboxrouter-check",
   "version": "0.2.0",
-  "date": "2026-11-06T01:05:50.852Z",
-  "platform": "darwin-arm64",
+  "date": "2026-11-06T14:25:19.001Z",
+  "platform": "linux-x64",
   "provider": "maritime",
-  "sandboxId": "maritime:sbx-slxeshx2bksqyj3r",
+  "sandboxId": "maritime:sbx-r2laiqrq5jmkdr6h",
   "results": [
     {
       "step": "create",
-      "ms": 1437,
+      "ms": 10016,
       "status": "pass",
-      "detail": "maritime:sbx-slxeshx2bksqyj3r, ~$0.022/hr"
+      "detail": "maritime:sbx-r2laiqrq5jmkdr6h, ~$0.022/hr"
     },
     {
       "step": "exec: stdout, stderr, exit code",
-      "ms": 188,
+      "ms": 618,
       "status": "pass"
     },
     {
       "step": "exec: env and cwd",
-      "ms": 140,
+      "ms": 478,
       "status": "pass"
     },
     {
       "step": "exec: UTF-8 output",
-      "ms": 48,
+      "ms": 152,
       "status": "pass"
     },
     {
       "step": "exec: streaming",
-      "ms": 3062,
+      "ms": 3161,
       "status": "pass",
-      "detail": "first output after 121 ms"
+      "detail": "first output after 155 ms"
     },
     {
       "step": "files: binary round-trip",
-      "ms": 205,
+      "ms": 331,
       "status": "pass"
     },
     {
       "step": "files: 1 MB round-trip",
-      "ms": 758,
+      "ms": 1817,
       "status": "pass"
     },
     {
       "step": "files: missing file is an error",
-      "ms": 40,
+      "ms": 129,
       "status": "pass"
     },
     {
       "step": "files: visible to commands",
-      "ms": 249,
+      "ms": 431,
       "status": "pass"
     },
     {
       "step": "exec: command timeout",
-      "ms": 3146,
+      "ms": 3154,
       "status": "pass",
-      "detail": "threw after 3146 ms"
+      "detail": "threw after 3154 ms"
     },
     {
       "step": "exec: timed-out command was stopped",
-      "ms": 6190,
+      "ms": 6791,
       "status": "pass"
     },
     {
       "step": "pause and resume",
-      "ms": 4299,
+      "ms": 10341,
       "status": "pass"
     },
     {
       "step": "kill",
-      "ms": 1569,
+      "ms": 5159,
       "status": "pass"
     },
     {
       "step": "killed sandbox is gone",
-      "ms": 224,
+      "ms": 1324,
       "status": "pass"
     }
   ],

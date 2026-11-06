@@ -1,6 +1,6 @@
 {
   "version": "0.2.0",
-  "generatedAt": "2026-11-06T01:06:35.376Z",
+  "generatedAt": "2026-11-06T14:25:57.925Z",
   "shapes": [
     "1x2",
     "2x4",
@@ -383,7 +383,7 @@
       },
       "access": null,
       "check": {
-        "date": "2026-11-06T01:06:19.226Z",
+        "date": "2026-11-06T14:24:00.046Z",
         "version": "0.2.0",
         "passed": 13,
         "failed": [],
@@ -627,28 +627,33 @@
       },
       "access": null,
       "check": {
-        "date": "2026-11-06T01:02:30.029Z",
+        "date": "2026-11-06T14:24:01.071Z",
         "version": "0.2.0",
-        "passed": 14,
-        "failed": [],
+        "passed": 0,
+        "failed": [
+          {
+            "step": "create",
+            "detail": "all providers failed: daytona: Sandbox failed to start: Error response from daemon: unexpected end of JSON input"
+          }
+        ],
         "skipped": [],
         "notRun": [],
         "notes": [],
         "steps": {
-          "create": "pass",
-          "exec: stdout, stderr, exit code": "pass",
-          "exec: env and cwd": "pass",
-          "exec: UTF-8 output": "pass",
-          "exec: streaming": "pass",
-          "files: binary round-trip": "pass",
-          "files: 1 MB round-trip": "pass",
-          "files: missing file is an error": "pass",
-          "files: visible to commands": "pass",
-          "exec: command timeout": "pass",
-          "exec: timed-out command was stopped": "pass",
-          "pause and resume": "pass",
-          "kill": "pass",
-          "killed sandbox is gone": "pass"
+          "create": "fail",
+          "exec: stdout, stderr, exit code": "not run",
+          "exec: env and cwd": "not run",
+          "exec: UTF-8 output": "not run",
+          "exec: streaming": "not run",
+          "files: binary round-trip": "not run",
+          "files: 1 MB round-trip": "not run",
+          "files: missing file is an error": "not run",
+          "files: visible to commands": "not run",
+          "exec: command timeout": "not run",
+          "exec: timed-out command was stopped": "not run",
+          "pause and resume": "not run",
+          "kill": "not run",
+          "killed sandbox is gone": "not run"
         }
       },
       "computers": [
@@ -816,7 +821,7 @@
       },
       "access": null,
       "check": {
-        "date": "2026-11-06T01:03:56.949Z",
+        "date": "2026-11-06T14:24:18.968Z",
         "version": "0.2.0",
         "passed": 14,
         "failed": [],
@@ -895,7 +900,7 @@
       },
       "access": null,
       "check": {
-        "date": "2026-11-06T01:02:09.238Z",
+        "date": "2026-11-06T14:24:35.097Z",
         "version": "0.2.0",
         "passed": 14,
         "failed": [],
@@ -1364,7 +1369,7 @@
       },
       "access": null,
       "check": {
-        "date": "2026-11-06T01:05:50.852Z",
+        "date": "2026-11-06T14:25:19.001Z",
         "version": "0.2.0",
         "passed": 14,
         "failed": [],
@@ -1668,7 +1673,7 @@
       },
       "access": null,
       "check": {
-        "date": "2026-11-06T01:03:15.296Z",
+        "date": "2026-11-06T14:25:56.458Z",
         "version": "0.2.0",
         "passed": 14,
         "failed": [],
