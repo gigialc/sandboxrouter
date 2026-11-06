@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { TableScroll } from "@/components/chrome";
 import { CodeBlock } from "@/components/code";
-import { REPO, site } from "@/lib/site";
+import { REPO, REPO_PUBLIC, site } from "@/lib/site";
 
 export const metadata: Metadata = { title: "Docs" };
 
@@ -260,8 +260,13 @@ with sr.create(vcpu=2, memory_gb=4, strategy="cheapest") as sbx:
         <h2 id="providers">Adding a provider</h2>
         <p>
           Implement the <code>Provider</code> interface in <code>src/types.ts</code> (create, connect, exec, files, kill, and pause
-          if it&apos;s real), and add a catalog entry with a link to the provider&apos;s pricing page. Pull requests welcome on{" "}
-          <a href={REPO}>GitHub</a>.
+          if it&apos;s real), and add a catalog entry with a link to the provider&apos;s pricing page.
+          {REPO_PUBLIC && (
+            <>
+              {" "}
+              Pull requests welcome on <a href={REPO}>GitHub</a>.
+            </>
+          )}
         </p>
       </article>
     </div>

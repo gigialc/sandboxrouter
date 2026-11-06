@@ -1,15 +1,15 @@
 import Link from "next/link";
 import { MobileNav } from "@/components/MobileNav";
-import { REPO, site } from "@/lib/site";
+import { NPM_URL, REPO, REPO_PUBLIC, site } from "@/lib/site";
 
 export function Logo({ className = "" }: { className?: string }) {
   return (
     <span className={`inline-flex items-center gap-2 text-[15px] tracking-tight ${className}`}>
       <svg width="18" height="18" viewBox="0 0 22 22" aria-hidden="true">
         <path d="M1.5 11H7c3 0 3.5-7 8-7M7 11h8M7 11c3 0 3.5 7 8 7" stroke="currentColor" strokeWidth="1.6" fill="none" strokeLinecap="square" />
-        <rect x="15.5" y="2" width="4" height="4" fill="currentColor" />
-        <rect x="15" y="8.5" width="5" height="5" fill="currentColor" />
-        <rect x="15.5" y="16" width="4" height="4" fill="currentColor" />
+        <rect x="15.5" y="2" width="4" height="4" className="fill-accent" />
+        <rect x="15" y="8.5" width="5" height="5" className="fill-accent" />
+        <rect x="15.5" y="16" width="4" height="4" className="fill-accent" />
       </svg>
       sandboxrouter
     </span>
@@ -38,8 +38,8 @@ export function Nav() {
             </Link>
           ))}
           <MobileNav links={NAV} />
-          <a href={REPO} className="rounded-full bg-ink px-4 py-1.5 text-[13px] font-medium text-bg hover:bg-ink-2">
-            GitHub
+          <a href={REPO_PUBLIC ? REPO : NPM_URL} className="rounded-full bg-ink px-4 py-1.5 text-[13px] font-medium text-bg hover:bg-ink-2">
+            {REPO_PUBLIC ? "GitHub" : "npm"}
           </a>
         </nav>
       </div>
@@ -57,8 +57,8 @@ export function Footer() {
           <Link href="/benchmarks" className="hover:text-ink">Benchmarks</Link>
           <Link href="/docs" className="hover:text-ink">Docs</Link>
           <Link href="/playground" className="hover:text-ink">Playground</Link>
-          <a href={REPO} className="hover:text-ink">GitHub</a>
-          <a href="https://www.npmjs.com/package/@sandboxrouter/sdk" className="hover:text-ink">npm</a>
+          {REPO_PUBLIC && <a href={REPO} className="hover:text-ink">GitHub</a>}
+          <a href={NPM_URL} className="hover:text-ink">npm</a>
         </div>
       </div>
     </footer>
@@ -70,7 +70,7 @@ export function Tag({ children }: { children: React.ReactNode }) {
 }
 
 export function Button({ href, children, primary = false }: { href: string; children: React.ReactNode; primary?: boolean }) {
-  const cls = primary ? "bg-ink text-bg hover:bg-ink-2" : "border border-line-2 bg-bg text-ink hover:bg-panel";
+  const cls = primary ? "bg-accent text-white hover:bg-accent-ink" : "border border-line-2 bg-bg text-ink hover:bg-panel";
   const external = href.startsWith("http");
   return external ? (
     <a href={href} className={`inline-flex h-9 items-center rounded-full px-4 text-[13px] font-medium ${cls}`}>
@@ -94,7 +94,7 @@ export function TableScroll({ children }: { children: React.ReactNode }) {
 export function SectionTitle({ id, kicker, children }: { id?: string; kicker?: string; children: React.ReactNode }) {
   return (
     <div id={id} className="scroll-mt-20">
-      {kicker && <p className="mb-3 font-mono text-[11px] uppercase tracking-[0.18em] text-muted">{kicker}</p>}
+      {kicker && <p className="mb-3 font-mono text-[11px] uppercase tracking-[0.18em] text-accent">{kicker}</p>}
       <h2 className="text-2xl font-normal tracking-[-0.025em] sm:text-[28px]">{children}</h2>
     </div>
   );

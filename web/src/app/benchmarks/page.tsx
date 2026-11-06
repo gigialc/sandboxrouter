@@ -1,11 +1,22 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { CodeBlock } from "@/components/code";
-import { NPM, site, usd } from "@/lib/site";
+import { NPM, REPO_PUBLIC, site, usd, type CostRow } from "@/lib/site";
 
 export const metadata: Metadata = { title: "Benchmarks" };
 
 const ms = (n?: number) => (n === undefined ? "n/a" : `${n.toLocaleString("en-US")} ms`);
+const cents = (n: number | null) => (n === null ? "n/a" : n === 0 ? "$0" : `$${n < 0.01 ? n.toFixed(4) : n.toFixed(3)}`);
+const size = (s: { vcpu: number; memoryGb: number } | null) => (s ? `${s.vcpu} vCPU / ${s.memoryGb} GB` : "n/a");
+
+/** Where a bill came from, in a few words; the full source string goes in the tooltip. */
+function billFrom(r: CostRow) {
+  if (r.error) return "create failed";
+  if (r.billedUsd !== null) return "provider's billing API";
+  if (r.billSource?.startsWith("no billing")) return "no billing API";
+  return "not posted yet";
+}
+
 const day = (iso: string) => new Date(iso).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric", timeZone: "UTC" });
 
 export default function BenchmarksPage() {
@@ -14,6 +25,7 @@ export default function BenchmarksPage() {
   const totalRuns = subs.reduce((n, s) => n + s.runs * s.providers, 0);
   const maxCreate = Math.max(1, ...rows.map((r) => r.medianCreateMs ?? 0));
   const maxExec = Math.max(1, ...rows.map((r) => r.medianExecMs ?? 0));
+  const costs = site.costRuns;
 
   return (
     <div className="px-5 sm:px-10 pt-14">
@@ -72,6 +84,63 @@ export default function BenchmarksPage() {
         </tbody>
       </table>
 
+      {costs.length > 0 && (
+        <section id="real-cost" className="mt-20 scroll-mt-20">
+          <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-accent">Real cost</p>
+          <h2 className="mt-3 text-2xl font-normal tracking-[-0.025em] sm:text-[28px]">What providers actually billed</h2>
+          <p className="mt-4 max-w-2xl text-[14px] leading-6 text-ink-2">
+            List price is a promise; the bill is what happened. Each row is one sandbox started on a real account, kept busy for a
+            fixed time with every core loaded, then killed. &ldquo;List price × time&rdquo; is what the catalog predicts;
+            &ldquo;Billed&rdquo; is read back from the provider&apos;s own billing API.
+          </p>
+          <div className="mt-6 overflow-x-auto">
+            <table className="w-full min-w-[720px] text-[13px]">
+              <thead>
+                <tr className="text-left text-[11px] uppercase tracking-[0.12em] text-muted">
+                  <th className="py-3 pr-4 font-normal">Provider</th>
+                  <th className="py-3 pr-4 font-normal">Asked for</th>
+                  <th className="py-3 pr-4 font-normal">Got</th>
+                  <th className="py-3 pr-4 font-normal">Ran</th>
+                  <th className="py-3 pr-4 font-normal">List price × time</th>
+                  <th className="py-3 pr-4 font-normal">Billed</th>
+                  <th className="py-3 pr-4 font-normal">Billed ÷ list</th>
+                  <th className="py-3 font-normal">Bill from</th>
+                </tr>
+              </thead>
+              <tbody>
+                {costs.map((r) => {
+                  const ratio = r.billedUsd !== null && r.predictedUsd ? r.billedUsd / r.predictedUsd : null;
+                  return (
+                    <tr key={`${r.date}-${r.provider}`} className="border-t border-line">
+                      <td className="py-3 pr-4">
+                        <Link href={`/providers/${r.provider}`} className="text-ink hover:underline underline-offset-4 decoration-line-2">
+                          {r.name}
+                        </Link>
+                      </td>
+                      <td className="py-3 pr-4 tnum text-ink-2">{size(r.requested)}</td>
+                      <td className="py-3 pr-4 tnum text-ink-2">{size(r.delivered)}</td>
+                      <td className="py-3 pr-4 font-mono tnum text-ink-2">{r.seconds === null ? "n/a" : `${r.seconds} s`}</td>
+                      <td className="py-3 pr-4 font-mono tnum text-ink-2">{cents(r.predictedUsd)}</td>
+                      <td className="py-3 pr-4 font-mono tnum text-ink">{cents(r.billedUsd)}</td>
+                      <td className="py-3 pr-4 font-mono tnum text-ink">{ratio === null ? "n/a" : `${Math.round(ratio * 100)}%`}</td>
+                      <td className="py-3 text-muted" title={r.error ?? r.billSource ?? undefined}>
+                        {billFrom(r)}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          <p className="mt-4 max-w-3xl text-[12px] leading-5 text-muted">
+            Billed and list price differ for reasons a price table can&apos;t show: some providers bill only while a request is
+            open (Blaxel), some add a one-off creation fee that dominates a short run (Sail, on its free plan), and an account on a
+            plan with included usage can be billed nothing (Maritime). &ldquo;Got&rdquo; is what the sandbox itself reports (nproc,
+            MemTotal). Run <code className="font-mono">sandboxrouter cost run</code> to measure your own.
+          </p>
+        </section>
+      )}
+
       <div className="mt-16 grid grid-cols-1 gap-12 border-t border-line pt-10 lg:grid-cols-2">
         <section className="prose-sr max-w-xl">
           <h2>What is measured</h2>
@@ -104,8 +173,8 @@ export default function BenchmarksPage() {
           </ul>
           <h2>Add a run</h2>
           <p>
-            Run it with your own keys and send the report as a pull request to <code>results/</code>. Label it with a city or cloud
-            region, never an address.
+            Run it with your own keys{REPO_PUBLIC ? <> and send the report as a pull request to <code>results/</code></> : null}.
+            Label it with a city or cloud region, never an address.
           </p>
           <CodeBlock title="terminal" code={`npx ${NPM} bench --runs 5 --share --label "us-east-1, c7g.large"`} />
         </section>

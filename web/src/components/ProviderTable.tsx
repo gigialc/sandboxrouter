@@ -2,22 +2,24 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { CAPABILITY_LABEL, DEFAULT_SHAPE, ranked, shapeLabel, site, usd } from "@/lib/site";
+import { CAPABILITY_LABEL, DEFAULT_SHAPE, fixedPrice, ranked, shapeLabel, site, usd } from "@/lib/site";
 
 const NEEDS = ["pause", "gpu", "custom-image"] as const;
 
 export function ProviderTable() {
   const [shape, setShape] = useState(DEFAULT_SHAPE);
   const [need, setNeed] = useState<string | null>(null);
+  const [tested, setTested] = useState(false);
   const speed = new Map(site.leaderboard.map((r) => [r.provider, r.medianCreateMs]));
   const showSpeed = speed.size > 0;
 
   const has = (p: (typeof site.providers)[number], c: string) => p.capabilities.includes(c);
-  const rows = ranked(shape).filter((p) => !need || has(p, need));
+  const rows = ranked(shape).filter((p) => (!need || has(p, need)) && (!tested || p.live.status === "passed"));
+  const passing = site.providers.filter((p) => !p.local && p.live.status === "passed").length;
   const cloud = rows.filter((r) => !r.local && !r.prices[shape].unfit);
   const max = Math.max(0.0001, ...cloud.map((r) => r.prices[shape].usd));
 
-  const chip = (on: boolean) => `px-2.5 py-1 text-[12px] tnum ${on ? "bg-ink text-bg" : "text-ink-2 hover:text-ink"}`;
+  const chip = (on: boolean) => `rounded-full px-2.5 py-1 text-[12px] tnum ${on ? "bg-accent text-white" : "text-ink-2 hover:bg-accent-soft hover:text-ink"}`;
 
   return (
     <div>
@@ -38,6 +40,9 @@ export function ProviderTable() {
             </button>
           ))}
         </div>
+        <button aria-pressed={tested} onClick={() => setTested(!tested)} className={`${chip(tested)} sm:ml-auto`}>
+          Passed on a real account ({passing})
+        </button>
       </div>
 
       <table className="w-full text-[13px]">
@@ -54,6 +59,7 @@ export function ProviderTable() {
         <tbody>
           {rows.map((p) => {
             const price = p.prices[shape];
+            const fixed = fixedPrice(p, shape);
             const pct = p.local || price.unfit ? 0 : Math.max(1.5, (price.usd / max) * 100);
             return (
               <tr key={p.id} className="group border-t border-line">
@@ -69,7 +75,15 @@ export function ProviderTable() {
                   )}
                 </td>
                 <td className="py-3 pr-4">
-                  {price.unfit ? (
+                  {fixed ? (
+                    <div
+                      className="flex items-center gap-3"
+                      title={`${p.name}'s default image is ${fixed.size} whatever size you ask for; a bigger size needs a custom image (image.${p.id}). This is its price at ${fixed.size}.`}
+                    >
+                      <span className="w-20 font-mono tnum text-ink-2">{usd(fixed.usd)}</span>
+                      <span className="text-[12px] text-muted">at {fixed.size} only</span>
+                    </div>
+                  ) : price.unfit ? (
                     <span className="text-muted">{price.unfit}</span>
                   ) : (
                     <div
@@ -110,7 +124,7 @@ export function ProviderTable() {
           {rows.length === 0 && (
             <tr className="border-t border-line">
               <td colSpan={6} className="py-8 text-center text-muted">
-                No provider supports that yet.
+                {tested ? "No provider with that has passed on a real account yet." : "No provider supports that yet."}
               </td>
             </tr>
           )}

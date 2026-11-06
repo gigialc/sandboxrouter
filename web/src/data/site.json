@@ -1,6 +1,6 @@
 {
   "version": "0.3.0",
-  "generatedAt": "2026-11-06T19:04:20.062Z",
+  "generatedAt": "2026-11-06T19:18:43.365Z",
   "shapes": [
     "1x2",
     "2x4",
@@ -39,6 +39,7 @@
       "billing": "allocated",
       "plan": null,
       "planLabel": "none",
+      "defaultSize": null,
       "check": null,
       "live": {
         "status": "untested",
@@ -100,6 +101,7 @@
       "billing": "allocated",
       "plan": null,
       "planLabel": "none",
+      "defaultSize": null,
       "check": null,
       "live": {
         "status": "untested",
@@ -167,6 +169,7 @@
       "billing": "active-cpu",
       "plan": null,
       "planLabel": "none",
+      "defaultSize": null,
       "check": null,
       "live": {
         "status": "untested",
@@ -237,6 +240,7 @@
       "billing": "allocated",
       "plan": null,
       "planLabel": "none",
+      "defaultSize": null,
       "check": null,
       "live": {
         "status": "untested",
@@ -303,6 +307,7 @@
       "billing": "allocated",
       "plan": null,
       "planLabel": "none",
+      "defaultSize": null,
       "check": null,
       "live": {
         "status": "untested",
@@ -370,6 +375,7 @@
         "checked": "2026-11-06"
       },
       "planLabel": "$20/mo (credited)",
+      "defaultSize": null,
       "check": null,
       "live": {
         "status": "untested",
@@ -432,6 +438,7 @@
       "billing": "allocated",
       "plan": null,
       "planLabel": "none",
+      "defaultSize": null,
       "check": {
         "date": "2026-11-06T14:24:00.046Z",
         "version": "0.2.0",
@@ -525,6 +532,7 @@
         "checked": "2026-11-06"
       },
       "planLabel": "$20/mo (credited)",
+      "defaultSize": null,
       "check": null,
       "live": {
         "status": "untested",
@@ -590,6 +598,7 @@
         "checked": "2026-11-06"
       },
       "planLabel": "$5/mo",
+      "defaultSize": null,
       "check": null,
       "live": {
         "status": "untested",
@@ -652,6 +661,7 @@
       "billing": "allocated",
       "plan": null,
       "planLabel": "none",
+      "defaultSize": null,
       "check": null,
       "live": {
         "status": "untested",
@@ -714,6 +724,10 @@
       "billing": "allocated",
       "plan": null,
       "planLabel": "none",
+      "defaultSize": {
+        "vcpu": 1,
+        "memoryGb": 1
+      },
       "check": {
         "date": "2026-11-06T14:24:01.071Z",
         "version": "0.2.0",
@@ -810,6 +824,7 @@
       "billing": "allocated",
       "plan": null,
       "planLabel": "none",
+      "defaultSize": null,
       "check": null,
       "live": {
         "status": "untested",
@@ -876,6 +891,7 @@
         "checked": "2026-11-06"
       },
       "planLabel": "$20/mo",
+      "defaultSize": null,
       "check": null,
       "live": {
         "status": "untested",
@@ -934,6 +950,7 @@
       "billing": "allocated",
       "plan": null,
       "planLabel": "none",
+      "defaultSize": null,
       "check": {
         "date": "2026-11-06T14:24:18.968Z",
         "version": "0.2.0",
@@ -1020,6 +1037,10 @@
       "billing": "allocated",
       "plan": null,
       "planLabel": "none",
+      "defaultSize": {
+        "vcpu": 2,
+        "memoryGb": 0.5
+      },
       "check": {
         "date": "2026-11-06T14:24:35.097Z",
         "version": "0.2.0",
@@ -1112,6 +1133,7 @@
         "checked": "2026-11-06"
       },
       "planLabel": "$15/mo",
+      "defaultSize": null,
       "check": null,
       "live": {
         "status": "untested",
@@ -1171,6 +1193,7 @@
       "billing": "active-cpu",
       "plan": null,
       "planLabel": "none",
+      "defaultSize": null,
       "check": null,
       "live": {
         "status": "untested",
@@ -1233,6 +1256,7 @@
       "billing": "allocated",
       "plan": null,
       "planLabel": "none",
+      "defaultSize": null,
       "check": null,
       "live": {
         "status": "untested",
@@ -1295,6 +1319,7 @@
       "billing": "allocated",
       "plan": null,
       "planLabel": "none",
+      "defaultSize": null,
       "check": null,
       "live": {
         "status": "untested",
@@ -1361,6 +1386,7 @@
       "billing": "allocated",
       "plan": null,
       "planLabel": "none",
+      "defaultSize": null,
       "check": null,
       "live": {
         "status": "untested",
@@ -1431,6 +1457,7 @@
         "checked": "2026-11-06"
       },
       "planLabel": "$29/mo",
+      "defaultSize": null,
       "check": null,
       "live": {
         "status": "untested",
@@ -1493,6 +1520,7 @@
       "billing": "allocated",
       "plan": null,
       "planLabel": "none",
+      "defaultSize": null,
       "check": null,
       "live": {
         "status": "untested",
@@ -1560,6 +1588,7 @@
         "checked": "2026-11-06"
       },
       "planLabel": "$20/mo (credited)",
+      "defaultSize": null,
       "check": {
         "date": "2026-11-06T14:25:19.001Z",
         "version": "0.2.0",
@@ -1651,6 +1680,7 @@
       "billing": "active-cpu",
       "plan": null,
       "planLabel": "none",
+      "defaultSize": null,
       "check": null,
       "live": {
         "status": "untested",
@@ -1713,6 +1743,7 @@
       "billing": "allocated",
       "plan": null,
       "planLabel": "none",
+      "defaultSize": null,
       "check": null,
       "live": {
         "status": "untested",
@@ -1775,6 +1806,7 @@
       "billing": "allocated",
       "plan": null,
       "planLabel": "none",
+      "defaultSize": null,
       "check": null,
       "live": {
         "status": "untested",
@@ -1837,6 +1869,7 @@
       "billing": "allocated",
       "plan": null,
       "planLabel": "none",
+      "defaultSize": null,
       "check": null,
       "live": {
         "status": "untested",
@@ -1899,6 +1932,10 @@
       "billing": "allocated",
       "plan": null,
       "planLabel": "none",
+      "defaultSize": {
+        "vcpu": 2,
+        "memoryGb": 1
+      },
       "check": {
         "date": "2026-11-06T14:25:56.458Z",
         "version": "0.2.0",
@@ -1985,6 +2022,7 @@
       "billing": "allocated",
       "plan": null,
       "planLabel": "none",
+      "defaultSize": null,
       "check": null,
       "live": {
         "status": "untested",
@@ -2046,6 +2084,7 @@
       "billing": "active-cpu",
       "plan": null,
       "planLabel": "none",
+      "defaultSize": null,
       "check": {
         "date": "2026-11-06T19:04:15.542Z",
         "version": "0.3.0",
@@ -2138,6 +2177,7 @@
         "checked": "2026-11-06"
       },
       "planLabel": "maybe $20/mo (credited)",
+      "defaultSize": null,
       "check": null,
       "live": {
         "status": "untested",
@@ -2200,6 +2240,7 @@
       "billing": "active-cpu",
       "plan": null,
       "planLabel": "none",
+      "defaultSize": null,
       "check": null,
       "live": {
         "status": "untested",
@@ -2259,6 +2300,7 @@
       "billing": "active-cpu",
       "plan": null,
       "planLabel": "none",
+      "defaultSize": null,
       "check": null,
       "live": {
         "status": "untested",
@@ -2323,6 +2365,7 @@
       "billing": "active-cpu",
       "plan": null,
       "planLabel": "none",
+      "defaultSize": null,
       "check": null,
       "live": {
         "status": "untested",
@@ -2575,6 +2618,131 @@
         "vcpu": 2,
         "memoryGb": 4
       }
+    }
+  ],
+  "costRuns": [
+    {
+      "provider": "sail",
+      "name": "Sailboxes (Sail Research)",
+      "date": "2026-11-06T19:13:02.657Z",
+      "minutes": 10,
+      "load": true,
+      "requested": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "delivered": {
+        "vcpu": 2,
+        "memoryGb": 7.8
+      },
+      "seconds": 603,
+      "predictedUsd": 0.010385,
+      "billedUsd": 0.015138,
+      "billedSeconds": 428,
+      "billSource": "sail /sailboxes/spend cost_usd_nanos (estimate at list rates; 1 creation charge; 849 vCPU-s, 221 GiB-s)",
+      "error": null
+    },
+    {
+      "provider": "e2b",
+      "name": "E2B",
+      "date": "2026-11-06T16:15:49.706Z",
+      "minutes": 10,
+      "load": true,
+      "requested": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "delivered": {
+        "vcpu": 2,
+        "memoryGb": 0.5
+      },
+      "seconds": 601,
+      "predictedUsd": 0.027646,
+      "billedUsd": null,
+      "billedSeconds": null,
+      "billSource": "no billing API: compare the console usage tab (console.e2b.dev, Usage)",
+      "error": null
+    },
+    {
+      "provider": "daytona",
+      "name": "Daytona",
+      "date": "2026-11-06T16:15:49.706Z",
+      "minutes": 10,
+      "load": true,
+      "requested": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "delivered": null,
+      "seconds": null,
+      "predictedUsd": null,
+      "billedUsd": null,
+      "billedSeconds": null,
+      "billSource": null,
+      "error": "all providers failed: daytona: Sandbox failed to start: Error response from daemon: unexpected end of JSON input"
+    },
+    {
+      "provider": "maritime",
+      "name": "Maritime",
+      "date": "2026-11-06T16:15:49.706Z",
+      "minutes": 10,
+      "load": true,
+      "requested": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "delivered": {
+        "vcpu": 2,
+        "memoryGb": 3.8
+      },
+      "seconds": 605,
+      "predictedUsd": 0.003697,
+      "billedUsd": 0,
+      "billedSeconds": 594,
+      "billSource": "maritime metered-usage (integer cents; no usage plan on this account)",
+      "error": null
+    },
+    {
+      "provider": "openscale",
+      "name": "OpenScale Sandboxes",
+      "date": "2026-11-06T16:15:49.706Z",
+      "minutes": 10,
+      "load": true,
+      "requested": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "delivered": {
+        "vcpu": 2,
+        "memoryGb": 1
+      },
+      "seconds": 601,
+      "predictedUsd": 0.002838,
+      "billedUsd": null,
+      "billedSeconds": null,
+      "billSource": "no billing HTTP API: `openscale balance` before and after, or the dashboard",
+      "error": null
+    },
+    {
+      "provider": "blaxel",
+      "name": "Blaxel",
+      "date": "2026-11-06T16:15:49.706Z",
+      "minutes": 10,
+      "load": true,
+      "requested": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "delivered": {
+        "vcpu": 2,
+        "memoryGb": 3.8
+      },
+      "seconds": 607,
+      "predictedUsd": 0.027922,
+      "billedUsd": 0.001426,
+      "billedSeconds": null,
+      "billSource": "blaxel /metrics cost (USD)",
+      "error": null
     }
   ],
   "submissions": [

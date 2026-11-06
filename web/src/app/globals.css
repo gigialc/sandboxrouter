@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
-/* One light theme after ornn.com: white page, black ink, hairlines, full-width layout, pill buttons. */
+/* One light theme: white page, black ink, hairlines, full-width layout, pill buttons, and one signature
+   accent (ultramarine, 7:1 on white) for the mark, primary actions, selected controls and price bars. */
 :root {
   color-scheme: light;
   --bg: #ffffff;
@@ -13,7 +14,10 @@
   --line-2: #cfcfcf;
   --ok: #15803d;
   --bad: #b91c1c;
-  --bar: #111111;
+  --accent: #3d2bff;
+  --accent-ink: #2a17e0;
+  --accent-soft: #efedff;
+  --bar: var(--accent);
 }
 
 @theme inline {
@@ -28,6 +32,9 @@
   --color-ok: var(--ok);
   --color-bad: var(--bad);
   --color-bar: var(--bar);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -43,8 +50,13 @@ body {
 }
 
 ::selection {
-  background: var(--ink);
-  color: var(--bg);
+  background: var(--accent);
+  color: #ffffff;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .tnum {
@@ -91,7 +103,8 @@ body {
   text-underline-offset: 3px;
 }
 .prose-sr a:hover {
-  text-decoration-color: var(--ink);
+  color: var(--accent);
+  text-decoration-color: var(--accent);
 }
 .prose-sr table {
   width: 100%;

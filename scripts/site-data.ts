@@ -1,11 +1,12 @@
 // Generates web/src/data/site.json from the library itself, so the website can't drift from the code.
 // Run from the repo root: node --import tsx scripts/site-data.ts
-import { readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { CATALOG, hourlyCost, planLabel, unfit } from "../src/catalog.js";
 import { aggregate, loadReports } from "../src/leaderboard.js";
 import { computerCatalog } from "../src/computers.js";
 import { CHECK_STEPS } from "../src/check.js";
 import { conformanceTable, liveStatus } from "../src/conformance.js";
+import type { CostRun } from "../src/cost.js";
 
 const SHAPES = [
   { vcpu: 1, memoryGb: 2 },
@@ -20,6 +21,30 @@ const pkg = JSON.parse(readFileSync(new URL("../package.json", import.meta.url),
 const reports = loadReports("results");
 const rows = new Map(conformanceTable().map((r) => [r.provider, r]));
 const conformance = new Map([...rows].map(([id, r]) => [id, r.run]));
+const names = new Map(CATALOG.map((c) => [c.id, c.name]));
+
+/** Every saved `cost run` (results/cost/*.json), newest first: list price × time against the provider's own bill. */
+const COST_DIR = "results/cost";
+const costRuns = (existsSync(COST_DIR) ? readdirSync(COST_DIR).filter((f) => f.endsWith(".json")) : [])
+  .map((f) => JSON.parse(readFileSync(`${COST_DIR}/${f}`, "utf8")) as CostRun)
+  .sort((a, b) => b.date.localeCompare(a.date));
+const costRows = costRuns.flatMap((run) =>
+  run.entries.map((e) => ({
+    provider: e.provider,
+    name: names.get(e.provider) ?? e.provider,
+    date: run.date,
+    minutes: run.minutes,
+    load: run.load,
+    requested: e.requested,
+    delivered: e.delivered ? { vcpu: e.delivered.vcpu, memoryGb: Math.round((e.delivered.memoryMb / 1024) * 10) / 10 } : null,
+    seconds: e.seconds ?? null,
+    predictedUsd: e.predictedUsd ?? null,
+    billedUsd: e.bill?.usd ?? null,
+    billedSeconds: e.bill?.seconds ?? null,
+    billSource: e.bill?.source ?? null,
+    error: e.error ?? null,
+  })),
+);
 
 const data = {
   version: pkg.version,
@@ -38,6 +63,7 @@ const data = {
     billing: c.billing,
     plan: c.plan ?? null,
     planLabel: c.local ? "none" : planLabel(c.id),
+    defaultSize: c.defaultSize ? { vcpu: c.defaultSize.vcpu, memoryGb: c.defaultSize.memoryGb } : null,
     check: conformance.get(c.id) ?? null,
     live: liveStatus(rows.get(c.id)!),
     computers: Object.keys(computerCatalog().find((d) => d.id === c.id)?.os ?? {}),
@@ -48,6 +74,7 @@ const data = {
   checkSteps: CHECK_STEPS,
   desktops: computerCatalog(),
   leaderboard: aggregate(reports),
+  costRuns: costRows,
   submissions: reports.map((r) => ({ date: r.date, label: r.label ?? null, platform: r.platform, runs: r.runs, providers: r.rows.length })),
 };
 

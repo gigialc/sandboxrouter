@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CodeBlock } from "@/components/code";
-import { CAPABILITY_LABEL, NPM, PACKAGE, provider, shapeLabel, site, usd } from "@/lib/site";
+import { CAPABILITY_LABEL, fixedPrice, NPM, PACKAGE, provider, shapeLabel, site, usd } from "@/lib/site";
 
 export function generateStaticParams() {
   return site.providers.map((p) => ({ id: p.id }));
@@ -45,6 +45,13 @@ await sbx.kill();`;
         </p>
       )}
       {p.pricing.note && <p className="mt-5 max-w-2xl text-[14px] leading-6 text-ink-2">{p.pricing.note[0].toUpperCase() + p.pricing.note.slice(1)}.</p>}
+      {p.defaultSize && (
+        <p className="mt-3 max-w-2xl border-l-2 border-accent pl-3 text-[14px] leading-6 text-ink">
+          Its default image runs at {p.defaultSize.vcpu} vCPU / {p.defaultSize.memoryGb} GB whatever size you ask for, measured inside
+          real sandboxes. The router only sends it work that fits, and prices it at that size. For more, pass your own image as{" "}
+          <code className="font-mono text-[12.5px]">image.{p.id}</code>.
+        </p>
+      )}
 
       <div className="mt-12 grid grid-cols-1 gap-12 md:grid-cols-2">
         <section>
@@ -55,7 +62,15 @@ await sbx.kill();`;
                 <tr key={s} className="border-t border-line">
                   <td className="py-2.5 text-ink-2 tnum">{shapeLabel(s)}</td>
                   <td className="py-2.5 text-right font-mono tnum">
-                    {p.prices[s].unfit ? <span className="text-muted">{p.prices[s].unfit}</span> : usd(p.prices[s].usd)}
+                    {fixedPrice(p, s) ? (
+                      <span className="text-muted">
+                        {usd(fixedPrice(p, s)!.usd)} at {fixedPrice(p, s)!.size} only
+                      </span>
+                    ) : p.prices[s].unfit ? (
+                      <span className="text-muted">{p.prices[s].unfit}</span>
+                    ) : (
+                      usd(p.prices[s].usd)
+                    )}
                   </td>
                 </tr>
               ))}

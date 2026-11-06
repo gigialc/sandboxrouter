@@ -46,7 +46,7 @@ export function CodeTabs({ tabs }: { tabs: { label: string; code: string }[] }) 
             role="tab"
             aria-selected={i === j}
             onClick={() => setI(j)}
-            className={`-mb-px border-b px-4 py-2 text-[12px] ${i === j ? "border-ink text-ink" : "border-transparent text-muted hover:text-ink-2"}`}
+            className={`-mb-px border-b px-4 py-2 text-[12px] ${i === j ? "border-accent text-ink" : "border-transparent text-muted hover:text-ink-2"}`}
           >
             {t.label}
           </button>
