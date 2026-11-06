@@ -154,14 +154,17 @@ export function Playground() {
     setBusy(null);
   }
 
-  const field = "w-full border border-line bg-bg px-3 py-2 text-sm outline-none focus:border-line-2";
+  const field = "w-full border border-line bg-bg px-3 py-2 text-base outline-none sm:text-sm focus:border-line-2";
 
   return (
-    <div className="grid gap-6 px-5 sm:px-10 lg:grid-cols-[22rem_1fr]">
+    <div className="grid grid-cols-1 gap-6 px-5 sm:px-10 lg:grid-cols-[22rem_minmax(0,1fr)]">
       <div className="space-y-6">
         <section className="border border-line p-5">
           <h2 className="font-normal">1. Connect your server</h2>
           <p className="mt-1 text-sm text-muted">Your keys stay on your machine. This page only talks to the server you run.</p>
+          <p className="mt-2 text-sm text-muted sm:hidden">
+            On a phone, 127.0.0.1 is the phone itself, so this needs a server your phone can reach over HTTPS.
+          </p>
           <label className="mt-4 block text-xs text-muted">
             Server URL
             <input value={url} onChange={(e) => setUrl(e.target.value)} className={`${field} mt-1 font-mono`} />
@@ -254,14 +257,14 @@ export function Playground() {
         </section>
       </div>
 
-      <section className="flex min-h-[32rem] flex-col overflow-hidden border border-line bg-panel">
+      <section className="flex min-h-64 flex-col sm:min-h-[32rem] overflow-hidden border border-line bg-panel">
         <div className="flex items-center gap-2 border-b border-line p-3">
           <input
             value={cmd}
             onChange={(e) => setCmd(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && sbx && !busy && run()}
             aria-label="Command"
-            className="flex-1 border border-line bg-panel px-3 py-2 font-mono text-sm text-ink-2 outline-none"
+            className="min-w-0 flex-1 border border-line bg-panel px-3 py-2 font-mono text-base text-ink-2 outline-none sm:text-sm"
           />
           <button
             onClick={run}

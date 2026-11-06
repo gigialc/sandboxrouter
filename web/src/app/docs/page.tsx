@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { TableScroll } from "@/components/chrome";
 import { CodeBlock } from "@/components/code";
 import { REPO, site } from "@/lib/site";
 
@@ -71,22 +72,24 @@ console.log(r.exitCode, r.stdout, "on", sbx.provider);`}
           directly; the rest need the provider&apos;s own package installed next to sandboxrouter (each provider&apos;s page says
           which).
         </p>
-        <table>
-          <thead>
-            <tr>
-              <th>Provider</th>
-              <th>Env</th>
-            </tr>
-          </thead>
-          <tbody>
-            {site.providers.map((p) => (
-              <tr key={p.id}>
-                <td>{p.name}</td>
-                <td className="font-mono text-xs">{p.credentials.length ? p.credentials.map((g) => g.join(" + ")).join("  or  ") : "Docker running locally"}</td>
+        <TableScroll>
+          <table>
+            <thead>
+              <tr>
+                <th>Provider</th>
+                <th>Env</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {site.providers.map((p) => (
+                <tr key={p.id}>
+                  <td>{p.name}</td>
+                  <td className="font-mono text-xs">{p.credentials.length ? p.credentials.map((g) => g.join(" + ")).join("  or  ") : "Docker running locally"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </TableScroll>
 
         <h2 id="routing">Routing</h2>
         <p>The second argument to <code>create</code> decides where a sandbox goes.</p>
@@ -190,35 +193,37 @@ const { url } = await desk.viewer("control", { reason: "Please sign in" });`}
 # allow a website (like this one's Playground) to call it from the browser (needs the token):
 SANDBOXROUTER_TOKEN=secret npx @sandboxrouter/sdk serve --cors https://your-site.example`}
         />
-        <table>
-          <thead>
-            <tr>
-              <th>Call</th>
-              <th>Body</th>
-            </tr>
-          </thead>
-          <tbody>
-            {[
-              ["GET /v1/providers", ""],
-              ["POST /v1/route", "same as create; returns the candidate order"],
-              ["POST /v1/sandboxes", "{ vcpu, memoryGb, gpu, env, timeoutMinutes, image, provider, strategy, fallback, createTimeoutSeconds, require }"],
-              ["POST /v1/sandboxes/:id/exec", "{ cmd, cwd, env, timeoutSeconds, stream }"],
-              ["PUT /v1/sandboxes/:id/files?path=", "raw bytes"],
-              ["GET /v1/sandboxes/:id/files?path=", ""],
-              ["POST /v1/sandboxes/:id/pause", ""],
-              ["DELETE /v1/sandboxes/:id", ""],
-              ["POST /v1/computers", "{ os, externalUserId, screen }"],
-              ["POST /v1/computers/:id/actions", "one action or { actions: [...] }"],
-              ["GET /v1/computers/:id/screenshot", "image bytes"],
-              ["POST /v1/computers/:id/viewer", `{ mode: "watch" | "control" }`],
-            ].map(([a, b]) => (
-              <tr key={a}>
-                <td className="font-mono text-xs whitespace-nowrap">{a}</td>
-                <td className="font-mono text-xs">{b}</td>
+        <TableScroll>
+          <table>
+            <thead>
+              <tr>
+                <th>Call</th>
+                <th>Body</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {[
+                ["GET /v1/providers", ""],
+                ["POST /v1/route", "same as create; returns the candidate order"],
+                ["POST /v1/sandboxes", "{ vcpu, memoryGb, gpu, env, timeoutMinutes, image, provider, strategy, fallback, createTimeoutSeconds, require }"],
+                ["POST /v1/sandboxes/:id/exec", "{ cmd, cwd, env, timeoutSeconds, stream }"],
+                ["PUT /v1/sandboxes/:id/files?path=", "raw bytes"],
+                ["GET /v1/sandboxes/:id/files?path=", ""],
+                ["POST /v1/sandboxes/:id/pause", ""],
+                ["DELETE /v1/sandboxes/:id", ""],
+                ["POST /v1/computers", "{ os, externalUserId, screen }"],
+                ["POST /v1/computers/:id/actions", "one action or { actions: [...] }"],
+                ["GET /v1/computers/:id/screenshot", "image bytes"],
+                ["POST /v1/computers/:id/viewer", `{ mode: "watch" | "control" }`],
+              ].map(([a, b]) => (
+                <tr key={a}>
+                  <td className="font-mono text-xs whitespace-nowrap">{a}</td>
+                  <td className="font-mono text-xs">{b}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </TableScroll>
         <p>
           With <code>stream: true</code>, exec answers <code>text/event-stream</code>: <code>stdout</code> and{" "}
           <code>stderr</code> events carry JSON string chunks, then one <code>result</code> event.
