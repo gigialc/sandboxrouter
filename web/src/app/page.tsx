@@ -31,11 +31,14 @@ const RULES = [
 
 export default function Home() {
   const cloud = site.providers.filter((p) => !p.local).length;
+  const passed = site.providers.filter((p) => !p.local && p.live.status === "passed").length;
   return (
     <div className="px-5 sm:px-10">
       <div className="grid items-center gap-12 pt-16 pb-6 sm:pt-24 lg:grid-cols-2 lg:gap-16">
       <section>
-        <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted">Open source · {cloud} providers</p>
+        <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted">
+          Open source · {cloud} providers · {passed} passing on real accounts
+        </p>
         <h1 className="mt-5 max-w-2xl text-4xl font-normal leading-[1.08] tracking-[-0.035em] sm:text-[52px]">One API for every sandbox.</h1>
         <p className="mt-5 max-w-xl text-[15px] leading-7 text-ink-2">
           AI agents need a safe computer to run code. sandboxrouter starts it on whichever provider fits the job, and moves to the

@@ -6,7 +6,7 @@ import { bench, benchMarkdown } from "./bench.js";
 import { checkProvider } from "./check.js";
 import { gc, listOpen } from "./gc.js";
 import { loadReports, makeReport, renderLeaderboard } from "./leaderboard.js";
-import { CATALOG, accessLabel, hourlyCost } from "./catalog.js";
+import { CATALOG, accessLabel, hourlyCost, listingOrder, planLabel, unfit } from "./catalog.js";
 import { Router } from "./router.js";
 import { createApp } from "./server.js";
 import { RouterError, type Capability, type ProviderId, type RouteOptions, type SandboxSpec, type Strategy } from "./types.js";
@@ -96,16 +96,18 @@ async function main() {
   if (!cmd || values.help) return console.log(HELP);
 
   if (cmd === "providers") {
-    const rows = CATALOG.map((c) => ({
+    const rows = listingOrder(spec).map((c) => ({
       provider: c.name,
       id: c.id,
-      "$/hr": `$${hourlyCost(c.id, spec).toFixed(4)}`,
+      "$/hr": unfit(c.id, spec) ?? `${c.billing === "active-cpu" ? "up to " : ""}$${hourlyCost(c.id, spec).toFixed(4)}`,
+      plan: c.local ? "none" : planLabel(c.id),
       configured: router.isConfigured(c.id) ? "yes" : "no",
       capabilities: c.capabilities.join(", ") || "-",
       "sign-up": accessLabel(c.id) ?? "open",
     }));
     if (values.json) return console.log(JSON.stringify(rows, null, 2));
-    console.log(`Estimated list price for ${spec.vcpu ?? 2} vCPU, ${spec.memoryGb ?? 4} GB while running:\n`);
+    console.log(`Estimated list price for ${spec.vcpu ?? 2} vCPU, ${spec.memoryGb ?? 4} GB while running, cheapest first.`);
+    console.log(`"up to" = billed on active CPU only, shown with every core busy. plan = monthly plan needed to use the API.\n`);
     console.table(rows);
     return;
   }

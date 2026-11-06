@@ -2,10 +2,12 @@
 
 All notable changes. Versions follow [semver](https://semver.org/); while the version is 0.x, a minor bump can change the API.
 
-## Unreleased (next: 0.3.0)
+## 0.3.0 (2026-11-06)
 
 ### Added
-- First real-account runs: E2B, Daytona, Maritime and OpenScale pass all 13 steps; Blaxel passes 12 of 12 (no pause).
+- Price tables (README, `providers`, site) show what a price leaves out: **plan needed** (the monthly plan a provider requires before its API creates sandboxes, and whether it's credited back as usage; `plan` and `planLabel()` in the catalog, checked against each pricing page on 2026-11-06), **billing model** (`billing: "active-cpu"` prices are marked "up to" / ≤, since they assume every core busy), and each provider's **real-account check** status (`liveStatus()`): passed, failed last run, or not run yet (mock-tested only). The site's homepage says how many providers pass on real accounts.
+- `listingOrder()`: the order tables list providers in. Open sign-ups come first, cheapest first; waitlisted or closed sign-ups follow, then providers that can't take the size, then Docker. Routing is unchanged.
+- First real-account runs: E2B, Maritime, OpenScale and Docker pass all 14 steps; Blaxel passes 13 of 13 (no pause). Daytona passed its first run, but the nightly run on 2026-11-06 failed at create with an error from Daytona's side.
 - First bench report (results/bench-2026-11-06-home-eu.json); the site's provider table shows its cold-start times.
 - `npm run secrets:push -- --only <ids>` uploads just the providers whose accounts are ready.
 - LangSmith Sandboxes (LangChain) via the `langsmith` SDK (`LANGSMITH_API_KEY`; streaming needs `ws`). Memory is kept within the 2 to 6 GiB per vCPU LangSmith allows; `timeoutMinutes` becomes the idle stop, and a stopped sandbox is deleted a day later.
@@ -26,6 +28,9 @@ All notable changes. Versions follow [semver](https://semver.org/); while the ve
 - The HTTP server needs `SANDBOXROUTER_TOKEN` when CORS is on (`createApp` throws) or when `serve --host` is not a loopback address (it refuses to start). The token is compared in constant time.
 - Providers that can't take the requested size are listed after the ones that can, with the reason.
 - Website: full-width layout, white page, black ink.
+- README and docs quickstarts use `try` / `finally { await sbx.kill() }`, which runs as plain JavaScript on Node 20+. `await using` (TypeScript 5.2+ or Node 24+) is mentioned as the shorter form; before, the README's first example was a syntax error in plain JavaScript on Node 22.
+- Examples no longer lead with one provider: README and docs examples use E2B and Daytona.
+- E2B's catalog note mentions its free Hobby tier; Pro ($150/mo) is only needed for longer sessions.
 
 ### Fixed
 - A provider whose create never answered stalled `router.create` instead of falling back. Each create now has a time limit (`createTimeoutSeconds`, default 120; CLI `--create-timeout`); a sandbox that turns up after it is recorded in the ledger and killed, so it can't bill unseen. Maritime's HTTP requests also have deadlines (60 s; a command's timeout plus 30 s; 5 min for files).

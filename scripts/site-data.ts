@@ -1,11 +1,11 @@
 // Generates web/src/data/site.json from the library itself, so the website can't drift from the code.
 // Run from the repo root: node --import tsx scripts/site-data.ts
 import { readFileSync, writeFileSync } from "node:fs";
-import { CATALOG, hourlyCost, unfit } from "../src/catalog.js";
+import { CATALOG, hourlyCost, planLabel, unfit } from "../src/catalog.js";
 import { aggregate, loadReports } from "../src/leaderboard.js";
 import { computerCatalog } from "../src/computers.js";
 import { CHECK_STEPS } from "../src/check.js";
-import { conformanceTable } from "../src/conformance.js";
+import { conformanceTable, liveStatus } from "../src/conformance.js";
 
 const SHAPES = [
   { vcpu: 1, memoryGb: 2 },
@@ -18,7 +18,8 @@ const SHAPES = [
 
 const pkg = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
 const reports = loadReports("results");
-const conformance = new Map(conformanceTable().map((r) => [r.provider, r.run]));
+const rows = new Map(conformanceTable().map((r) => [r.provider, r]));
+const conformance = new Map([...rows].map(([id, r]) => [id, r.run]));
 
 const data = {
   version: pkg.version,
@@ -34,7 +35,11 @@ const data = {
     docs: c.docs,
     pricing: c.pricing,
     access: c.access ?? null,
+    billing: c.billing,
+    plan: c.plan ?? null,
+    planLabel: c.local ? "none" : planLabel(c.id),
     check: conformance.get(c.id) ?? null,
+    live: liveStatus(rows.get(c.id)!),
     computers: Object.keys(computerCatalog().find((d) => d.id === c.id)?.os ?? {}),
     prices: Object.fromEntries(
       SHAPES.map((s) => [`${s.vcpu}x${s.memoryGb}`, { usd: Math.round(hourlyCost(c.id, s) * 10000) / 10000, unfit: unfit(c.id, s) }]),

@@ -49,15 +49,18 @@ export default function DocsPage() {
           code={`import { Router } from "@sandboxrouter/sdk";
 
 const router = new Router();
-await using sbx = await router.create({ vcpu: 2, memoryGb: 4, timeoutMinutes: 10 });
-
-await sbx.writeFile("/tmp/hello.py", "print('hello from a sandbox')");
-const r = await sbx.exec("python3 /tmp/hello.py");
-console.log(r.exitCode, r.stdout, "on", sbx.provider);`}
+const sbx = await router.create({ vcpu: 2, memoryGb: 4, timeoutMinutes: 10 });
+try {
+  await sbx.writeFile("/tmp/hello.py", "print('hello from a sandbox')");
+  const r = await sbx.exec("python3 /tmp/hello.py");
+  console.log(r.exitCode, r.stdout, "on", sbx.provider);
+} finally {
+  await sbx.kill();
+}`}
         />
         <p>
-          <code>await using</code> kills the sandbox when the block ends. Without it, call <code>sbx.kill()</code>. Each
-          provider also ends sandboxes on its own at <code>timeoutMinutes</code>.
+          Always kill the sandbox when you&apos;re done; each provider also ends it on its own at <code>timeoutMinutes</code>.
+          In TypeScript 5.2+ (or Node 24+) you can write <code>await using sbx = ...</code> instead, which kills it when the block ends.
         </p>
         <p>
           No account yet? Use Docker on your own machine: start Docker, then pass <code>{`{ provider: "docker" }`}</code>. It&apos;s
@@ -117,7 +120,7 @@ router.create(spec, { require: ["pause"] })         // only providers that can p
         </p>
         <CodeBlock
           code={`sbx.attempts
-// [ { provider: "maritime", ok: false, ms: 212, error: "... 429 concurrency_limit" },
+// [ { provider: "daytona", ok: false, ms: 212, error: "... 429 too many requests" },
 //   { provider: "e2b", ok: true, ms: 840 } ]`}
         />
         <p>
@@ -159,7 +162,7 @@ const text = await sbx.readText("/tmp/log.txt");`}
           code={`const sbx = await router.create({}, { require: ["pause"] });
 await sbx.pause();
 // later, in any process:
-const again = await router.get(sbx.id);   // e.g. "maritime:sbx-k3m7q2ab"`}
+const again = await router.get(sbx.id);   // e.g. "e2b:iz5sb5a4bt3pmjx7c5ms2"`}
         />
 
         <h2 id="computers">Desktops and phones</h2>

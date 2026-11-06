@@ -3,27 +3,29 @@
 // Run: node --import tsx scripts/readme-tables.ts           print them
 //      node --import tsx scripts/readme-tables.ts --write   replace them in README.md
 import { readFileSync, writeFileSync } from "node:fs";
-import { CATALOG, accessLabel, hourlyCost, unfit } from "../src/catalog.js";
+import { CATALOG, accessLabel, hourlyCost, listingOrder, planLabel, unfit } from "../src/catalog.js";
 import { CHECK_STEPS } from "../src/check.js";
-import { conformanceTable } from "../src/conformance.js";
+import { conformanceTable, liveStatus } from "../src/conformance.js";
 
-// Providers that can't take the default size sort after the ones that can, as the router skips them.
-const rank = (c: (typeof CATALOG)[number]) => (c.local ? 2 : unfit(c.id, {}) ? 1 : 0);
-const rows = [...CATALOG].sort((a, b) => rank(a) - rank(b) || hourlyCost(a.id) - hourlyCost(b.id) || a.id.localeCompare(b.id));
+const rows = listingOrder();
 const order = new Map(rows.map((c, i) => [c.id, i]));
+const live = new Map(conformanceTable().map((r) => [r.provider, liveStatus(r)]));
 
-const prices = ["| Provider | $/hr | Notes | Source |", "|---|---|---|---|"];
+const prices = ["| Provider | $/hr | Plan needed | Real-account check | Notes | Source |", "|---|---|---|---|---|---|"];
 for (const c of rows) {
   const why = unfit(c.id, {});
-  const price = c.local ? "free" : why ? `skipped (${why})` : `$${hourlyCost(c.id).toFixed(3)}`;
+  const cost = `$${hourlyCost(c.id).toFixed(3)}`;
+  const price = c.local ? "free" : why ? `skipped (${why})` : c.billing === "active-cpu" ? `up to ${cost}` : cost;
+  const plan = c.local ? "none" : planLabel(c.id);
+  const tested = live.get(c.id)!.label;
   const note = (c.pricing.note ?? "").replace(/\|/g, "/");
   // Capitalize a leading plain word ("per second" -> "Per second"), but not codes like "us-east-1" or "iad1".
   const shown = /^[a-z]+(?:-[a-z]+)*(?=[\s,;:(]|$)/.test(note) ? note[0].toUpperCase() + note.slice(1) : note;
   const gated = accessLabel(c.id);
   const name = gated ? `${c.name} (${gated})` : c.name;
-  prices.push(`| ${name} | ${price} | ${shown} | [pricing](${c.pricing.source}) |`);
+  prices.push(`| ${name} | ${price} | ${plan} | ${tested} | ${shown} | [pricing](${c.pricing.source}) |`);
 }
-const dates = CATALOG.filter((c) => !c.local).map((c) => c.pricing.checked).sort();
+const dates = CATALOG.filter((c) => !c.local).flatMap((c) => [c.pricing.checked, ...(c.plan ? [c.plan.checked] : [])]).sort();
 prices.push("", `Checked ${dates[0] === dates.at(-1) ? dates[0] : `${dates[0]} to ${dates.at(-1)}`}.`);
 
 const env = ["| Provider | Env |", "|---|---|"];

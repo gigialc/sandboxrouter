@@ -68,6 +68,15 @@ await sbx.kill();`;
             </a>
             , checked {p.pricing.checked}.
           </p>
+          {!p.local && (
+            <p className="mt-2 text-[12px] leading-5 text-muted">
+              {p.billing === "active-cpu"
+                ? "CPU is billed only while busy, so these are the prices with every core busy; idle time costs less. "
+                : "Billed on the size you ask for while it runs. "}
+              Plan needed: {p.planLabel}
+              {p.plan ? ` (${p.plan.note}; checked ${p.plan.checked})` : " (a free tier or pay-as-you-go works)"}.
+            </p>
+          )}
         </section>
 
         <section>
