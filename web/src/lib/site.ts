@@ -43,6 +43,7 @@ export interface LeaderRow {
   medianExecMs?: number;
   successRate: number;
   hourlyUsd: number;
+  size: { vcpu: number; memoryGb: number };
 }
 
 export interface SiteDesktop {

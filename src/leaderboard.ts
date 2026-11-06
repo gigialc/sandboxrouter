@@ -1,6 +1,6 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { CATALOG, hourlyCost } from "./catalog.js";
+import { CATALOG, fittingSpec, hourlyCost } from "./catalog.js";
 import { median } from "./bench-store.js";
 import type { BenchRow } from "./bench.js";
 import type { ProviderId, SandboxSpec } from "./types.js";
@@ -64,7 +64,10 @@ export interface LeaderRow {
   medianCreateMs?: number;
   medianExecMs?: number;
   successRate: number;
+  /** List price for the size the bench runs it at (`size`). */
   hourlyUsd: number;
+  /** The size bench runs: 2 vCPU / 4 GB, or the provider's fixed default size. */
+  size: { vcpu: number; memoryGb: number };
 }
 
 const KNOWN = new Set(CATALOG.map((c) => c.id));
@@ -83,7 +86,8 @@ export function aggregate(reports: BenchReport[]): LeaderRow[] {
       medianCreateMs: median(rs.map((r) => r.medianCreateMs).filter((n): n is number => typeof n === "number")),
       medianExecMs: median(rs.map((r) => r.medianExecMs).filter((n): n is number => typeof n === "number")),
       successRate: runs ? ok / runs : 0,
-      hourlyUsd: hourlyCost(id),
+      hourlyUsd: hourlyCost(id, fittingSpec(id)),
+      size: fittingSpec(id),
     };
   });
   return rows.sort((a, b) => (a.medianCreateMs ?? Infinity) - (b.medianCreateMs ?? Infinity));
@@ -114,7 +118,7 @@ export function renderLeaderboard(reports: BenchReport[]): string {
   <th scope="row">${esc(r.name)}</th>
   ${bar(r.medianCreateMs, maxCreate, r.medianCreateMs === undefined ? "" : `${r.medianCreateMs.toLocaleString("en-US")} ms`, `${r.name}: median cold start ${r.medianCreateMs} ms across ${r.submissions} submission${r.submissions === 1 ? "" : "s"}`)}
   <td class="num">${r.medianExecMs === undefined ? "n/a" : `${r.medianExecMs} ms`}</td>
-  ${bar(r.hourlyUsd, maxPrice, `$${r.hourlyUsd.toFixed(3)}`, `${r.name}: $${r.hourlyUsd.toFixed(4)} per hour at list price, 2 vCPU / 4 GB`)}
+  ${bar(r.hourlyUsd, maxPrice, `$${r.hourlyUsd.toFixed(3)}`, `${r.name}: $${r.hourlyUsd.toFixed(4)} per hour at list price, ${r.size.vcpu} vCPU / ${r.size.memoryGb} GB`)}
   <td class="num">${(r.successRate * 100).toFixed(0)}%</td>
   <td class="num muted">${r.submissions}</td>
 </tr>`,
@@ -190,7 +194,7 @@ a { color: inherit; }
     <table>
       <thead><tr>
         <th>#</th><th>Provider</th><th>Cold start (median)</th><th>Exec round trip</th>
-        <th>List price, 2 vCPU / 4 GB</th><th>Success</th><th>Submissions</th>
+        <th>List price (size run)</th><th>Success</th><th>Submissions</th>
       </tr></thead>
       <tbody>
 ${body || `<tr><td colspan="7" class="muted">No results yet. Run <code>npx @sandboxrouter/sdk bench --share</code> and open a PR.</td></tr>`}

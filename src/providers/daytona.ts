@@ -48,22 +48,38 @@ export class DaytonaProvider implements Provider, ComputerProvider {
 
   async create(spec: SandboxSpec): Promise<ProviderSandbox> {
     const d = await this.daytona();
+    // A per-create tag, so a sandbox Daytona made but couldn't start can be found and deleted: the
+    // SDK throws without handing it back, and it would otherwise sit in "error" state.
+    const tag = randomUUID();
     const base = {
       envVars: spec.env,
-      labels: spec.metadata,
+      labels: { ...spec.metadata, "sandboxrouter-create": tag },
       // Minutes of inactivity before Daytona stops it; deleted a minute after it stops. Not 0:
       // that makes the sandbox ephemeral, which is fixed at creation and rules out pause.
       autoStopInterval: Math.max(1, Math.round(spec.timeoutMinutes ?? 30)),
       autoDeleteInterval: 1,
     };
-    const sbx = spec.image?.daytona
-      ? await d.create({
-          ...base,
-          image: spec.image.daytona,
-          resources: { cpu: spec.vcpu, memory: spec.memoryGb },
-        })
-      : await d.create(base);
-    return new DaytonaBox(sbx);
+    try {
+      const sbx = spec.image?.daytona
+        ? await d.create({
+            ...base,
+            image: spec.image.daytona,
+            resources: { cpu: spec.vcpu, memory: spec.memoryGb },
+          })
+        : await d.create(base);
+      return new DaytonaBox(sbx);
+    } catch (err) {
+      await this.discardTagged(d, tag);
+      throw err;
+    }
+  }
+
+  private async discardTagged(d: DaytonaClient, tag: string): Promise<void> {
+    try {
+      for await (const sbx of d.list({ labels: { "sandboxrouter-create": tag } })) await sbx.delete().catch(() => {});
+    } catch {
+      /* best effort: the create error is the one worth reporting */
+    }
   }
 
   /**

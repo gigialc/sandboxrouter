@@ -1,6 +1,6 @@
 {
   "version": "0.3.0",
-  "generatedAt": "2026-11-06T16:55:22.860Z",
+  "generatedAt": "2026-11-06T18:33:20.112Z",
   "shapes": [
     "1x2",
     "2x4",
@@ -753,27 +753,27 @@
       ],
       "prices": {
         "1x2": {
-          "usd": 0.0828,
-          "unfit": null
+          "usd": 0.0666,
+          "unfit": "default size 1 vCPU / 1 GB; more needs image.daytona"
         },
         "2x4": {
-          "usd": 0.1656,
-          "unfit": null
+          "usd": 0.0666,
+          "unfit": "default size 1 vCPU / 1 GB; more needs image.daytona"
         },
         "4x8": {
-          "usd": 0.3312,
-          "unfit": null
+          "usd": 0.0666,
+          "unfit": "default size 1 vCPU / 1 GB; more needs image.daytona"
         },
         "8x16": {
-          "usd": 0.6624,
+          "usd": 0.0666,
           "unfit": "max 4 vCPU"
         },
         "16x32": {
-          "usd": 1.3248,
+          "usd": 0.0666,
           "unfit": "max 4 vCPU"
         },
         "32x128": {
-          "usd": 3.6864,
+          "usd": 0.0666,
           "unfit": "max 4 vCPU"
         }
       }
@@ -1054,27 +1054,27 @@
       ],
       "prices": {
         "1x2": {
-          "usd": 0.0828,
-          "unfit": null
+          "usd": 0.1089,
+          "unfit": "default size 2 vCPU / 0.5 GB; more needs image.e2b"
         },
         "2x4": {
-          "usd": 0.1656,
-          "unfit": null
+          "usd": 0.1089,
+          "unfit": "default size 2 vCPU / 0.5 GB; more needs image.e2b"
         },
         "4x8": {
-          "usd": 0.3312,
-          "unfit": null
+          "usd": 0.1089,
+          "unfit": "default size 2 vCPU / 0.5 GB; more needs image.e2b"
         },
         "8x16": {
-          "usd": 0.6624,
+          "usd": 0.1089,
           "unfit": "max 8 GB memory"
         },
         "16x32": {
-          "usd": 1.3248,
+          "usd": 0.1089,
           "unfit": "max 8 vCPU"
         },
         "32x128": {
-          "usd": 3.6864,
+          "usd": 0.1089,
           "unfit": "max 8 vCPU"
         }
       }
@@ -1931,27 +1931,27 @@
       "computers": [],
       "prices": {
         "1x2": {
-          "usd": 0.0085,
-          "unfit": null
+          "usd": 0.014,
+          "unfit": "default size 2 vCPU / 1 GB; more needs image.openscale"
         },
         "2x4": {
-          "usd": 0.017,
-          "unfit": null
+          "usd": 0.014,
+          "unfit": "default size 2 vCPU / 1 GB; more needs image.openscale"
         },
         "4x8": {
-          "usd": 0.034,
-          "unfit": null
+          "usd": 0.014,
+          "unfit": "default size 2 vCPU / 1 GB; more needs image.openscale"
         },
         "8x16": {
-          "usd": 0.068,
-          "unfit": null
+          "usd": 0.014,
+          "unfit": "default size 2 vCPU / 1 GB; more needs image.openscale"
         },
         "16x32": {
-          "usd": 0.136,
+          "usd": 0.014,
           "unfit": "max 8 vCPU"
         },
         "32x128": {
-          "usd": 0.336,
+          "usd": 0.014,
           "unfit": "max 8 vCPU"
         }
       }
@@ -2433,7 +2433,11 @@
       "medianCreateMs": 332,
       "medianExecMs": 169,
       "successRate": 1,
-      "hourlyUsd": 0.1656
+      "hourlyUsd": 0.1089,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 0.5
+      }
     },
     {
       "provider": "openscale",
@@ -2442,7 +2446,11 @@
       "medianCreateMs": 350,
       "medianExecMs": 992,
       "successRate": 1,
-      "hourlyUsd": 0.017
+      "hourlyUsd": 0.013999999999999999,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 1
+      }
     },
     {
       "provider": "daytona",
@@ -2451,7 +2459,11 @@
       "medianCreateMs": 363,
       "medianExecMs": 403,
       "successRate": 1,
-      "hourlyUsd": 0.1656
+      "hourlyUsd": 0.06659999999999999,
+      "size": {
+        "vcpu": 1,
+        "memoryGb": 1
+      }
     },
     {
       "provider": "blaxel",
@@ -2460,7 +2472,11 @@
       "medianCreateMs": 1090,
       "medianExecMs": 247,
       "successRate": 1,
-      "hourlyUsd": 0.1656
+      "hourlyUsd": 0.1656,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      }
     },
     {
       "provider": "maritime",
@@ -2469,7 +2485,11 @@
       "medianCreateMs": 1231,
       "medianExecMs": 188,
       "successRate": 1,
-      "hourlyUsd": 0.022
+      "hourlyUsd": 0.022,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      }
     }
   ],
   "submissions": [
