@@ -11,6 +11,7 @@ All notable changes. Versions follow [semver](https://semver.org/); while the ve
 - First real-account runs: E2B, Maritime, OpenScale and Docker pass all 14 steps; Blaxel passes 13 of 13 (no pause). Daytona passed its first run, but the nightly run on 2026-11-06 failed at create with an error from Daytona's side.
 - First bench report (results/bench-2026-11-06-home-eu.json); the site's provider table shows its cold-start times.
 - `npm run secrets:push -- --only <ids>` uploads just the providers whose accounts are ready.
+- Sail Research Sailboxes (`SAIL_API_KEY`), over Sail's plain HTTPS API: persistent VMs billed on what they use (CPU time, RAM held, disk), with pause and resume. The cost check reads Sail's real charge from `/sailboxes/spend`.
 - LangSmith Sandboxes (LangChain) via the `langsmith` SDK (`LANGSMITH_API_KEY`; streaming needs `ws`). Memory is kept within the 2 to 6 GiB per vCPU LangSmith allows; `timeoutMinutes` becomes the idle stop, and a stopped sandbox is deleted a day later.
 - Sign-up status for gated providers (`access` in the catalog, `accessLabel()`): InstaBox and Dedalus are waitlisted, Koyeb isn't taking new accounts since joining Mistral. `providers`, `route`, the README and the site say so. Routing is unchanged: anyone who already has a key still gets routed there.
 - 16 more sandbox providers, for 31 cloud providers plus Docker:

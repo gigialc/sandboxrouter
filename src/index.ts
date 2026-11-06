@@ -54,6 +54,7 @@ export { KoyebProvider } from "./providers/koyeb.js";
 export { DedalusProvider } from "./providers/dedalus.js";
 export { OpenScaleProvider } from "./providers/openscale.js";
 export { SuperserveProvider } from "./providers/superserve.js";
+export { SailProvider } from "./providers/sail.js";
 export { InstaboxProvider, INSTABOX_SIZES, instaboxSize } from "./providers/instabox.js";
 export { Agent37Provider, AGENT37_SHAPES, agent37Shape } from "./providers/agent37.js";
 export { NovitaProvider } from "./providers/novita.js";

@@ -40,6 +40,7 @@ import { DedalusProvider } from "./providers/dedalus.js";
 import { Agent37Provider } from "./providers/agent37.js";
 import { OpenScaleProvider } from "./providers/openscale.js";
 import { SuperserveProvider } from "./providers/superserve.js";
+import { SailProvider } from "./providers/sail.js";
 import { InstaboxProvider } from "./providers/instabox.js";
 import { NovitaProvider } from "./providers/novita.js";
 import { LangSmithProvider } from "./providers/langsmith.js";
@@ -122,6 +123,7 @@ export function defaultProviders(): Provider[] {
     new LangSmithProvider(),
     new OpenScaleProvider(),
     new SuperserveProvider(),
+    new SailProvider(),
     new UpstashProvider(),
     new DockerProvider(),
   ];

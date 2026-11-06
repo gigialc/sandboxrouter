@@ -31,7 +31,8 @@ export type ProviderId =
   | "agent37"
   | "superserve"
   | "instabox"
-  | "openscale";
+  | "openscale"
+  | "sail";
 
 /** Things a caller can require of a provider. The router skips providers that lack one. */
 export type Capability =

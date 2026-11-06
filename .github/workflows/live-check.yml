@@ -70,6 +70,7 @@ jobs:
           RUNLOOP_API_KEY: ${{ secrets.RUNLOOP_API_KEY }}
           SPRITES_TOKEN: ${{ secrets.SPRITES_TOKEN }}
           SUPERSERVE_API_KEY: ${{ secrets.SUPERSERVE_API_KEY }}
+          SAIL_API_KEY: ${{ secrets.SAIL_API_KEY }}
           TENSORLAKE_API_KEY: ${{ secrets.TENSORLAKE_API_KEY }}
           UPSTASH_BOX_API_KEY: ${{ secrets.UPSTASH_BOX_API_KEY }}
           VERCEL_OIDC_TOKEN: ${{ secrets.VERCEL_OIDC_TOKEN }}
@@ -121,6 +122,7 @@ jobs:
           RUNLOOP_API_KEY: ${{ secrets.RUNLOOP_API_KEY }}
           SPRITES_TOKEN: ${{ secrets.SPRITES_TOKEN }}
           SUPERSERVE_API_KEY: ${{ secrets.SUPERSERVE_API_KEY }}
+          SAIL_API_KEY: ${{ secrets.SAIL_API_KEY }}
           TENSORLAKE_API_KEY: ${{ secrets.TENSORLAKE_API_KEY }}
           UPSTASH_BOX_API_KEY: ${{ secrets.UPSTASH_BOX_API_KEY }}
           VERCEL_OIDC_TOKEN: ${{ secrets.VERCEL_OIDC_TOKEN }}

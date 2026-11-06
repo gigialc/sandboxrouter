@@ -138,5 +138,6 @@ export const PACKAGE: Record<string, string | null> = {
   agent37: null,
   openscale: "e2b",
   superserve: null,
+  sail: null,
   instabox: null,
 };
