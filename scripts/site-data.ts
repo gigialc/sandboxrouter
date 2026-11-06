@@ -33,6 +33,7 @@ const data = {
     credentials: c.credentials,
     docs: c.docs,
     pricing: c.pricing,
+    access: c.access ?? null,
     check: conformance.get(c.id) ?? null,
     computers: Object.keys(computerCatalog().find((d) => d.id === c.id)?.os ?? {}),
     prices: Object.fromEntries(

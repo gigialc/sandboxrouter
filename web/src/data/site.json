@@ -1,6 +1,6 @@
 {
   "version": "0.2.0",
-  "generatedAt": "2026-11-05T22:52:54.175Z",
+  "generatedAt": "2026-11-06T00:55:09.924Z",
   "shapes": [
     "1x2",
     "2x4",
@@ -35,6 +35,7 @@
         "source": "https://www.agent37.com/docs/agents-api/billing",
         "checked": "2026-11-05"
       },
+      "access": null,
       "check": null,
       "computers": [],
       "prices": {
@@ -88,6 +89,7 @@
         "source": "https://www.alibabacloud.com/help/en/agent-sandbox/product-overview/billing-overview",
         "checked": "2026-11-05"
       },
+      "access": null,
       "check": null,
       "computers": [],
       "prices": {
@@ -147,6 +149,7 @@
         "source": "https://aws.amazon.com/bedrock/agentcore/pricing/",
         "checked": "2026-11-04"
       },
+      "access": null,
       "check": null,
       "computers": [],
       "prices": {
@@ -209,6 +212,7 @@
         "source": "https://aws.amazon.com/lambda/pricing/",
         "checked": "2026-11-05"
       },
+      "access": null,
       "check": null,
       "computers": [],
       "prices": {
@@ -267,6 +271,7 @@
         "source": "https://learn.microsoft.com/en-us/azure/container-apps/billing#dynamic-sessions",
         "checked": "2026-11-04"
       },
+      "access": null,
       "check": null,
       "computers": [],
       "prices": {
@@ -321,6 +326,7 @@
         "source": "https://www.beam.cloud/pricing",
         "checked": "2026-11-04"
       },
+      "access": null,
       "check": null,
       "computers": [],
       "prices": {
@@ -376,6 +382,7 @@
         "source": "https://blaxel.ai/pricing",
         "checked": "2026-11-04"
       },
+      "access": null,
       "check": null,
       "computers": [],
       "prices": {
@@ -430,6 +437,7 @@
         "source": "https://docs.boat.dev/pricing.md",
         "checked": "2026-11-04"
       },
+      "access": null,
       "check": null,
       "computers": [],
       "prices": {
@@ -482,6 +490,7 @@
         "source": "https://developers.cloudflare.com/containers/platform/pricing/",
         "checked": "2026-11-05"
       },
+      "access": null,
       "check": null,
       "computers": [],
       "prices": {
@@ -536,6 +545,7 @@
         "source": "https://docs.together.ai/docs/together-code-sandbox-legacy",
         "checked": "2026-11-05"
       },
+      "access": null,
       "check": null,
       "computers": [],
       "prices": {
@@ -590,6 +600,7 @@
         "source": "https://www.daytona.io/pricing",
         "checked": "2026-11-04"
       },
+      "access": null,
       "check": null,
       "computers": [
         "linux"
@@ -645,6 +656,11 @@
         "source": "https://docs.dedaluslabs.ai/dcs/dm/pricing",
         "checked": "2026-11-05"
       },
+      "access": {
+        "status": "waitlist",
+        "note": "private beta: your organization has to be admitted before keys work",
+        "checked": "2026-11-05"
+      },
       "check": null,
       "computers": [],
       "prices": {
@@ -698,6 +714,7 @@
         "source": "https://deno.com/sandbox",
         "checked": "2026-11-04"
       },
+      "access": null,
       "check": null,
       "computers": [],
       "prices": {
@@ -748,6 +765,7 @@
         "source": "https://docs.docker.com/engine/",
         "checked": "2026-11-04"
       },
+      "access": null,
       "check": {
         "date": "2026-11-05T18:17:55.354Z",
         "version": "0.2.0",
@@ -828,6 +846,7 @@
         "source": "https://e2b.dev/pricing",
         "checked": "2026-11-04"
       },
+      "access": null,
       "check": null,
       "computers": [
         "linux"
@@ -883,6 +902,7 @@
         "source": "https://exe.dev/docs/standalone-vms.md",
         "checked": "2026-11-05"
       },
+      "access": null,
       "check": null,
       "computers": [],
       "prices": {
@@ -934,6 +954,7 @@
         "source": "https://fly.io/sprites",
         "checked": "2026-11-04"
       },
+      "access": null,
       "check": null,
       "computers": [],
       "prices": {
@@ -988,6 +1009,7 @@
         "source": "https://www.freestyle.sh/docs/vms/pricing-and-limits",
         "checked": "2026-11-05"
       },
+      "access": null,
       "check": null,
       "computers": [],
       "prices": {
@@ -1042,6 +1064,7 @@
         "source": "https://hopx.ai/pricing",
         "checked": "2026-11-04"
       },
+      "access": null,
       "check": null,
       "computers": [],
       "prices": {
@@ -1094,6 +1117,11 @@
         "gbHour": 0.00225,
         "note": "per second while running on fixed sizes (2/4, 4/8, 8/16); paused or stopped boxes bill only /data beyond the included disk ($0.00011/GiB-h); Pro $20/mo includes $20 credits; free plan: 1 box at 4/8",
         "source": "https://instabox.sh/docs/pricing.md",
+        "checked": "2026-11-05"
+      },
+      "access": {
+        "status": "waitlist",
+        "note": "new accounts go on a waitlist before they can create boxes or keys",
         "checked": "2026-11-05"
       },
       "check": null,
@@ -1149,6 +1177,11 @@
         "source": "https://www.koyeb.com/docs/reference/instances",
         "checked": "2026-11-04"
       },
+      "access": {
+        "status": "closed",
+        "note": "Koyeb is joining Mistral; a new account's dashboard only shows that notice, with no way to create sandboxes or tokens. Existing accounts are unaffected",
+        "checked": "2026-11-05"
+      },
       "check": null,
       "computers": [],
       "prices": {
@@ -1203,6 +1236,7 @@
         "source": "https://maritime.sh/pricing",
         "checked": "2026-11-05"
       },
+      "access": null,
       "check": null,
       "computers": [
         "linux",
@@ -1262,6 +1296,7 @@
         "source": "https://modal.com/pricing",
         "checked": "2026-11-05"
       },
+      "access": null,
       "check": null,
       "computers": [],
       "prices": {
@@ -1316,6 +1351,7 @@
         "source": "https://cloud.morph.so/web/pricing",
         "checked": "2026-11-04"
       },
+      "access": null,
       "check": null,
       "computers": [],
       "prices": {
@@ -1370,6 +1406,7 @@
         "source": "https://northflank.com/pricing",
         "checked": "2026-11-04"
       },
+      "access": null,
       "check": null,
       "computers": [],
       "prices": {
@@ -1424,6 +1461,7 @@
         "source": "https://docs.novita.ai/guides/sandbox-pricing",
         "checked": "2026-11-04"
       },
+      "access": null,
       "check": null,
       "computers": [],
       "prices": {
@@ -1478,6 +1516,7 @@
         "source": "https://openscale.so/sandboxes",
         "checked": "2026-11-05"
       },
+      "access": null,
       "check": null,
       "computers": [],
       "prices": {
@@ -1532,6 +1571,7 @@
         "source": "https://www.runloop.ai/pricing",
         "checked": "2026-11-04"
       },
+      "access": null,
       "check": null,
       "computers": [],
       "prices": {
@@ -1586,6 +1626,7 @@
         "source": "https://superserve.ai/pricing",
         "checked": "2026-11-05"
       },
+      "access": null,
       "check": null,
       "computers": [],
       "prices": {
@@ -1640,6 +1681,7 @@
         "source": "https://www.tensorlake.ai/pricing",
         "checked": "2026-11-04"
       },
+      "access": null,
       "check": null,
       "computers": [],
       "prices": {
@@ -1691,6 +1733,7 @@
         "source": "https://upstash.com/pricing/box",
         "checked": "2026-11-04"
       },
+      "access": null,
       "check": null,
       "computers": [],
       "prices": {
@@ -1747,6 +1790,7 @@
         "source": "https://vercel.com/docs/vercel-sandbox/pricing",
         "checked": "2026-11-05"
       },
+      "access": null,
       "check": null,
       "computers": [],
       "prices": {

@@ -39,6 +39,11 @@ await sbx.kill();`;
       </Link>
       <h1 className="mt-8 text-4xl font-normal tracking-[-0.035em]">{p.name}</h1>
       <p className="mt-2 font-mono text-[12px] text-muted">provider: &quot;{p.id}&quot;</p>
+      {p.access && (
+        <p className="mt-5 max-w-2xl border-l-2 border-line-2 pl-3 text-[14px] leading-6 text-ink">
+          {p.access.status === "waitlist" ? "Sign-up is waitlisted" : "Not taking new accounts"}: {p.access.note}. Checked {p.access.checked}.
+        </p>
+      )}
       {p.pricing.note && <p className="mt-5 max-w-2xl text-[14px] leading-6 text-ink-2">{p.pricing.note[0].toUpperCase() + p.pricing.note.slice(1)}.</p>}
 
       <div className="mt-12 grid gap-12 md:grid-cols-2">
@@ -72,7 +77,14 @@ await sbx.kill();`;
               ["Supports", ["Exec + streaming", "Files", ...caps.map((c) => CAPABILITY_LABEL[c] ?? c)].join(" · ")],
               ["Max size", `${p.limits.maxVcpu} vCPU · ${p.limits.maxMemoryGb} GB`],
               ...(p.computers.length ? [["Computers", p.computers.join(", ")]] : []),
-              ["Routing", p.local ? "Only when you ask for it by name" : "Chosen when it's the cheapest fit, or as a fallback"],
+              [
+                "Routing",
+                p.local
+                  ? "Only when you ask for it by name"
+                  : p.access
+                    ? "Chosen when it's the cheapest fit, if you already have a key"
+                    : "Chosen when it's the cheapest fit, or as a fallback",
+              ],
               ["Docs", new URL(p.docs).hostname],
             ].map(([k, v]) => (
               <div key={k} className="flex gap-4 border-t border-line py-2.5">
