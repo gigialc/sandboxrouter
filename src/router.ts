@@ -10,6 +10,7 @@ import {
 } from "./computers.js";
 import { loadBench, median } from "./bench-store.js";
 import { Ledger, defaultLedgerFile } from "./ledger.js";
+import { DEFAULT_EXEC_TIMEOUT_S, timeoutError } from "./util.js";
 import { DaytonaProvider } from "./providers/daytona.js";
 import { E2BProvider } from "./providers/e2b.js";
 import { MaritimeProvider } from "./providers/maritime.js";
@@ -165,13 +166,15 @@ export class Router {
     const bench = route.strategy === "fastest" ? loadBench(this.benchFile) : {};
 
     const list: Candidate[] = ids.map((id) => {
+      // An id the catalog has never heard of (a typo in an explicit list) has no price to look up.
+      if (!CATALOG.some((c) => c.id === id)) return { provider: id, estimatedHourlyUsd: 0, skip: "unknown provider" };
       const p = this.providers.get(id);
       const c: Candidate = {
         provider: id,
         estimatedHourlyUsd: round(hourlyCost(id, spec)),
         medianCreateMs: median(bench[id]?.createMs),
       };
-      if (!p) c.skip = "unknown provider";
+      if (!p) c.skip = "no adapter registered";
       else {
         const gated = accessLabel(id);
         c.skip = unfit(id, spec, route.require) ?? (p.configured() ? undefined : gated ? `not configured; ${gated}` : "not configured");
@@ -282,8 +285,15 @@ export class RoutedSandbox {
     return this.box.nativeId;
   }
 
-  exec(cmd: string, opts?: ExecOptions): Promise<ExecResult> {
-    return this.box.exec(cmd, opts);
+  /**
+   * Run a command. If it outlives `opts.timeoutSeconds` the adapter stops it and this rejects with
+   * `ProviderError("<provider>: command timed out after Ns")`. Should an adapter fail to notice its
+   * own deadline, the router gives up `EXEC_GRACE_S` later with the same error, so callers can
+   * always rely on the timeout being bounded and the message being the same on every provider.
+   */
+  exec(cmd: string, opts: ExecOptions = {}): Promise<ExecResult> {
+    const seconds = opts.timeoutSeconds ?? DEFAULT_EXEC_TIMEOUT_S;
+    return withDeadline(this.box.exec(cmd, opts), (seconds + EXEC_GRACE_S) * 1000, () => timeoutError(this.provider, seconds));
   }
 
   writeFile(path: string, content: string | Uint8Array): Promise<void> {
@@ -328,4 +338,22 @@ export function parseId(id: string): { provider: ProviderId; nativeId: string } 
 
 function round(n: number) {
   return Math.round(n * 10000) / 10000;
+}
+
+/** Seconds past a command's timeout before the router stops waiting for the adapter. */
+export const EXEC_GRACE_S = 30;
+
+/** Resolve with `work`, or reject with `onExpire()` after `ms`. A late `work` rejection is swallowed. */
+async function withDeadline<T>(work: Promise<T>, ms: number, onExpire: () => Error): Promise<T> {
+  let timer: NodeJS.Timeout | undefined;
+  const expired = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(onExpire()), ms);
+    timer.unref();
+  });
+  try {
+    return await Promise.race([work, expired]);
+  } finally {
+    clearTimeout(timer);
+    work.catch(() => {});
+  }
 }

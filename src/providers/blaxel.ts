@@ -1,6 +1,6 @@
 import { DEFAULT_MEMORY_GB, DEFAULT_VCPU } from "../catalog.js";
 import { ProviderError, type ExecOptions, type ExecResult, type Provider, type ProviderSandbox, type SandboxSpec } from "../types.js";
-import { optionalImport, toBytes } from "../util.js";
+import { DEFAULT_EXEC_TIMEOUT_S, optionalImport, timeoutError, toBytes } from "../util.js";
 
 type BlaxelModule = typeof import("@blaxel/core");
 type BlaxelSandbox = InstanceType<BlaxelModule["SandboxInstance"]>;
@@ -84,10 +84,11 @@ class BlaxelBox implements ProviderSandbox {
 
   async exec(cmd: string, opts: ExecOptions = {}): Promise<ExecResult> {
     const t0 = Date.now();
-    const timeoutSeconds = opts.timeoutSeconds ?? 60;
+    const timeoutSeconds = opts.timeoutSeconds ?? DEFAULT_EXEC_TIMEOUT_S;
     let r;
     try {
       // With onStdout/onStderr the SDK streams logs from the same request as the command runs.
+      // The sandbox kills the command at `timeout` and reports it with status "killed".
       r = await this.sbx.process.exec({
         command: cmd,
         workingDir: opts.cwd,
@@ -97,12 +98,16 @@ class BlaxelBox implements ProviderSandbox {
         onStdout: opts.onStdout,
         onStderr: opts.onStderr,
       });
-      if (r.status === "running") r = await this.sbx.process.wait(r.pid, { maxWait: timeoutSeconds * 1000 });
+      if (r.status === "running") r = await this.sbx.process.wait(r.pid, { maxWait: (timeoutSeconds + 15) * 1000 });
     } catch (err) {
-      throw wrap(err);
+      const e = wrap(err);
+      // A real account answers a command that passes its limit with 422 "process timed out after N seconds".
+      if (e.status === 422 && /timed out/i.test(e.message)) throw timeoutError("blaxel", timeoutSeconds);
+      throw e;
     }
     if (r.status === "killed" || r.status === "stopped") {
-      throw new ProviderError("blaxel", `command ${r.status} (timeout ${timeoutSeconds}s?)`);
+      if (Date.now() - t0 >= timeoutSeconds * 1000 - 250) throw timeoutError("blaxel", timeoutSeconds);
+      throw new ProviderError("blaxel", `command ${r.status} before it finished`);
     }
     // A nonzero exit is a result (status "failed"), not an error.
     return { exitCode: r.exitCode, stdout: r.stdout ?? "", stderr: r.stderr ?? "", durationMs: Date.now() - t0 };

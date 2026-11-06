@@ -147,7 +147,8 @@ describe("BeamProvider", () => {
     const sbx = await p().create({ env: { BASE: "b", OVER: "old" } });
     const r = await sbx.exec(`echo "$BASE $OVER $(basename "$PWD")"; echo 'it''s err' >&2`, { cwd: "/tmp", env: { OVER: "new" } });
     expect(r).toMatchObject({ exitCode: 0, stdout: "b new tmp\n", stderr: "its err\n" });
-    expect(execs.at(-1)!.opts).toEqual({ cwd: "/tmp", env: { BASE: "b", OVER: "new" }, wait: true });
+    // Never wait: true, or the timeout could not start until the command had already finished.
+    expect(execs.at(-1)!.opts).toEqual({ cwd: "/tmp", env: { BASE: "b", OVER: "new" }, wait: false });
     expect((await sbx.exec("exit 3")).exitCode).toBe(3);
   });
 

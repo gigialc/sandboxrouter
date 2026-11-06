@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { DEFAULT_MEMORY_GB, DEFAULT_VCPU } from "../catalog.js";
 import { ProviderError, type ExecOptions, type ExecResult, type Provider, type ProviderSandbox, type SandboxSpec } from "../types.js";
-import { optionalImport, shq, toBytes, wrapCommand } from "../util.js";
+import { DEFAULT_EXEC_TIMEOUT_S, optionalImport, shq, timeoutError, toBytes, wrapCommand } from "../util.js";
 
 type TensorlakeModule = typeof import("@tensorlakeai/tensorlake");
 type TensorlakeSandbox = InstanceType<TensorlakeModule["Sandbox"]>;
@@ -83,10 +83,10 @@ class TensorlakeBox implements ProviderSandbox {
   async exec(cmd: string, opts: ExecOptions = {}): Promise<ExecResult> {
     if (opts.onStdout || opts.onStderr) return this.execStreaming(cmd, opts);
     const t0 = Date.now();
-    const limit = opts.timeoutSeconds ?? 60;
+    const seconds = opts.timeoutSeconds ?? DEFAULT_EXEC_TIMEOUT_S;
     try {
-      const r = await this.sbx.run("/bin/sh", { args: ["-c", this.shellLine(cmd, opts)], timeout: limit });
-      if (r.timedOut) throw new ProviderError("tensorlake", `command timed out after ${limit}s`);
+      const r = await this.sbx.run("/bin/sh", { args: ["-c", this.shellLine(cmd, opts)], timeout: seconds });
+      if (r.timedOut) throw timeoutError("tensorlake", seconds);
       // A nonzero exit is a result; the SDK only throws for transport/API failures.
       return { exitCode: r.exitCode, stdout: r.stdout, stderr: r.stderr, durationMs: Date.now() - t0 };
     } catch (err) {
@@ -97,23 +97,26 @@ class TensorlakeBox implements ProviderSandbox {
   /** Start the process, then follow its combined output stream until it exits. */
   private async execStreaming(cmd: string, opts: ExecOptions): Promise<ExecResult> {
     const t0 = Date.now();
-    const limit = (opts.timeoutSeconds ?? 60) * 1000;
+    const seconds = opts.timeoutSeconds ?? DEFAULT_EXEC_TIMEOUT_S;
     const abort = new AbortController();
-    const stdout: string[] = [];
-    const stderr: string[] = [];
+    // Output arrives as lines without their line ending. Each is stored exactly as it is streamed
+    // to the callbacks, so the returned text equals what the callbacks saw.
+    let stdout = "";
+    let stderr = "";
     let pid: number | undefined;
-    const timer = setTimeout(() => abort.abort(), limit);
+    const timer = setTimeout(() => abort.abort(), seconds * 1000);
     timer.unref();
     try {
       ({ pid } = await this.sbx.startProcess("/bin/sh", { args: ["-c", this.shellLine(cmd, opts)] }));
       try {
         for await (const ev of this.sbx.followOutput(pid, { signal: abort.signal })) {
+          const line = ev.line + "\n";
           if (ev.stream === "stderr") {
-            stderr.push(ev.line);
-            opts.onStderr?.(ev.line + "\n");
+            stderr += line;
+            opts.onStderr?.(line);
           } else {
-            stdout.push(ev.line);
-            opts.onStdout?.(ev.line + "\n");
+            stdout += line;
+            opts.onStdout?.(line);
           }
         }
       } catch (err) {
@@ -121,7 +124,7 @@ class TensorlakeBox implements ProviderSandbox {
       }
       if (abort.signal.aborted) {
         await this.sbx.killProcess(pid).catch(() => {});
-        throw new ProviderError("tensorlake", `command timed out after ${limit / 1000}s`);
+        throw timeoutError("tensorlake", seconds);
       }
       // The stream can close a moment before the daemon records the exit.
       let info = await this.sbx.getProcess(pid);
@@ -130,7 +133,7 @@ class TensorlakeBox implements ProviderSandbox {
         info = await this.sbx.getProcess(pid);
       }
       const exitCode = info.exitCode ?? (info.signal != null ? -info.signal : -1);
-      return { exitCode, stdout: stdout.join("\n"), stderr: stderr.join("\n"), durationMs: Date.now() - t0 };
+      return { exitCode, stdout, stderr, durationMs: Date.now() - t0 };
     } catch (err) {
       throw fail(err);
     } finally {

@@ -235,11 +235,14 @@ describe("Azure Container Apps Shell sessions", () => {
     await box.kill();
   });
 
-  it("reports a command killed by its timeout as exit 124", async () => {
+  it("stops a command at its timeout and reports it as a timeout error", async () => {
     const box = await provider().create({});
-    const r = await box.exec("sleep 5; echo late", { timeoutSeconds: 1 });
-    expect(r.exitCode).toBe(124);
-    expect(r.stdout).toBe("");
+    await expect(box.exec("sleep 5; echo late", { timeoutSeconds: 1 })).rejects.toMatchObject({
+      name: "ProviderError",
+      message: "azure: command timed out after 1s",
+    });
+    // A command that exits 124 by itself is a result, not a timeout.
+    expect((await box.exec("exit 124", { timeoutSeconds: 5 })).exitCode).toBe(124);
     await box.kill();
   }, 20_000);
 

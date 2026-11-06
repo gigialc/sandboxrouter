@@ -1,5 +1,5 @@
 import { ProviderError, type ExecOptions, type ExecResult, type Provider, type ProviderSandbox, type SandboxSpec } from "../types.js";
-import { dirname, optionalImport, shq, toBytes, wrapCommand } from "../util.js";
+import { DEFAULT_EXEC_TIMEOUT_S, dirname, guardTimeout, killedByTimeout, optionalImport, shq, timeoutError, toBytes, wrapCommand } from "../util.js";
 
 type MorphModule = typeof import("morphcloud");
 type MorphClient = InstanceType<MorphModule["MorphCloudClient"]>;
@@ -102,16 +102,22 @@ class MorphBox implements ProviderSandbox {
 
   async exec(cmd: string, opts: ExecOptions = {}): Promise<ExecResult> {
     const t0 = Date.now();
-    const script = `[ -r ${ENV_FILE} ] && . ${ENV_FILE}; ${wrapCommand(cmd, { cwd: opts.cwd, env: opts.env })}`;
+    const seconds = opts.timeoutSeconds ?? DEFAULT_EXEC_TIMEOUT_S;
+    // The VM kills the command at the deadline: the SDK's `timeout` only abandons the HTTP request
+    // and would leave the process running, so it is set past ours as a fallback.
+    const script = guardTimeout(`[ -r ${ENV_FILE} ] && . ${ENV_FILE}; ${wrapCommand(cmd, { cwd: opts.cwd, env: opts.env })}`, seconds);
     try {
       // With callbacks the SDK switches to its SSE endpoint and streams; otherwise one request.
       const r = await this.inst.exec(["sh", "-c", script], {
-        timeout: opts.timeoutSeconds ?? 60,
+        timeout: seconds + 15,
         onStdout: opts.onStdout,
         onStderr: opts.onStderr,
       });
-      return { exitCode: r.exit_code, stdout: r.stdout ?? "", stderr: r.stderr ?? "", durationMs: Date.now() - t0 };
+      const durationMs = Date.now() - t0;
+      if (killedByTimeout(r.exit_code, durationMs, seconds)) throw timeoutError("morph", seconds);
+      return { exitCode: r.exit_code, stdout: r.stdout ?? "", stderr: r.stderr ?? "", durationMs };
     } catch (err) {
+      if (/timed out/i.test((err as Error)?.message ?? "")) throw timeoutError("morph", seconds);
       throw wrap(err);
     }
   }

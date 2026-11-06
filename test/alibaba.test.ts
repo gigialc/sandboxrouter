@@ -10,10 +10,16 @@ function fakeSandbox(id = "sbx_ali") {
   return {
     sandboxId: id,
     commands: {
+      // Like the SDK with `background: true`: a handle whose wait() rejects with CommandExitError on a nonzero exit.
       run: vi.fn(async (cmd: string, opts: any) => {
-        if (cmd === "false") throw Object.assign(new Error("exit status 1"), { name: "CommandExitError", exitCode: 1, stdout: "", stderr: "nope" });
         opts?.onStdout?.("hi\n");
-        return { exitCode: 0, stdout: "hi\n", stderr: "" };
+        return {
+          wait: async () => {
+            if (cmd === "false") throw Object.assign(new Error("exit status 1"), { name: "CommandExitError", exitCode: 1, stdout: "", stderr: "nope" });
+            return { exitCode: 0, stdout: "hi\n", stderr: "" };
+          },
+          kill: vi.fn(async () => true),
+        };
       }),
     },
     files: {

@@ -1,6 +1,6 @@
 import { randomBytes } from "node:crypto";
 import { ProviderError, type ExecOptions, type ExecResult, type Provider, type ProviderSandbox, type SandboxSpec } from "../types.js";
-import { dirname, shq, toBytes, wrapCommand } from "../util.js";
+import { dirname, killedByTimeout, shq, timeoutError, toBytes, wrapCommand } from "../util.js";
 
 /**
  * Azure Container Apps dynamic sessions, Shell session pools (plain REST, no Azure SDK).
@@ -285,7 +285,10 @@ class AzureSession implements ProviderSandbox {
     }
     if (stdout) opts.onStdout?.(stdout);
     if (stderr) opts.onStderr?.(stderr);
-    return { exitCode, stdout, stderr, durationMs: Date.now() - t0 };
+    const durationMs = Date.now() - t0;
+    // `timeout -k 5` leaves exit 124 (or 137 after SIGKILL) when it had to stop the command.
+    if (killedByTimeout(exitCode, durationMs, timeout)) throw timeoutError(ID, timeout);
+    return { exitCode, stdout, stderr, durationMs };
   }
 
   /** GET files/{name}/content for a file directly under filesDir. */

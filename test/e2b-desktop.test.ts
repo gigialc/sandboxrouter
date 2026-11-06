@@ -112,6 +112,18 @@ describe("E2B desktop computer", () => {
     expect(runs()).toEqual(["xdotool keydown 'shift'", "xdotool keyup 'shift'"]);
   });
 
+  it("hold_key gives the command a timeout past the hold, and refuses holds over 100 s", async () => {
+    const c = await computer();
+    await c.act({ action: "hold_key", text: "a", duration: 90, noScreenshot: true });
+    const hold = desk.calls.find((x) => x[0] === "run" && String(x[1]).startsWith("xdotool keydown"))!;
+    expect(hold[1]).toBe("xdotool keydown 'a'; sleep 90; xdotool keyup 'a'");
+    // The SDK's default command timeout is 60 s, which would end the hold with the key still down.
+    expect(hold[2]).toEqual({ timeoutMs: 120_000 });
+    const r = await c.act({ action: "hold_key", text: "a", duration: 500, noScreenshot: true });
+    expect(r.ok).toBe(false);
+    expect(r.error).toMatch(/duration must be 0 to 100 seconds/);
+  });
+
   it("type writes text", async () => {
     const c = await computer();
     await c.act({ action: "type", text: "hello 'world'", noScreenshot: true });

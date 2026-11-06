@@ -2,7 +2,7 @@ import { randomBytes } from "node:crypto";
 import { mkdir, writeFile as fsWriteFile } from "node:fs/promises";
 import { join } from "node:path";
 import { ProviderError, type ExecOptions, type ExecResult, type Provider, type ProviderSandbox, type SandboxSpec } from "../types.js";
-import { wrapCommand } from "../util.js";
+import { timeoutError, wrapCommand } from "../util.js";
 import { AwsClient, awsCredentialsHinted, type AwsCredentials } from "./agentcore.js";
 
 /**
@@ -302,7 +302,8 @@ class LambdaMicrovm implements ProviderSandbox {
     let stderr = "";
     let exitCode: number | undefined;
     for await (const line of readLines(res)) {
-      const j = JSON.parse(line) as { stdout?: string; stderr?: string; exitCode?: number; error?: string };
+      const j = JSON.parse(line) as { stdout?: string; stderr?: string; exitCode?: number; timedOut?: boolean; error?: string };
+      if (j.timedOut) throw timeoutError(ID, timeout);
       if (j.stdout !== undefined) {
         const s = outDec.decode(Buffer.from(j.stdout, "base64"), { stream: true });
         if (s) (stdout += s), opts.onStdout?.(s);
@@ -450,8 +451,9 @@ createServer(async (req, res) => {
       child.on("close", (code, signal) => {
         finished = true;
         if (timer) clearTimeout(timer);
-        const exitCode = timedOut ? 124 : code ?? (signal ? 128 + (constants.signals[signal] || 0) : 1);
-        line({ exitCode });
+        // A timeout kill is reported as such, so the client can tell it from a command that exits 124 itself.
+        const exitCode = code ?? (signal ? 128 + (constants.signals[signal] || 0) : 1);
+        line(timedOut ? { exitCode: 124, timedOut: true } : { exitCode });
         res.end();
       });
       return;

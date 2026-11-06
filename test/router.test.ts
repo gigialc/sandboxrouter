@@ -1,6 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { CATALOG, hourlyCost, unfit } from "../src/catalog.js";
-import { Router, parseId } from "../src/router.js";
+import { EXEC_GRACE_S, Router, parseId } from "../src/router.js";
 import { RouterError } from "../src/types.js";
 import { ALL, FakeProvider } from "./fake.js";
 
@@ -86,6 +86,15 @@ describe("routing", () => {
     expect(sbx.provider).toBe("e2b");
   });
 
+  it("reports an unknown provider id as a skipped candidate, and create refuses it", async () => {
+    const r = new Router({ providers: fakes() });
+    const plan = r.plan({}, { provider: ["nope" as never, "e2b"] });
+    expect(plan.map((c) => [c.provider, c.skip])).toEqual([["nope", "unknown provider"], ["e2b", undefined]]);
+    const err = await r.create({}, { provider: "nope" as never }).catch((e) => e);
+    expect(err).toBeInstanceOf(RouterError);
+    expect(err.message).toMatch(/nope \(unknown provider\)/);
+  });
+
   it("explains why nothing can run", async () => {
     const r = new Router({ providers: ALL.map((id) => new FakeProvider(id, { configured: false })) });
     await expect(r.create()).rejects.toThrow(/no provider can take this sandbox: maritime \(not configured\)/);
@@ -116,6 +125,28 @@ describe("streaming and pause", () => {
     const out: string[] = [];
     const res = await sbx.exec("ls", { onStdout: (c) => out.push(c) });
     expect(out.join("")).toBe(res.stdout);
+  });
+
+  describe("exec deadline", () => {
+    afterEach(() => vi.useRealTimers());
+
+    it("rejects with the contract's timeout error when an adapter never answers", async () => {
+      vi.useFakeTimers();
+      const r = new Router({ providers: fakes({ maritime: { hang: true } }) });
+      const sbx = await r.create();
+      const pending = sbx.exec("sleep 999", { timeoutSeconds: 2 });
+      const rejected = expect(pending).rejects.toMatchObject({ name: "ProviderError", provider: "maritime", message: "maritime: command timed out after 2s" });
+      // Nothing happens at the adapter's own deadline: the router steps in EXEC_GRACE_S later.
+      await vi.advanceTimersByTimeAsync((2 + EXEC_GRACE_S) * 1000 - 1);
+      await vi.advanceTimersByTimeAsync(1);
+      await rejected;
+    });
+
+    it("passes a prompt adapter result through untouched", async () => {
+      const r = new Router({ providers: fakes() });
+      const sbx = await r.create();
+      expect(await sbx.exec("ls", { timeoutSeconds: 1 })).toMatchObject({ exitCode: 0, stdout: "ran: ls\n" });
+    });
   });
 
   it("pauses where supported and explains where not", async () => {

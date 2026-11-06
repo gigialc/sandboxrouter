@@ -132,8 +132,9 @@ class DenoBox implements ProviderSandbox {
         abandoned,
       ]);
       if (timedOut) throw new ProviderError(ID, `command timed out after ${secs}s`);
-      // A signal-terminated process reports no useful code; use the shell convention 128+n.
-      const exitCode = status.signal && !status.code ? 128 + (SIGNALS[status.signal] ?? 0) : status.code;
+      // Deno reports a signal death as the signal's name plus a negative code (minus its number);
+      // shells report 128 + n, so callers see the same code they would from any other provider.
+      const exitCode = status.signal ? 128 + (SIGNALS[status.signal] ?? Math.max(0, -status.code)) : status.code;
       return { exitCode, stdout, stderr, durationMs: Date.now() - t0 };
     } finally {
       clearTimeout(timer);

@@ -1,6 +1,6 @@
 {
   "version": "0.2.0",
-  "generatedAt": "2026-11-06T00:42:15.519Z",
+  "generatedAt": "2026-11-06T01:06:35.376Z",
   "shapes": [
     "1x2",
     "2x4",
@@ -383,9 +383,9 @@
       },
       "access": null,
       "check": {
-        "date": "2026-11-05T23:27:35.340Z",
+        "date": "2026-11-06T01:06:19.226Z",
         "version": "0.2.0",
-        "passed": 12,
+        "passed": 13,
         "failed": [],
         "skipped": [
           "pause and resume"
@@ -403,6 +403,7 @@
           "files: missing file is an error": "pass",
           "files: visible to commands": "pass",
           "exec: command timeout": "pass",
+          "exec: timed-out command was stopped": "pass",
           "pause and resume": "skip",
           "kill": "pass",
           "killed sandbox is gone": "pass"
@@ -626,9 +627,9 @@
       },
       "access": null,
       "check": {
-        "date": "2026-11-05T23:28:26.329Z",
+        "date": "2026-11-06T01:02:30.029Z",
         "version": "0.2.0",
-        "passed": 13,
+        "passed": 14,
         "failed": [],
         "skipped": [],
         "notRun": [],
@@ -644,6 +645,7 @@
           "files: missing file is an error": "pass",
           "files: visible to commands": "pass",
           "exec: command timeout": "pass",
+          "exec: timed-out command was stopped": "pass",
           "pause and resume": "pass",
           "kill": "pass",
           "killed sandbox is gone": "pass"
@@ -814,9 +816,9 @@
       },
       "access": null,
       "check": {
-        "date": "2026-11-05T23:23:07.981Z",
+        "date": "2026-11-06T01:03:56.949Z",
         "version": "0.2.0",
-        "passed": 13,
+        "passed": 14,
         "failed": [],
         "skipped": [],
         "notRun": [],
@@ -832,6 +834,7 @@
           "files: missing file is an error": "pass",
           "files: visible to commands": "pass",
           "exec: command timeout": "pass",
+          "exec: timed-out command was stopped": "pass",
           "pause and resume": "pass",
           "kill": "pass",
           "killed sandbox is gone": "pass"
@@ -892,9 +895,9 @@
       },
       "access": null,
       "check": {
-        "date": "2026-11-05T23:23:19.922Z",
+        "date": "2026-11-06T01:02:09.238Z",
         "version": "0.2.0",
-        "passed": 13,
+        "passed": 14,
         "failed": [],
         "skipped": [],
         "notRun": [],
@@ -910,6 +913,7 @@
           "files: missing file is an error": "pass",
           "files: visible to commands": "pass",
           "exec: command timeout": "pass",
+          "exec: timed-out command was stopped": "pass",
           "pause and resume": "pass",
           "kill": "pass",
           "killed sandbox is gone": "pass"
@@ -1360,9 +1364,9 @@
       },
       "access": null,
       "check": {
-        "date": "2026-11-05T23:23:35.570Z",
+        "date": "2026-11-06T01:05:50.852Z",
         "version": "0.2.0",
-        "passed": 13,
+        "passed": 14,
         "failed": [],
         "skipped": [],
         "notRun": [],
@@ -1378,6 +1382,7 @@
           "files: missing file is an error": "pass",
           "files: visible to commands": "pass",
           "exec: command timeout": "pass",
+          "exec: timed-out command was stopped": "pass",
           "pause and resume": "pass",
           "kill": "pass",
           "killed sandbox is gone": "pass"
@@ -1663,9 +1668,9 @@
       },
       "access": null,
       "check": {
-        "date": "2026-11-05T23:23:52.429Z",
+        "date": "2026-11-06T01:03:15.296Z",
         "version": "0.2.0",
-        "passed": 13,
+        "passed": 14,
         "failed": [],
         "skipped": [],
         "notRun": [],
@@ -1681,6 +1686,7 @@
           "files: missing file is an error": "pass",
           "files: visible to commands": "pass",
           "exec: command timeout": "pass",
+          "exec: timed-out command was stopped": "pass",
           "pause and resume": "pass",
           "kill": "pass",
           "killed sandbox is gone": "pass"
@@ -2000,6 +2006,7 @@
     "files: missing file is an error",
     "files: visible to commands",
     "exec: command timeout",
+    "exec: timed-out command was stopped",
     "pause and resume",
     "kill",
     "killed sandbox is gone"

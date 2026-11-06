@@ -1,77 +1,82 @@
 {
   "tool": "sandboxrouter-check",
   "version": "0.2.0",
-  "date": "2026-11-05T23:23:52.429Z",
+  "date": "2026-11-06T01:03:15.296Z",
   "platform": "darwin-arm64",
   "provider": "openscale",
-  "sandboxId": "openscale:4x91hwtwwt85sfqz0hce",
+  "sandboxId": "openscale:xxxa7tsfbyr6xjcd2ws9",
   "results": [
     {
       "step": "create",
-      "ms": 980,
+      "ms": 965,
       "status": "pass",
-      "detail": "openscale:4x91hwtwwt85sfqz0hce, ~$0.017/hr"
+      "detail": "openscale:xxxa7tsfbyr6xjcd2ws9, ~$0.017/hr"
     },
     {
       "step": "exec: stdout, stderr, exit code",
-      "ms": 1030,
+      "ms": 1003,
       "status": "pass"
     },
     {
       "step": "exec: env and cwd",
-      "ms": 337,
+      "ms": 275,
       "status": "pass"
     },
     {
       "step": "exec: UTF-8 output",
-      "ms": 268,
+      "ms": 272,
       "status": "pass"
     },
     {
       "step": "exec: streaming",
-      "ms": 3293,
+      "ms": 3296,
       "status": "pass",
-      "detail": "first output after 414 ms"
+      "detail": "first output after 267 ms"
     },
     {
       "step": "files: binary round-trip",
-      "ms": 1685,
+      "ms": 1565,
       "status": "pass"
     },
     {
       "step": "files: 1 MB round-trip",
-      "ms": 2124,
+      "ms": 2394,
       "status": "pass"
     },
     {
       "step": "files: missing file is an error",
-      "ms": 269,
+      "ms": 250,
       "status": "pass"
     },
     {
       "step": "files: visible to commands",
-      "ms": 1432,
+      "ms": 1305,
       "status": "pass"
     },
     {
       "step": "exec: command timeout",
-      "ms": 3003,
+      "ms": 3351,
       "status": "pass",
-      "detail": "threw after 3003 ms: openscale: [deadline_exceeded] the operation timed out: This error is likely due to exceeding 'timeoutMs' — the total time a long running request (like command execution or directory watch) can be active. It can be modified by passing 'timeoutMs' when making the request. Use '0' to disable the timeout."
+      "detail": "threw after 3351 ms"
+    },
+    {
+      "step": "exec: timed-out command was stopped",
+      "ms": 7150,
+      "status": "pass"
     },
     {
       "step": "pause and resume",
-      "ms": 1926,
+      "ms": 1842,
       "status": "pass"
     },
     {
       "step": "kill",
-      "ms": 259,
+      "ms": 300,
       "status": "pass"
     },
     {
       "step": "killed sandbox is gone",
-      "ms": 249,
+      "ms": 267,
       "status": "pass"
     }
   ],

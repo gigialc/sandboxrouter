@@ -8,7 +8,8 @@ export class FakeProvider implements Provider {
 
   constructor(
     readonly id: ProviderId,
-    public opts: { configured?: boolean; fail?: string; pause?: boolean } = {},
+    /** `hang`: exec never settles, like an adapter that lost its connection. */
+    public opts: { configured?: boolean; fail?: string; pause?: boolean; hang?: boolean } = {},
   ) {}
 
   configured() {
@@ -20,6 +21,7 @@ export class FakeProvider implements Provider {
     this.created.push(spec);
     const box = new FakeBox(`${this.id}-${++this.n}`);
     if (this.opts.pause === false) (box as { pause?: unknown }).pause = undefined;
+    if (this.opts.hang) box.exec = () => new Promise<ExecResult>(() => {});
     this.live.set(box.nativeId, box);
     return box;
   }

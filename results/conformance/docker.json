@@ -1,16 +1,16 @@
 {
   "tool": "sandboxrouter-check",
   "version": "0.2.0",
-  "date": "2026-11-05T23:23:07.981Z",
+  "date": "2026-11-06T01:03:56.949Z",
   "platform": "darwin-arm64",
   "provider": "docker",
-  "sandboxId": "docker:sbr-c391ce09-edd",
+  "sandboxId": "docker:sbr-b689e442-ca9",
   "results": [
     {
       "step": "create",
-      "ms": 1415,
+      "ms": 1901,
       "status": "pass",
-      "detail": "docker:sbr-c391ce09-edd, ~$0/hr"
+      "detail": "docker:sbr-b689e442-ca9, ~$0/hr"
     },
     {
       "step": "exec: stdout, stderr, exit code",
@@ -19,33 +19,33 @@
     },
     {
       "step": "exec: env and cwd",
-      "ms": 45,
+      "ms": 52,
       "status": "pass"
     },
     {
       "step": "exec: UTF-8 output",
-      "ms": 46,
+      "ms": 45,
       "status": "pass"
     },
     {
       "step": "exec: streaming",
-      "ms": 3061,
+      "ms": 3066,
       "status": "pass",
-      "detail": "first output after 42 ms"
+      "detail": "first output after 43 ms"
     },
     {
       "step": "files: binary round-trip",
-      "ms": 107,
+      "ms": 121,
       "status": "pass"
     },
     {
       "step": "files: 1 MB round-trip",
-      "ms": 102,
+      "ms": 116,
       "status": "pass"
     },
     {
       "step": "files: missing file is an error",
-      "ms": 47,
+      "ms": 54,
       "status": "pass"
     },
     {
@@ -55,23 +55,28 @@
     },
     {
       "step": "exec: command timeout",
-      "ms": 3008,
+      "ms": 3053,
       "status": "pass",
-      "detail": "threw after 3008 ms: docker: command timed out after 3s"
+      "detail": "threw after 3053 ms"
+    },
+    {
+      "step": "exec: timed-out command was stopped",
+      "ms": 6138,
+      "status": "pass"
     },
     {
       "step": "pause and resume",
-      "ms": 154,
+      "ms": 116,
       "status": "pass"
     },
     {
       "step": "kill",
-      "ms": 97,
+      "ms": 92,
       "status": "pass"
     },
     {
       "step": "killed sandbox is gone",
-      "ms": 18,
+      "ms": 20,
       "status": "pass"
     }
   ],

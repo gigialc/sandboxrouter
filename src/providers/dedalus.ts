@@ -28,8 +28,10 @@ const ID = "dedalus" as const;
 const READY_TIMEOUT_MS = 5 * 60_000;
 const POLL_MS = 250;
 const TERMINAL = new Set(["succeeded", "failed", "cancelled", "expired"]);
-/** Raw bytes per read chunk; base64 of this stays well under any output cap. */
-const READ_CHUNK = 256 * 1024;
+/** The API returns at most this much of each stream inline from /output; longer output is flagged truncated. */
+const OUTPUT_CAP = 64 * 1024;
+/** Raw bytes per readFile chunk: base64 with line breaks (45 KiB -> about 61 KiB) stays under OUTPUT_CAP. */
+const READ_CHUNK = 45 * 1024;
 
 interface Machine {
   machine_id?: string;
@@ -162,24 +164,32 @@ class DedalusBox implements ProviderSandbox {
     const deadline = t0 + secs * 1000 + 30_000;
     let status = created.status ?? "";
     const streaming = !!(opts.onStdout || opts.onStderr);
+    // Everything the events feed delivered so far, kept so output past the /output cap is still complete.
+    let eventsOut = "";
+    let eventsErr = "";
     let cursor: string | undefined;
+    // A page may come back without next_cursor (it is optional); the next drain then re-reads the
+    // same page, so remember how many of its items were already consumed.
+    let consumedAtCursor = 0;
     /** Read every events page from the cursor on, passing output chunks to the callbacks. */
     const drain = async () => {
       for (;;) {
         const q: string = cursor ? `?cursor=${encodeURIComponent(cursor)}` : "";
         const page = await this.p.api<{ items?: { type?: string; chunk?: string; status?: string }[] | null; next_cursor?: string }>("GET", `${ex}/events${q}`);
-        const items = page.items ?? [];
+        const items = (page.items ?? []).slice(consumedAtCursor);
         for (const e of items) {
-          if (e.type === "stdout" && e.chunk) opts.onStdout?.(e.chunk);
-          else if (e.type === "stderr" && e.chunk) opts.onStderr?.(e.chunk);
+          if (e.type === "stdout" && e.chunk) (eventsOut += e.chunk), opts.onStdout?.(e.chunk);
+          else if (e.type === "stderr" && e.chunk) (eventsErr += e.chunk), opts.onStderr?.(e.chunk);
           else if (e.type === "lifecycle" && e.status) status = e.status;
         }
         const next = page.next_cursor;
-        if (!next || next === cursor || !items.length) {
-          if (next) cursor = next;
+        if (!next || next === cursor) {
+          consumedAtCursor += items.length;
           return;
         }
         cursor = next;
+        consumedAtCursor = 0;
+        if (!items.length) return;
       }
     };
     while (!TERMINAL.has(status)) {
@@ -202,8 +212,11 @@ class DedalusBox implements ProviderSandbox {
     if (final.exit_code === undefined || final.exit_code === null) {
       throw new ProviderError(ID, `command ${final.status ?? "ended"} without an exit code${why.trim() ? `: ${why.trim()}` : ""}`);
     }
-    const out = await this.p.api<{ stdout?: string; stderr?: string }>("GET", `${ex}/output`);
-    return { exitCode: final.exit_code, stdout: out.stdout ?? "", stderr: out.stderr ?? "", durationMs };
+    const out = await this.p.api<{ stdout?: string; stderr?: string; stdout_truncated?: boolean; stderr_truncated?: boolean }>("GET", `${ex}/output`);
+    if (!out.stdout_truncated && !out.stderr_truncated) return { exitCode: final.exit_code, stdout: out.stdout ?? "", stderr: out.stderr ?? "", durationMs };
+    // /output cut a stream at OUTPUT_CAP: the events feed has all of it.
+    if (!streaming) await drain();
+    return { exitCode: final.exit_code, stdout: eventsOut, stderr: eventsErr, durationMs };
   }
 
   exec(cmd: string, opts: ExecOptions = {}): Promise<ExecResult> {

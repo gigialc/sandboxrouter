@@ -68,6 +68,14 @@ beforeAll(async () => {
       }
     }
     if (dp && url.pathname.endsWith("/commands") && req.method === "POST") {
+      // What a real account answers for a command past its limit (checked 2026-11-06).
+      if (body.cmd === "sleep 99") {
+        if (req.headers.accept === "text/event-stream") {
+          res.writeHead(200, { "Content-Type": "text/event-stream" });
+          return res.end(`event: error\ndata: ${JSON.stringify({ code: "command_timeout", message: "the command passed its time limit and was killed" })}\n\n`);
+        }
+        return send(504, { code: "command_timeout", message: "the command passed its time limit and was killed" });
+      }
       const env = { ...process.env, ...(body.env ?? {}) };
       if (req.headers.accept === "text/event-stream") {
         res.writeHead(200, { "Content-Type": "text/event-stream" });
@@ -173,6 +181,13 @@ describe("MaritimeProvider", () => {
     expect((await sbx.exec("echo hi")).stdout).toBe("hi\n");
     await sbx.kill();
     expect(seen.at(-1)).toMatchObject({ method: "DELETE", path: "/api/sandboxes/ephemeral/sbx-test1", auth: "Bearer mk_test" });
+  });
+
+  it("reads a real account's 504 command_timeout, plain or streamed, as the contract's timeout error", async () => {
+    const sbx = await p().create({});
+    const err = { name: "ProviderError", message: "maritime: command timed out after 3s" };
+    await expect(sbx.exec("sleep 99", { timeoutSeconds: 3 })).rejects.toMatchObject(err);
+    await expect(sbx.exec("sleep 99", { timeoutSeconds: 3, onStdout: () => {} })).rejects.toMatchObject(err);
   });
 
   it("reports configured() from the key", () => {

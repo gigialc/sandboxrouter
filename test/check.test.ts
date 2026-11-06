@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { CHECK_STEPS, checkProvider } from "../src/check.js";
 import { Router } from "../src/router.js";
-import type { ExecOptions, ExecResult, Provider, ProviderSandbox } from "../src/types.js";
+import { ProviderError, type ExecOptions, type ExecResult, type Provider, type ProviderSandbox } from "../src/types.js";
 
 /** A shell-ish fake that behaves like a correct provider for every step `check` runs. */
 class GoodBox implements ProviderSandbox {
@@ -23,7 +23,8 @@ class GoodBox implements ProviderSandbox {
       }
       return { exitCode: 0, stdout: "1\n2\n3\n", stderr: "", durationMs: 2000 };
     }
-    if (cmd.startsWith("sleep 30")) return { exitCode: 124, stdout: "", stderr: "", durationMs: 3000 };
+    // The contract: a command that outlives its timeout is stopped and exec rejects with this error.
+    if (cmd.startsWith("sleep 30")) throw new ProviderError("boat", `command timed out after ${opts.timeoutSeconds}s`);
     if (cmd.startsWith("cat /tmp/sbr-check/hello.txt")) return ok(new TextDecoder().decode(this.files.get("/tmp/sbr-check/hello.txt")));
     return ok("");
   }
@@ -67,13 +68,31 @@ describe("sandboxrouter check", () => {
     expect(report.results.filter((r) => r.status === "fail")).toEqual([]);
     expect(report.results.map((r) => r.step)).toEqual([...CHECK_STEPS]);
     expect(report.ok).toBe(true);
-  }, 15_000);
+  }, 25_000);
 
   it("fails when kill doesn't actually stop the sandbox", async () => {
     const report = await checkProvider(new Router({ providers: [new GoodProvider({ leak: true })] }), "boat");
     expect(report.ok).toBe(false);
     expect(report.results.at(-1)).toMatchObject({ step: "killed sandbox is gone", status: "fail" });
-  }, 15_000);
+  }, 25_000);
+
+  it("fails a provider that returns a timed-out command as a result", async () => {
+    const p = new GoodProvider();
+    const exec = GoodBox.prototype.exec;
+    GoodBox.prototype.exec = async function (cmd, opts) {
+      if (cmd.startsWith("sleep 30")) return { exitCode: 124, stdout: "", stderr: "", durationMs: 3000 };
+      return exec.call(this, cmd, opts);
+    };
+    try {
+      const report = await checkProvider(new Router({ providers: [p] }), "boat");
+      expect(report.results.find((r) => r.step === "exec: command timeout")).toMatchObject({
+        status: "fail",
+        detail: expect.stringContaining("returned exit 124"),
+      });
+    } finally {
+      GoodBox.prototype.exec = exec;
+    }
+  }, 25_000);
 
   it("fails a provider whose readFile returns empty bytes for a missing file, or truncates big files", async () => {
     const p = new GoodProvider();
