@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /* One light theme: white page, black ink, hairlines, full-width layout, pill buttons, and one signature
-   accent (ultramarine, 7:1 on white) for the mark, primary actions, selected controls and price bars. */
+   accent (jade green, 5:1 on white; "passed" uses it too) for the mark, primary actions, selected controls and price bars. */
 :root {
   color-scheme: light;
   --bg: #ffffff;
@@ -12,11 +12,11 @@
   --muted: #5f5f5f;
   --line: #e3e3e3;
   --line-2: #cfcfcf;
-  --ok: #15803d;
+  --ok: var(--accent);
   --bad: #b91c1c;
-  --accent: #3d2bff;
-  --accent-ink: #2a17e0;
-  --accent-soft: #efedff;
+  --accent: #007f4f;
+  --accent-ink: #00663f;
+  --accent-soft: #e6f4ee;
   --bar: var(--accent);
 }
 
