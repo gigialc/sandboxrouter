@@ -45,8 +45,10 @@ export function ProviderTable() {
           <tr className="text-left text-[11px] uppercase tracking-[0.12em] text-muted">
             <th className="py-3 pr-4 font-normal">Provider</th>
             <th className="py-3 pr-4 font-normal">Per hour</th>
+            <th className="hidden py-3 pr-4 font-normal sm:table-cell">Plan needed</th>
             {showSpeed && <th className="hidden py-3 pr-4 font-normal sm:table-cell">Cold start</th>}
-            <th className="hidden py-3 font-normal md:table-cell">Supports</th>
+            <th className="hidden py-3 pr-4 font-normal md:table-cell">Real account</th>
+            <th className="hidden py-3 font-normal lg:table-cell">Supports</th>
           </tr>
         </thead>
         <tbody>
@@ -70,18 +72,36 @@ export function ProviderTable() {
                   {price.unfit ? (
                     <span className="text-muted">{price.unfit}</span>
                   ) : (
-                    <div className="flex items-center gap-3" title={`${p.name}: ${usd(price.usd)} per hour at list price`}>
-                      <span className="w-14 font-mono tnum text-ink">{usd(price.usd)}</span>
+                    <div
+                      className="flex items-center gap-3"
+                      title={
+                        p.billing === "active-cpu"
+                          ? `${p.name}: CPU is billed only while busy; ${usd(price.usd)} is the price with every core busy`
+                          : `${p.name}: ${usd(price.usd)} per hour at list price`
+                      }
+                    >
+                      <span className="w-20 font-mono tnum text-ink">
+                        {p.billing === "active-cpu" && <span className="mr-1 text-[11px] text-muted">≤</span>}
+                        {usd(price.usd)}
+                      </span>
                       <span className="hidden h-px w-28 bg-line sm:block">
                         <span className="block h-px bg-bar" style={{ width: `${pct}%` }} />
                       </span>
                     </div>
                   )}
                 </td>
+                <td className="hidden py-3 pr-4 text-ink-2 sm:table-cell" title={p.plan?.note}>
+                  {p.planLabel}
+                </td>
                 {showSpeed && (
                   <td className="hidden py-3 pr-4 font-mono tnum text-ink-2 sm:table-cell">{speed.get(p.id) ? `${speed.get(p.id)} ms` : "—"}</td>
                 )}
-                <td className="hidden py-3 text-ink-2 md:table-cell">
+                <td className="hidden py-3 pr-4 md:table-cell">
+                  <span className={p.live.status === "passed" ? "text-ink" : "text-muted"}>
+                    {p.live.status === "passed" ? "passed" : p.live.status === "failing" ? "failed last run" : "not yet"}
+                  </span>
+                </td>
+                <td className="hidden py-3 text-ink-2 lg:table-cell">
                   {p.capabilities.map((c) => CAPABILITY_LABEL[c] ?? c).join(" · ") || "—"}
                 </td>
               </tr>
@@ -89,7 +109,7 @@ export function ProviderTable() {
           })}
           {rows.length === 0 && (
             <tr className="border-t border-line">
-              <td colSpan={4} className="py-8 text-center text-muted">
+              <td colSpan={6} className="py-8 text-center text-muted">
                 No provider supports that yet.
               </td>
             </tr>
@@ -97,9 +117,20 @@ export function ProviderTable() {
         </tbody>
       </table>
       <p className="mt-4 text-[12px] leading-5 text-muted">
-        Sorted the way the router picks: lowest list price for the size, ties alphabetical. Prices are each provider&apos;s public
-        rate while running; some bill only active CPU, so idle work costs less. Docker runs on your own machine and is only used
-        when you ask for it.
+        Providers anyone can sign up for come first, cheapest first, ties alphabetical; waitlisted or closed sign-ups follow. The
+        router uses the same price order, but only among providers you have keys for. Prices are each provider&apos;s public rate
+        while running. ≤ means CPU is billed only while busy, so this is the price with every core busy and idle work costs less.
+        Plan needed is the monthly plan required before the API creates sandboxes (&ldquo;credited&rdquo; = paid back as usage);
+        for a small project it can cost more than the usage. Real account shows whether the 14-step check has passed on a real
+        account; &ldquo;not yet&rdquo; means the adapter is built from the provider&apos;s docs and tested against mocks only.
+        {showSpeed && (
+          <>
+            {" "}
+            Cold starts are medians from the benchmark reports submitted so far ({site.submissions.length}{" "}
+            {site.submissions.length === 1 ? "report, from one machine" : "reports"}), so treat them as a rough guide.
+          </>
+        )}{" "}
+        Docker runs on your own machine and is only used when you ask for it.
       </p>
     </div>
   );

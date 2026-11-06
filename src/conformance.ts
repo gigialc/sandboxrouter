@@ -32,6 +32,18 @@ export interface ConformanceRow {
   };
 }
 
+/**
+ * One-word status of a provider's last real-account run, for tables: "passed" (every step that applies),
+ * "failing" (the last run had failures), or "untested" (only mock-tested; no real run saved yet).
+ */
+export function liveStatus(row: ConformanceRow): { status: "passed" | "failing" | "untested"; label: string } {
+  const r = row.run;
+  if (!r) return { status: "untested", label: "not run yet" };
+  const day = r.date.slice(0, 10);
+  if (r.failed.length) return { status: "failing", label: `failed ${r.failed.length} step${r.failed.length > 1 ? "s" : ""} (${day})` };
+  return { status: "passed", label: `passed (${day})` };
+}
+
 /** Saved check runs in `dir` (default results/conformance), keyed by provider. */
 export function loadConformance(dir = "results/conformance"): Map<ProviderId, SavedCheck> {
   const out = new Map<ProviderId, SavedCheck>();

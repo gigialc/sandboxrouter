@@ -2,17 +2,24 @@
 
 **One API for every sandbox.** A free, open-source router for the places an AI agent can run code: Agent37, Alibaba Cloud, AWS (Bedrock AgentCore and Lambda MicroVMs), Azure Container Apps, Beam, Blaxel, Boat, Cloudflare, CodeSandbox, Daytona, Dedalus Machines, Deno, E2B, exe.dev, Fly.io Sprites, Freestyle, HOPX, InstaBox, Koyeb, Maritime, Modal, Morph, Northflank, Novita, OpenScale, Runloop, Superserve, Tensorlake, Upstash Box and Vercel, plus Docker on your own machine. It picks a provider by price, speed or capability, and falls back to the next one when a provider is down or rate-limited.
 
+Not every adapter has run against a real account yet. The [Prices](#prices) table shows which have passed the real-account check and which are built from docs and tested against mocks only.
+
 ```ts
 import { Router } from "@sandboxrouter/sdk";
 
 const router = new Router();                       // uses whichever provider keys you've set
-await using sbx = await router.create({ vcpu: 2, memoryGb: 4 });
-
-const r = await sbx.exec("python3 -c 'print(6*7)'");
-console.log(r.stdout, "ran on", sbx.provider);
+const sbx = await router.create({ vcpu: 2, memoryGb: 4 });
+try {
+  const r = await sbx.exec("python3 -c 'print(6*7)'");
+  console.log(r.stdout, "ran on", sbx.provider);
+} finally {
+  await sbx.kill();
+}
 ```
 
-Change providers without changing code. If one returns a 429, the next one takes the sandbox.
+Runs as plain JavaScript on Node 20+. (In TypeScript 5.2+, or Node 24+, `await using sbx = ...` kills the sandbox for you.)
+
+Switch providers by changing which keys are set, not your code (custom images are the exception: each provider names its own). If one returns a 429, the next one takes the sandbox.
 
 Site: [sandboxrouter.vercel.app](https://sandboxrouter.vercel.app) · npm: [`@sandboxrouter/sdk`](https://www.npmjs.com/package/@sandboxrouter/sdk)
 
@@ -44,45 +51,51 @@ If a price is wrong, open a PR with the source link.
 
 ## Prices
 
-Estimated list price while running, 2 vCPU / 4 GB (`npx @sandboxrouter/sdk providers --vcpu 2 --memory 4`), in the order the router would try them:
+Estimated list price while running, 2 vCPU / 4 GB (`npx @sandboxrouter/sdk providers --vcpu 2 --memory 4`). Providers anyone can sign up for come first, cheapest first; waitlisted or closed sign-ups follow. The router uses the same price order, but only among providers you have keys for.
 
-| Provider | $/hr | Notes | Source |
-|---|---|---|---|
-| Agent37 | $0.007 | Whole-minute billing: monthly shape total / 730 / 60; running estimate includes default disk (2 vCPU / 4 GB / 4 GB disk = $4.76/mo); sleeping/stopped disk $0.09/GB-mo; gVisor; $5 minimum top-up, wallet must hold one running day | [pricing](https://www.agent37.com/docs/agents-api/billing) |
-| InstaBox (sign-up waitlisted) | $0.017 | Per second while running on fixed sizes (2/4, 4/8, 8/16); paused or stopped boxes bill only /data beyond the included disk ($0.00011/GiB-h); Pro $20/mo includes $20 credits; free plan: 1 box at 4/8 | [pricing](https://instabox.sh/docs/pricing.md) |
-| Boat | $0.018 | Fixed sizes billed per second ($0.018/h for 2 vCPU / 4 GB up to $0.20/h for 16 / 32); needs a plan from $20/mo, paid back as VM time | [pricing](https://docs.boat.dev/pricing.md) |
-| Maritime | $0.022 | Per second, no minimum runtime; running disk included; Starter $20/mo incl. $20 usage; paused disk $0.08/GB-month (default idle action deletes sandbox) | [pricing](https://maritime.sh/pricing) |
-| Koyeb Sandboxes (not taking new accounts) | $0.058 | Per second; fixed Standard instance sizes (1 vCPU + 1 GB = $0.0144/h); sandboxes need a paid plan (Pro $29/mo); public preview | [pricing](https://www.koyeb.com/docs/reference/instances) |
-| Northflank | $0.067 | Per second on Northflank Cloud, ephemeral disk included; sandboxes run as deployment services (microVMs) | [pricing](https://northflank.com/pricing) |
-| Morph Cloud | $0.100 | $0.05/MCU; MCU-hours = max(vCPU, RAM/4 GB, disk/16 GB); snapshots extra | [pricing](https://cloud.morph.so/web/pricing) |
-| exe.dev | $0.105 | Standalone reserved size, per second: $0.105/h per 2 vCPU / 4 GiB unit; stopped CPU/RAM free, retained disk separate; Personal from $15/mo (up to 16 vCPU / 32 GiB), Work $75/mo (32 / 64 without approval) | [pricing](https://exe.dev/docs/standalone-vms.md) |
-| Novita AI Agent Sandbox | $0.117 | Per second ($0.0000098/vCPU/s, $0.0000032/GiB/s); size comes from the template; paused = storage only | [pricing](https://docs.novita.ai/guides/sandbox-pricing) |
-| Freestyle | $0.134 | Per second on allocated fixed snapshot size; estimate includes disk at $0.000086/GiB-h; free monthly 200 vCPU-h, 400 GiB-h RAM, 60,000 GiB-h disk; Hobby $50/mo incl. $50 (max 8/16), Pro $500 (max 32/64); paused storage only | [pricing](https://www.freestyle.sh/docs/vms/pricing-and-limits) |
-| Beam | $0.140 | Per second, Performance tier (sandbox default); Developer plan $20/mo incl. $20 credits; GPUs billed separately | [pricing](https://www.beam.cloud/pricing) |
-| CodeSandbox SDK (Together) | $0.149 | Fixed tiers: Pico 2 vCPU / 1 GB $0.0743/h, Nano 2 / 4 $0.1486/h, up to 64 / 128 $4.7552/h; credits $0.01486, billed per started minute; Build free, 10 concurrent; Scale $170/mo incl. 1,100 credits | [pricing](https://docs.together.ai/docs/together-code-sandbox-legacy) |
-| Dedalus Machines (sign-up waitlisted) | $0.149 | Per second while awake; sleeping machines bill storage only (10 GiB included on Hobby, 20 on Pro); Hobby plan max 4 vCPU / 16 GiB; private beta | [pricing](https://docs.dedaluslabs.ai/dcs/dm/pricing) |
-| Fly.io Sprites | $0.164 | Bills actual CPU and memory use; this is the full-use price; storage extra | [pricing](https://fly.io/sprites) |
-| Blaxel | $0.166 | Billed on memory only ($0.0000115/GB-s), CPU scales with memory (~2 GB per core) | [pricing](https://blaxel.ai/pricing) |
-| HOPX | $0.166 | Per second, plus storage; size comes from the template, not the request | [pricing](https://hopx.ai/pricing) |
-| Superserve | $0.166 | Per second active; superserve/base fixed at 2 vCPU / 4 GiB / 8 GiB disk; retained storage $0.000108/GiB-h (shared template plus changed blocks); Developer $20/mo incl. $20, max 4/16 with team templates; recurring Free allowance not published on pricing page | [pricing](https://superserve.ai/pricing) |
-| LangSmith Sandboxes | $0.189 | Per second; memory must be 2 to 6 GiB per vCPU; storage $0.000123/GiB-h; 8 LSU ($8) of sandbox usage a month included; Developer plan max 10 sandboxes | [pricing](https://www.langchain.com/pricing) |
-| Tensorlake | $0.200 | Bills active CPU (floor 20% of allocation); this is the full-use price; Pro plan is lower | [pricing](https://www.tensorlake.ai/pricing) |
-| Upstash Box | $0.200 | Billed per active CPU core-hour only (memory and idle time free); estimate assumes every core of the box busy; fixed sizes 2/4, 4/8, 8/16 | [pricing](https://upstash.com/pricing/box) |
-| Cloudflare Sandbox | $0.216 | 10 ms billing on active CPU and allocated instance memory; full-CPU estimate excludes allocated disk ($0.000252/GB-h), Worker and Durable Objects charges; needs Workers Paid ($5/mo) and bridges/cloudflare | [pricing](https://developers.cloudflare.com/containers/platform/pricing/) |
-| Amazon Bedrock AgentCore Code Interpreter | $0.217 | Per second; CPU billed on actual use (I/O wait free), memory on peak; fixed 2 vCPU / 8 GB session, this is the 100%-CPU price | [pricing](https://aws.amazon.com/bedrock/agentcore/pricing/) |
-| Modal | $0.238 | Sandbox rates, per second ($0.00003942 per physical core = 2 vCPUs); GPUs extra; region pinning x1.15-1.75; Starter includes $30/mo credit | [pricing](https://modal.com/pricing) |
-| AWS Lambda MicroVMs | $0.252 | us-east-1 ARM; billed on the image's baseline size (2 GB per vCPU) while running, per-second burst up to 4x; suspended VMs pay snapshot storage; needs a MicroVM image you build once | [pricing](https://aws.amazon.com/lambda/pricing/) |
-| Deno Sandbox | $0.300 | Billed on CPU time, not wall clock (estimate assumes both vCPUs busy); fixed 2 vCPU, 0.75-4 GB, max 30 min lifetime; needs a paid Deno Deploy plan | [pricing](https://deno.com/sandbox) |
-| Runloop | $0.317 | Per second, plus disk; pause (suspend) is a Pro-plan feature | [pricing](https://www.runloop.ai/pricing) |
-| Vercel Sandbox | $0.341 | iad1; active CPU, provisioned RAM in minimum 1-minute increments (2 GB/vCPU); full-CPU estimate; Hobby free within quotas, Pro $20/mo usage credit; creations $0.60/million and retained snapshots $0.08/GB-month extra | [pricing](https://vercel.com/docs/vercel-sandbox/pricing) |
-| OpenScale Sandboxes | skipped (default size 2 vCPU / 1 GB; more needs image.openscale) | Per second on allocated size; no platform fee or minimum; paused = free; size comes from the template (E2B-compatible API); Singapore only; needs a pay-as-you-go key | [pricing](https://openscale.so/sandboxes) |
-| Azure Container Apps dynamic sessions | skipped (max 1 vCPU) | Flat $0.03 per session-hour (built-in Shell pools), billed per allocated session in 1-hour increments, East US; needs a session pool you create once | [pricing](https://learn.microsoft.com/en-us/azure/container-apps/billing#dynamic-sessions) |
-| Daytona | skipped (default size 1 vCPU / 1 GB; more needs image.daytona) | Per second, plus disk above 5 GiB | [pricing](https://www.daytona.io/pricing) |
-| Alibaba Cloud Agent Sandbox | skipped (max 2 GB memory) | Per second; Default QoS, Hong Kong and regions outside mainland China; disk separately $0.00025308/GiB-h; code-interpreter-v1 template is 2 vCPU / 2 GiB with 10 GiB disk (E2B-compatible API) | [pricing](https://www.alibabacloud.com/help/en/agent-sandbox/product-overview/billing-overview) |
-| E2B | skipped (default size 2 vCPU / 0.5 GB; more needs image.e2b) | Per second; Pro plan $150/mo | [pricing](https://e2b.dev/pricing) |
-| Docker (local) | free | Runs on your own machine; free, but shares your kernel, so weaker isolation than a cloud micro-VM | [pricing](https://docs.docker.com/engine/) |
+How to read it:
 
-Checked 2026-11-04 to 2026-11-05.
+- **Up to $X** means the provider bills CPU only while it's busy, so this is the price with every core busy. An agent that mostly waits on its model pays less.
+- **Plan needed** is the monthly plan you must be on before the API will create sandboxes. "Credited" means the fee comes back as usage. "None" means a free tier or plain pay-as-you-go works. For a small project, the plan can cost more than the usage.
+- **Real-account check** is the last time the 14-step [`check`](#compatibility) passed against a real account. "Not run yet" means the adapter is built from the provider's docs and tested against mocks only.
+
+| Provider | $/hr | Plan needed | Real-account check | Notes | Source |
+|---|---|---|---|---|---|
+| Agent37 | $0.007 | none | not run yet | Whole-minute billing: monthly shape total / 730 / 60; running estimate includes default disk (2 vCPU / 4 GB / 4 GB disk = $4.76/mo); sleeping/stopped disk $0.09/GB-mo; gVisor; $5 minimum top-up, wallet must hold one running day | [pricing](https://www.agent37.com/docs/agents-api/billing) |
+| Boat | $0.018 | $20/mo (credited) | not run yet | Fixed sizes billed per second ($0.018/h for 2 vCPU / 4 GB up to $0.20/h for 16 / 32); needs a plan from $20/mo, paid back as VM time | [pricing](https://docs.boat.dev/pricing.md) |
+| Maritime | $0.022 | $20/mo (credited) | passed (2026-11-06) | Per second, no minimum runtime; running disk included; Starter $20/mo incl. $20 usage; paused disk $0.08/GB-month (default idle action deletes sandbox) | [pricing](https://maritime.sh/pricing) |
+| Northflank | $0.067 | none | not run yet | Per second on Northflank Cloud, ephemeral disk included; sandboxes run as deployment services (microVMs) | [pricing](https://northflank.com/pricing) |
+| Morph Cloud | $0.100 | none | not run yet | $0.05/MCU; MCU-hours = max(vCPU, RAM/4 GB, disk/16 GB); snapshots extra | [pricing](https://cloud.morph.so/web/pricing) |
+| exe.dev | $0.105 | $15/mo | not run yet | Standalone reserved size, per second: $0.105/h per 2 vCPU / 4 GiB unit; stopped CPU/RAM free, retained disk separate; Personal from $15/mo (up to 16 vCPU / 32 GiB), Work $75/mo (32 / 64 without approval) | [pricing](https://exe.dev/docs/standalone-vms.md) |
+| Novita AI Agent Sandbox | $0.117 | none | not run yet | Per second ($0.0000098/vCPU/s, $0.0000032/GiB/s); size comes from the template; paused = storage only | [pricing](https://docs.novita.ai/guides/sandbox-pricing) |
+| Freestyle | $0.134 | none | not run yet | Per second on allocated fixed snapshot size; estimate includes disk at $0.000086/GiB-h; free monthly 200 vCPU-h, 400 GiB-h RAM, 60,000 GiB-h disk; Hobby $50/mo incl. $50 (max 8/16), Pro $500 (max 32/64); paused storage only | [pricing](https://www.freestyle.sh/docs/vms/pricing-and-limits) |
+| Beam | $0.140 | $20/mo (credited) | not run yet | Per second, Performance tier (sandbox default); Developer plan $20/mo incl. $20 credits; GPUs billed separately | [pricing](https://www.beam.cloud/pricing) |
+| CodeSandbox SDK (Together) | $0.149 | none | not run yet | Fixed tiers: Pico 2 vCPU / 1 GB $0.0743/h, Nano 2 / 4 $0.1486/h, up to 64 / 128 $4.7552/h; credits $0.01486, billed per started minute; Build free, 10 concurrent; Scale $170/mo incl. 1,100 credits | [pricing](https://docs.together.ai/docs/together-code-sandbox-legacy) |
+| Fly.io Sprites | up to $0.164 | none | not run yet | Bills actual CPU and memory use; this is the full-use price; storage extra | [pricing](https://fly.io/sprites) |
+| Blaxel | $0.166 | none | passed (2026-11-06) | Billed on memory only ($0.0000115/GB-s), CPU scales with memory (~2 GB per core) | [pricing](https://blaxel.ai/pricing) |
+| HOPX | $0.166 | none | not run yet | Per second, plus storage; size comes from the template, not the request | [pricing](https://hopx.ai/pricing) |
+| Superserve | $0.166 | maybe $20/mo (credited) | not run yet | Per second active; superserve/base fixed at 2 vCPU / 4 GiB / 8 GiB disk; retained storage $0.000108/GiB-h (shared template plus changed blocks); Developer $20/mo incl. $20, max 4/16 with team templates; recurring Free allowance not published on pricing page | [pricing](https://superserve.ai/pricing) |
+| LangSmith Sandboxes | $0.189 | none | not run yet | Per second; memory must be 2 to 6 GiB per vCPU; storage $0.000123/GiB-h; 8 LSU ($8) of sandbox usage a month included; Developer plan max 10 sandboxes | [pricing](https://www.langchain.com/pricing) |
+| Tensorlake | up to $0.200 | none | not run yet | Bills active CPU (floor 20% of allocation); this is the full-use price; Pro plan is lower | [pricing](https://www.tensorlake.ai/pricing) |
+| Upstash Box | up to $0.200 | none | not run yet | Billed per active CPU core-hour only (memory and idle time free); estimate assumes every core of the box busy; fixed sizes 2/4, 4/8, 8/16 | [pricing](https://upstash.com/pricing/box) |
+| Cloudflare Sandbox | up to $0.216 | $5/mo | not run yet | 10 ms billing on active CPU and allocated instance memory; full-CPU estimate excludes allocated disk ($0.000252/GB-h), Worker and Durable Objects charges; needs Workers Paid ($5/mo) and bridges/cloudflare | [pricing](https://developers.cloudflare.com/containers/platform/pricing/) |
+| Amazon Bedrock AgentCore Code Interpreter | up to $0.217 | none | not run yet | Per second; CPU billed on actual use (I/O wait free), memory on peak; fixed 2 vCPU / 8 GB session, this is the 100%-CPU price | [pricing](https://aws.amazon.com/bedrock/agentcore/pricing/) |
+| Modal | up to $0.238 | none | not run yet | Sandbox rates, per second ($0.00003942 per physical core = 2 vCPUs); GPUs extra; region pinning x1.15-1.75; Starter includes $30/mo credit | [pricing](https://modal.com/pricing) |
+| AWS Lambda MicroVMs | $0.252 | none | not run yet | us-east-1 ARM; billed on the image's baseline size (2 GB per vCPU) while running, per-second burst up to 4x; suspended VMs pay snapshot storage; needs a MicroVM image you build once | [pricing](https://aws.amazon.com/lambda/pricing/) |
+| Deno Sandbox | up to $0.300 | $20/mo | not run yet | Billed on CPU time, not wall clock (estimate assumes both vCPUs busy); fixed 2 vCPU, 0.75-4 GB, max 30 min lifetime; needs a paid Deno Deploy plan | [pricing](https://deno.com/sandbox) |
+| Runloop | $0.317 | none | not run yet | Per second, plus disk; pause (suspend) is a Pro-plan feature | [pricing](https://www.runloop.ai/pricing) |
+| Vercel Sandbox | up to $0.341 | none | not run yet | iad1; active CPU, provisioned RAM in minimum 1-minute increments (2 GB/vCPU); full-CPU estimate; Hobby free within quotas, Pro $20/mo usage credit; creations $0.60/million and retained snapshots $0.08/GB-month extra | [pricing](https://vercel.com/docs/vercel-sandbox/pricing) |
+| InstaBox (sign-up waitlisted) | $0.017 | none | not run yet | Per second while running on fixed sizes (2/4, 4/8, 8/16); paused or stopped boxes bill only /data beyond the included disk ($0.00011/GiB-h); Pro $20/mo includes $20 credits; free plan: 1 box at 4/8 | [pricing](https://instabox.sh/docs/pricing.md) |
+| Koyeb Sandboxes (not taking new accounts) | $0.058 | $29/mo | not run yet | Per second; fixed Standard instance sizes (1 vCPU + 1 GB = $0.0144/h); sandboxes need a paid plan (Pro $29/mo); public preview | [pricing](https://www.koyeb.com/docs/reference/instances) |
+| Dedalus Machines (sign-up waitlisted) | $0.149 | none | not run yet | Per second while awake; sleeping machines bill storage only (10 GiB included on Hobby, 20 on Pro); Hobby plan max 4 vCPU / 16 GiB; private beta | [pricing](https://docs.dedaluslabs.ai/dcs/dm/pricing) |
+| OpenScale Sandboxes | skipped (default size 2 vCPU / 1 GB; more needs image.openscale) | none | passed (2026-11-06) | Per second on allocated size; no platform fee or minimum; paused = free; size comes from the template (E2B-compatible API); Singapore only; needs a pay-as-you-go key | [pricing](https://openscale.so/sandboxes) |
+| Azure Container Apps dynamic sessions | skipped (max 1 vCPU) | none | not run yet | Flat $0.03 per session-hour (built-in Shell pools), billed per allocated session in 1-hour increments, East US; needs a session pool you create once | [pricing](https://learn.microsoft.com/en-us/azure/container-apps/billing#dynamic-sessions) |
+| Daytona | skipped (default size 1 vCPU / 1 GB; more needs image.daytona) | none | failed 1 step (2026-11-06) | Per second, plus disk above 5 GiB | [pricing](https://www.daytona.io/pricing) |
+| Alibaba Cloud Agent Sandbox | skipped (max 2 GB memory) | none | not run yet | Per second; Default QoS, Hong Kong and regions outside mainland China; disk separately $0.00025308/GiB-h; code-interpreter-v1 template is 2 vCPU / 2 GiB with 10 GiB disk (E2B-compatible API) | [pricing](https://www.alibabacloud.com/help/en/agent-sandbox/product-overview/billing-overview) |
+| E2B | skipped (default size 2 vCPU / 0.5 GB; more needs image.e2b) | none | passed (2026-11-06) | Per second; free Hobby tier ($100 one-time credit, 1-hour sessions, 20 at once); Pro $150/mo for longer sessions | [pricing](https://e2b.dev/pricing) |
+| Docker (local) | free | none | passed (2026-11-06) | Runs on your own machine; free, but shares your kernel, so weaker isolation than a cloud micro-VM | [pricing](https://docs.docker.com/engine/) |
+
+Checked 2026-11-04 to 2026-11-06.
 
 ## Install
 
@@ -163,7 +176,7 @@ const a = await router.create({ vcpu: 8, memoryGb: 16 }, { strategy: "cheapest" 
 const b = await router.create({ gpu: "A10G", image: { modal: "pytorch/pytorch:latest" } });
 
 // Pin providers in order and turn fallback off
-const c = await router.create({}, { provider: ["maritime", "e2b"], fallback: false });
+const c = await router.create({}, { provider: ["e2b", "daytona"], fallback: false });
 
 // Fallback moves on when a provider is down: a timeout, a network error, 429 or 5xx, and a create
 // that takes longer than createTimeoutSeconds (default 120; a sandbox that turns up later is
@@ -173,7 +186,7 @@ const c = await router.create({}, { provider: ["maritime", "e2b"], fallback: fal
 const e = await router.create({}, { fallback: "any", createTimeoutSeconds: 300 });
 
 // Per-provider images: each provider names its templates differently
-const d = await router.create({ image: { maritime: "python", e2b: "code-interpreter-v1", modal: "python:3.13-slim" } });
+const d = await router.create({ image: { e2b: "code-interpreter-v1", modal: "python:3.13-slim" } });
 
 // Files
 await a.writeFile("/tmp/data.csv", "x,y\n1,2\n");
@@ -226,7 +239,7 @@ const { url } = await desk.viewer("control", { reason: "Please sign in" });
 
 ```bash
 npx @sandboxrouter/sdk desktop --os linux --user user_42 --control   # prints a takeover link
-npx @sandboxrouter/sdk screenshot maritime:<id> --out screen.png
+npx @sandboxrouter/sdk screenshot <provider>:<id> --out screen.png
 ```
 
 ## CLI
@@ -235,7 +248,7 @@ npx @sandboxrouter/sdk screenshot maritime:<id> --out screen.png
 npx @sandboxrouter/sdk providers                    # price table + which keys are set
 npx @sandboxrouter/sdk route --gpu T4               # dry run
 npx @sandboxrouter/sdk run "uname -a && nproc"      # start, run, print, kill
-npx @sandboxrouter/sdk run "pytest -q" --provider e2b,maritime --keep
+npx @sandboxrouter/sdk run "pytest -q" --provider e2b,daytona --keep
 npx @sandboxrouter/sdk bench --runs 5               # cold start + exec latency table
 npx @sandboxrouter/sdk bench --share --label "us-east-1"   # also write a report for results/
 npx @sandboxrouter/sdk leaderboard results --out leaderboard.html
@@ -287,10 +300,8 @@ It prints one line per step and exits 1 if any fails. `checkProvider(router, id)
 | Provider | Real-account check (14 steps) | Result since |
 |---|---|---|
 | Agent37 | not run yet | |
-| InstaBox | not run yet | |
 | Boat | not run yet | |
 | Maritime | 14/14 passed | 2026-11-06, v0.2.0 |
-| Koyeb Sandboxes | not run yet | |
 | Northflank | not run yet | |
 | Morph Cloud | not run yet | |
 | exe.dev | not run yet | |
@@ -298,7 +309,6 @@ It prints one line per step and exits 1 if any fails. `checkProvider(router, id)
 | Freestyle | not run yet | |
 | Beam | not run yet | |
 | CodeSandbox SDK (Together) | not run yet | |
-| Dedalus Machines | not run yet | |
 | Fly.io Sprites | not run yet | |
 | Blaxel | 13/13 passed; n/a: pause and resume | 2026-11-06, v0.2.0 |
 | HOPX | not run yet | |
@@ -313,6 +323,9 @@ It prints one line per step and exits 1 if any fails. `checkProvider(router, id)
 | Deno Sandbox | not run yet | |
 | Runloop | not run yet | |
 | Vercel Sandbox | not run yet | |
+| InstaBox | not run yet | |
+| Koyeb Sandboxes | not run yet | |
+| Dedalus Machines | not run yet | |
 | OpenScale Sandboxes | 14/14 passed | 2026-11-06, v0.2.0 |
 | Azure Container Apps dynamic sessions | not run yet | |
 | Daytona | 0/14 passed; failed: create | 2026-11-06, v0.2.0 |
@@ -348,7 +361,7 @@ SANDBOXROUTER_TOKEN=secret npx @sandboxrouter/sdk serve
 ```bash
 curl -s localhost:8787/v1/sandboxes -H "Authorization: Bearer secret" \
   -d '{"vcpu":2,"strategy":"cheapest"}'
-# {"id":"maritime:sbx-k3m7q2ab","provider":"maritime","estimatedHourlyUsd":0.022,"attempts":[...]}
+# {"id":"e2b:iz5sb5a4bt3pmjx7c5ms2","provider":"e2b","estimatedHourlyUsd":0.1656,"attempts":[...]}
 ```
 
 Provider keys stay on the server. Clients only hold `SANDBOXROUTER_TOKEN`. It binds to `127.0.0.1` by default. Without a token it only starts on a loopback address with CORS off: `--cors` (any browser page could otherwise start sandboxes on your keys) and a public `--host` both need `SANDBOXROUTER_TOKEN`.

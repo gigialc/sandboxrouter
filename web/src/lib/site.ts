@@ -13,6 +13,13 @@ export interface SiteProvider {
   pricing: { vcpuHour: number; gbHour: number; note?: string; source: string; checked: string };
   /** Set when you can't just sign up: "waitlist" (invite or beta only) or "closed" (no new accounts). */
   access: null | { status: "waitlist" | "closed"; note: string; checked: string };
+  /** "active-cpu": CPU billed only while busy, so the listed price is the most an hour costs. */
+  billing: "allocated" | "active-cpu";
+  /** The monthly plan needed before the API creates sandboxes; null when a free tier or pay-as-you-go works. */
+  plan: null | { usdMonth: number; credited: boolean; unclear?: boolean; note: string; checked: string };
+  planLabel: string;
+  /** Last real-account run: passed, failing, or untested (mock-tested only). */
+  live: { status: "passed" | "failing" | "untested"; label: string };
   computers: string[];
   prices: Record<Shape, { usd: number; unfit: string | null }>;
   /** The last saved real-account `check` run, or null when none has been saved. */
@@ -82,15 +89,13 @@ export function provider(id: string) {
   return site.providers.find((p) => p.id === id);
 }
 
-/** The router's own rule: cheapest first, ties alphabetical; local providers last (never auto-picked). */
+/**
+ * Same order as the library's listingOrder(): providers anyone can sign up for, cheapest first, ties
+ * alphabetical; then waitlisted or closed sign-ups; then ones that can't take the size; Docker last.
+ */
 export function ranked(shape: Shape = DEFAULT_SHAPE) {
-  return [...site.providers].sort(
-    (a, b) =>
-      Number(!!a.local) - Number(!!b.local) ||
-      Number(!!a.prices[shape].unfit) - Number(!!b.prices[shape].unfit) ||
-      a.prices[shape].usd - b.prices[shape].usd ||
-      a.id.localeCompare(b.id),
-  );
+  const rank = (p: SiteProvider) => (p.local ? 3 : p.prices[shape].unfit ? 2 : p.access ? 1 : 0);
+  return [...site.providers].sort((a, b) => rank(a) - rank(b) || a.prices[shape].usd - b.prices[shape].usd || a.id.localeCompare(b.id));
 }
 
 export const CAPABILITY_LABEL: Record<string, string> = {

@@ -30,6 +30,17 @@ export interface ProviderInfo {
    * only ever uses providers you have keys for.
    */
   access?: { status: "waitlist" | "closed"; note: string; checked: string };
+  /**
+   * "allocated": you pay for the size you asked for while it runs. "active-cpu": CPU is charged only
+   * while it's busy, so the listed price (every core busy) is the most an hour can cost; idle agents pay less.
+   */
+  billing: "allocated" | "active-cpu";
+  /**
+   * The cheapest monthly plan you need before you can create sandboxes through the API. Absent when a
+   * free tier or plain pay-as-you-go works. `credited`: the fee comes back as usage credit.
+   * `unclear`: the pricing page doesn't say whether a free tier can use the API.
+   */
+  plan?: { usdMonth: number; credited: boolean; unclear?: boolean; note: string; checked: string };
 }
 
 /** Short label for a gated provider's sign-up status, or null when anyone can sign up. */
@@ -38,12 +49,30 @@ export function accessLabel(id: ProviderId): string | null {
   return a ? (a.status === "waitlist" ? "sign-up waitlisted" : "not taking new accounts") : null;
 }
 
+/** Short label for the plan a provider needs before you can use it: "none", "$20/mo (credited)", "$5/mo". */
+export function planLabel(id: ProviderId): string {
+  const p = CATALOG.find((c) => c.id === id)?.plan;
+  if (!p) return "none";
+  return `${p.unclear ? "maybe " : ""}$${p.usdMonth}/mo${p.credited ? " (credited)" : ""}`;
+}
+
+/**
+ * The order tables list providers in (README, CLI, website): providers anyone can sign up for that can
+ * take this size, cheapest first, ties alphabetical; then waitlisted or closed sign-ups; then providers
+ * that can't take the size; then Docker. The router uses the same price order, but only among providers
+ * you have keys for, so a gated provider only gets work if you already have an account there.
+ */
+export function listingOrder(spec: SandboxSpec = {}): ProviderInfo[] {
+  const rank = (c: ProviderInfo) => (c.local ? 3 : unfit(c.id, spec) ? 2 : c.access ? 1 : 0);
+  return [...CATALOG].sort((a, b) => rank(a) - rank(b) || hourlyCost(a.id, spec) - hourlyCost(b.id, spec) || a.id.localeCompare(b.id));
+}
+
 /**
  * Every provider is treated the same: the router orders candidates by list price for the requested
  * size (or by your measured cold starts), ties broken alphabetically. Nobody gets a better slot.
  * Prices come from each provider's public pricing page; PRs that correct one are welcome.
  */
-const ENTRIES: ProviderInfo[] = [
+const ENTRIES: Omit<ProviderInfo, "billing" | "plan">[] = [
   {
     id: "docker",
     name: "Docker (local)",
@@ -81,7 +110,7 @@ const ENTRIES: ProviderInfo[] = [
     pricing: {
       vcpuHour: 0.0504,
       gbHour: 0.0162,
-      note: "per second; Pro plan $150/mo",
+      note: "per second; free Hobby tier ($100 one-time credit, 1-hour sessions, 20 at once); Pro $150/mo for longer sessions",
       source: "https://e2b.dev/pricing",
       checked: "2026-11-04",
     },
@@ -579,7 +608,58 @@ ENTRIES.push(
   },
 );
 
-export const CATALOG: ProviderInfo[] = [...ENTRIES].sort((a, b) => a.name.localeCompare(b.name));
+/**
+ * How each provider bills, and the monthly plan it needs before the API will create sandboxes.
+ * Every provider must be listed (the Record type checks it). Plan fees come from each pricing page,
+ * checked 2026-11-06; prepaid top-ups that turn into usage aren't fees, so they don't count.
+ */
+const P = "2026-11-06";
+const BILLING: Record<ProviderId, Pick<ProviderInfo, "billing" | "plan">> = {
+  docker: { billing: "allocated" },
+  agent37: { billing: "allocated" },
+  agentcore: { billing: "active-cpu" },
+  alibaba: { billing: "allocated" },
+  azure: { billing: "allocated" },
+  beam: { billing: "allocated", plan: { usdMonth: 20, credited: true, note: "Developer plan; no free plan", checked: P } },
+  blaxel: { billing: "allocated" },
+  boat: { billing: "allocated", plan: { usdMonth: 20, credited: true, note: "plan paid back as VM time; 7-day trial needs a card", checked: P } },
+  cloudflare: {
+    billing: "active-cpu",
+    plan: { usdMonth: 5, credited: false, note: "Workers Paid; includes usage allowances, not credit", checked: P },
+  },
+  codesandbox: { billing: "allocated" },
+  daytona: { billing: "allocated" },
+  dedalus: { billing: "allocated" },
+  deno: {
+    billing: "active-cpu",
+    plan: { usdMonth: 20, credited: false, note: "the free Deno Deploy plan has no sandboxes; Pro includes allowances, not credit", checked: P },
+  },
+  e2b: { billing: "allocated" },
+  exedev: { billing: "allocated", plan: { usdMonth: 15, credited: false, note: "Personal plan; VMs are metered on top; 7-day trial", checked: P } },
+  freestyle: { billing: "allocated" },
+  hopx: { billing: "allocated" },
+  instabox: { billing: "allocated" },
+  koyeb: { billing: "allocated", plan: { usdMonth: 29, credited: false, note: "sandboxes need a paid plan; Pro includes $10 of compute", checked: P } },
+  lambda: { billing: "allocated" },
+  langsmith: { billing: "allocated" },
+  maritime: { billing: "allocated", plan: { usdMonth: 20, credited: true, note: "Starter plan; no free tier; 7-day trial needs a card", checked: P } },
+  modal: { billing: "active-cpu" },
+  morph: { billing: "allocated" },
+  northflank: { billing: "allocated" },
+  novita: { billing: "allocated" },
+  openscale: { billing: "allocated" },
+  runloop: { billing: "allocated" },
+  sprites: { billing: "active-cpu" },
+  superserve: {
+    billing: "allocated",
+    plan: { usdMonth: 20, credited: true, unclear: true, note: "Developer plan; the page offers a free start but doesn't say what it includes", checked: P },
+  },
+  tensorlake: { billing: "active-cpu" },
+  upstash: { billing: "active-cpu" },
+  vercel: { billing: "active-cpu" },
+};
+
+export const CATALOG: ProviderInfo[] = ENTRIES.map((e) => ({ ...e, ...BILLING[e.id] })).sort((a, b) => a.name.localeCompare(b.name));
 
 /** Cloudflare only rents fixed instance types: https://developers.cloudflare.com/containers/platform/limits/ */
 export const CLOUDFLARE_INSTANCES = [
