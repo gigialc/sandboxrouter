@@ -30,8 +30,10 @@ import { DEFAULT_EXEC_TIMEOUT_S, guardTimeout, killedByTimeout, timeoutError, to
  * two by Sail. Billing is on what the box actually uses (CPU time, RAM held including page cache,
  * disk), not on the limits, so the adapter sets vCPUs to the request and memory to the request's
  * floor of 16 GiB.
- * Timeouts: the API's exec `timeout` isn't documented beyond "seconds", so commands also run under
- * guardTimeout, which kills them with exit 124 at the deadline.
+ * Timeouts: at the exec `timeout` Sail ends the stream with {type:"exit", status:"timed_out",
+ * return_code:124, timed_out:true} (seen on a real account 2026-11-06). Commands also run under
+ * guardTimeout, which kills the whole command at the deadline, and Sail's own timeout sits 10 s later
+ * as a backstop.
  * Lifetime: spec.timeoutMinutes becomes max_lifetime_seconds, which counts paused and sleeping time too.
  * Docs: https://docs.sailresearch.com/sailboxes-http-api.md, https://docs.sailresearch.com/sailbox-openapi.json,
  *       https://docs.sailresearch.com/sailboxes-billing.md, https://docs.sailresearch.com/sailboxes-pricing.md

@@ -1,0 +1,84 @@
+{
+  "tool": "sandboxrouter-check",
+  "version": "0.3.0",
+  "date": "2026-11-06T19:04:15.542Z",
+  "platform": "darwin-arm64",
+  "provider": "sail",
+  "sandboxId": "sail:sb_c1a48053-027b-441f-aa43-88c5c3872b47",
+  "results": [
+    {
+      "step": "create",
+      "ms": 2836,
+      "status": "pass",
+      "detail": "sail:sb_c1a48053-027b-441f-aa43-88c5c3872b47, ~$0.062/hr"
+    },
+    {
+      "step": "exec: stdout, stderr, exit code",
+      "ms": 683,
+      "status": "pass"
+    },
+    {
+      "step": "exec: env and cwd",
+      "ms": 203,
+      "status": "pass"
+    },
+    {
+      "step": "exec: UTF-8 output",
+      "ms": 850,
+      "status": "pass"
+    },
+    {
+      "step": "exec: streaming",
+      "ms": 3221,
+      "status": "pass",
+      "detail": "first output after 294 ms"
+    },
+    {
+      "step": "files: binary round-trip",
+      "ms": 414,
+      "status": "pass"
+    },
+    {
+      "step": "files: 1 MB round-trip",
+      "ms": 3699,
+      "status": "pass"
+    },
+    {
+      "step": "files: missing file is an error",
+      "ms": 300,
+      "status": "pass"
+    },
+    {
+      "step": "files: visible to commands",
+      "ms": 597,
+      "status": "pass"
+    },
+    {
+      "step": "exec: command timeout",
+      "ms": 4115,
+      "status": "pass",
+      "detail": "threw after 4115 ms"
+    },
+    {
+      "step": "exec: timed-out command was stopped",
+      "ms": 7219,
+      "status": "pass"
+    },
+    {
+      "step": "pause and resume",
+      "ms": 7164,
+      "status": "pass"
+    },
+    {
+      "step": "kill",
+      "ms": 1038,
+      "status": "pass"
+    },
+    {
+      "step": "killed sandbox is gone",
+      "ms": 212,
+      "status": "pass"
+    }
+  ],
+  "ok": true
+}
