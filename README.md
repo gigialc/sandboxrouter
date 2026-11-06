@@ -64,7 +64,7 @@ How to read it:
 | Agent37 | $0.007 | none | not run yet | Whole-minute billing: monthly shape total / 730 / 60; running estimate includes default disk (2 vCPU / 4 GB / 4 GB disk = $4.76/mo); sleeping/stopped disk $0.09/GB-mo; gVisor; $5 minimum top-up, wallet must hold one running day | [pricing](https://www.agent37.com/docs/agents-api/billing) |
 | Boat | $0.018 | $20/mo (credited) | not run yet | Fixed sizes billed per second ($0.018/h for 2 vCPU / 4 GB up to $0.20/h for 16 / 32); needs a plan from $20/mo, paid back as VM time | [pricing](https://docs.boat.dev/pricing.md) |
 | Maritime | $0.022 | $20/mo (credited) | passed (2026-11-06) | Per second, no minimum runtime; running disk included; Starter $20/mo incl. $20 usage; paused disk $0.08/GB-month (default idle action deletes sandbox) | [pricing](https://maritime.sh/pricing) |
-| Sailboxes (Sail Research) | up to $0.062 | none | not run yet | Per second on what the box uses (CPU time, RAM it holds, disk $0.0007/GiB-h), billed per minute; RAM counts the VM's file cache, up to the 16 GiB minimum limit, so file-heavy work can hold more than you asked for; paused/sleeping free; creation $0.01 at 2-4 vCPU on the free plan ($5/mo credit with a card), waived on Pro $250/mo | [pricing](https://docs.sailresearch.com/sailboxes-pricing.md) |
+| Sailboxes (Sail Research) | up to $0.062 | none | passed (2026-11-06) | Per second on what the box uses (CPU time, RAM it holds, disk $0.0007/GiB-h), billed per minute; RAM counts the VM's file cache, up to the 16 GiB minimum limit, so file-heavy work can hold more than you asked for; paused/sleeping free; creation $0.01 at 2-4 vCPU on the free plan ($5/mo credit with a card), waived on Pro $250/mo | [pricing](https://docs.sailresearch.com/sailboxes-pricing.md) |
 | Northflank | $0.067 | none | not run yet | Per second on Northflank Cloud, ephemeral disk included; sandboxes run as deployment services (microVMs) | [pricing](https://northflank.com/pricing) |
 | Morph Cloud | $0.100 | none | not run yet | $0.05/MCU; MCU-hours = max(vCPU, RAM/4 GB, disk/16 GB); snapshots extra | [pricing](https://cloud.morph.so/web/pricing) |
 | exe.dev | $0.105 | $15/mo | not run yet | Standalone reserved size, per second: $0.105/h per 2 vCPU / 4 GiB unit; stopped CPU/RAM free, retained disk separate; Personal from $15/mo (up to 16 vCPU / 32 GiB), Work $75/mo (32 / 64 without approval) | [pricing](https://exe.dev/docs/standalone-vms.md) |
@@ -304,7 +304,7 @@ It prints one line per step and exits 1 if any fails. `checkProvider(router, id)
 | Agent37 | not run yet | |
 | Boat | not run yet | |
 | Maritime | 14/14 passed | 2026-11-06, v0.2.0 |
-| Sailboxes (Sail Research) | not run yet | |
+| Sailboxes (Sail Research) | 14/14 passed | 2026-11-06, v0.3.0 |
 | Northflank | not run yet | |
 | Morph Cloud | not run yet | |
 | exe.dev | not run yet | |

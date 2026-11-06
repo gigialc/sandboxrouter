@@ -2,7 +2,7 @@ import { Button, SectionTitle } from "@/components/chrome";
 import { CodeTabs, InstallChip } from "@/components/code";
 import { ProviderTable } from "@/components/ProviderTable";
 import { DesktopTable } from "@/components/DesktopTable";
-import { NPM, REPO, site } from "@/lib/site";
+import { NPM, NPM_URL, REPO, REPO_PUBLIC, site } from "@/lib/site";
 
 const TS = `import { Router } from "${NPM}";
 
@@ -37,9 +37,11 @@ export default function Home() {
       <div className="grid items-center gap-12 pt-16 pb-6 sm:pt-24 lg:grid-cols-2 lg:gap-16">
       <section>
         <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted">
-          Open source · {cloud} providers · {passed} passing on real accounts
+          Open source · {cloud} providers · <span className="text-accent">{passed} passing on real accounts</span>
         </p>
-        <h1 className="mt-5 max-w-2xl text-4xl font-normal leading-[1.08] tracking-[-0.035em] sm:text-[52px]">One API for every sandbox.</h1>
+        <h1 className="mt-5 max-w-2xl text-4xl font-normal leading-[1.08] tracking-[-0.035em] sm:text-[52px]">
+          One API for <span className="text-accent">every sandbox.</span>
+        </h1>
         <p className="mt-5 max-w-xl text-[15px] leading-7 text-ink-2">
           AI agents need a safe computer to run code. sandboxrouter starts it on whichever provider fits the job, and moves to the
           next one if that provider is busy. One interface for {cloud} providers, plus Docker on your own machine.
@@ -49,7 +51,7 @@ export default function Home() {
           <Button href="/docs" primary>
             Docs
           </Button>
-          <Button href={REPO}>GitHub</Button>
+          <Button href={REPO_PUBLIC ? REPO : NPM_URL}>{REPO_PUBLIC ? "GitHub" : "npm"}</Button>
         </div>
       </section>
 

@@ -6,10 +6,15 @@ import "./globals.css";
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
+const DESCRIPTION =
+  "A free, open-source router for AI agent sandboxes: one API across 30+ providers, priced side by side, tested on real accounts, with automatic fallback.";
+
 export const metadata: Metadata = {
+  metadataBase: new URL("https://sandboxrouter.vercel.app"),
   title: { default: "sandboxrouter: one API for every sandbox", template: "%s · sandboxrouter" },
-  description:
-    "OpenRouter for sandboxes. Route your AI agent's code to Maritime, E2B, Daytona, Modal, Vercel and more, by price, speed or capability, with automatic fallback.",
+  description: DESCRIPTION,
+  openGraph: { title: "sandboxrouter", description: DESCRIPTION, url: "/", siteName: "sandboxrouter", type: "website" },
+  twitter: { card: "summary_large_image", title: "sandboxrouter: one API for every sandbox", description: DESCRIPTION },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

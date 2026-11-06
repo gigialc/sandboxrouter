@@ -18,6 +18,8 @@ export interface SiteProvider {
   /** The monthly plan needed before the API creates sandboxes; null when a free tier or pay-as-you-go works. */
   plan: null | { usdMonth: number; credited: boolean; unclear?: boolean; note: string; checked: string };
   planLabel: string;
+  /** The size the provider's default image gives whatever is asked for; bigger requests need a custom image. */
+  defaultSize: null | { vcpu: number; memoryGb: number };
   /** Last real-account run: passed, failing, or untested (mock-tested only). */
   live: { status: "passed" | "failing" | "untested"; label: string };
   computers: string[];
@@ -46,6 +48,22 @@ export interface LeaderRow {
   size: { vcpu: number; memoryGb: number };
 }
 
+export interface CostRow {
+  provider: string;
+  name: string;
+  date: string;
+  minutes: number;
+  load: boolean;
+  requested: { vcpu: number; memoryGb: number };
+  delivered: null | { vcpu: number; memoryGb: number };
+  seconds: number | null;
+  predictedUsd: number | null;
+  billedUsd: number | null;
+  billedSeconds: number | null;
+  billSource: string | null;
+  error: string | null;
+}
+
 export interface SiteDesktop {
   id: string;
   name: string;
@@ -68,10 +86,14 @@ export const site = data as unknown as {
   checkSteps: string[];
   desktops: SiteDesktop[];
   leaderboard: LeaderRow[];
+  costRuns: CostRow[];
   submissions: { date: string; label: string | null; platform: string; runs: number; providers: number }[];
 };
 
 export const REPO = "https://github.com/gigialc/sandboxrouter";
+/** The repo is private until launch. Flip this when it goes public, and the GitHub links come back. */
+export const REPO_PUBLIC = false;
+export const NPM_URL = "https://www.npmjs.com/package/@sandboxrouter/sdk";
 export const NPM = "@sandboxrouter/sdk";
 export const DEFAULT_SHAPE: Shape = "2x4";
 
@@ -83,6 +105,16 @@ export function shapeLabel(s: Shape) {
 export function usd(n: number) {
   if (n === 0) return "free";
   return n < 1 ? `$${n.toFixed(3)}` : `$${n.toFixed(2)}`;
+}
+
+/**
+ * What to show for a provider at a size it can't take. Providers whose default image is a fixed size
+ * (E2B, OpenScale, Daytona) still get a price: the one at the size they really run.
+ */
+export function fixedPrice(p: SiteProvider, shape: Shape): null | { usd: number; size: string } {
+  const unfit = p.prices[shape].unfit;
+  if (!unfit || !p.defaultSize || !unfit.startsWith("default size")) return null;
+  return { usd: p.prices[shape].usd, size: `${p.defaultSize.vcpu} vCPU · ${p.defaultSize.memoryGb} GB` };
 }
 
 export function provider(id: string) {

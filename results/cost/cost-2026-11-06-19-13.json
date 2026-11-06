@@ -1,0 +1,33 @@
+{
+  "tool": "sandboxrouter-cost",
+  "version": "0.3.0",
+  "date": "2026-11-06T19:13:02.657Z",
+  "minutes": 10,
+  "load": true,
+  "entries": [
+    {
+      "provider": "sail",
+      "requested": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "listUsdHour": 0.062,
+      "startedAt": "2026-11-06T19:02:59.348Z",
+      "sandboxId": "sb_5501f281-a756-4820-bc57-1eb69f014753",
+      "delivered": {
+        "vcpu": 2,
+        "memoryMb": 7939
+      },
+      "deliveredUsdHour": 0.092023,
+      "endedAt": "2026-11-06T19:13:02.657Z",
+      "seconds": 603,
+      "predictedUsd": 0.010385,
+      "bill": {
+        "usd": 0.015138,
+        "seconds": 428,
+        "source": "sail /sailboxes/spend cost_usd_nanos (estimate at list rates; 1 creation charge; 849 vCPU-s, 221 GiB-s)",
+        "at": "2026-11-06T19:13:02.658Z"
+      }
+    }
+  ]
+}
