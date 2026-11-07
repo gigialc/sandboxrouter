@@ -93,8 +93,8 @@ export const site = data as unknown as {
 };
 
 export const REPO = "https://github.com/gigialc/sandboxrouter";
-/** The repo is private until launch. Flip this when it goes public, and the GitHub links come back. */
-export const REPO_PUBLIC = false;
+/** The repo is public (since 2026-11-07). Set to false to hide GitHub links and "open a PR" wording, e.g. while a repo is private. */
+export const REPO_PUBLIC = true;
 export const NPM_URL = "https://www.npmjs.com/package/@sandboxrouter/sdk";
 export const NPM = "@sandboxrouter/sdk";
 export const DEFAULT_SHAPE: Shape = "2x4";
