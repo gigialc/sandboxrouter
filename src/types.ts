@@ -151,3 +151,14 @@ export class ProviderError extends Error {
     this.name = "ProviderError";
   }
 }
+
+/**
+ * A problem with local setup, such as a provider SDK that isn't installed or a missing setting:
+ * something to fix here, not a provider being down. The router stops on it instead of falling back.
+ */
+export class SetupError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "SetupError";
+  }
+}

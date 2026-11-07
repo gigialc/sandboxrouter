@@ -7,7 +7,8 @@ import { Ledger } from "../src/ledger.js";
 import { MaritimeProvider } from "../src/providers/maritime.js";
 import { Router } from "../src/router.js";
 import { createApp } from "../src/server.js";
-import { RouterError } from "../src/types.js";
+import { RouterError, SetupError } from "../src/types.js";
+import { errorStatus } from "../src/util.js";
 import { FakeProvider } from "./fake.js";
 
 const dir = mkdtempSync(join(tmpdir(), "sbr-hardening-"));
@@ -70,6 +71,39 @@ describe("fallback", () => {
       expect(err.attempts).toHaveLength(1);
       expect(fallback.created).toHaveLength(0);
     }
+  });
+
+  // The shapes each SDK's bad-key error really has (probed against the live APIs with fake keys).
+  const named = (name: string, message: string, extra: Record<string, unknown> = {}) =>
+    Object.assign(new (class extends Error {})(message), { name }, extra);
+  const SDK_SETUP_ERRORS: [string, unknown][] = [
+    ["E2B AuthenticationError (no status)", named("AuthenticationError", "Unauthorized, please check your credentials.")],
+    ["Daytona statusCode", named("DaytonaAuthenticationError", "Invalid credentials", { statusCode: 401 })],
+    ["Vercel response.status", named("Error", "Status code 403 is not ok: Not authorized", { response: { status: 403 } })],
+    ["Modal gRPC UNAUTHENTICATED", named("ClientError", "UNAUTHENTICATED: Token ID is malformed", { code: 16 })],
+    ["Blaxel status_code", { code: "UNAUTHORIZED", message: "Authorization failed", status_code: 403 }],
+    ["AWS CredentialsProviderError", named("CredentialsProviderError", "Could not load credentials from any providers")],
+    ["a status on the cause", named("Error", "request failed", { cause: { status: 401 } })],
+    ["a missing SDK package", new SetupError('modal needs the "modal" package: npm i modal')],
+  ];
+
+  it.each(SDK_SETUP_ERRORS)("stops on a setup error an SDK reports its own way: %s", async (_, error) => {
+    const fallback = new FakeProvider("maritime");
+    const router = new Router({ providers: [new FakeProvider("modal", { failWith: error }), fallback], ledger: false });
+    const err = await router.create({}, route).catch((e) => e);
+    expect(err).toBeInstanceOf(RouterError);
+    expect(err.message).toMatch(/^modal\b.*This looks like a setup problem with modal/);
+    expect(err.message).not.toMatch(/^modal: modal/);
+    expect(fallback.created).toHaveLength(0);
+  });
+
+  it("reads the status from every SDK error shape, and leaves outages alone", () => {
+    expect(SDK_SETUP_ERRORS.slice(0, -1).map(([, e]) => errorStatus(e))).toEqual([401, 401, 403, 401, 403, 401, 401]);
+    expect(errorStatus(named("ClientError", "UNAVAILABLE", { code: 14 }))).toBe(503);
+    expect(errorStatus(named("RateLimitError", "slow down"))).toBe(429);
+    expect(errorStatus(named("DaytonaError", "Sandbox failed to start"))).toBeUndefined();
+    expect(errorStatus(new Error("ECONNRESET"))).toBeUndefined();
+    expect(errorStatus({ status: "error" })).toBeUndefined();
   });
 
   it("still falls back when the provider looks unavailable: 429, 5xx, timeouts, or no status", async () => {

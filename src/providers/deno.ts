@@ -1,4 +1,4 @@
-import { ProviderError, type ExecOptions, type ExecResult, type Provider, type ProviderSandbox, type SandboxSpec } from "../types.js";
+import { ProviderError, SetupError, type ExecOptions, type ExecResult, type Provider, type ProviderSandbox, type SandboxSpec } from "../types.js";
 import { dirname, optionalImport, toBytes } from "../util.js";
 
 /**
@@ -66,7 +66,7 @@ export class DenoProvider implements Provider {
 
   private auth(): Record<string, unknown> {
     if (!this.token) throw new ProviderError(ID, "DENO_DEPLOY_TOKEN is not set");
-    if (!this.token.startsWith("ddo_") && !this.org) throw new ProviderError(ID, "a personal DENO_DEPLOY_TOKEN needs DENO_DEPLOY_ORG");
+    if (!this.token.startsWith("ddo_") && !this.org) throw new SetupError(`${ID}: a personal DENO_DEPLOY_TOKEN needs DENO_DEPLOY_ORG`);
     return { token: this.token, ...(this.org ? { org: this.org } : {}) };
   }
 
