@@ -1,6 +1,6 @@
 import { DEFAULT_MEMORY_GB, DEFAULT_VCPU } from "../catalog.js";
 import { ProviderError, type ExecOptions, type ExecResult, type Provider, type ProviderSandbox, type SandboxSpec } from "../types.js";
-import { DEFAULT_EXEC_TIMEOUT_S, optionalImport, timeoutError, toBytes } from "../util.js";
+import { DEFAULT_EXEC_TIMEOUT_S, errorStatus, optionalImport, timeoutError, toBytes } from "../util.js";
 
 type BlaxelModule = typeof import("@blaxel/core");
 type BlaxelSandbox = InstanceType<BlaxelModule["SandboxInstance"]>;
@@ -151,7 +151,7 @@ class BlaxelBox implements ProviderSandbox {
 
 function wrap(err: any): ProviderError {
   if (err instanceof ProviderError) return err;
-  const status = typeof err?.status === "number" ? err.status : typeof err?.code === "number" ? err.code : err?.response?.status;
+  const status = errorStatus(err) ?? (typeof err?.code === "number" ? err.code : undefined);
   // The SDK sometimes throws the plain API body ({ code, error }), not an Error.
   const message = err?.message ?? err?.error ?? (typeof err === "object" ? JSON.stringify(err) : String(err));
   return new ProviderError("blaxel", message, status);

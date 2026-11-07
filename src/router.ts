@@ -10,7 +10,7 @@ import {
 } from "./computers.js";
 import { loadBench, median } from "./bench-store.js";
 import { Ledger, defaultLedgerFile } from "./ledger.js";
-import { DEFAULT_EXEC_TIMEOUT_S, timeoutError } from "./util.js";
+import { DEFAULT_EXEC_TIMEOUT_S, errorStatus, timeoutError } from "./util.js";
 import { DaytonaProvider } from "./providers/daytona.js";
 import { E2BProvider } from "./providers/e2b.js";
 import { MaritimeProvider } from "./providers/maritime.js";
@@ -51,6 +51,7 @@ import { LimrunProvider } from "./providers/limrun.js";
 import { WorkspacesAgentProvider } from "./providers/workspaces.js";
 import {
   ProviderError,
+  SetupError,
   RouterError,
   type Attempt,
   type ExecOptions,
@@ -257,10 +258,12 @@ export class Router {
         // so it can't bill unseen. If the kill fails, the ledger entry is left for `gc`.
         if (timedOut) pending.then((late) => this.discard(c.provider, late, c.estimatedHourlyUsd, spec.timeoutMinutes), () => {});
         attempts.push({ provider: c.provider, ok: false, ms: Date.now() - t0, error: (err as Error).message });
-        const status = err instanceof ProviderError ? err.status : undefined;
-        if (route.fallback !== "any" && status !== undefined && SETUP_ERRORS.has(status)) {
+        const status = errorStatus(err);
+        const setup = err instanceof SetupError || (status !== undefined && SETUP_ERRORS.has(status));
+        if (route.fallback !== "any" && setup) {
+          const msg = (err as Error).message.replace(/[.\s]+$/, "");
           throw new RouterError(
-            `${(err as Error).message.replace(/[.\s]+$/, "")}. This looks like a setup problem with ${c.provider} (key, billing, image or request), ` +
+            `${msg.startsWith(c.provider) ? msg : `${c.provider}: ${msg}`}. This looks like a setup problem with ${c.provider} (key, billing, image, request or a missing package), ` +
               `so the router stopped instead of moving the work to another provider; pass fallback: "any" to fall back on every error`,
             attempts,
           );
