@@ -13,7 +13,7 @@ export class FakeProvider implements Provider {
      * status `fail` carries. `createMs`: create takes this long (and still makes a sandbox).
      * `killFails`: kill rejects.
      */
-    public opts: { configured?: boolean; fail?: string; failStatus?: number; pause?: boolean; hang?: boolean; createMs?: number; killFails?: boolean } = {},
+    public opts: { configured?: boolean; fail?: string; failStatus?: number; failWith?: unknown; pause?: boolean; hang?: boolean; createMs?: number; killFails?: boolean } = {},
   ) {}
 
   configured() {
@@ -22,6 +22,7 @@ export class FakeProvider implements Provider {
 
   async create(spec: SandboxSpec): Promise<ProviderSandbox> {
     if (this.opts.createMs) await new Promise((r) => setTimeout(r, this.opts.createMs));
+    if (this.opts.failWith !== undefined) throw this.opts.failWith;
     if (this.opts.fail) throw this.opts.failStatus ? new ProviderError(this.id, this.opts.fail, this.opts.failStatus) : new Error(this.opts.fail);
     this.created.push(spec);
     const box = new FakeBox(`${this.id}-${++this.n}`);
