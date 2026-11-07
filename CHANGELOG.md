@@ -2,7 +2,9 @@
 
 All notable changes. Versions follow [semver](https://semver.org/); while the version is 0.x, a minor bump can change the API.
 
-## Unreleased
+## 0.3.2 (2026-11-07)
+
+0.3.1 on npm was built before these changes were merged, so its CLI lacks `--by`; 0.3.2 is the same code as main.
 
 ### Added
 - `--by GITHUB_USER` on `check --save`, `bench --share` and `cost run` puts the contributor's GitHub username on the result file, so the website can credit it.
