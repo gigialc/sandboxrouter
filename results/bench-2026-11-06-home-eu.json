@@ -33,14 +33,6 @@
       "hourlyUsd": 0.1656
     },
     {
-      "provider": "blaxel",
-      "runs": 5,
-      "failures": 0,
-      "medianCreateMs": 1090,
-      "medianExecMs": 247,
-      "hourlyUsd": 0.1656
-    },
-    {
       "provider": "maritime",
       "runs": 5,
       "failures": 0,

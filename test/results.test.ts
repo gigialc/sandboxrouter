@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { CHECK_STEPS } from "../src/check.js";
-import { contributor, scanText, validateResult, validateResults } from "../src/results.js";
+import { contributor, publishableCheck, scanText, validateResult, validateResults } from "../src/results.js";
 
 const NOW = Date.parse("2026-11-07T00:00:00Z");
 const bench = (over: Record<string, unknown> = {}, row: Record<string, unknown> = {}) => ({
@@ -151,5 +151,47 @@ describe("validateResults", () => {
     ];
     const problems = validateResults(d, { changed, now: NOW });
     expect(problems.map((p) => p.file.split("/").pop())).toEqual(["bench-old.json", "bench-gone.json"]);
+  });
+});
+
+describe("providers whose terms forbid publishing benchmarks", () => {
+  it("are refused in bench and cost files", () => {
+    expect(validateResult(bench({}, { provider: "blaxel" }), NOW).join()).toMatch(/blaxel: its terms don't allow publishing benchmarks/);
+    expect(validateResult(cost({ provider: "blaxel" }), NOW).join()).toMatch(/blaxel: its terms/);
+  });
+
+  it("keep pass/fail in a saved check, without timings", () => {
+    const raw = check({
+      provider: "blaxel",
+      results: [
+        { step: "create", ms: 900, status: "pass", detail: "blaxel:abc, ~$0.17/hr" },
+        { step: "exec: streaming", ms: 120, status: "pass", detail: "first output after 100 ms" },
+        { step: "exec: command timeout", ms: 3044, status: "pass", detail: "threw after 3.0 s" },
+      ],
+    });
+    expect(validateResult(raw, NOW).join()).toMatch(/has timings/);
+    const clean = publishableCheck(raw);
+    expect(clean.results).toEqual([
+      { step: "create", status: "pass", detail: "blaxel:abc, ~$0.17/hr" },
+      { step: "exec: streaming", status: "pass" },
+      { step: "exec: command timeout", status: "pass" },
+    ]);
+    expect(validateResult(clean, NOW)).toEqual([]);
+    expect(publishableCheck(check())).toEqual(check());
+  });
+
+  it("may be removed from an existing bench report, but nothing else may change", () => {
+    const d = mkdtempSync(join(tmpdir(), "sr-results-"));
+    const before = bench({}, {});
+    before.rows = [...before.rows, { provider: "blaxel", runs: 5, failures: 0, medianCreateMs: 1090, medianExecMs: 300, hourlyUsd: 0.17 }] as any;
+    const file = join(d, "bench-a.json");
+    const changed = [{ status: "M", path: file }];
+    const previous = () => JSON.stringify(before);
+
+    writeFileSync(file, JSON.stringify(bench()));
+    expect(validateResults(d, { changed, previous, now: NOW })).toEqual([]);
+
+    writeFileSync(file, JSON.stringify(bench({}, { medianCreateMs: 100 })));
+    expect(validateResults(d, { changed, previous, now: NOW }).map((i) => i.problem).join()).toMatch(/edits an existing bench report/);
   });
 });

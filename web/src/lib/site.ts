@@ -18,6 +18,8 @@ export interface SiteProvider {
   /** The monthly plan needed before the API creates sandboxes; null when a free tier or pay-as-you-go works. */
   plan: null | { usdMonth: number; credited: boolean; unclear?: boolean; note: string; checked: string };
   planLabel: string;
+  /** Set when the provider's terms forbid publishing benchmarks: no speed, size or bill data is shown. */
+  noBenchmarks: null | { clause: string; source: string; checked: string };
   /** The size the provider's default image gives whatever is asked for; bigger requests need a custom image. */
   defaultSize: null | { vcpu: number; memoryGb: number };
   /** Last real-account run: passed, failing, or untested (mock-tested only). */

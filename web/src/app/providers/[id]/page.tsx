@@ -40,6 +40,7 @@ await sbx.kill();`;
   const noBillingApi = !!cost?.billSource?.startsWith("no billing");
   const billed = cost && cost.billedUsd !== null && cost.predictedUsd ? { usd: cost.billedUsd, list: cost.predictedUsd } : null;
   const total = site.checkSteps.length - (p.check?.skipped.length ?? 0);
+  const hidden = p.noBenchmarks ? "not published" : null;
   const credit = (by: string | null) => (by ? ` by @${by}` : "");
   const facts: [string, string, string][] = [
     [
@@ -49,19 +50,25 @@ await sbx.kill();`;
     ],
     [
       "Cold start",
-      lb?.medianCreateMs ? `${lb.medianCreateMs.toLocaleString("en-US")} ms` : "not measured",
-      lb ? `median, ${reports.length} location${reports.length === 1 ? "" : "s"}` : "no benchmark run yet",
+      hidden ?? (lb?.medianCreateMs ? `${lb.medianCreateMs.toLocaleString("en-US")} ms` : "not measured"),
+      hidden ? "see the note below" : lb ? `median, ${reports.length} location${reports.length === 1 ? "" : "s"}` : "no benchmark run yet",
     ],
-    ["Succeeded", lb ? `${Math.round(lb.successRate * 100)}%` : "not measured", lb ? "of benchmark sandboxes" : "no benchmark run yet"],
+    [
+      "Succeeded",
+      hidden ?? (lb ? `${Math.round(lb.successRate * 100)}%` : "not measured"),
+      hidden ? "see the note below" : lb ? "of benchmark sandboxes" : "no benchmark run yet",
+    ],
     [
       "Size you get",
-      cost?.delivered ? `${cost.delivered.vcpu} vCPU / ${cost.delivered.memoryGb} GB` : "not measured",
-      cost?.delivered ? `asked for ${cost.requested.vcpu} vCPU / ${cost.requested.memoryGb} GB` : "no cost run yet",
+      hidden ?? (cost?.delivered ? `${cost.delivered.vcpu} vCPU / ${cost.delivered.memoryGb} GB` : "not measured"),
+      hidden ? "see the note below" : cost?.delivered ? `asked for ${cost.requested.vcpu} vCPU / ${cost.requested.memoryGb} GB` : "no cost run yet",
     ],
     [
       "Billed vs list price",
-      billed ? `${Math.round((billed.usd / billed.list) * 100)}%` : cost?.error ? "run failed" : noBillingApi ? "no billing API" : "not measured",
-      billed
+      hidden ?? (billed ? `${Math.round((billed.usd / billed.list) * 100)}%` : cost?.error ? "run failed" : noBillingApi ? "no billing API" : "not measured"),
+      hidden
+        ? "see the note below"
+        : billed
         ? `$${billed.usd.toFixed(4)} billed, $${billed.list.toFixed(4)} at list, ${cost!.date.slice(0, 10)}${credit(cost!.by)}`
         : cost
           ? cost.date.slice(0, 10)
@@ -70,8 +77,8 @@ await sbx.kill();`;
   ];
   const help = [
     ...(p.live.status !== "passed" ? [`npx ${NPM} check --provider ${p.id} --save --by YOUR_GITHUB_USERNAME`] : []),
-    ...(!lb ? [`npx ${NPM} bench --provider ${p.id} --runs 5 --share --label "your city or cloud region" --by YOUR_GITHUB_USERNAME`] : []),
-    ...(!billed && !noBillingApi ? [`npx ${NPM} cost run --provider ${p.id} --minutes 10 --by YOUR_GITHUB_USERNAME`] : []),
+    ...(!lb && !hidden ? [`npx ${NPM} bench --provider ${p.id} --runs 5 --share --label "your city or cloud region" --by YOUR_GITHUB_USERNAME`] : []),
+    ...(!billed && !noBillingApi && !hidden ? [`npx ${NPM} cost run --provider ${p.id} --minutes 10 --by YOUR_GITHUB_USERNAME`] : []),
   ];
 
   return (
@@ -178,6 +185,16 @@ await sbx.kill();`;
               </div>
             ))}
           </dl>
+          {p.noBenchmarks && (
+            <p className="mt-4 max-w-2xl text-[13px] leading-6 text-ink-2">
+              Speed, size and billing results for {p.name} aren&apos;t published here:{" "}
+              <a href={p.noBenchmarks.source} className="underline decoration-line-2 underline-offset-2 hover:text-ink">
+                {p.noBenchmarks.clause}
+              </a>
+              . Its list price above comes from its public pricing page, and the router works with it like any other provider; run{" "}
+              <code className="font-mono text-[12px]">sandboxrouter bench --provider {p.id}</code> on your own account to see its numbers.
+            </p>
+          )}
           {help.length > 0 && (
             <div className="mt-6 border-l-2 border-accent pl-4">
               <h3 className="text-[15px] text-ink">Help verify {p.name}</h3>

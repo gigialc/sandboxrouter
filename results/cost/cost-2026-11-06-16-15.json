@@ -82,29 +82,6 @@
         "source": "no billing HTTP API: `openscale balance` before and after, or the dashboard",
         "at": "2026-11-06T16:18:50.106Z"
       }
-    },
-    {
-      "provider": "blaxel",
-      "requested": {
-        "vcpu": 2,
-        "memoryGb": 4
-      },
-      "listUsdHour": 0.1656,
-      "startedAt": "2026-11-06T16:05:42.703Z",
-      "sandboxId": "d291719b-5165-4ea8-ae26-98eb36352b78",
-      "delivered": {
-        "vcpu": 2,
-        "memoryMb": 3938
-      },
-      "deliveredUsdHour": 0.1656,
-      "endedAt": "2026-11-06T16:15:49.706Z",
-      "seconds": 607,
-      "predictedUsd": 0.027922,
-      "bill": {
-        "usd": 0.001426,
-        "source": "blaxel /metrics cost (USD)",
-        "at": "2026-11-06T16:18:50.106Z"
-      }
     }
   ]
 }
