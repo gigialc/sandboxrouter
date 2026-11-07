@@ -4,7 +4,11 @@ All notable changes. Versions follow [semver](https://semver.org/); while the ve
 
 ## 0.3.2 (2026-11-07)
 
-0.3.1 on npm was built before these changes were merged, so its CLI lacks `--by`; 0.3.2 is the same code as main.
+0.3.1 on npm was built before #21 and #22 were merged, so its CLI lacks `--by` and bad keys still fell back; 0.3.2 has both.
+
+### Fixed
+- Fallback stopped on a setup error only when the adapter attached an HTTP status itself, so a bad key on E2B, Daytona, Vercel, Modal, Blaxel or AWS (AgentCore, Lambda) quietly moved the work to the next provider. The router now reads the status the way each SDK reports it (`statusCode`, `status_code`, `response.status`, AWS `$metadata`, Modal's gRPC codes, E2B's `AuthenticationError` and AWS's `CredentialsProviderError` by name, or a `cause`), checked against each live API with a bad key.
+- A provider SDK that isn't installed (`needs the "…" package: npm i …`) is a setup error too (new `SetupError`): the router stops and says what to install instead of falling back. `fallback: "any"` still falls back on everything.
 
 ### Added
 - `--by GITHUB_USER` on `check --save`, `bench --share` and `cost run` puts the contributor's GitHub username on the result file, so the website can credit it.
@@ -16,8 +20,6 @@ All notable changes. Versions follow [semver](https://semver.org/); while the ve
 ### Fixed
 - A `create()` that names no size skipped E2B, Daytona and OpenScale, whose default images have a fixed size smaller than 2 vCPU / 4 GB. With only one of those keys set, the quickstart failed with "no provider can take this sandbox". With no size asked for, those providers now take the sandbox at their default image's size; only a `vcpu` or `memoryGb` you name can be too big for it.
 - The error when no provider can take a sandbox leads with what to fix. With no keys set: "no provider keys found", and where to find the variables. With keys set: only the reasons the providers you have keys for were skipped, plus how many have no key, and for a provider skipped for its default image's size, how to use it anyway. A provider you name that has no key says which variables to set.
-- Fallback stopped on a setup error only when the adapter attached an HTTP status itself, so a bad key on E2B, Daytona, Vercel, Modal, Blaxel or AWS (AgentCore, Lambda) quietly moved the work to the next provider. The router now reads the status the way each SDK reports it (`statusCode`, `status_code`, `response.status`, AWS `$metadata`, Modal's gRPC codes, E2B's `AuthenticationError` and AWS's `CredentialsProviderError` by name, or a `cause`), checked against each live API with a bad key.
-- A provider SDK that isn't installed (`needs the "…" package: npm i …`) is a setup error too (new `SetupError`): the router stops and says what to install instead of falling back. `fallback: "any"` still falls back on everything.
 
 ### Changed
 - README, docs and website examples call `router.create()` with no size (`sr.create()` in Python, `{}` over HTTP), so they work with any one provider's key. The README and docs say what size you get.
