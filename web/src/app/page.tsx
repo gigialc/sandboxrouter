@@ -8,7 +8,7 @@ import { NPM, NPM_URL, REPO, REPO_PUBLIC, site } from "@/lib/site";
 const TS = `import { Router } from "${NPM}";
 
 const router = new Router();      // uses whichever provider keys you've set
-const sbx = await router.create({ vcpu: 2, memoryGb: 4 });
+const sbx = await router.create();
 
 const r = await sbx.exec("python3 -c 'print(6*7)'");
 console.log(r.stdout, sbx.provider);
@@ -17,12 +17,12 @@ await sbx.kill();`;
 const PY = `from sandboxrouter import Client
 
 sr = Client("http://127.0.0.1:8787", token="...")
-with sr.create(vcpu=2, memory_gb=4) as sbx:
+with sr.create() as sbx:
     print(sbx.exec("python3 -c 'print(6*7)'").stdout, sbx.provider)`;
 
 const HTTP = `curl localhost:8787/v1/sandboxes \\
   -H "Authorization: Bearer $SANDBOXROUTER_TOKEN" \\
-  -d '{"vcpu": 2, "memoryGb": 4}'`;
+  -d '{}'`;
 
 const RULES = [
   ["Cheapest first", "With no other instruction, a sandbox goes to the lowest list price for its size among the providers you have keys for. Ties go alphabetically. No provider pays for placement."],

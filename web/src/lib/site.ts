@@ -115,7 +115,7 @@ export function usd(n: number) {
  */
 export function fixedPrice(p: SiteProvider, shape: Shape): null | { usd: number; size: string } {
   const unfit = p.prices[shape].unfit;
-  if (!unfit || !p.defaultSize || !unfit.startsWith("default size")) return null;
+  if (!unfit || !p.defaultSize || !unfit.startsWith("default image")) return null;
   return { usd: p.prices[shape].usd, size: `${p.defaultSize.vcpu} vCPU · ${p.defaultSize.memoryGb} GB` };
 }
 

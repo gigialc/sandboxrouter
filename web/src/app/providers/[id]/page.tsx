@@ -27,7 +27,7 @@ export default async function ProviderPage({ params }: PageProps<"/providers/[id
   const code = `import { Router } from "${NPM}";
 
 const router = new Router();
-const sbx = await router.create({ vcpu: 2, memoryGb: 4 }, { provider: "${p.id}" });
+const sbx = await router.create({}, { provider: "${p.id}" });
 await sbx.exec("uname -a", { onStdout: (c) => process.stdout.write(c) });
 await sbx.kill();`;
   const caps = [...p.capabilities, ...(p.computers.length ? ["computers"] : [])];

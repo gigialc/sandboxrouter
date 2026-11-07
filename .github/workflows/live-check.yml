@@ -1,5 +1,5 @@
 name: live-check
-# Nightly: run the 13-step real-account check on every provider that has keys in this repo's
+# Nightly: run the 14-step real-account check on every provider that has keys in this repo's
 # secrets (npm run secrets:push uploads them), save the results, and kill anything left behind.
 # Providers without keys are skipped, so with no secrets this only checks Docker on the runner.
 on:
