@@ -1,7 +1,7 @@
 // Generates web/src/data/site.json from the library itself, so the website can't drift from the code.
 // Run from the repo root: node --import tsx scripts/site-data.ts
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
-import { CATALOG, hourlyCost, planLabel, unfit } from "../src/catalog.js";
+import { benchmarksPublishable, CATALOG, hourlyCost, planLabel, unfit } from "../src/catalog.js";
 import { aggregate, loadReports } from "../src/leaderboard.js";
 import { computerCatalog } from "../src/computers.js";
 import { CHECK_STEPS } from "../src/check.js";
@@ -18,7 +18,8 @@ const SHAPES = [
 ];
 
 const pkg = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
-const reports = loadReports("results");
+// Providers whose terms forbid publishing benchmarks are dropped from every report before anything is computed.
+const reports = loadReports("results").map((r) => ({ ...r, rows: r.rows.filter((x) => benchmarksPublishable(x.provider)) }));
 const rows = new Map(conformanceTable().map((r) => [r.provider, r]));
 const conformance = new Map([...rows].map(([id, r]) => [id, r.run]));
 const names = new Map(CATALOG.map((c) => [c.id, c.name]));
@@ -29,7 +30,7 @@ const costRuns = (existsSync(COST_DIR) ? readdirSync(COST_DIR).filter((f) => f.e
   .map((f) => JSON.parse(readFileSync(`${COST_DIR}/${f}`, "utf8")) as CostRun)
   .sort((a, b) => b.date.localeCompare(a.date));
 const costRows = costRuns.flatMap((run) =>
-  run.entries.map((e) => ({
+  run.entries.filter((e) => benchmarksPublishable(e.provider)).map((e) => ({
     provider: e.provider,
     name: names.get(e.provider) ?? e.provider,
     date: run.date,
@@ -63,6 +64,7 @@ const data = {
     access: c.access ?? null,
     billing: c.billing,
     plan: c.plan ?? null,
+    noBenchmarks: c.noBenchmarks ?? null,
     planLabel: c.local ? "none" : planLabel(c.id),
     defaultSize: c.defaultSize ? { vcpu: c.defaultSize.vcpu, memoryGb: c.defaultSize.memoryGb } : null,
     check: conformance.get(c.id) ?? null,

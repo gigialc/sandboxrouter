@@ -1,6 +1,6 @@
 {
   "version": "0.3.2",
-  "generatedAt": "2026-11-07T21:12:25.425Z",
+  "generatedAt": "2026-11-07T23:00:30.617Z",
   "shapes": [
     "1x2",
     "2x4",
@@ -38,6 +38,7 @@
       "access": null,
       "billing": "allocated",
       "plan": null,
+      "noBenchmarks": null,
       "planLabel": "none",
       "defaultSize": null,
       "check": null,
@@ -100,6 +101,7 @@
       "access": null,
       "billing": "allocated",
       "plan": null,
+      "noBenchmarks": null,
       "planLabel": "none",
       "defaultSize": null,
       "check": null,
@@ -168,6 +170,7 @@
       "access": null,
       "billing": "active-cpu",
       "plan": null,
+      "noBenchmarks": null,
       "planLabel": "none",
       "defaultSize": null,
       "check": null,
@@ -239,6 +242,7 @@
       "access": null,
       "billing": "allocated",
       "plan": null,
+      "noBenchmarks": null,
       "planLabel": "none",
       "defaultSize": null,
       "check": null,
@@ -306,6 +310,7 @@
       "access": null,
       "billing": "allocated",
       "plan": null,
+      "noBenchmarks": null,
       "planLabel": "none",
       "defaultSize": null,
       "check": null,
@@ -374,6 +379,7 @@
         "note": "Developer plan; no free plan",
         "checked": "2026-11-06"
       },
+      "noBenchmarks": null,
       "planLabel": "$20/mo (credited)",
       "defaultSize": null,
       "check": null,
@@ -437,6 +443,11 @@
       "access": null,
       "billing": "allocated",
       "plan": null,
+      "noBenchmarks": {
+        "clause": "Blaxel's terms (§2.6(f)) don't allow publishing benchmarks or performance information about it",
+        "source": "https://blaxel.ai/legal/terms/2025-12-10-blaxel-terms-and-conditions.pdf",
+        "checked": "2026-11-07"
+      },
       "planLabel": "none",
       "defaultSize": null,
       "check": {
@@ -532,6 +543,7 @@
         "note": "plan paid back as VM time; 7-day trial needs a card",
         "checked": "2026-11-06"
       },
+      "noBenchmarks": null,
       "planLabel": "$20/mo (credited)",
       "defaultSize": null,
       "check": null,
@@ -598,6 +610,7 @@
         "note": "Workers Paid; includes usage allowances, not credit",
         "checked": "2026-11-06"
       },
+      "noBenchmarks": null,
       "planLabel": "$5/mo",
       "defaultSize": null,
       "check": null,
@@ -661,6 +674,7 @@
       "access": null,
       "billing": "allocated",
       "plan": null,
+      "noBenchmarks": null,
       "planLabel": "none",
       "defaultSize": null,
       "check": null,
@@ -724,6 +738,7 @@
       "access": null,
       "billing": "allocated",
       "plan": null,
+      "noBenchmarks": null,
       "planLabel": "none",
       "defaultSize": {
         "vcpu": 1,
@@ -820,6 +835,7 @@
       },
       "billing": "allocated",
       "plan": null,
+      "noBenchmarks": null,
       "planLabel": "none",
       "defaultSize": null,
       "check": null,
@@ -887,6 +903,7 @@
         "note": "the free Deno Deploy plan has no sandboxes; Pro includes allowances, not credit",
         "checked": "2026-11-06"
       },
+      "noBenchmarks": null,
       "planLabel": "$20/mo",
       "defaultSize": null,
       "check": null,
@@ -946,6 +963,7 @@
       "access": null,
       "billing": "allocated",
       "plan": null,
+      "noBenchmarks": null,
       "planLabel": "none",
       "defaultSize": null,
       "check": {
@@ -1034,6 +1052,7 @@
       "access": null,
       "billing": "allocated",
       "plan": null,
+      "noBenchmarks": null,
       "planLabel": "none",
       "defaultSize": {
         "vcpu": 2,
@@ -1131,6 +1150,7 @@
         "note": "Personal plan; VMs are metered on top; 7-day trial",
         "checked": "2026-11-06"
       },
+      "noBenchmarks": null,
       "planLabel": "$15/mo",
       "defaultSize": null,
       "check": null,
@@ -1191,6 +1211,7 @@
       "access": null,
       "billing": "active-cpu",
       "plan": null,
+      "noBenchmarks": null,
       "planLabel": "none",
       "defaultSize": null,
       "check": null,
@@ -1254,6 +1275,7 @@
       "access": null,
       "billing": "allocated",
       "plan": null,
+      "noBenchmarks": null,
       "planLabel": "none",
       "defaultSize": null,
       "check": null,
@@ -1317,6 +1339,7 @@
       "access": null,
       "billing": "allocated",
       "plan": null,
+      "noBenchmarks": null,
       "planLabel": "none",
       "defaultSize": null,
       "check": null,
@@ -1384,6 +1407,7 @@
       },
       "billing": "allocated",
       "plan": null,
+      "noBenchmarks": null,
       "planLabel": "none",
       "defaultSize": null,
       "check": null,
@@ -1455,6 +1479,7 @@
         "note": "sandboxes need a paid plan; Pro includes $10 of compute",
         "checked": "2026-11-06"
       },
+      "noBenchmarks": null,
       "planLabel": "$29/mo",
       "defaultSize": null,
       "check": null,
@@ -1522,6 +1547,7 @@
       },
       "billing": "allocated",
       "plan": null,
+      "noBenchmarks": null,
       "planLabel": "none",
       "defaultSize": null,
       "check": null,
@@ -1590,6 +1616,7 @@
         "note": "Starter plan; no free tier; 7-day trial needs a card",
         "checked": "2026-11-06"
       },
+      "noBenchmarks": null,
       "planLabel": "$20/mo (credited)",
       "defaultSize": null,
       "check": {
@@ -1683,6 +1710,7 @@
       "access": null,
       "billing": "active-cpu",
       "plan": null,
+      "noBenchmarks": null,
       "planLabel": "none",
       "defaultSize": null,
       "check": null,
@@ -1746,6 +1774,7 @@
       "access": null,
       "billing": "allocated",
       "plan": null,
+      "noBenchmarks": null,
       "planLabel": "none",
       "defaultSize": null,
       "check": null,
@@ -1809,6 +1838,7 @@
       "access": null,
       "billing": "allocated",
       "plan": null,
+      "noBenchmarks": null,
       "planLabel": "none",
       "defaultSize": null,
       "check": null,
@@ -1872,6 +1902,7 @@
       "access": null,
       "billing": "allocated",
       "plan": null,
+      "noBenchmarks": null,
       "planLabel": "none",
       "defaultSize": null,
       "check": null,
@@ -1935,6 +1966,7 @@
       "access": null,
       "billing": "allocated",
       "plan": null,
+      "noBenchmarks": null,
       "planLabel": "none",
       "defaultSize": {
         "vcpu": 2,
@@ -2026,6 +2058,7 @@
       "access": null,
       "billing": "allocated",
       "plan": null,
+      "noBenchmarks": null,
       "planLabel": "none",
       "defaultSize": null,
       "check": null,
@@ -2088,6 +2121,7 @@
       "access": null,
       "billing": "active-cpu",
       "plan": null,
+      "noBenchmarks": null,
       "planLabel": "none",
       "defaultSize": null,
       "check": {
@@ -2182,6 +2216,7 @@
         "note": "Developer plan; the page offers a free start but doesn't say what it includes",
         "checked": "2026-11-06"
       },
+      "noBenchmarks": null,
       "planLabel": "maybe $20/mo (credited)",
       "defaultSize": null,
       "check": null,
@@ -2245,6 +2280,7 @@
       "access": null,
       "billing": "active-cpu",
       "plan": null,
+      "noBenchmarks": null,
       "planLabel": "none",
       "defaultSize": null,
       "check": null,
@@ -2305,6 +2341,7 @@
       "access": null,
       "billing": "active-cpu",
       "plan": null,
+      "noBenchmarks": null,
       "planLabel": "none",
       "defaultSize": null,
       "check": null,
@@ -2370,6 +2407,7 @@
       "access": null,
       "billing": "active-cpu",
       "plan": null,
+      "noBenchmarks": null,
       "planLabel": "none",
       "defaultSize": null,
       "check": null,
@@ -2600,19 +2638,6 @@
       }
     },
     {
-      "provider": "blaxel",
-      "name": "Blaxel",
-      "submissions": 1,
-      "medianCreateMs": 1090,
-      "medianExecMs": 247,
-      "successRate": 1,
-      "hourlyUsd": 0.1656,
-      "size": {
-        "vcpu": 2,
-        "memoryGb": 4
-      }
-    },
-    {
       "provider": "maritime",
       "name": "Maritime",
       "submissions": 1,
@@ -2733,28 +2758,6 @@
       "billedSeconds": null,
       "billSource": "no billing HTTP API: `openscale balance` before and after, or the dashboard",
       "error": null
-    },
-    {
-      "provider": "blaxel",
-      "name": "Blaxel",
-      "date": "2026-11-06T16:15:49.706Z",
-      "minutes": 10,
-      "load": true,
-      "by": null,
-      "requested": {
-        "vcpu": 2,
-        "memoryGb": 4
-      },
-      "delivered": {
-        "vcpu": 2,
-        "memoryGb": 3.8
-      },
-      "seconds": 607,
-      "predictedUsd": 0.027922,
-      "billedUsd": 0.001426,
-      "billedSeconds": null,
-      "billSource": "blaxel /metrics cost (USD)",
-      "error": null
     }
   ],
   "submissions": [
@@ -2764,12 +2767,11 @@
       "by": null,
       "platform": "darwin-arm64",
       "runs": 5,
-      "providers": 5,
+      "providers": 4,
       "ids": [
         "e2b",
         "openscale",
         "daytona",
-        "blaxel",
         "maritime"
       ]
     }

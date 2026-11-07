@@ -2,6 +2,11 @@
 
 All notable changes. Versions follow [semver](https://semver.org/); while the version is 0.x, a minor bump can change the API.
 
+## Unreleased
+
+### Changed
+- Providers whose terms forbid publishing benchmarks (`noBenchmarks` in the catalog, `benchmarksPublishable()`; today Blaxel, under §2.6(f) of its terms) are left out of everything meant to be published: `bench --share` and `cost run` drop them from the files they write, `check --save` keeps their pass/fail but no timings, `results:check` refuses files with their numbers, and the website shows their list price and real-account check but no speed, size or bill. Blaxel's earlier numbers were removed from `results/`.
+
 ## 0.3.2 (2026-11-07)
 
 0.3.1 on npm was built before #21 and #22 were merged, so its CLI lacks `--by` and bad keys still fell back; 0.3.2 has both.

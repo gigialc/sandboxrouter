@@ -6,9 +6,9 @@ import { bench, benchMarkdown } from "./bench.js";
 import { costMarkdown, costRun, settle, type CostRun } from "./cost.js";
 import { checkProvider } from "./check.js";
 import { gc, listOpen } from "./gc.js";
-import { contributor } from "./results.js";
+import { contributor, publishableCheck } from "./results.js";
 import { loadReports, makeReport, renderLeaderboard } from "./leaderboard.js";
-import { CATALOG, DEFAULT_MEMORY_GB, DEFAULT_VCPU, accessLabel, hourlyCost, listingOrder, planLabel, unfit } from "./catalog.js";
+import { CATALOG, DEFAULT_MEMORY_GB, DEFAULT_VCPU, accessLabel, benchmarksPublishable, hourlyCost, listingOrder, planLabel, unfit } from "./catalog.js";
 import { Router } from "./router.js";
 import { createApp } from "./server.js";
 import { RouterError, type Capability, type ProviderId, type RouteOptions, type SandboxSpec, type Strategy } from "./types.js";
@@ -215,7 +215,7 @@ async function main() {
       reports.push(report);
       if (saveDir) {
         mkdirSync(saveDir, { recursive: true });
-        const saved = { tool: "sandboxrouter-check", version, date: new Date().toISOString(), platform: `${platform()}-${arch()}`, ...(by ? { by } : {}), ...report };
+        const saved = publishableCheck({ tool: "sandboxrouter-check", version, date: new Date().toISOString(), platform: `${platform()}-${arch()}`, ...(by ? { by } : {}), ...report });
         writeFileSync(`${saveDir}/${p}.json`, JSON.stringify(saved, null, 2) + "\n");
       }
     }
@@ -266,6 +266,8 @@ async function main() {
     if (values.share) {
       const version = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8")).version;
       const report = makeReport(rows, { version, runs: rows[0].runs, spec, label: values.label, by });
+      const left = rows.filter((r) => !benchmarksPublishable(r.provider)).map((r) => r.provider);
+      if (left.length) console.log(`\nleft out of the shared report: ${left.join(", ")} (their terms don't allow publishing benchmarks)`);
       const file = values.out ?? `sandboxrouter-bench-${report.date.slice(0, 10)}-${Math.random().toString(36).slice(2, 8)}.json`;
       writeFileSync(file, JSON.stringify(report, null, 2) + "\n");
       console.log(`\nwrote ${file}. Add it to results/ in a PR to github.com/gigialc/sandboxrouter to put it on the leaderboard.`);
@@ -290,7 +292,10 @@ async function main() {
       });
       const file = values.out ?? `results/cost/cost-${run.date.slice(0, 16).replace(/[:T]/g, "-")}.json`;
       mkdirSync(file.replace(/\/[^/]*$/, "") || ".", { recursive: true });
-      writeFileSync(file, JSON.stringify(await settle(run), null, 2) + "\n");
+      const settled = await settle(run);
+      const left = settled.entries.filter((e) => !benchmarksPublishable(e.provider)).map((e) => e.provider);
+      writeFileSync(file, JSON.stringify({ ...settled, entries: settled.entries.filter((e) => benchmarksPublishable(e.provider)) }, null, 2) + "\n");
+      if (left.length) console.log(`left out of ${file}: ${left.join(", ")} (their terms don't allow publishing benchmarks; the table above is the only copy)`);
       console.log(costMarkdown(run));
       console.log(`\nwrote ${file}. Bills post late on some providers: run "sandboxrouter cost settle ${file}" again later.`);
       return;

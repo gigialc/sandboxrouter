@@ -41,6 +41,18 @@ export interface ProviderInfo {
    * `unclear`: the pricing page doesn't say whether a free tier can use the API.
    */
   plan?: { usdMonth: number; credited: boolean; unclear?: boolean; note: string; checked: string };
+  /**
+   * Set when the provider's terms forbid publishing benchmarks or performance information about it.
+   * Its cold starts, success rate, measured size and real bills are then left out of shared reports,
+   * results/ and the website, and saved checks keep pass/fail without timings. List prices (public
+   * pricing pages) and the adapter itself are unaffected.
+   */
+  noBenchmarks?: { clause: string; source: string; checked: string };
+}
+
+/** False when the provider's terms forbid publishing its benchmarks (see `noBenchmarks`). */
+export function benchmarksPublishable(id: string): boolean {
+  return !CATALOG.find((c) => c.id === id)?.noBenchmarks;
 }
 
 /** Short label for a gated provider's sign-up status, or null when anyone can sign up. */
@@ -214,6 +226,11 @@ const ENTRIES: Omit<ProviderInfo, "billing" | "plan">[] = [
     limits: { maxVcpu: 8, maxMemoryGb: 16 },
     credentials: [["BL_API_KEY", "BL_WORKSPACE"]],
     docs: "https://docs.blaxel.ai/Sandboxes/Overview",
+    noBenchmarks: {
+      clause: "Blaxel's terms (§2.6(f)) don't allow publishing benchmarks or performance information about it",
+      source: "https://blaxel.ai/legal/terms/2025-12-10-blaxel-terms-and-conditions.pdf",
+      checked: "2026-11-07",
+    },
   },
   {
     id: "tensorlake",

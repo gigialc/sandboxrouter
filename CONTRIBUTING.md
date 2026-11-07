@@ -49,6 +49,8 @@ Then open a PR with the files, and run `npm run results:check` first. CI runs th
 
 Prices are the exception: they always come from the provider's public pricing page (see below), never from a result file.
 
+Some providers' terms forbid publishing benchmarks about them (`noBenchmarks` in [`src/catalog.ts`](src/catalog.ts); today Blaxel). `bench --share` and `cost run` leave them out of the files they write, `check --save` keeps their pass/fail without timings, and CI refuses result files that include their numbers. Run them on your own account all you like; just don't publish the numbers.
+
 Maintainers: `npm run secrets:push -- --init` writes a gitignored `.env.providers` with every key name; fill it in and run `npm run secrets:push` to load the keys into the repo's Actions secrets for the nightly tests.
 
 ## Fixing a price

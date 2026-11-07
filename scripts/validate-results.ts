@@ -18,7 +18,14 @@ const changed = ref
       })
   : undefined;
 
-const issues = validateResults("results", { changed });
+const previous = (path: string) => {
+  try {
+    return execFileSync("git", ["show", `${ref}:${path}`], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] });
+  } catch {
+    return undefined;
+  }
+};
+const issues = validateResults("results", { changed, previous: ref ? previous : undefined });
 if (!issues.length) {
   console.log(`results/: every file checks out${changed ? ` (${changed.length} changed since ${ref})` : ""}`);
 } else {

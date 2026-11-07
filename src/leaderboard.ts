@@ -1,6 +1,6 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { CATALOG, fittingSpec, hourlyCost } from "./catalog.js";
+import { benchmarksPublishable, CATALOG, fittingSpec, hourlyCost } from "./catalog.js";
 import { median } from "./bench-store.js";
 import type { BenchRow } from "./bench.js";
 import type { ProviderId, SandboxSpec } from "./types.js";
@@ -37,7 +37,8 @@ export function makeReport(rows: BenchRow[], opts: { version: string; runs: numb
     spec: { vcpu: opts.spec.vcpu, memoryGb: opts.spec.memoryGb },
     node: process.version,
     platform: `${process.platform}-${process.arch}`,
-    rows: rows.map(({ lastError: _drop, ...r }) => r),
+    // Providers whose terms forbid publishing benchmarks stay out of anything meant to be shared.
+    rows: rows.filter((r) => benchmarksPublishable(r.provider)).map(({ lastError: _drop, ...r }) => r),
   };
 }
 

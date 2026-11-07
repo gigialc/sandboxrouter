@@ -135,7 +135,7 @@ export default function BenchmarksPage() {
           </div>
           <p className="mt-4 max-w-3xl text-[12px] leading-5 text-muted">
             Billed and list price differ for reasons a price table can&apos;t show: some providers bill only while a request is
-            open (Blaxel), some add a one-off creation fee that dominates a short run (Sail, on its free plan), and an account on a
+            open, some add a one-off creation fee that dominates a short run (Sail, on its free plan), and an account on a
             plan with included usage can be billed nothing (Maritime). &ldquo;Got&rdquo; is what the sandbox itself reports (nproc,
             MemTotal). Run <code className="font-mono">sandboxrouter cost run</code> to measure your own.
           </p>

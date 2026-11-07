@@ -1,6 +1,6 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
-import { CATALOG } from "./catalog.js";
+import { benchmarksPublishable, CATALOG } from "./catalog.js";
 import { CHECK_STEPS } from "./check.js";
 
 /**
@@ -30,6 +30,23 @@ export function contributor(by?: string): string | undefined {
 }
 
 const IDS = new Set<string>(CATALOG.map((c) => c.id));
+/** A timing in a check step's note, e.g. "first output after 100 ms" or "threw after 3.0 s". */
+const TIMING = /\d[\d,.]*\s?(?:ms|s|sec|seconds?)\b/i;
+
+/**
+ * A saved check as it may be published: for a provider whose terms forbid publishing benchmarks,
+ * pass/fail stays and every timing goes (the per-step `ms`, and notes that quote a duration).
+ */
+export function publishableCheck<T extends { provider: string; results: { ms?: number; detail?: string }[] }>(saved: T): T {
+  if (benchmarksPublishable(saved.provider)) return saved;
+  return {
+    ...saved,
+    results: saved.results.map(({ ms: _ms, detail, ...r }) => ({ ...r, ...(detail && !TIMING.test(detail) ? { detail } : {}) })),
+  };
+}
+
+const noBench = (id: unknown) => typeof id === "string" && IDS.has(id) && !benchmarksPublishable(id);
+const NO_BENCH = "its terms don't allow publishing benchmarks (noBenchmarks in src/catalog.ts); leave it out of shared results";
 const STEPS = new Set<string>(CHECK_STEPS);
 const MAX_MS = 15 * 60_000;
 
@@ -98,6 +115,7 @@ export function validateResult(j: any, now = Date.now()): string[] {
     if (!Array.isArray(j.rows) || !j.rows.length) out.push("rows is empty");
     for (const r of Array.isArray(j.rows) ? j.rows : []) {
       provider(r?.provider, "row provider");
+      if (noBench(r?.provider)) out.push(`${r.provider}: ${NO_BENCH}`);
       if (!isNum(r?.runs, 1, 1000)) out.push(`${r?.provider}: runs is not a positive number`);
       if (!isNum(r?.failures, 0, r?.runs ?? 0)) out.push(`${r?.provider}: failures must be between 0 and runs`);
       for (const k of ["medianCreateMs", "medianExecMs"] as const) {
@@ -114,7 +132,10 @@ export function validateResult(j: any, now = Date.now()): string[] {
     for (const r of Array.isArray(j.results) ? j.results : []) {
       if (!STEPS.has(r?.step)) out.push(`unknown check step "${r?.step}"`);
       if (!["pass", "fail", "skip", "info"].includes(r?.status)) out.push(`${r?.step}: unknown status "${r?.status}"`);
-      if (!isNum(r?.ms, 0, MAX_MS)) out.push(`${r?.step}: ms must be between 0 and 15 min`);
+      if (r?.ms !== undefined && !isNum(r.ms, 0, MAX_MS)) out.push(`${r?.step}: ms must be between 0 and 15 min`);
+      if (noBench(j.provider) && (r?.ms !== undefined || (typeof r?.detail === "string" && TIMING.test(r.detail)))) {
+        out.push(`${r?.step}: has timings, but ${j.provider}'s terms don't allow publishing performance information; save with check --save`);
+      }
     }
   } else if (j.tool === "sandboxrouter-cost") {
     add(checkDate(j.date, now));
@@ -123,6 +144,7 @@ export function validateResult(j: any, now = Date.now()): string[] {
     if (!Array.isArray(j.entries) || !j.entries.length) out.push("entries is empty");
     for (const e of Array.isArray(j.entries) ? j.entries : []) {
       provider(e?.provider, "entry provider");
+      if (noBench(e?.provider)) out.push(`${e.provider}: ${NO_BENCH}`);
       if (e?.seconds !== undefined && !isNum(e.seconds, 0, 2 * 24 * 3600)) out.push(`${e?.provider}: seconds is out of range`);
       if (e?.predictedUsd !== undefined && !isNum(e.predictedUsd, 0, 1000)) out.push(`${e?.provider}: predictedUsd is out of range`);
       if (e?.bill?.usd !== undefined && !isNum(e.bill.usd, 0, 1000)) out.push(`${e?.provider}: bill.usd is out of range`);
@@ -167,7 +189,10 @@ function walk(dir: string): string[] {
  * Saved checks (one per provider, replaced by each new run) and cost runs (`cost settle` fills in the
  * bill later) may change.
  */
-export function validateResults(dir = "results", opts: { changed?: { status: string; path: string }[]; now?: number } = {}): Issue[] {
+export function validateResults(
+  dir = "results",
+  opts: { changed?: { status: string; path: string }[]; previous?: (path: string) => string | undefined; now?: number } = {},
+): Issue[] {
   const issues: Issue[] = [];
   for (const path of walk(dir)) {
     const rel = relative(".", path);
@@ -192,8 +217,29 @@ export function validateResults(dir = "results", opts: { changed?: { status: str
     const p = c.path;
     if (!p.startsWith(`${dir}/`) || NOT_A_SUBMISSION(p.slice(dir.length + 1))) continue;
     if (p.startsWith(`${dir}/conformance/`) || p.startsWith(`${dir}/cost/`)) continue;
-    if (/^[MR]/.test(c.status)) issues.push({ file: p, problem: "edits an existing bench report; add your run as a new file instead" });
+    if (/^[MR]/.test(c.status) && !onlyDropsUnpublishable(opts.previous?.(p), p)) {
+      issues.push({ file: p, problem: "edits an existing bench report; add your run as a new file instead" });
+    }
     if (c.status.startsWith("D")) issues.push({ file: p, problem: "deletes a bench report; reports are only removed by a maintainer" });
   }
   return issues;
+}
+
+/**
+ * True when a bench report's only change is removing rows for providers whose terms forbid publishing
+ * benchmarks: the one edit to someone's report that's allowed, so those numbers can be taken down.
+ */
+function onlyDropsUnpublishable(before: string | undefined, path: string): boolean {
+  if (before === undefined || !existsSync(path)) return false;
+  try {
+    const a = JSON.parse(before);
+    const b = JSON.parse(readFileSync(path, "utf8"));
+    const { rows: ra, ...restA } = a;
+    const { rows: rb, ...restB } = b;
+    if (JSON.stringify(restA) !== JSON.stringify(restB)) return false;
+    const kept = (ra as { provider: string }[]).filter((r) => benchmarksPublishable(r.provider));
+    return JSON.stringify(kept) === JSON.stringify(rb);
+  } catch {
+    return false;
+  }
 }
