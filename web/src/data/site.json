@@ -1,6 +1,6 @@
 {
   "version": "0.3.2",
-  "generatedAt": "2026-11-07T13:16:51.432Z",
+  "generatedAt": "2026-11-07T21:12:25.425Z",
   "shapes": [
     "1x2",
     "2x4",
@@ -1515,7 +1515,11 @@
         "source": "https://www.langchain.com/pricing",
         "checked": "2026-11-05"
       },
-      "access": null,
+      "access": {
+        "status": "waitlist",
+        "note": "Sandboxes are a private preview: until LangChain enables them for your organization, the API answers \"Sandbox feature is not enabled for this organization\"",
+        "checked": "2026-11-07"
+      },
       "billing": "allocated",
       "plan": null,
       "planLabel": "none",

@@ -79,7 +79,6 @@ How to read it:
 | Blaxel | $0.166 | none | passed (2026-11-07) | Billed on memory only ($0.0000115/GB-s), CPU scales with memory (~2 GB per core) | [pricing](https://blaxel.ai/pricing) |
 | HOPX | $0.166 | none | not run yet | Per second, plus storage; size comes from the template, not the request | [pricing](https://hopx.ai/pricing) |
 | Superserve | $0.166 | maybe $20/mo (credited) | not run yet | Per second active; superserve/base fixed at 2 vCPU / 4 GiB / 8 GiB disk; retained storage $0.000108/GiB-h (shared template plus changed blocks); Developer $20/mo incl. $20, max 4/16 with team templates; recurring Free allowance not published on pricing page | [pricing](https://superserve.ai/pricing) |
-| LangSmith Sandboxes | $0.189 | none | not run yet | Per second; memory must be 2 to 6 GiB per vCPU; storage $0.000123/GiB-h; 8 LSU ($8) of sandbox usage a month included; Developer plan max 10 sandboxes | [pricing](https://www.langchain.com/pricing) |
 | Tensorlake | up to $0.200 | none | not run yet | Bills active CPU (floor 20% of allocation); this is the full-use price; Pro plan is lower | [pricing](https://www.tensorlake.ai/pricing) |
 | Upstash Box | up to $0.200 | none | not run yet | Billed per active CPU core-hour only (memory and idle time free); estimate assumes every core of the box busy; fixed sizes 2/4, 4/8, 8/16 | [pricing](https://upstash.com/pricing/box) |
 | Cloudflare Sandbox | up to $0.216 | $5/mo | not run yet | 10 ms billing on active CPU and allocated instance memory; full-CPU estimate excludes allocated disk ($0.000252/GB-h), Worker and Durable Objects charges; needs Workers Paid ($5/mo) and bridges/cloudflare | [pricing](https://developers.cloudflare.com/containers/platform/pricing/) |
@@ -92,6 +91,7 @@ How to read it:
 | InstaBox (sign-up waitlisted) | $0.017 | none | not run yet | Per second while running on fixed sizes (2/4, 4/8, 8/16); paused or stopped boxes bill only /data beyond the included disk ($0.00011/GiB-h); Pro $20/mo includes $20 credits; free plan: 1 box at 4/8 | [pricing](https://instabox.sh/docs/pricing.md) |
 | Koyeb Sandboxes (not taking new accounts) | $0.058 | $29/mo | not run yet | Per second; fixed Standard instance sizes (1 vCPU + 1 GB = $0.0144/h); sandboxes need a paid plan (Pro $29/mo); public preview | [pricing](https://www.koyeb.com/docs/reference/instances) |
 | Dedalus Machines (sign-up waitlisted) | $0.149 | none | not run yet | Per second while awake; sleeping machines bill storage only (10 GiB included on Hobby, 20 on Pro); Hobby plan max 4 vCPU / 16 GiB; private beta | [pricing](https://docs.dedaluslabs.ai/dcs/dm/pricing) |
+| LangSmith Sandboxes (sign-up waitlisted) | $0.189 | none | not run yet | Per second; memory must be 2 to 6 GiB per vCPU; storage $0.000123/GiB-h; 8 LSU ($8) of sandbox usage a month included; Developer plan max 10 sandboxes | [pricing](https://www.langchain.com/pricing) |
 | OpenScale Sandboxes | skipped (default image is 2 vCPU / 1 GB; a bigger size needs image.openscale) | none | passed (2026-11-07) | Per second on allocated size; no platform fee or minimum; paused = free; size comes from the template (E2B-compatible API); Singapore only; needs a pay-as-you-go key | [pricing](https://openscale.so/sandboxes) |
 | Azure Container Apps dynamic sessions | skipped (max 1 vCPU) | none | not run yet | Flat $0.03 per session-hour (built-in Shell pools), billed per allocated session in 1-hour increments, East US; needs a session pool you create once | [pricing](https://learn.microsoft.com/en-us/azure/container-apps/billing#dynamic-sessions) |
 | Daytona | skipped (default image is 1 vCPU / 1 GB; a bigger size needs image.daytona) | none | passed (2026-11-07) | Per second, plus disk above 5 GiB | [pricing](https://www.daytona.io/pricing) |
@@ -319,7 +319,6 @@ It prints one line per step and exits 1 if any fails. `checkProvider(router, id)
 | Blaxel | 13/13 passed; n/a: pause and resume | 2026-11-07, v0.3.2 |
 | HOPX | not run yet | |
 | Superserve | not run yet | |
-| LangSmith Sandboxes | not run yet | |
 | Tensorlake | not run yet | |
 | Upstash Box | not run yet | |
 | Cloudflare Sandbox | not run yet | |
@@ -332,6 +331,7 @@ It prints one line per step and exits 1 if any fails. `checkProvider(router, id)
 | InstaBox | not run yet | |
 | Koyeb Sandboxes | not run yet | |
 | Dedalus Machines | not run yet | |
+| LangSmith Sandboxes | not run yet | |
 | OpenScale Sandboxes | 14/14 passed | 2026-11-07, v0.3.2 |
 | Azure Container Apps dynamic sessions | not run yet | |
 | Daytona | 14/14 passed | 2026-11-07, v0.3.2 |
