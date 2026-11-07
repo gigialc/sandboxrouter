@@ -16,6 +16,8 @@ export interface BenchReport {
   date: string;
   /** Free text from the submitter, e.g. "us-east-1 c7g.large" or "Berlin, home fiber". */
   label?: string;
+  /** GitHub username of whoever ran it, from `--by`. */
+  by?: string;
   runs: number;
   spec: SandboxSpec;
   node: string;
@@ -23,12 +25,13 @@ export interface BenchReport {
   rows: BenchRow[];
 }
 
-export function makeReport(rows: BenchRow[], opts: { version: string; runs: number; spec: SandboxSpec; label?: string }): BenchReport {
+export function makeReport(rows: BenchRow[], opts: { version: string; runs: number; spec: SandboxSpec; label?: string; by?: string }): BenchReport {
   return {
     tool: "sandboxrouter",
     version: opts.version,
     date: new Date().toISOString(),
     label: opts.label,
+    ...(opts.by ? { by: opts.by } : {}),
     runs: opts.runs,
     // Only the shape matters for comparison; never ship env or metadata.
     spec: { vcpu: opts.spec.vcpu, memoryGb: opts.spec.memoryGb },

@@ -28,6 +28,7 @@ export interface SiteProvider {
   check: null | {
     date: string;
     version: string;
+    by: string | null;
     passed: number;
     failed: { step: string; detail?: string }[];
     skipped: string[];
@@ -54,6 +55,7 @@ export interface CostRow {
   date: string;
   minutes: number;
   load: boolean;
+  by: string | null;
   requested: { vcpu: number; memoryGb: number };
   delivered: null | { vcpu: number; memoryGb: number };
   seconds: number | null;
@@ -87,7 +89,7 @@ export const site = data as unknown as {
   desktops: SiteDesktop[];
   leaderboard: LeaderRow[];
   costRuns: CostRow[];
-  submissions: { date: string; label: string | null; platform: string; runs: number; providers: number }[];
+  submissions: { date: string; label: string | null; by: string | null; platform: string; runs: number; providers: number; ids: string[] }[];
 };
 
 export const REPO = "https://github.com/gigialc/sandboxrouter";

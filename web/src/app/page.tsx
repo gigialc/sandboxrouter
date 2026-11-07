@@ -1,6 +1,7 @@
 import { Button, SectionTitle } from "@/components/chrome";
 import { CodeTabs, InstallChip } from "@/components/code";
 import { ProviderTable } from "@/components/ProviderTable";
+import { Sources } from "@/components/Sources";
 import { DesktopTable } from "@/components/DesktopTable";
 import { NPM, NPM_URL, REPO, REPO_PUBLIC, site } from "@/lib/site";
 
@@ -72,6 +73,9 @@ export default function Home() {
         </SectionTitle>
         <div className="mt-6">
           <ProviderTable />
+        </div>
+        <div className="mt-12">
+          <Sources />
         </div>
       </section>
 

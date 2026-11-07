@@ -28,7 +28,8 @@
     "test:py": "python3 -m unittest discover -s python/tests -v",
     "site:data": "node --import tsx scripts/site-data.ts",
     "price:check": "node --import tsx scripts/price-watch.ts",
-    "secrets:push": "node --import tsx scripts/push-secrets.ts"
+    "secrets:push": "node --import tsx scripts/push-secrets.ts",
+    "results:check": "node --import tsx scripts/validate-results.ts"
   },
   "keywords": [
     "ai-agents",

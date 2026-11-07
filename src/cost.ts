@@ -51,6 +51,8 @@ export interface CostRun {
   date: string;
   minutes: number;
   load: boolean;
+  /** GitHub username of whoever ran it, from `--by`. */
+  by?: string;
   entries: CostEntry[];
 }
 
@@ -67,6 +69,7 @@ export async function costRun(opts: {
   load?: boolean;
   router?: Router;
   version: string;
+  by?: string;
   onProgress?: (msg: string) => void;
 }): Promise<CostRun> {
   const router = opts.router ?? new Router();
@@ -109,7 +112,7 @@ export async function costRun(opts: {
   };
 
   const entries = await Promise.all(opts.providers.map(one));
-  return { tool: "sandboxrouter-cost", version: opts.version, date: new Date().toISOString(), minutes: opts.minutes, load, entries };
+  return { tool: "sandboxrouter-cost", version: opts.version, date: new Date().toISOString(), minutes: opts.minutes, load, ...(opts.by ? { by: opts.by } : {}), entries };
 }
 
 type Reader = (e: CostEntry) => Promise<Omit<Bill, "at">>;

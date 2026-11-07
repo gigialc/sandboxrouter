@@ -49,7 +49,7 @@ export function ProviderTable() {
         <thead>
           <tr className="text-left text-[11px] uppercase tracking-[0.12em] text-muted">
             <th className="py-3 pr-4 font-normal">Provider</th>
-            <th className="py-3 pr-4 font-normal">Per hour</th>
+            <th className="py-3 pr-4 font-normal">List price / hr</th>
             <th className="hidden py-3 pr-4 font-normal sm:table-cell">Plan needed</th>
             {showSpeed && <th className="hidden py-3 pr-4 font-normal sm:table-cell">Cold start</th>}
             <th className="hidden py-3 pr-4 font-normal md:table-cell">Real account</th>
@@ -132,8 +132,8 @@ export function ProviderTable() {
       </table>
       <p className="mt-4 text-[12px] leading-5 text-muted">
         Providers anyone can sign up for come first, cheapest first, ties alphabetical; waitlisted or closed sign-ups follow. The
-        router uses the same price order, but only among providers you have keys for. Prices are each provider&apos;s public rate
-        while running. ≤ means CPU is billed only while busy, so this is the price with every core busy and idle work costs less.
+        router uses the same price order, but only among providers you have keys for. Prices are each provider&apos;s public list
+        price while running, an estimate rather than a bill (where they come from is below). ≤ means CPU is billed only while busy, so this is the price with every core busy and idle work costs less.
         Plan needed is the monthly plan required before the API creates sandboxes (&ldquo;credited&rdquo; = paid back as usage);
         for a small project it can cost more than the usage. Real account shows whether the 14-step check has passed on a real
         account; &ldquo;not yet&rdquo; means the adapter is built from the provider&apos;s docs and tested against mocks only.

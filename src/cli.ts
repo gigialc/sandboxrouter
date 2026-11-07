@@ -6,6 +6,7 @@ import { bench, benchMarkdown } from "./bench.js";
 import { costMarkdown, costRun, settle, type CostRun } from "./cost.js";
 import { checkProvider } from "./check.js";
 import { gc, listOpen } from "./gc.js";
+import { contributor } from "./results.js";
 import { loadReports, makeReport, renderLeaderboard } from "./leaderboard.js";
 import { CATALOG, accessLabel, hourlyCost, listingOrder, planLabel, unfit } from "./catalog.js";
 import { Router } from "./router.js";
@@ -18,15 +19,15 @@ Usage:
   sandboxrouter providers [--vcpu N] [--memory GB]   price table + which keys are set
   sandboxrouter route     [spec flags] [route flags] dry run: the order providers would be tried
   sandboxrouter run "<cmd>" [spec flags] [route flags] [--keep]
-  sandboxrouter check     --provider ID[,ID] | --all [--json] [--save [dir]]
+  sandboxrouter check     --provider ID[,ID] | --all [--json] [--save [dir]] [--by GITHUB_USER]
                           test providers for real: exec, env, UTF-8, streaming, files, timeout, pause,
                           kill; exits 1 if any step fails. --all = every configured provider;
                           --save writes results/conformance/<id>.json for the compatibility table
   sandboxrouter ls        [--json]                       sandboxes this machine started that weren't killed
   sandboxrouter gc        [--all | --older-than MIN] [--dry-run]
                           kill leaked sandboxes: by default those past their lifetime
-  sandboxrouter bench     [--runs 3] [--provider a,b] [--json] [--share [--label "where you ran it"]]
-  sandboxrouter cost run  [--provider a,b] [--minutes 10] [--vcpu 2 --memory 4] [--no-load] [--out FILE]
+  sandboxrouter bench     [--runs 3] [--provider a,b] [--json] [--share [--label "where you ran it"] [--by GITHUB_USER]]
+  sandboxrouter cost run  [--provider a,b] [--minutes 10] [--vcpu 2 --memory 4] [--no-load] [--out FILE] [--by GITHUB_USER]
                           start one sandbox per provider for a fixed time with every core busy, record
                           the size it really got and the list-price prediction
   sandboxrouter cost settle FILE
@@ -43,7 +44,8 @@ Route flags:  --provider e2b[,modal,...]  --strategy cheapest|fastest
               --no-fallback  --fallback-any (also on setup errors like a bad key)
               --create-timeout SEC (per provider, default 120)  --require gpu,custom-image
 
-Keys: one env var group per provider; "sandboxrouter providers" lists them and shows which are set.`;
+Keys: one env var group per provider; "sandboxrouter providers" lists them and shows which are set.
+--by puts your GitHub username on a saved result, so the website can credit it.`;
 
 const { values, positionals } = parseArgs({
   allowPositionals: true,
@@ -77,6 +79,7 @@ const { values, positionals } = parseArgs({
     "dry-run": { type: "boolean" },
     minutes: { type: "string" },
     "no-load": { type: "boolean" },
+    by: { type: "string" },
   },
 });
 
@@ -90,6 +93,14 @@ const spec: SandboxSpec = {
   timeoutMinutes: num(values.timeout),
 };
 const providers = list(values.provider) as ProviderId[] | undefined;
+const by = (() => {
+  try {
+    return contributor(values.by);
+  } catch (e) {
+    console.error(`error: ${(e as Error).message}`);
+    process.exit(2);
+  }
+})();
 const route: RouteOptions = {
   provider: providers,
   strategy: values.strategy as Strategy | undefined,
@@ -179,7 +190,7 @@ async function main() {
       reports.push(report);
       if (saveDir) {
         mkdirSync(saveDir, { recursive: true });
-        const saved = { tool: "sandboxrouter-check", version, date: new Date().toISOString(), platform: `${platform()}-${arch()}`, ...report };
+        const saved = { tool: "sandboxrouter-check", version, date: new Date().toISOString(), platform: `${platform()}-${arch()}`, ...(by ? { by } : {}), ...report };
         writeFileSync(`${saveDir}/${p}.json`, JSON.stringify(saved, null, 2) + "\n");
       }
     }
@@ -229,7 +240,7 @@ async function main() {
     for (const r of rows.filter((r) => r.lastError)) console.error(`\n${r.provider} last error: ${r.lastError}`);
     if (values.share) {
       const version = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8")).version;
-      const report = makeReport(rows, { version, runs: rows[0].runs, spec, label: values.label });
+      const report = makeReport(rows, { version, runs: rows[0].runs, spec, label: values.label, by });
       const file = values.out ?? `sandboxrouter-bench-${report.date.slice(0, 10)}-${Math.random().toString(36).slice(2, 8)}.json`;
       writeFileSync(file, JSON.stringify(report, null, 2) + "\n");
       console.log(`\nwrote ${file}. Add it to results/ in a PR to github.com/gigialc/sandboxrouter to put it on the leaderboard.`);
@@ -249,6 +260,7 @@ async function main() {
         spec,
         load: !values["no-load"],
         version,
+        by,
         onProgress: (m) => console.error(m),
       });
       const file = values.out ?? `results/cost/cost-${run.date.slice(0, 16).replace(/[:T]/g, "-")}.json`;
