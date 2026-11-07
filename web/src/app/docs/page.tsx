@@ -21,6 +21,11 @@ const SECTIONS = [
 ] as const;
 
 export default function DocsPage() {
+  const fixedSizes = site.providers
+    .filter((p) => p.defaultSize)
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .map((p) => `${p.name} ${p.defaultSize!.vcpu} vCPU / ${p.defaultSize!.memoryGb} GB`)
+    .join(", ");
   return (
     <div className="grid gap-10 px-5 sm:px-10 pt-14 lg:grid-cols-[13rem_1fr] xl:gap-16">
       <aside className="hidden lg:block">
@@ -49,7 +54,7 @@ export default function DocsPage() {
           code={`import { Router } from "@sandboxrouter/sdk";
 
 const router = new Router();
-const sbx = await router.create({ vcpu: 2, memoryGb: 4, timeoutMinutes: 10 });
+const sbx = await router.create({ timeoutMinutes: 10 });
 try {
   await sbx.writeFile("/tmp/hello.py", "print('hello from a sandbox')");
   const r = await sbx.exec("python3 /tmp/hello.py");
@@ -61,6 +66,11 @@ try {
         <p>
           Always kill the sandbox when you&apos;re done; each provider also ends it on its own at <code>timeoutMinutes</code>.
           In TypeScript 5.2+ (or Node 24+) you can write <code>await using sbx = ...</code> instead, which kills it when the block ends.
+        </p>
+        <p>
+          Ask for a size with <code>{`{ vcpu: 2, memoryGb: 4 }`}</code>. With no size you get 2 vCPU / 4 GB, except on providers whose
+          default image has a fixed size ({fixedSizes}), where you get that. Ask for more and those providers are skipped unless you
+          pass a custom <code>image</code> built at the size you need.
         </p>
         <p>
           No account yet? Use Docker on your own machine: start Docker, then pass <code>{`{ provider: "docker" }`}</code>. It&apos;s
@@ -240,7 +250,7 @@ SANDBOXROUTER_TOKEN=secret npx @sandboxrouter/sdk serve --cors https://your-site
           code={`from sandboxrouter import Client
 
 sr = Client("http://127.0.0.1:8787", token="secret")
-with sr.create(vcpu=2, memory_gb=4, strategy="cheapest") as sbx:
+with sr.create(strategy="cheapest") as sbx:
     sbx.exec("pip install rich", on_stdout=lambda c: print(c, end=""))
     print(sbx.provider, sbx.estimated_hourly_usd)`}
         />

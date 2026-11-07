@@ -198,14 +198,43 @@ export class Router {
     return list;
   }
 
+  /**
+   * Why a create has nowhere to go, leading with what the caller can fix: no keys at all, or why the
+   * providers they do have keys for were skipped.
+   */
+  private whyNone(plan: Candidate[], explicit: boolean): string {
+    if (plan.length === 0) return "no provider can take this sandbox: none registered";
+    // Providers the caller named: say what each one needs.
+    if (explicit) {
+      const why = plan.map((c) => {
+        const vars = CATALOG.find((x) => x.id === c.provider)?.credentials.map((g) => g.join(" + ")).join(" or ");
+        return `${c.provider} (${c.skip}${vars && c.skip?.startsWith("not configured") ? `: set ${vars}` : ""})`;
+      });
+      return `no provider can take this sandbox: ${why.join(", ")}`;
+    }
+    const keyed = plan.filter((c) => this.isConfigured(c.provider));
+    if (keyed.length === 0)
+      return (
+        "no provider keys found: set the API key for at least one provider (the README's Env table lists each provider's variables); " +
+        "`npx @sandboxrouter/sdk providers` shows which are set"
+      );
+    const rest = plan.length - keyed.length;
+    const small = keyed.filter((c) => c.skip?.startsWith("default image"));
+    return (
+      `none of the providers you have keys for can take this sandbox: ${keyed.map((c) => `${c.provider} (${c.skip})`).join(", ")}` +
+      (rest ? `; ${rest} other provider${rest === 1 ? " has" : "s have"} no key set` : "") +
+      (small.length
+        ? `. To use ${small.map((c) => c.provider).join(" or ")}, leave out vcpu and memoryGb to get the default image's size, ` +
+          `or pass image: { ${small[0].provider}: "<template>" } with a template built at the size you need`
+        : "")
+    );
+  }
+
   /** Start a sandbox on the best available provider, falling back down the list on failure. */
   async create(spec: SandboxSpec = {}, route: RouteOptions = {}): Promise<RoutedSandbox> {
     const plan = this.plan(spec, route);
     const usable = plan.filter((c) => !c.skip);
-    if (usable.length === 0) {
-      const why = plan.map((c) => `${c.provider} (${c.skip})`).join(", ");
-      throw new RouterError(`no provider can take this sandbox: ${why || "none registered"}`);
-    }
+    if (usable.length === 0) throw new RouterError(this.whyNone(plan, !!route.provider));
 
     const attempts: Attempt[] = [];
     const tries = route.fallback === false ? usable.slice(0, 1) : usable;

@@ -62,7 +62,7 @@ export function planLabel(id: ProviderId): string {
  * that can't take the size; then Docker. The router uses the same price order, but only among providers
  * you have keys for, so a gated provider only gets work if you already have an account there.
  */
-export function listingOrder(spec: SandboxSpec = {}): ProviderInfo[] {
+export function listingOrder(spec: SandboxSpec = { vcpu: DEFAULT_VCPU, memoryGb: DEFAULT_MEMORY_GB }): ProviderInfo[] {
   const rank = (c: ProviderInfo) => (c.local ? 3 : unfit(c.id, spec) ? 2 : c.access ? 1 : 0);
   return [...CATALOG].sort((a, b) => rank(a) - rank(b) || hourlyCost(a.id, spec) - hourlyCost(b.id, spec) || a.id.localeCompare(b.id));
 }
@@ -811,8 +811,10 @@ export function unfit(id: ProviderId, spec: SandboxSpec, require: Capability[] =
   for (const c of needs) if (!p.capabilities.includes(c)) return `no ${c} support`;
   if ((spec.vcpu ?? DEFAULT_VCPU) > p.limits.maxVcpu) return `max ${p.limits.maxVcpu} vCPU`;
   if ((spec.memoryGb ?? DEFAULT_MEMORY_GB) > p.limits.maxMemoryGb) return `max ${p.limits.maxMemoryGb} GB memory`;
+  // A default image's size is fixed. With no size asked for you get that size, so only a size you
+  // name can be too big for it.
   const fixed = fixedSize(id, spec);
-  if (fixed && ((spec.vcpu ?? DEFAULT_VCPU) > fixed.vcpu || (spec.memoryGb ?? DEFAULT_MEMORY_GB) > fixed.memoryGb))
-    return `default size ${fixed.vcpu} vCPU / ${fixed.memoryGb} GB; more needs image.${id}`;
+  if (fixed && ((spec.vcpu ?? 0) > fixed.vcpu || (spec.memoryGb ?? 0) > fixed.memoryGb))
+    return `default image is ${fixed.vcpu} vCPU / ${fixed.memoryGb} GB; a bigger size needs image.${id}`;
   return null;
 }

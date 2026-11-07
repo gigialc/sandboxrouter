@@ -7,7 +7,7 @@ import { costMarkdown, costRun, settle, type CostRun } from "./cost.js";
 import { checkProvider } from "./check.js";
 import { gc, listOpen } from "./gc.js";
 import { loadReports, makeReport, renderLeaderboard } from "./leaderboard.js";
-import { CATALOG, accessLabel, hourlyCost, listingOrder, planLabel, unfit } from "./catalog.js";
+import { CATALOG, DEFAULT_MEMORY_GB, DEFAULT_VCPU, accessLabel, hourlyCost, listingOrder, planLabel, unfit } from "./catalog.js";
 import { Router } from "./router.js";
 import { createApp } from "./server.js";
 import { RouterError, type Capability, type ProviderId, type RouteOptions, type SandboxSpec, type Strategy } from "./types.js";
@@ -81,6 +81,13 @@ const { values, positionals } = parseArgs({
 });
 
 const list = (s?: string) => (s ? s.split(",").map((x) => x.trim()).filter(Boolean) : undefined);
+
+/** Plain left-aligned columns, two spaces apart; the last column isn't padded. */
+function textTable(head: string[], rows: string[][]): string {
+  const width = head.map((h, i) => Math.max(h.length, ...rows.map((r) => r[i].length)));
+  const line = (r: string[]) => r.map((v, i) => (i === r.length - 1 ? v : v.padEnd(width[i]))).join("  ").trimEnd();
+  return [line(head), ...rows.map(line)].join("\n");
+}
 const num = (s?: string) => (s === undefined ? undefined : Number(s));
 
 const spec: SandboxSpec = {
@@ -105,19 +112,37 @@ async function main() {
   if (!cmd || values.help) return console.log(HELP);
 
   if (cmd === "providers") {
-    const rows = listingOrder(spec).map((c) => ({
+    // The table is for a size, so ask for the default one explicitly when no flags are given.
+    const size: SandboxSpec = { ...spec, vcpu: spec.vcpu ?? DEFAULT_VCPU, memoryGb: spec.memoryGb ?? DEFAULT_MEMORY_GB };
+    const rows = listingOrder(size).map((c) => ({
       provider: c.name,
       id: c.id,
-      "$/hr": unfit(c.id, spec) ?? `${c.billing === "active-cpu" ? "up to " : ""}$${hourlyCost(c.id, spec).toFixed(4)}`,
+      "$/hr": unfit(c.id, size) ?? `${c.billing === "active-cpu" ? "up to " : ""}$${hourlyCost(c.id, size).toFixed(4)}`,
       plan: c.local ? "none" : planLabel(c.id),
       configured: router.isConfigured(c.id) ? "yes" : "no",
       capabilities: c.capabilities.join(", ") || "-",
       "sign-up": accessLabel(c.id) ?? "open",
     }));
     if (values.json) return console.log(JSON.stringify(rows, null, 2));
-    console.log(`Estimated list price for ${spec.vcpu ?? 2} vCPU, ${spec.memoryGb ?? 4} GB while running, cheapest first.`);
-    console.log(`"up to" = billed on active CPU only, shown with every core busy. plan = monthly plan needed to use the API.\n`);
-    console.table(rows);
+    console.log(`${size.vcpu} vCPU / ${size.memoryGb} GB: estimated list price while running, cheapest first.\n`);
+    const cells = listingOrder(size).map((c) => {
+      const why = unfit(c.id, size);
+      const usd = c.local ? "free" : why ? "skipped" : `${c.billing === "active-cpu" ? "≤ " : ""}$${hourlyCost(c.id, size).toFixed(4)}`;
+      const note = [why, accessLabel(c.id), c.local ? "local; only used when named" : null].filter(Boolean).join("; ");
+      const name = c.name.length > 30 ? `${c.name.slice(0, 29)}…` : c.name;
+      return [c.id, name, usd, c.local ? "none" : planLabel(c.id), router.isConfigured(c.id) ? "set" : "-", c.capabilities.join(", ") || "-", note];
+    });
+    console.log(textTable(["ID", "PROVIDER", "$/HR", "PLAN", "KEY", "SUPPORTS", "NOTE"], cells));
+    console.log(
+      [
+        "",
+        "≤        billed on busy CPU only; the price with every core busy",
+        "PLAN     monthly plan the API needs before it creates sandboxes (credited = paid back as usage)",
+        "KEY      set = this provider's env vars are set here",
+        "skipped  can't take this size. A provider skipped for its default image's size still takes",
+        "         a create() that names no size, at that image's size.",
+      ].join("\n"),
+    );
     return;
   }
 
