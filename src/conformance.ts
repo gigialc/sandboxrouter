@@ -10,6 +10,8 @@ export interface SavedCheck extends CheckReport {
   version: string;
   date: string;
   platform: string;
+  /** GitHub username of whoever ran it, from `--by`. */
+  by?: string;
 }
 
 export interface ConformanceRow {
@@ -19,6 +21,8 @@ export interface ConformanceRow {
   run: null | {
     date: string;
     version: string;
+    /** GitHub username of whoever ran it, when they gave one. */
+    by: string | null;
     passed: number;
     /** Steps that ran and failed, with why. */
     failed: { step: string; detail?: string }[];
@@ -78,6 +82,7 @@ export function conformanceTable(saved = loadConformance()): ConformanceRow[] {
       run: {
         date: r.date,
         version: r.version,
+        by: r.by ?? null,
         passed: pick("pass").length + pick("info").length,
         failed: pick("fail").map((x) => ({ step: x.step, detail: x.detail })),
         skipped: pick("skip").map((x) => x.step),

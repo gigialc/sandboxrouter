@@ -125,6 +125,7 @@ export default function BenchmarksPage() {
                       <td className="py-3 pr-4 font-mono tnum text-ink">{ratio === null ? "n/a" : `${Math.round(ratio * 100)}%`}</td>
                       <td className="py-3 text-muted" title={r.error ?? r.billSource ?? undefined}>
                         {billFrom(r)}
+                        {r.by && <span className="block text-[11px]">by @{r.by}</span>}
                       </td>
                     </tr>
                   );
@@ -168,6 +169,7 @@ export default function BenchmarksPage() {
             {subs.map((s) => (
               <li key={s.date}>
                 {day(s.date)}: {s.label ?? "unlabelled"} ({s.platform}), {s.runs} runs on each of {s.providers} providers
+                {s.by ? `, by @${s.by}` : ""}
               </li>
             ))}
           </ul>
@@ -176,7 +178,7 @@ export default function BenchmarksPage() {
             Run it with your own keys{REPO_PUBLIC ? <> and send the report as a pull request to <code>results/</code></> : null}.
             Label it with a city or cloud region, never an address.
           </p>
-          <CodeBlock title="terminal" code={`npx ${NPM} bench --runs 5 --share --label "us-east-1, c7g.large"`} />
+          <CodeBlock title="terminal" code={`npx ${NPM} bench --runs 5 --share --label "us-east-1, c7g.large" --by YOUR_GITHUB_USERNAME`} />
         </section>
       </div>
     </div>

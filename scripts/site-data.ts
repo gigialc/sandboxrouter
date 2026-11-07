@@ -35,6 +35,7 @@ const costRows = costRuns.flatMap((run) =>
     date: run.date,
     minutes: run.minutes,
     load: run.load,
+    by: run.by ?? null,
     requested: e.requested,
     delivered: e.delivered ? { vcpu: e.delivered.vcpu, memoryGb: Math.round((e.delivered.memoryMb / 1024) * 10) / 10 } : null,
     seconds: e.seconds ?? null,
@@ -75,7 +76,15 @@ const data = {
   desktops: computerCatalog(),
   leaderboard: aggregate(reports),
   costRuns: costRows,
-  submissions: reports.map((r) => ({ date: r.date, label: r.label ?? null, platform: r.platform, runs: r.runs, providers: r.rows.length })),
+  submissions: reports.map((r) => ({
+    date: r.date,
+    label: r.label ?? null,
+    by: r.by ?? null,
+    platform: r.platform,
+    runs: r.runs,
+    providers: r.rows.length,
+    ids: r.rows.map((x) => x.provider),
+  })),
 };
 
 writeFileSync("web/src/data/site.json", JSON.stringify(data, null, 2) + "\n");

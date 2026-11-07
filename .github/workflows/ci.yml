@@ -5,6 +5,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+        with:
+          # Two commits: on a pull request, HEAD is the merge and HEAD^1 its base, for the results check.
+          fetch-depth: 2
       - uses: actions/setup-node@v7
         with:
           node-version: 22
@@ -20,6 +23,9 @@ jobs:
           node --import tsx scripts/readme-tables.ts --write
           npm run site:data
           git diff --exit-code -I '"generatedAt"' -- README.md web/src/data/site.json
+      - name: Submitted results are well-formed
+        # Keys, emails, addresses and impossible numbers in results/; on a PR also edits to existing bench reports.
+        run: npm run results:check -- ${{ github.event_name == 'pull_request' && '--against HEAD^1' || '' }}
       - run: npm test
       - run: npm run test:py
       - run: npm ci && npm run build

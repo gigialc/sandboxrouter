@@ -1,6 +1,6 @@
 {
   "version": "0.3.1",
-  "generatedAt": "2026-11-07T00:04:41.411Z",
+  "generatedAt": "2026-11-07T00:19:35.754Z",
   "shapes": [
     "1x2",
     "2x4",
@@ -442,6 +442,7 @@
       "check": {
         "date": "2026-11-06T14:24:00.046Z",
         "version": "0.2.0",
+        "by": null,
         "passed": 13,
         "failed": [],
         "skipped": [
@@ -731,6 +732,7 @@
       "check": {
         "date": "2026-11-06T14:24:01.071Z",
         "version": "0.2.0",
+        "by": null,
         "passed": 0,
         "failed": [
           {
@@ -954,6 +956,7 @@
       "check": {
         "date": "2026-11-06T14:24:18.968Z",
         "version": "0.2.0",
+        "by": null,
         "passed": 14,
         "failed": [],
         "skipped": [],
@@ -1044,6 +1047,7 @@
       "check": {
         "date": "2026-11-06T14:24:35.097Z",
         "version": "0.2.0",
+        "by": null,
         "passed": 14,
         "failed": [],
         "skipped": [],
@@ -1592,6 +1596,7 @@
       "check": {
         "date": "2026-11-06T14:25:19.001Z",
         "version": "0.2.0",
+        "by": null,
         "passed": 14,
         "failed": [],
         "skipped": [],
@@ -1939,6 +1944,7 @@
       "check": {
         "date": "2026-11-06T14:25:56.458Z",
         "version": "0.2.0",
+        "by": null,
         "passed": 14,
         "failed": [],
         "skipped": [],
@@ -2088,6 +2094,7 @@
       "check": {
         "date": "2026-11-06T19:04:15.542Z",
         "version": "0.3.0",
+        "by": null,
         "passed": 14,
         "failed": [],
         "skipped": [],
@@ -2627,6 +2634,7 @@
       "date": "2026-11-06T19:13:02.657Z",
       "minutes": 10,
       "load": true,
+      "by": null,
       "requested": {
         "vcpu": 2,
         "memoryGb": 4
@@ -2648,6 +2656,7 @@
       "date": "2026-11-06T16:15:49.706Z",
       "minutes": 10,
       "load": true,
+      "by": null,
       "requested": {
         "vcpu": 2,
         "memoryGb": 4
@@ -2669,6 +2678,7 @@
       "date": "2026-11-06T16:15:49.706Z",
       "minutes": 10,
       "load": true,
+      "by": null,
       "requested": {
         "vcpu": 2,
         "memoryGb": 4
@@ -2687,6 +2697,7 @@
       "date": "2026-11-06T16:15:49.706Z",
       "minutes": 10,
       "load": true,
+      "by": null,
       "requested": {
         "vcpu": 2,
         "memoryGb": 4
@@ -2708,6 +2719,7 @@
       "date": "2026-11-06T16:15:49.706Z",
       "minutes": 10,
       "load": true,
+      "by": null,
       "requested": {
         "vcpu": 2,
         "memoryGb": 4
@@ -2729,6 +2741,7 @@
       "date": "2026-11-06T16:15:49.706Z",
       "minutes": 10,
       "load": true,
+      "by": null,
       "requested": {
         "vcpu": 2,
         "memoryGb": 4
@@ -2749,9 +2762,17 @@
     {
       "date": "2026-11-06T00:41:50.288Z",
       "label": "home laptop, Europe (CET)",
+      "by": null,
       "platform": "darwin-arm64",
       "runs": 5,
-      "providers": 5
+      "providers": 5,
+      "ids": [
+        "e2b",
+        "openscale",
+        "daytona",
+        "blaxel",
+        "maritime"
+      ]
     }
   ]
 }

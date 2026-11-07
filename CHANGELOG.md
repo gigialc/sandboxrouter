@@ -2,6 +2,13 @@
 
 All notable changes. Versions follow [semver](https://semver.org/); while the version is 0.x, a minor bump can change the API.
 
+## Unreleased
+
+### Added
+- `--by GITHUB_USER` on `check --save`, `bench --share` and `cost run` puts the contributor's GitHub username on the result file, so the website can credit it.
+- `npm run results:check` (and a CI step): every file in `results/` is checked for keys and tokens, emails, IP addresses, street-address labels, unknown providers and impossible numbers; on a pull request it also refuses edits to or deletions of an existing bench report. `validateResults()` in `src/results.ts`.
+- Website: "Where the numbers come from" under the provider table (prices are list prices from each pricing page, bills are measured, tests and speed are contributed), price columns labelled as list prices, and on every provider page a "Measured on real accounts" panel (check, cold start, success rate, size you really get, billed vs list) with a "Help verify" box listing the commands for whatever is still missing.
+
 ## 0.3.1 (2026-11-07)
 
 ### Fixed
