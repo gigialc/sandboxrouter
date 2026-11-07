@@ -1,4 +1,4 @@
-import { ProviderError, type ProviderId } from "./types.js";
+import { ProviderError, SetupError, type ProviderId } from "./types.js";
 
 /** Per-command timeout when ExecOptions.timeoutSeconds is not given. */
 export const DEFAULT_EXEC_TIMEOUT_S = 60;
@@ -85,8 +85,30 @@ export async function optionalImport<T>(pkg: string, provider: string): Promise<
     // Bundlers and test runners (Vite, esbuild) report a missing package without Node's error code.
     const missing = /Cannot find (module|package)|Could not resolve|Failed to (resolve|load url)/.test(String((err as Error)?.message));
     if (code === "ERR_MODULE_NOT_FOUND" || code === "MODULE_NOT_FOUND" || missing) {
-      throw new Error(`${provider} needs the "${pkg}" package: npm i ${pkg}`);
+      throw new SetupError(`${provider} needs the "${pkg}" package: npm i ${pkg}`);
     }
     throw err;
   }
+}
+
+/** gRPC status codes (Modal's SDK) as the HTTP status they correspond to. */
+const GRPC_TO_HTTP: Record<number, number> = { 3: 400, 5: 404, 7: 403, 8: 429, 14: 503, 16: 401 };
+
+/**
+ * The HTTP status an error stands for, read from the shapes provider SDKs use: `status`,
+ * `statusCode` (Daytona), `status_code` (Blaxel), `response.status` (Vercel), AWS's
+ * `$metadata.httpStatusCode`, gRPC codes (Modal), and error classes that only say it by name
+ * (E2B's AuthenticationError, AWS's CredentialsProviderError). Undefined when there's none.
+ */
+export function errorStatus(err: unknown, depth = 0): number | undefined {
+  if (!err || typeof err !== "object" || depth > 3) return undefined;
+  const e = err as any;
+  for (const v of [e.status, e.statusCode, e.status_code, e.response?.status, e.$metadata?.httpStatusCode])
+    if (typeof v === "number" && v >= 100 && v < 600) return v;
+  if (e.name === "ClientError" && typeof e.code === "number" && GRPC_TO_HTTP[e.code]) return GRPC_TO_HTTP[e.code];
+  const name = String(e.name && e.name !== "Error" ? e.name : (e.constructor?.name ?? ""));
+  if (/AuthenticationError$/.test(name) || name === "CredentialsProviderError") return 401;
+  if (/PermissionDenied|ForbiddenError$/.test(name)) return 403;
+  if (/RateLimitError$/.test(name)) return 429;
+  return errorStatus(e.cause, depth + 1);
 }
