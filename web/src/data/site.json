@@ -1,6 +1,6 @@
 {
   "version": "0.3.2",
-  "generatedAt": "2026-11-07T00:41:16.139Z",
+  "generatedAt": "2026-11-07T13:16:51.432Z",
   "shapes": [
     "1x2",
     "2x4",
@@ -440,8 +440,8 @@
       "planLabel": "none",
       "defaultSize": null,
       "check": {
-        "date": "2026-11-06T14:24:00.046Z",
-        "version": "0.2.0",
+        "date": "2026-11-07T13:14:32.809Z",
+        "version": "0.3.2",
         "by": null,
         "passed": 13,
         "failed": [],
@@ -469,7 +469,7 @@
       },
       "live": {
         "status": "passed",
-        "label": "passed (2026-11-06)"
+        "label": "passed (2026-11-07)"
       },
       "computers": [],
       "prices": {
@@ -730,39 +730,34 @@
         "memoryGb": 1
       },
       "check": {
-        "date": "2026-11-06T14:24:01.071Z",
-        "version": "0.2.0",
+        "date": "2026-11-07T13:14:56.338Z",
+        "version": "0.3.2",
         "by": null,
-        "passed": 0,
-        "failed": [
-          {
-            "step": "create",
-            "detail": "all providers failed: daytona: Sandbox failed to start: Error response from daemon: unexpected end of JSON input"
-          }
-        ],
+        "passed": 14,
+        "failed": [],
         "skipped": [],
         "notRun": [],
         "notes": [],
         "steps": {
-          "create": "fail",
-          "exec: stdout, stderr, exit code": "not run",
-          "exec: env and cwd": "not run",
-          "exec: UTF-8 output": "not run",
-          "exec: streaming": "not run",
-          "files: binary round-trip": "not run",
-          "files: 1 MB round-trip": "not run",
-          "files: missing file is an error": "not run",
-          "files: visible to commands": "not run",
-          "exec: command timeout": "not run",
-          "exec: timed-out command was stopped": "not run",
-          "pause and resume": "not run",
-          "kill": "not run",
-          "killed sandbox is gone": "not run"
+          "create": "pass",
+          "exec: stdout, stderr, exit code": "pass",
+          "exec: env and cwd": "pass",
+          "exec: UTF-8 output": "pass",
+          "exec: streaming": "pass",
+          "files: binary round-trip": "pass",
+          "files: 1 MB round-trip": "pass",
+          "files: missing file is an error": "pass",
+          "files: visible to commands": "pass",
+          "exec: command timeout": "pass",
+          "exec: timed-out command was stopped": "pass",
+          "pause and resume": "pass",
+          "kill": "pass",
+          "killed sandbox is gone": "pass"
         }
       },
       "live": {
-        "status": "failing",
-        "label": "failed 1 step (2026-11-06)"
+        "status": "passed",
+        "label": "passed (2026-11-07)"
       },
       "computers": [
         "linux"
@@ -954,8 +949,8 @@
       "planLabel": "none",
       "defaultSize": null,
       "check": {
-        "date": "2026-11-06T14:24:18.968Z",
-        "version": "0.2.0",
+        "date": "2026-11-07T13:15:12.824Z",
+        "version": "0.3.2",
         "by": null,
         "passed": 14,
         "failed": [],
@@ -981,7 +976,7 @@
       },
       "live": {
         "status": "passed",
-        "label": "passed (2026-11-06)"
+        "label": "passed (2026-11-07)"
       },
       "computers": [],
       "prices": {
@@ -1045,8 +1040,8 @@
         "memoryGb": 0.5
       },
       "check": {
-        "date": "2026-11-06T14:24:35.097Z",
-        "version": "0.2.0",
+        "date": "2026-11-07T13:15:27.395Z",
+        "version": "0.3.2",
         "by": null,
         "passed": 14,
         "failed": [],
@@ -1072,7 +1067,7 @@
       },
       "live": {
         "status": "passed",
-        "label": "passed (2026-11-06)"
+        "label": "passed (2026-11-07)"
       },
       "computers": [
         "linux"
@@ -1594,8 +1589,8 @@
       "planLabel": "$20/mo (credited)",
       "defaultSize": null,
       "check": {
-        "date": "2026-11-06T14:25:19.001Z",
-        "version": "0.2.0",
+        "date": "2026-11-07T13:15:50.839Z",
+        "version": "0.3.2",
         "by": null,
         "passed": 14,
         "failed": [],
@@ -1621,7 +1616,7 @@
       },
       "live": {
         "status": "passed",
-        "label": "passed (2026-11-06)"
+        "label": "passed (2026-11-07)"
       },
       "computers": [
         "linux",
@@ -1942,8 +1937,8 @@
         "memoryGb": 1
       },
       "check": {
-        "date": "2026-11-06T14:25:56.458Z",
-        "version": "0.2.0",
+        "date": "2026-11-07T13:16:11.416Z",
+        "version": "0.3.2",
         "by": null,
         "passed": 14,
         "failed": [],
@@ -1969,7 +1964,7 @@
       },
       "live": {
         "status": "passed",
-        "label": "passed (2026-11-06)"
+        "label": "passed (2026-11-07)"
       },
       "computers": [],
       "prices": {
@@ -2092,8 +2087,8 @@
       "planLabel": "none",
       "defaultSize": null,
       "check": {
-        "date": "2026-11-06T19:04:15.542Z",
-        "version": "0.3.0",
+        "date": "2026-11-07T13:16:49.528Z",
+        "version": "0.3.2",
         "by": null,
         "passed": 14,
         "failed": [],
@@ -2119,7 +2114,7 @@
       },
       "live": {
         "status": "passed",
-        "label": "passed (2026-11-06)"
+        "label": "passed (2026-11-07)"
       },
       "computers": [],
       "prices": {

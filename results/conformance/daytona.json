@@ -1,16 +1,84 @@
 {
   "tool": "sandboxrouter-check",
-  "version": "0.2.0",
-  "date": "2026-11-06T14:24:01.071Z",
+  "version": "0.3.2",
+  "date": "2026-11-07T13:14:56.338Z",
   "platform": "linux-x64",
   "provider": "daytona",
+  "sandboxId": "daytona:8fac8d2d-cefc-468d-9f5b-ab305ae63e56",
   "results": [
     {
       "step": "create",
-      "status": "fail",
-      "ms": 1023,
-      "detail": "all providers failed: daytona: Sandbox failed to start: Error response from daemon: unexpected end of JSON input"
+      "ms": 765,
+      "status": "pass",
+      "detail": "daytona:8fac8d2d-cefc-468d-9f5b-ab305ae63e56, ~$0.0666/hr"
+    },
+    {
+      "step": "exec: stdout, stderr, exit code",
+      "ms": 905,
+      "status": "pass"
+    },
+    {
+      "step": "exec: env and cwd",
+      "ms": 722,
+      "status": "pass"
+    },
+    {
+      "step": "exec: UTF-8 output",
+      "ms": 308,
+      "status": "pass"
+    },
+    {
+      "step": "exec: streaming",
+      "ms": 3747,
+      "status": "pass",
+      "detail": "first output after 1330 ms"
+    },
+    {
+      "step": "files: binary round-trip",
+      "ms": 423,
+      "status": "pass"
+    },
+    {
+      "step": "files: 1 MB round-trip",
+      "ms": 1901,
+      "status": "pass"
+    },
+    {
+      "step": "files: missing file is an error",
+      "ms": 144,
+      "status": "pass"
+    },
+    {
+      "step": "files: visible to commands",
+      "ms": 1054,
+      "status": "pass"
+    },
+    {
+      "step": "exec: command timeout",
+      "ms": 3160,
+      "status": "pass",
+      "detail": "threw after 3159 ms"
+    },
+    {
+      "step": "exec: timed-out command was stopped",
+      "ms": 6441,
+      "status": "pass"
+    },
+    {
+      "step": "pause and resume",
+      "ms": 3801,
+      "status": "pass"
+    },
+    {
+      "step": "kill",
+      "ms": 90,
+      "status": "pass"
+    },
+    {
+      "step": "killed sandbox is gone",
+      "ms": 68,
+      "status": "pass"
     }
   ],
-  "ok": false
+  "ok": true
 }
