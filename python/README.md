@@ -12,7 +12,7 @@ from sandboxrouter import Client
 
 sr = Client("http://127.0.0.1:8787", token="secret")
 
-with sr.create(vcpu=2, memory_gb=4, strategy="cheapest") as sbx:
+with sr.create(strategy="cheapest") as sbx:
     print(sbx.provider, sbx.estimated_hourly_usd)
     sbx.write_file("/tmp/hello.py", "print('hi')")
     r = sbx.exec("python3 /tmp/hello.py", on_stdout=lambda c: print(c, end=""))

@@ -3,18 +3,20 @@
 // Run: node --import tsx scripts/readme-tables.ts           print them
 //      node --import tsx scripts/readme-tables.ts --write   replace them in README.md
 import { readFileSync, writeFileSync } from "node:fs";
-import { CATALOG, accessLabel, hourlyCost, listingOrder, planLabel, unfit } from "../src/catalog.js";
+import { CATALOG, DEFAULT_MEMORY_GB, DEFAULT_VCPU, accessLabel, hourlyCost, listingOrder, planLabel, unfit } from "../src/catalog.js";
 import { CHECK_STEPS } from "../src/check.js";
 import { conformanceTable, liveStatus } from "../src/conformance.js";
 
-const rows = listingOrder();
+// The Prices table is for the router's default size, asked for explicitly.
+const SIZE = { vcpu: DEFAULT_VCPU, memoryGb: DEFAULT_MEMORY_GB };
+const rows = listingOrder(SIZE);
 const order = new Map(rows.map((c, i) => [c.id, i]));
 const live = new Map(conformanceTable().map((r) => [r.provider, liveStatus(r)]));
 
 const prices = ["| Provider | $/hr | Plan needed | Real-account check | Notes | Source |", "|---|---|---|---|---|---|"];
 for (const c of rows) {
-  const why = unfit(c.id, {});
-  const cost = `$${hourlyCost(c.id).toFixed(3)}`;
+  const why = unfit(c.id, SIZE);
+  const cost = `$${hourlyCost(c.id, SIZE).toFixed(3)}`;
   const price = c.local ? "free" : why ? `skipped (${why})` : c.billing === "active-cpu" ? `up to ${cost}` : cost;
   const plan = c.local ? "none" : planLabel(c.id);
   const tested = live.get(c.id)!.label;

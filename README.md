@@ -8,7 +8,7 @@ Not every adapter has run against a real account yet. The [Prices](#prices) tabl
 import { Router } from "@sandboxrouter/sdk";
 
 const router = new Router();                       // uses whichever provider keys you've set
-const sbx = await router.create({ vcpu: 2, memoryGb: 4 });
+const sbx = await router.create();                 // or create({ vcpu: 2, memoryGb: 4 }) for a size
 try {
   const r = await sbx.exec("python3 -c 'print(6*7)'");
   console.log(r.stdout, "ran on", sbx.provider);
@@ -18,6 +18,8 @@ try {
 ```
 
 Runs as plain JavaScript on Node 20+. (In TypeScript 5.2+, or Node 24+, `await using sbx = ...` kills the sandbox for you.)
+
+With no size you get 2 vCPU / 4 GB, except on providers whose default image has a fixed size (Daytona 1 vCPU / 1 GB, E2B 2 vCPU / 0.5 GB, OpenScale 2 vCPU / 1 GB), where you get that. Ask for more than that and those providers are skipped unless you pass a custom `image` built at the size you need.
 
 Switch providers by changing which keys are set, not your code (custom images are the exception: each provider names its own). If one returns a 429, the next one takes the sandbox.
 
@@ -58,6 +60,7 @@ How to read it:
 - **Up to $X** means the provider bills CPU only while it's busy, so this is the price with every core busy. An agent that mostly waits on its model pays less.
 - **Plan needed** is the monthly plan you must be on before the API will create sandboxes. "Credited" means the fee comes back as usage. "None" means a free tier or plain pay-as-you-go works. For a small project, the plan can cost more than the usage.
 - **Real-account check** is the last time the 14-step [`check`](#compatibility) passed against a real account. "Not run yet" means the adapter is built from the provider's docs and tested against mocks only.
+- **Skipped** means the provider can't take 2 vCPU / 4 GB. One skipped for its default image's size is still used by a `create()` that names no size, at that image's size.
 
 | Provider | $/hr | Plan needed | Real-account check | Notes | Source |
 |---|---|---|---|---|---|
@@ -89,11 +92,11 @@ How to read it:
 | InstaBox (sign-up waitlisted) | $0.017 | none | not run yet | Per second while running on fixed sizes (2/4, 4/8, 8/16); paused or stopped boxes bill only /data beyond the included disk ($0.00011/GiB-h); Pro $20/mo includes $20 credits; free plan: 1 box at 4/8 | [pricing](https://instabox.sh/docs/pricing.md) |
 | Koyeb Sandboxes (not taking new accounts) | $0.058 | $29/mo | not run yet | Per second; fixed Standard instance sizes (1 vCPU + 1 GB = $0.0144/h); sandboxes need a paid plan (Pro $29/mo); public preview | [pricing](https://www.koyeb.com/docs/reference/instances) |
 | Dedalus Machines (sign-up waitlisted) | $0.149 | none | not run yet | Per second while awake; sleeping machines bill storage only (10 GiB included on Hobby, 20 on Pro); Hobby plan max 4 vCPU / 16 GiB; private beta | [pricing](https://docs.dedaluslabs.ai/dcs/dm/pricing) |
-| OpenScale Sandboxes | skipped (default size 2 vCPU / 1 GB; more needs image.openscale) | none | passed (2026-11-06) | Per second on allocated size; no platform fee or minimum; paused = free; size comes from the template (E2B-compatible API); Singapore only; needs a pay-as-you-go key | [pricing](https://openscale.so/sandboxes) |
+| OpenScale Sandboxes | skipped (default image is 2 vCPU / 1 GB; a bigger size needs image.openscale) | none | passed (2026-11-06) | Per second on allocated size; no platform fee or minimum; paused = free; size comes from the template (E2B-compatible API); Singapore only; needs a pay-as-you-go key | [pricing](https://openscale.so/sandboxes) |
 | Azure Container Apps dynamic sessions | skipped (max 1 vCPU) | none | not run yet | Flat $0.03 per session-hour (built-in Shell pools), billed per allocated session in 1-hour increments, East US; needs a session pool you create once | [pricing](https://learn.microsoft.com/en-us/azure/container-apps/billing#dynamic-sessions) |
-| Daytona | skipped (default size 1 vCPU / 1 GB; more needs image.daytona) | none | failed 1 step (2026-11-06) | Per second, plus disk above 5 GiB | [pricing](https://www.daytona.io/pricing) |
+| Daytona | skipped (default image is 1 vCPU / 1 GB; a bigger size needs image.daytona) | none | failed 1 step (2026-11-06) | Per second, plus disk above 5 GiB | [pricing](https://www.daytona.io/pricing) |
 | Alibaba Cloud Agent Sandbox | skipped (max 2 GB memory) | none | not run yet | Per second; Default QoS, Hong Kong and regions outside mainland China; disk separately $0.00025308/GiB-h; code-interpreter-v1 template is 2 vCPU / 2 GiB with 10 GiB disk (E2B-compatible API) | [pricing](https://www.alibabacloud.com/help/en/agent-sandbox/product-overview/billing-overview) |
-| E2B | skipped (default size 2 vCPU / 0.5 GB; more needs image.e2b) | none | passed (2026-11-06) | Per second; free Hobby tier ($100 one-time credit, 1-hour sessions, 20 at once); Pro $150/mo for longer sessions | [pricing](https://e2b.dev/pricing) |
+| E2B | skipped (default image is 2 vCPU / 0.5 GB; a bigger size needs image.e2b) | none | passed (2026-11-06) | Per second; free Hobby tier ($100 one-time credit, 1-hour sessions, 20 at once); Pro $150/mo for longer sessions | [pricing](https://e2b.dev/pricing) |
 | Docker (local) | free | none | passed (2026-11-06) | Runs on your own machine; free, but shares your kernel, so weaker isolation than a cloud micro-VM | [pricing](https://docs.docker.com/engine/) |
 
 Checked 2026-11-04 to 2026-11-06.
@@ -377,7 +380,7 @@ A standard-library client for the HTTP API lives in [`python/`](python/):
 from sandboxrouter import Client
 
 sr = Client("http://127.0.0.1:8787", token="secret")
-with sr.create(vcpu=2, memory_gb=4, strategy="cheapest") as sbx:
+with sr.create(strategy="cheapest") as sbx:
     sbx.exec("pip install rich && python -c 'import rich'", on_stdout=lambda c: print(c, end=""))
 ```
 

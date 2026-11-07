@@ -1,6 +1,6 @@
 {
-  "version": "0.3.0",
-  "generatedAt": "2026-11-06T19:18:43.365Z",
+  "version": "0.3.1",
+  "generatedAt": "2026-11-07T00:04:41.411Z",
   "shapes": [
     "1x2",
     "2x4",
@@ -768,15 +768,15 @@
       "prices": {
         "1x2": {
           "usd": 0.0666,
-          "unfit": "default size 1 vCPU / 1 GB; more needs image.daytona"
+          "unfit": "default image is 1 vCPU / 1 GB; a bigger size needs image.daytona"
         },
         "2x4": {
           "usd": 0.0666,
-          "unfit": "default size 1 vCPU / 1 GB; more needs image.daytona"
+          "unfit": "default image is 1 vCPU / 1 GB; a bigger size needs image.daytona"
         },
         "4x8": {
           "usd": 0.0666,
-          "unfit": "default size 1 vCPU / 1 GB; more needs image.daytona"
+          "unfit": "default image is 1 vCPU / 1 GB; a bigger size needs image.daytona"
         },
         "8x16": {
           "usd": 0.0666,
@@ -1076,15 +1076,15 @@
       "prices": {
         "1x2": {
           "usd": 0.1089,
-          "unfit": "default size 2 vCPU / 0.5 GB; more needs image.e2b"
+          "unfit": "default image is 2 vCPU / 0.5 GB; a bigger size needs image.e2b"
         },
         "2x4": {
           "usd": 0.1089,
-          "unfit": "default size 2 vCPU / 0.5 GB; more needs image.e2b"
+          "unfit": "default image is 2 vCPU / 0.5 GB; a bigger size needs image.e2b"
         },
         "4x8": {
           "usd": 0.1089,
-          "unfit": "default size 2 vCPU / 0.5 GB; more needs image.e2b"
+          "unfit": "default image is 2 vCPU / 0.5 GB; a bigger size needs image.e2b"
         },
         "8x16": {
           "usd": 0.1089,
@@ -1969,19 +1969,19 @@
       "prices": {
         "1x2": {
           "usd": 0.014,
-          "unfit": "default size 2 vCPU / 1 GB; more needs image.openscale"
+          "unfit": "default image is 2 vCPU / 1 GB; a bigger size needs image.openscale"
         },
         "2x4": {
           "usd": 0.014,
-          "unfit": "default size 2 vCPU / 1 GB; more needs image.openscale"
+          "unfit": "default image is 2 vCPU / 1 GB; a bigger size needs image.openscale"
         },
         "4x8": {
           "usd": 0.014,
-          "unfit": "default size 2 vCPU / 1 GB; more needs image.openscale"
+          "unfit": "default image is 2 vCPU / 1 GB; a bigger size needs image.openscale"
         },
         "8x16": {
           "usd": 0.014,
-          "unfit": "default size 2 vCPU / 1 GB; more needs image.openscale"
+          "unfit": "default image is 2 vCPU / 1 GB; a bigger size needs image.openscale"
         },
         "16x32": {
           "usd": 0.014,

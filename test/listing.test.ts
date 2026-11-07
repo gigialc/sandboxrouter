@@ -2,16 +2,19 @@ import { describe, expect, it } from "vitest";
 import { CATALOG, hourlyCost, listingOrder, planLabel, unfit } from "../src/catalog.js";
 import { liveStatus } from "../src/conformance.js";
 
+// Tables list providers for the default size, asked for explicitly.
+const SIZE = { vcpu: 2, memoryGb: 4 };
+
 describe("listing order", () => {
   it("lists open sign-ups cheapest first, then gated, then ones that can't take the size, then Docker", () => {
     const rows = listingOrder();
-    const rank = (c: (typeof rows)[number]) => (c.local ? 3 : unfit(c.id, {}) ? 2 : c.access ? 1 : 0);
+    const rank = (c: (typeof rows)[number]) => (c.local ? 3 : unfit(c.id, SIZE) ? 2 : c.access ? 1 : 0);
     for (let i = 1; i < rows.length; i++) {
       const a = rows[i - 1];
       const b = rows[i];
       expect(rank(a)).toBeLessThanOrEqual(rank(b));
       if (rank(a) === rank(b)) {
-        const d = hourlyCost(a.id) - hourlyCost(b.id);
+        const d = hourlyCost(a.id, SIZE) - hourlyCost(b.id, SIZE);
         expect(d < 0 || (d === 0 && a.id < b.id)).toBe(true);
       }
     }
@@ -21,7 +24,7 @@ describe("listing order", () => {
 
   it("puts a waitlisted provider after every open one that fits", () => {
     const ids = listingOrder().map((c) => c.id);
-    const lastOpen = Math.max(...listingOrder().filter((c) => !c.local && !c.access && !unfit(c.id, {})).map((c) => ids.indexOf(c.id)));
+    const lastOpen = Math.max(...listingOrder().filter((c) => !c.local && !c.access && !unfit(c.id, SIZE)).map((c) => ids.indexOf(c.id)));
     expect(ids.indexOf("instabox")).toBeGreaterThan(lastOpen);
   });
 });

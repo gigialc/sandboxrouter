@@ -2,6 +2,17 @@
 
 All notable changes. Versions follow [semver](https://semver.org/); while the version is 0.x, a minor bump can change the API.
 
+## 0.3.1 (2026-11-07)
+
+### Fixed
+- A `create()` that names no size skipped E2B, Daytona and OpenScale, whose default images have a fixed size smaller than 2 vCPU / 4 GB. With only one of those keys set, the quickstart failed with "no provider can take this sandbox". With no size asked for, those providers now take the sandbox at their default image's size; only a `vcpu` or `memoryGb` you name can be too big for it.
+- The error when no provider can take a sandbox leads with what to fix. With no keys set: "no provider keys found", and where to find the variables. With keys set: only the reasons the providers you have keys for were skipped, plus how many have no key, and for a provider skipped for its default image's size, how to use it anyway. A provider you name that has no key says which variables to set.
+
+### Changed
+- README, docs and website examples call `router.create()` with no size (`sr.create()` in Python, `{}` over HTTP), so they work with any one provider's key. The README and docs say what size you get.
+- `sandboxrouter providers` prints a plain aligned table (id, provider, $/hr, plan, key, supports, note) with a legend, instead of Node's `console.table`. With no `--vcpu` / `--memory` it lists 2 vCPU / 4 GB, as before. `--json` is unchanged.
+- The skip reason for a fixed default image reads "default image is 2 vCPU / 0.5 GB; a bigger size needs image.e2b".
+
 ## 0.3.0 (2026-11-06)
 
 ### Added
