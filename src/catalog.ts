@@ -590,6 +590,11 @@ ENTRIES.push(
     limits: { maxVcpu: 16, maxMemoryGb: 96 },
     credentials: [["LANGSMITH_API_KEY"]],
     docs: "https://docs.langchain.com/langsmith/sandboxes",
+    access: {
+      status: "waitlist",
+      note: "Sandboxes are a private preview: until LangChain enables them for your organization, the API answers \"Sandbox feature is not enabled for this organization\"",
+      checked: "2026-11-07",
+    },
   },
   {
     id: "novita",
