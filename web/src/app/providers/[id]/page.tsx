@@ -96,9 +96,8 @@ await sbx.kill();`;
       {p.pricing.note && <p className="mt-5 max-w-2xl text-[14px] leading-6 text-ink-2">{p.pricing.note[0].toUpperCase() + p.pricing.note.slice(1)}.</p>}
       {p.defaultSize && (
         <p className="mt-3 max-w-2xl border-l-2 border-accent pl-3 text-[14px] leading-6 text-ink">
-          Its default image runs at {p.defaultSize.vcpu} vCPU / {p.defaultSize.memoryGb} GB whatever size you ask for, measured inside
-          real sandboxes. The router only sends it work that fits, and prices it at that size. For more, pass your own image as{" "}
-          <code className="font-mono text-[12.5px]">image.{p.id}</code>.
+          Always runs at {p.defaultSize.vcpu} vCPU / {p.defaultSize.memoryGb} GB unless you pass your own image (
+          <code className="font-mono text-[12.5px]">image.{p.id}</code>), so the router only sends it work that fits.
         </p>
       )}
 
@@ -125,26 +124,23 @@ await sbx.kill();`;
               ))}
             </tbody>
           </table>
-          <p className="mt-4 text-[13px] leading-6 text-ink-2">
-            From{" "}
-            <a href={p.pricing.source} className="underline decoration-line-2 underline-offset-2 hover:text-ink">
-              {p.pricing.source.replace("https://", "")}
-            </a>
-            , checked {p.pricing.checked}. An estimate of what you&apos;ll pay, not a bill (
-            <Link href="/#sources" className="underline decoration-line-2 underline-offset-2 hover:text-ink">
-              where the numbers come from
-            </Link>
-            ).
-          </p>
-          {!p.local && (
-            <p className="mt-2 text-[13px] leading-6 text-ink-2">
-              {p.billing === "active-cpu"
-                ? "CPU is billed only while busy, so these are the prices with every core busy; idle time costs less. "
-                : "Billed on the size you ask for while it runs. "}
-              Plan needed: {p.planLabel}
-              {p.plan ? ` (${p.plan.note}; checked ${p.plan.checked})` : " (a free tier or pay-as-you-go works)"}.
-            </p>
-          )}
+          <dl className="mt-4 grid grid-cols-[5.5rem_1fr] gap-x-3 gap-y-1 text-[13px] leading-6 text-ink-2">
+            <dt className="text-muted">Source</dt>
+            <dd>
+              <a href={p.pricing.source} className="underline decoration-line-2 underline-offset-2 hover:text-ink">
+                {new URL(p.pricing.source).hostname}
+              </a>
+              , {p.pricing.checked} (an estimate, not a bill)
+            </dd>
+            {!p.local && (
+              <>
+                <dt className="text-muted">Billing</dt>
+                <dd>{p.billing === "active-cpu" ? "CPU only while busy; shown with every core busy" : "the size you ask for, while it runs"}</dd>
+                <dt className="text-muted">Plan</dt>
+                <dd>{p.plan ? `${p.planLabel}: ${p.plan.note}` : "none needed"}</dd>
+              </>
+            )}
+          </dl>
         </section>
 
         <section>
@@ -240,8 +236,7 @@ await sbx.kill();`;
           </>
         ) : (
           <p className="mt-4 max-w-2xl text-[14px] leading-6 text-ink-2">
-            Not run against a real account yet. The adapter is tested against a mock of {p.name}&apos;s API; this fills in when someone runs{" "}
-            <code className="font-mono text-[12px]">sandboxrouter check --provider {p.id} --save</code> with real keys.
+            Not run on a real account yet; the adapter is tested against a mock of {p.name}&apos;s API.
           </p>
         )}
       </section>

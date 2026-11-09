@@ -1,94 +1,66 @@
 # Contributing
 
-Thanks for helping. sandboxrouter is a small, neutral router: every provider gets the same treatment, and the catalog is only as good as its prices and its tests. The most useful contributions are, in order:
-
-1. **Run a provider for real** and send the result (see [Sending results](#sending-results)), or report what broke.
-2. **Fix a price or a limit** that's out of date.
-3. **Add a provider.**
-4. Everything else: bugs, docs, the website, the Python client.
+Most useful, in order: **run a provider on a real account and send the result**, **fix a price**, **add a provider**. Bugs, docs and the website are welcome too.
 
 ## Setup
 
 ```bash
 git clone https://github.com/gigialc/sandboxrouter && cd sandboxrouter
 npm install
-npm run typecheck && npm test      # TypeScript: every adapter runs against a local mock server
-npm run test:py                    # Python client
-cd web && npm install && npm run build   # website
+npm run typecheck && npm test           # every adapter against a local mock; no accounts needed
+npm run test:py                         # Python client
+cd web && npm install && npm run build  # website
 ```
 
-Node 20+ (CI uses 22; the Fly Sprites SDK wants 24). No provider accounts are needed for the tests.
+Node 20+ (CI uses 22).
 
 ## Sending results
 
-Nobody can hold an account at every provider, so the real-account results on the website come from whoever has one. Three commands, each writing a file:
+The real-account results on the site come from whoever has an account. With that provider's keys set (`npx tsx src/cli.ts providers` lists them):
 
 ```bash
-# the env vars for that provider: `npx tsx src/cli.ts providers`, or the provider's page on the website
-export MODAL_TOKEN_ID=... MODAL_TOKEN_SECRET=...
-
-npx tsx src/cli.ts check --provider modal --save --by YOUR_GITHUB_USERNAME
-#   does it work: 14 real steps; writes results/conformance/modal.json
-npx tsx src/cli.ts bench --provider modal --runs 5 --share --label "Berlin" --by YOUR_GITHUB_USERNAME
-#   how fast it starts; writes sandboxrouter-bench-*.json: move it into results/
-npx tsx src/cli.ts cost run --provider modal --minutes 10 --by YOUR_GITHUB_USERNAME
-#   what it really billed; writes results/cost/cost-*.json. Bills post late, so run
-#   `npx tsx src/cli.ts cost settle <that file>` again later until the bill shows
+npx tsx src/cli.ts check --provider modal --save --by YOUR_GITHUB_USERNAME     # does it work: results/conformance/modal.json
+npx tsx src/cli.ts bench --provider modal --runs 5 --share --label "Berlin" --by YOUR_GITHUB_USERNAME   # cold starts: move the file into results/
+npx tsx src/cli.ts cost run --provider modal --minutes 10 --by YOUR_GITHUB_USERNAME   # real bill: results/cost/; rerun `cost settle <file>` until it posts
 ```
 
-Each one starts real sandboxes on your account and kills them afterwards, for a few cents at most (a 10-minute cost run at 2 vCPU / 4 GB is about the list price for 10 minutes). `npx tsx src/cli.ts gc --all` kills anything a crashed run left behind; check the provider's dashboard afterwards anyway.
+Each costs a few cents and kills its sandboxes; `npx tsx src/cli.ts gc --all` cleans up after a crash. Run `npm run results:check`, then open a PR with the files. CI refuses keys, emails, IP addresses, street-address labels, unknown providers, impossible numbers, and edits to someone else's bench report. A maintainer reviews every result PR.
 
-Then open a PR with the files, and run `npm run results:check` first. CI runs the same check on every PR. It refuses:
+- `--by` credits you on the site. Results never include keys, env vars or error messages.
+- Prices never come from result files; they come from the provider's pricing page (below).
+- Providers whose terms forbid publishing benchmarks (`noBenchmarks` in [`src/catalog.ts`](src/catalog.ts), today Blaxel) are left out of shared files automatically.
 
-- anything that looks like a key or token, an email address or an IP address;
-- a `--label` that looks like a street address: use a city or a cloud region;
-- providers that aren't in the catalog, impossible numbers (fewer than 3 bench runs, timings over 15 minutes, negative bills), dates in the future;
-- edits to or deletions of an existing bench report: a new run is a new file.
-
-`--by` is optional and puts your GitHub username on the result, so the website can credit you. Results never include keys, env vars or error messages. Run the commands unmodified: a maintainer reviews every result PR, and numbers far from everyone else's get a second run before they're merged.
-
-Prices are the exception: they always come from the provider's public pricing page (see below), never from a result file.
-
-Some providers' terms forbid publishing benchmarks about them (`noBenchmarks` in [`src/catalog.ts`](src/catalog.ts); today Blaxel). `bench --share` and `cost run` leave them out of the files they write, `check --save` keeps their pass/fail without timings, and CI refuses result files that include their numbers. Run them on your own account all you like; just don't publish the numbers.
-
-Maintainers: `npm run secrets:push -- --init` writes a gitignored `.env.providers` with every key name; fill it in and run `npm run secrets:push` to load the keys into the repo's Actions secrets for the nightly tests.
+Maintainers: `npm run secrets:push -- --init` writes a gitignored `.env.providers`; fill it in and run `npm run secrets:push` to load the keys into Actions secrets for the nightly check.
 
 ## Fixing a price
 
-Prices live in [`src/catalog.ts`](src/catalog.ts): `vcpuHour`, `gbHour`, a short `note`, the `source` URL and the date you `checked` it. Fixed-size providers also have a rule in `hourlyCost()`. Change the numbers, set `checked` to today, link the page in the PR, then regenerate the generated parts:
+Edit the provider's entry in [`src/catalog.ts`](src/catalog.ts) (`vcpuHour`, `gbHour`, `note`, `source`, `checked` = today), link the pricing page in the PR, then regenerate:
 
 ```bash
-node --import tsx scripts/readme-tables.ts --write   # regenerate the tables: Prices (README), Env and Compatibility (docs/reference.md)
-npm run site:data                             # web/src/data/site.json
+node --import tsx scripts/readme-tables.ts --write && npm run site:data
 ```
 
-`npm run price:check` shows which pricing pages changed since the last check (a workflow runs it every Monday and opens an issue).
-
-Please use the provider's **public list price** for self-serve accounts. No negotiated rates, no promos, no credits.
+Use the **public self-serve list price**: no negotiated rates, promos or credits. `npm run price:check` shows which pricing pages changed; a workflow runs it every Monday.
 
 ## Adding a provider
 
-One adapter file, one test file, and a few one-line registrations. Copy a plain-REST adapter close to the new one, e.g. [`src/providers/dedalus.ts`](src/providers/dedalus.ts) or [`src/providers/koyeb.ts`](src/providers/koyeb.ts) (or [`alibaba.ts`](src/providers/alibaba.ts) for an E2B-compatible API).
+Copy an adapter close to the new one: [`koyeb.ts`](src/providers/koyeb.ts) or [`dedalus.ts`](src/providers/dedalus.ts) for plain REST, [`alibaba.ts`](src/providers/alibaba.ts) for an E2B-compatible API.
 
-1. `src/providers/<id>.ts`: a class implementing `Provider` and `ProviderSandbox` from [`src/types.ts`](src/types.ts). Start it with a comment that lists the wire protocol you used and links the docs.
-   - `exec` must honor `cwd`, `env` and `timeoutSeconds`, and call `onStdout`/`onStderr` as output arrives if the provider can stream.
-   - A command that outlives `timeoutSeconds` must be **stopped** (not just abandoned) and `exec` must reject with `timeoutError(id, seconds)` from [`src/util.ts`](src/util.ts), i.e. `ProviderError("<id>: command timed out after Ns")`. The same file has the pieces: `wrapCommand` for cwd/env when the API lacks them, `guardTimeout` to run a command under coreutils `timeout` when the API cannot kill a running command, and `killedByTimeout` to recognise a timeout kill (exit 124/137/143 after the deadline) and tell it from a command that exits 124 by itself. The router adds a 30 s grace deadline on top (`EXEC_GRACE_S`), but that is a net, not the mechanism.
-   - `readFile`/`writeFile` must be binary-safe.
-   - `pause()` only if the provider keeps the disk; `connect(id)` must resume a paused sandbox.
-   - Prefer plain `fetch` over an SDK. If an SDK is required, load it with `optionalImport` and add it to `peerDependenciesMeta` as optional.
-2. `test/<id>.test.ts`: a local mock (an HTTP server following the provider's API, or `vi.mock` of its SDK) that really runs the commands with `sh` in a temp dir, honouring cwd, env and the vendor's timeout behaviour. Call `describeConformance("<id>", { provider, dir })` from [`test/conformance.ts`](test/conformance.ts) so the adapter is held to the same contract as every other (output, env and cwd, streaming, binary files, timeout kill, connect, pause and resume, kill), then add the vendor-specific checks (spec mapping, error mapping). It must pass on macOS and Linux (CI runs Ubuntu); macOS has no coreutils `timeout`, so mocks that need one add a shim (see `test/koyeb.test.ts`). Kill whole process groups on timeouts.
-3. Register it: the id in `ProviderId` (`src/types.ts`), a catalog entry (and an `hourlyCost` rule for fixed sizes) in `src/catalog.ts`, `defaultProviders()` in `src/router.ts`, an export in `src/index.ts`, and the npm package (or `null`) in `web/src/lib/site.ts`.
-4. Docs: the provider list at the top of `README.md`, and the Install note and the "How each adapter maps the spec" row in [`docs/reference.md`](docs/reference.md), then regenerate the tables and site data as above.
+1. **`src/providers/<id>.ts`** implements `Provider` and `ProviderSandbox` from [`src/types.ts`](src/types.ts); its top comment names the protocol and links the docs.
+   - `exec` honours `cwd`, `env` and `timeoutSeconds`, and streams through `onStdout`/`onStderr` when the provider can.
+   - A command past its timeout must be **stopped**, and `exec` rejects with `timeoutError(id, seconds)`. [`src/util.ts`](src/util.ts) has the helpers: `wrapCommand`, `guardTimeout`, `killedByTimeout`.
+   - Files are binary-safe. `pause()` only if the disk is kept; `connect(id)` resumes a paused sandbox.
+   - Prefer `fetch`; an SDK loads through `optionalImport` and is an optional peer dependency.
+2. **`test/<id>.test.ts`** mocks the provider's API, really runs commands with `sh`, and calls `describeConformance("<id>", …)` from [`test/conformance.ts`](test/conformance.ts) so the adapter meets the same contract as every other. It must pass on macOS and Linux (see `test/koyeb.test.ts` for the `timeout` shim).
+3. **Register it:** `ProviderId` in `src/types.ts`, a catalog entry in `src/catalog.ts`, `defaultProviders()` in `src/router.ts`, an export in `src/index.ts`, and its npm package (or `null`) in `web/src/lib/site.ts`.
+4. **Docs:** the provider list at the top of `README.md` and the Install note and adapter row in [`docs/reference.md`](docs/reference.md), then regenerate as above.
 
-Capabilities in the catalog describe what the **adapter** implements, not what the provider markets. Leave a capability out until it's implemented and tested.
+List only the capabilities the adapter implements and tests, not what the provider markets.
 
 ## Neutrality
 
-The router orders providers by list price (or your own measured cold starts) and breaks ties alphabetically. PRs that give any provider a better slot, a default, or nicer copy than the others won't be merged, including from providers. Provider teams are very welcome to review and fix their own adapter.
+Providers are ordered by list price (or your own measured cold starts), ties alphabetical. PRs that give a provider a better slot, a default or nicer copy won't be merged, including from providers. Provider teams are welcome to fix their own adapter.
 
 ## Pull requests
 
-- Keep each PR to one thing, and include tests.
-- `npm run typecheck && npm test` must pass. CI also runs the Python tests and the website build.
-- Write commit messages that say what changed and why.
-- By contributing you agree your work is released under the [MIT License](LICENSE).
+One thing per PR, with tests. `npm run typecheck && npm test` must pass (CI also runs the Python tests and the website build). By contributing you agree your work is released under the [MIT License](LICENSE).
