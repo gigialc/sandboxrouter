@@ -263,7 +263,7 @@ export class Router {
         if (route.fallback !== "any" && setup) {
           const msg = (err as Error).message.replace(/[.\s]+$/, "");
           throw new RouterError(
-            `${msg.startsWith(c.provider) ? msg : `${c.provider}: ${msg}`}. This looks like a setup problem with ${c.provider} (key, billing, image, request or a missing package), ` +
+            `${msg.startsWith(c.provider) ? msg : `${c.provider}: ${msg}`}. This looks like a setup problem with ${c.provider} (key, image, request or a missing package), ` +
               `so the router stopped instead of moving the work to another provider; pass fallback: "any" to fall back on every error`,
             attempts,
           );
@@ -405,8 +405,12 @@ function round(n: number) {
 /** Seconds to wait for one provider's create before trying the next (RouteOptions.createTimeoutSeconds). */
 export const DEFAULT_CREATE_TIMEOUT_S = 120;
 
-/** HTTP statuses that mean the request or the account is wrong, not that the provider is down. */
-const SETUP_ERRORS = new Set([400, 401, 402, 403, 404, 422]);
+/**
+ * HTTP statuses that mean the request or the key is wrong, not that the provider is down. 402 (out of
+ * balance, plan needed) isn't one: an unfunded account is exactly when the next provider should take the
+ * sandbox, and the failed attempt stays on `attempts` (the CLI prints it), so it isn't hidden.
+ */
+const SETUP_ERRORS = new Set([400, 401, 403, 404, 422]);
 
 /** Seconds past a command's timeout before the router stops waiting for the adapter. */
 export const EXEC_GRACE_S = 30;

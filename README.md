@@ -185,8 +185,9 @@ const c = await router.create({}, { provider: ["e2b", "daytona"], fallback: fals
 
 // Fallback moves on when a provider is down: a timeout, a network error, 429 or 5xx, and a create
 // that takes longer than createTimeoutSeconds (default 120; a sandbox that turns up later is
-// killed, or left in the ledger for `gc`). A setup error (400, 401, 402, 403, 404, 422: a bad key,
-// no billing, a bad image) stops instead, so a mistake isn't hidden by a pricier provider.
+// killed, or left in the ledger for `gc`), and when an account can't pay (402: no balance, plan
+// needed). A setup error (400, 401, 403, 404, 422: a bad key, a bad image or request) stops instead,
+// so a mistake isn't hidden by a pricier provider. Every failed attempt is on sbx.attempts.
 // fallback: "any" falls back on every error.
 const e = await router.create({}, { fallback: "any", createTimeoutSeconds: 300 });
 
