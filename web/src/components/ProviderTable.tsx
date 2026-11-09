@@ -45,7 +45,7 @@ export function ProviderTable() {
         </button>
       </div>
 
-      <table className="w-full text-[13px]">
+      <table className="w-full text-[14px]">
         <thead>
           <tr className="text-left text-[11px] uppercase tracking-[0.12em] text-muted">
             <th className="py-3 pr-4 font-normal">Provider</th>
@@ -130,21 +130,12 @@ export function ProviderTable() {
           )}
         </tbody>
       </table>
-      <p className="mt-4 text-[12px] leading-5 text-muted">
-        Providers anyone can sign up for come first, cheapest first, ties alphabetical; waitlisted or closed sign-ups follow. The
-        router uses the same price order, but only among providers you have keys for. Prices are each provider&apos;s public list
-        price while running, an estimate rather than a bill (where they come from is below). ≤ means CPU is billed only while busy, so this is the price with every core busy and idle work costs less.
-        Plan needed is the monthly plan required before the API creates sandboxes (&ldquo;credited&rdquo; = paid back as usage);
-        for a small project it can cost more than the usage. Real account shows whether the 14-step check has passed on a real
-        account; &ldquo;not yet&rdquo; means the adapter is built from the provider&apos;s docs and tested against mocks only.
-        {showSpeed && (
-          <>
-            {" "}
-            Cold starts are medians from the benchmark reports submitted so far ({site.submissions.length}{" "}
-            {site.submissions.length === 1 ? "report, from one machine" : "reports"}), so treat them as a rough guide.
-          </>
-        )}{" "}
-        Docker runs on your own machine and is only used when you ask for it.
+      <p className="mt-4 max-w-4xl text-[13px] leading-6 text-ink-2">
+        Cheapest first, open sign-ups before waitlisted ones. ≤ = billed only while the CPU is busy. &ldquo;Not yet&rdquo; = tested
+        against mocks only.{" "}
+        <Link href="/docs#price-table" className="underline decoration-line-2 underline-offset-2 hover:text-ink">
+          How to read this table
+        </Link>
       </p>
     </div>
   );

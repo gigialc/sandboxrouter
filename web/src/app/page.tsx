@@ -3,6 +3,7 @@ import { CodeTabs, InstallChip } from "@/components/code";
 import { ProviderTable } from "@/components/ProviderTable";
 import { Sources } from "@/components/Sources";
 import { DesktopTable } from "@/components/DesktopTable";
+import { RouteDemo } from "@/components/RouteDemo";
 import { NPM, NPM_URL, REPO, REPO_PUBLIC, site } from "@/lib/site";
 
 const TS = `import { Router } from "${NPM}";
@@ -66,7 +67,7 @@ export default function Home() {
         </div>
       </section>
 
-      <div className="min-w-0">
+      <div className="min-w-0 space-y-4">
         <CodeTabs
           tabs={[
             { label: "TypeScript", code: TS },
@@ -74,6 +75,7 @@ export default function Home() {
             { label: "HTTP", code: HTTP },
           ]}
         />
+        <RouteDemo />
       </div>
       </div>
 
@@ -84,13 +86,13 @@ export default function Home() {
         <ol className="mt-8 grid gap-10 sm:grid-cols-3">
           {STEPS.map(([title, body], i) => (
             <li key={title}>
-              <span className="font-mono text-[12px] text-accent">0{i + 1}</span>
-              <h3 className="mt-2 text-[15px] text-ink">{title}</h3>
-              <p className="mt-2 text-[13px] leading-6 text-ink-2">{body}</p>
+              <span className="font-mono text-[13px] text-accent">0{i + 1}</span>
+              <h3 className="mt-2 text-[16px] text-ink">{title}</h3>
+              <p className="mt-2 text-[14px] leading-6 text-ink-2">{body}</p>
             </li>
           ))}
         </ol>
-        <p className="mt-10 max-w-3xl border-l-2 border-accent pl-4 text-[14px] leading-6 text-ink-2">
+        <p className="mt-10 max-w-3xl border-l-2 border-accent pl-4 text-[15px] leading-7 text-ink-2">
           <span className="text-ink">Built for anything that starts many short-lived sandboxes:</span> agents that open one per task
           or per user, evals, and RL rollouts. Each new sandbox goes to the cheapest provider that&apos;s up, and switching providers is
           a matter of which keys are set, not a rewrite. Free and MIT licensed.

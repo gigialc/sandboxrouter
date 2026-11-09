@@ -9,6 +9,7 @@ const SECTIONS = [
   ["quickstart", "Quickstart"],
   ["keys", "Provider keys"],
   ["routing", "Routing"],
+  ["price-table", "Reading the price table"],
   ["fallback", "Fallback"],
   ["streaming", "Streaming output"],
   ["files", "Files"],
@@ -121,6 +122,40 @@ router.create(spec, { require: ["pause"] })         // only providers that can p
           <code>router.plan(spec, route)</code> or run <code>npx @sandboxrouter/sdk route</code>. Every skipped provider comes with
           a reason, like <code>not configured</code> or <code>max 16 vCPU</code>.
         </p>
+
+        <h2 id="price-table">Reading the price table</h2>
+        <ul>
+          <li>
+            <strong>Order:</strong> providers anyone can sign up for come first, cheapest first, ties alphabetical; waitlisted or
+            closed sign-ups follow, then providers that can&apos;t take the size. The router uses the same price order, but only
+            among providers you have keys for.
+          </li>
+          <li>
+            <strong>List price / hr:</strong> each provider&apos;s public list price while running, read off its pricing page. An
+            estimate, not a bill: the benchmarks page compares it with real bills where a provider has a billing API.
+          </li>
+          <li>
+            <strong>≤:</strong> CPU is billed only while busy, so the price shown is with every core busy and idle work costs less.
+          </li>
+          <li>
+            <strong>&ldquo;at 2 vCPU · 0.5 GB only&rdquo;:</strong> the provider&apos;s default image runs at that size whatever you
+            ask for; a bigger size needs your own image.
+          </li>
+          <li>
+            <strong>Plan needed:</strong> the monthly plan required before the API creates sandboxes (&ldquo;credited&rdquo; = paid
+            back as usage). For a small project it can cost more than the usage.
+          </li>
+          <li>
+            <strong>Cold start:</strong> medians from the benchmark reports submitted so far; with few reports, a rough guide.
+          </li>
+          <li>
+            <strong>Real account:</strong> whether the 14-step check has passed on a real account. &ldquo;Not yet&rdquo; means the
+            adapter is built from the provider&apos;s docs and tested against a mock of its API only.
+          </li>
+          <li>
+            <strong>Docker</strong> runs on your own machine and is only used when you ask for it by name.
+          </li>
+        </ul>
 
         <h2 id="fallback">Fallback</h2>
         <p>

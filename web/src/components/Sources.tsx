@@ -47,8 +47,8 @@ export function Sources() {
     <section id="sources" className="scroll-mt-20 grid gap-10 border-t border-line pt-8 sm:grid-cols-3">
       {items.map((it) => (
         <div key={it.title}>
-          <h3 className="text-[15px] text-ink">{it.title}</h3>
-          <p className="mt-2 text-[13px] leading-6 text-ink-2">{it.body}</p>
+          <h3 className="text-[16px] text-ink">{it.title}</h3>
+          <p className="mt-2 text-[14px] leading-6 text-ink-2">{it.body}</p>
         </div>
       ))}
     </section>

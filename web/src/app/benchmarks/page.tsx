@@ -39,7 +39,7 @@ export default function BenchmarksPage() {
         them aren&apos;t here yet; they get added as soon as someone runs them.
       </p>
 
-      <table className="mt-10 w-full text-[13px]">
+      <table className="mt-10 w-full text-[14px]">
         <thead>
           <tr className="text-left text-[11px] uppercase tracking-[0.12em] text-muted">
             <th className="py-3 pr-4 font-normal">Provider</th>
@@ -94,7 +94,7 @@ export default function BenchmarksPage() {
             &ldquo;Billed&rdquo; is read back from the provider&apos;s own billing API.
           </p>
           <div className="mt-6 overflow-x-auto">
-            <table className="w-full min-w-[720px] text-[13px]">
+            <table className="w-full min-w-[720px] text-[14px]">
               <thead>
                 <tr className="text-left text-[11px] uppercase tracking-[0.12em] text-muted">
                   <th className="py-3 pr-4 font-normal">Provider</th>
@@ -133,7 +133,7 @@ export default function BenchmarksPage() {
               </tbody>
             </table>
           </div>
-          <p className="mt-4 max-w-3xl text-[12px] leading-5 text-muted">
+          <p className="mt-4 max-w-3xl text-[13px] leading-6 text-ink-2">
             Billed and list price differ for reasons a price table can&apos;t show: some providers bill only while a request is
             open, some add a one-off creation fee that dominates a short run (Sail, on its free plan), and an account on a
             plan with included usage can be billed nothing (Maritime). &ldquo;Got&rdquo; is what the sandbox itself reports (nproc,
