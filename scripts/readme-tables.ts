@@ -13,19 +13,17 @@ const rows = listingOrder(SIZE);
 const order = new Map(rows.map((c, i) => [c.id, i]));
 const live = new Map(conformanceTable().map((r) => [r.provider, liveStatus(r)]));
 
-const prices = ["| Provider | $/hr | Plan needed | Real-account check | Notes | Source |", "|---|---|---|---|---|---|"];
+// Billing fine print (per-provider notes) lives on each provider's page on the site, not here.
+const prices = ["| Provider | $/hr | Plan needed | Real-account check | Source |", "|---|---|---|---|---|"];
 for (const c of rows) {
   const why = unfit(c.id, SIZE);
   const cost = `$${hourlyCost(c.id, SIZE).toFixed(3)}`;
   const price = c.local ? "free" : why ? `skipped (${why})` : c.billing === "active-cpu" ? `up to ${cost}` : cost;
   const plan = c.local ? "none" : planLabel(c.id);
   const tested = live.get(c.id)!.label;
-  const note = (c.pricing.note ?? "").replace(/\|/g, "/");
-  // Capitalize a leading plain word ("per second" -> "Per second"), but not codes like "us-east-1" or "iad1".
-  const shown = /^[a-z]+(?:-[a-z]+)*(?=[\s,;:(]|$)/.test(note) ? note[0].toUpperCase() + note.slice(1) : note;
   const gated = accessLabel(c.id);
   const name = gated ? `${c.name} (${gated})` : c.name;
-  prices.push(`| ${name} | ${price} | ${plan} | ${tested} | ${shown} | [pricing](${c.pricing.source}) |`);
+  prices.push(`| [${name}](https://sandboxrouter.vercel.app/providers/${c.id}) | ${price} | ${plan} | ${tested} | [pricing](${c.pricing.source}) |`);
 }
 const dates = CATALOG.filter((c) => !c.local).flatMap((c) => [c.pricing.checked, ...(c.plan ? [c.plan.checked] : [])]).sort();
 prices.push("", `Checked ${dates[0] === dates.at(-1) ? dates[0] : `${dates[0]} to ${dates.at(-1)}`}.`);

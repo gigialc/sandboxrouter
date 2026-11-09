@@ -12,9 +12,7 @@ export function Sources() {
       title: "Prices are list prices",
       body: (
         <>
-          Every price is read off the provider&apos;s public pricing page, with a link and the date it was checked (the oldest is{" "}
-          {oldest}). A script re-reads every pricing page each week and flags any change for a person to update. They are estimates
-          of what you&apos;ll pay, not bills, and contributors can&apos;t set them.
+          From each provider&apos;s public pricing page, re-read every week (oldest check {oldest}). Estimates, not bills.
         </>
       ),
     },
@@ -22,9 +20,7 @@ export function Sources() {
       title: "Bills are measured",
       body: (
         <>
-          <code className="font-mono text-[12px]">sandboxrouter cost run</code> starts a real sandbox, keeps it busy, then reads what
-          the provider actually charged from its billing API. That shows where the list price misleads: billing only while busy,
-          creation fees, plan credits. {billed} provider{billed === 1 ? "" : "s"} measured so far, on{" "}
+          Real sandboxes, then the provider&apos;s own billing API: {billed} so far, on{" "}
           <Link href="/benchmarks#real-cost" className="underline decoration-line-2 underline-offset-2 hover:text-ink">
             the benchmarks page
           </Link>
@@ -36,9 +32,8 @@ export function Sources() {
       title: "Tests and speed are contributed",
       body: (
         <>
-          Anyone with a provider account can run the real-account check and the speed benchmark and send in the result. Each result
-          says who ran it, when and from where, and speed is the median of each location&apos;s median, so no single run sets the
-          number. {passed} of {cloud.length} providers have passed so far; the rest are tested against mocks of their API.
+          Anyone with an account can send a result, credited by name; speed is a median of medians. {passed} of {cloud.length}{" "}
+          providers pass so far.
         </>
       ),
     },
