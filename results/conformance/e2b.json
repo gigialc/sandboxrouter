@@ -1,77 +1,77 @@
 {
   "tool": "sandboxrouter-check",
-  "version": "0.3.2",
-  "date": "2026-11-07T13:15:27.395Z",
+  "version": "0.3.3",
+  "date": "2026-11-09T16:33:57.626Z",
   "platform": "linux-x64",
   "provider": "e2b",
-  "sandboxId": "e2b:idbjy42kq5d4l3dv70a1a",
+  "sandboxId": "e2b:i2cujovdw2wikmvqw3irz",
   "results": [
     {
       "step": "create",
-      "ms": 570,
+      "ms": 606,
       "status": "pass",
-      "detail": "e2b:idbjy42kq5d4l3dv70a1a, ~$0.1089/hr"
+      "detail": "e2b:i2cujovdw2wikmvqw3irz, ~$0.1089/hr"
     },
     {
       "step": "exec: stdout, stderr, exit code",
-      "ms": 139,
+      "ms": 102,
       "status": "pass"
     },
     {
       "step": "exec: env and cwd",
-      "ms": 52,
-      "status": "pass"
-    },
-    {
-      "step": "exec: UTF-8 output",
       "ms": 55,
       "status": "pass"
     },
     {
+      "step": "exec: UTF-8 output",
+      "ms": 53,
+      "status": "pass"
+    },
+    {
       "step": "exec: streaming",
-      "ms": 3059,
+      "ms": 3060,
       "status": "pass",
       "detail": "first output after 49 ms"
     },
     {
       "step": "files: binary round-trip",
-      "ms": 223,
+      "ms": 293,
       "status": "pass"
     },
     {
       "step": "files: 1 MB round-trip",
-      "ms": 256,
+      "ms": 179,
       "status": "pass"
     },
     {
       "step": "files: missing file is an error",
-      "ms": 49,
+      "ms": 48,
       "status": "pass"
     },
     {
       "step": "files: visible to commands",
-      "ms": 144,
+      "ms": 150,
       "status": "pass"
     },
     {
       "step": "exec: command timeout",
-      "ms": 3053,
+      "ms": 3054,
       "status": "pass",
-      "detail": "threw after 3053 ms"
+      "detail": "threw after 3054 ms"
     },
     {
       "step": "exec: timed-out command was stopped",
-      "ms": 6219,
+      "ms": 6171,
       "status": "pass"
     },
     {
       "step": "pause and resume",
-      "ms": 635,
+      "ms": 575,
       "status": "pass"
     },
     {
       "step": "kill",
-      "ms": 64,
+      "ms": 66,
       "status": "pass"
     },
     {

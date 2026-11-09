@@ -1,15 +1,15 @@
 {
   "tool": "sandboxrouter-check",
-  "version": "0.3.2",
-  "date": "2026-11-07T13:14:32.809Z",
+  "version": "0.3.3",
+  "date": "2026-11-09T16:33:02.374Z",
   "platform": "linux-x64",
   "provider": "blaxel",
-  "sandboxId": "blaxel:71566607-2c79-4c11-9f4b-bf05ed1050b8",
+  "sandboxId": "blaxel:1a188179-e7e5-46cc-a535-f4c748832503",
   "results": [
     {
       "step": "create",
       "status": "pass",
-      "detail": "blaxel:71566607-2c79-4c11-9f4b-bf05ed1050b8, ~$0.1656/hr"
+      "detail": "blaxel:1a188179-e7e5-46cc-a535-f4c748832503, ~$0.1656/hr"
     },
     {
       "step": "exec: stdout, stderr, exit code",
