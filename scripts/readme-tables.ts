@@ -1,7 +1,7 @@
-// Builds the README's generated tables from the code, so the README can't drift:
-// Prices (catalog), Env (credentials) and Compatibility (saved `check --save` runs).
+// Builds the docs' generated tables from the code, so they can't drift: Prices (catalog) in README.md,
+// Env (credentials) and Compatibility (saved `check --save` runs) in docs/reference.md.
 // Run: node --import tsx scripts/readme-tables.ts           print them
-//      node --import tsx scripts/readme-tables.ts --write   replace them in README.md
+//      node --import tsx scripts/readme-tables.ts --write   replace them in those files
 import { readFileSync, writeFileSync } from "node:fs";
 import { CATALOG, DEFAULT_MEMORY_GB, DEFAULT_VCPU, accessLabel, hourlyCost, listingOrder, planLabel, unfit } from "../src/catalog.js";
 import { CHECK_STEPS } from "../src/check.js";
@@ -55,16 +55,18 @@ for (const row of conformanceTable().sort((a, b) => order.get(a.provider)! - ord
 if (!process.argv.includes("--write")) {
   console.log([prices.join("\n"), env.join("\n"), checks.join("\n")].join("\n\n---\n\n"));
 } else {
-  let readme = readFileSync("README.md", "utf8");
-  /** Replace the block of lines that starts with `header`, through the last line `isPart` accepts. */
+  const FILES = ["README.md", "docs/reference.md"];
+  const docs = new Map(FILES.map((f) => [f, readFileSync(f, "utf8")]));
+  /** Replace the block of lines that starts with `header`, through the last line `isPart` accepts, in whichever file has it. */
   const replace = (header: string, lines: string[], isPart: (line: string) => boolean) => {
-    const all = readme.split("\n");
+    const file = FILES.find((f) => docs.get(f)!.split("\n").some((l) => l.startsWith(header)));
+    if (!file) throw new Error(`no table starting with "${header}" in ${FILES.join(" or ")}`);
+    const all = docs.get(file)!.split("\n");
     const start = all.findIndex((l) => l.startsWith(header));
-    if (start < 0) throw new Error(`README.md has no table starting with "${header}"`);
     let end = start;
     while (end + 1 < all.length && isPart(all[end + 1])) end++;
     all.splice(start, end - start + 1, ...lines);
-    readme = all.join("\n");
+    docs.set(file, all.join("\n"));
   };
   const tableRow = (l: string) => l.startsWith("|");
   let afterTable = false;
@@ -76,6 +78,6 @@ if (!process.argv.includes("--write")) {
   });
   replace("| Provider | Env |", env, tableRow);
   replace("| Provider | Real-account check", checks, tableRow);
-  writeFileSync("README.md", readme);
-  console.log("README.md: Prices, Env and Compatibility tables updated");
+  for (const [file, text] of docs) writeFileSync(file, text);
+  console.log("README.md: Prices; docs/reference.md: Env and Compatibility tables updated");
 }
