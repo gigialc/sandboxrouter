@@ -18,7 +18,7 @@ export function DesktopTable() {
   return (
     <div>
       <TableScroll>
-        <table className="w-full text-[13px]">
+        <table className="w-full text-[14px]">
           <thead>
             <tr className="border-b border-line text-left text-[11px] uppercase tracking-[0.12em] text-muted">
               <th className="py-3 pr-4 font-normal">Provider</th>
@@ -67,10 +67,9 @@ export function DesktopTable() {
           </tbody>
         </table>
       </TableScroll>
-      <p className="mt-4 text-[12px] leading-5 text-muted">
-        Machines with a screen your model drives with clicks and keys. <span className="font-mono">router.computer({`{ os }`})</span>{" "}
-        starts one on the cheapest provider for that OS among those you have keys for, ties alphabetical. Human takeover means a
-        person can open a link to handle a login or CAPTCHA. Default sizes differ a lot, so compare price and size together.
+      <p className="mt-4 max-w-4xl text-[13px] leading-6 text-ink-2">
+        <span className="font-mono">router.computer({`{ os }`})</span> starts one on the cheapest provider for that OS among those you
+        have keys for. Human takeover = a person can open a link to handle a login or CAPTCHA. Sizes differ a lot, so compare both.
       </p>
     </div>
   );

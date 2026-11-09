@@ -105,7 +105,7 @@ await sbx.kill();`;
       <div className="mt-12 grid grid-cols-1 gap-12 md:grid-cols-2">
         <section>
           <h2 className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted">List price per hour</h2>
-          <table className="mt-4 w-full text-[13px]">
+          <table className="mt-4 w-full text-[14px]">
             <tbody>
               {site.shapes.map((s) => (
                 <tr key={s} className="border-t border-line">
@@ -125,7 +125,7 @@ await sbx.kill();`;
               ))}
             </tbody>
           </table>
-          <p className="mt-4 text-[12px] leading-5 text-muted">
+          <p className="mt-4 text-[13px] leading-6 text-ink-2">
             From{" "}
             <a href={p.pricing.source} className="underline decoration-line-2 underline-offset-2 hover:text-ink">
               {p.pricing.source.replace("https://", "")}
@@ -137,7 +137,7 @@ await sbx.kill();`;
             ).
           </p>
           {!p.local && (
-            <p className="mt-2 text-[12px] leading-5 text-muted">
+            <p className="mt-2 text-[13px] leading-6 text-ink-2">
               {p.billing === "active-cpu"
                 ? "CPU is billed only while busy, so these are the prices with every core busy; idle time costs less. "
                 : "Billed on the size you ask for while it runs. "}
@@ -181,12 +181,12 @@ await sbx.kill();`;
               <div key={k} className="bg-bg p-4">
                 <dt className="text-[11px] uppercase tracking-[0.12em] text-muted">{k}</dt>
                 <dd className={`mt-2 font-mono text-[15px] tnum ${/^(not |no |run failed)/.test(v) ? "text-muted" : "text-ink"}`}>{v}</dd>
-                <dd className="mt-1 text-[12px] leading-5 text-muted">{sub}</dd>
+                <dd className="mt-1 text-[13px] leading-6 text-ink-2">{sub}</dd>
               </div>
             ))}
           </dl>
           {p.noBenchmarks && (
-            <p className="mt-4 max-w-2xl text-[13px] leading-6 text-ink-2">
+            <p className="mt-4 max-w-2xl text-[14px] leading-6 text-ink-2">
               Speed, size and billing results for {p.name} aren&apos;t published here:{" "}
               <a href={p.noBenchmarks.source} className="underline decoration-line-2 underline-offset-2 hover:text-ink">
                 {p.noBenchmarks.clause}
@@ -198,7 +198,7 @@ await sbx.kill();`;
           {help.length > 0 && (
             <div className="mt-6 border-l-2 border-accent pl-4">
               <h3 className="text-[15px] text-ink">Help verify {p.name}</h3>
-              <p className="mt-2 max-w-2xl text-[13px] leading-6 text-ink-2">
+              <p className="mt-2 max-w-2xl text-[14px] leading-6 text-ink-2">
                 Have a {p.name} account? These run real sandboxes on it, for a few cents at most, and write result files that fill in
                 the blanks above. Results never include your keys.
                 {REPO_PUBLIC
@@ -239,7 +239,7 @@ await sbx.kill();`;
             </ul>
           </>
         ) : (
-          <p className="mt-4 max-w-2xl text-[13px] leading-6 text-ink-2">
+          <p className="mt-4 max-w-2xl text-[14px] leading-6 text-ink-2">
             Not run against a real account yet. The adapter is tested against a mock of {p.name}&apos;s API; this fills in when someone runs{" "}
             <code className="font-mono text-[12px]">sandboxrouter check --provider {p.id} --save</code> with real keys.
           </p>
