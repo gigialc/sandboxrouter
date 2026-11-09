@@ -2,16 +2,14 @@
 
 All notable changes. Versions follow [semver](https://semver.org/); while the version is 0.x, a minor bump can change the API.
 
-## Unreleased
+## 0.3.3 (2026-11-09)
 
 ### Changed
 - Fallback moves on when an account can't pay (402: no balance, or a plan needed) instead of stopping, so one unfunded account no longer blocks a plain `create()`. The failed attempt stays on `attempts` (the CLI prints it). Bad keys, bad images and bad requests (400, 401, 403, 404, 422) still stop.
+- Providers whose terms forbid publishing benchmarks (`noBenchmarks` in the catalog, `benchmarksPublishable()`; today Blaxel, under §2.6(f) of its terms) are left out of everything meant to be published: `bench --share` and `cost run` drop them from the files they write, `check --save` keeps their pass/fail but no timings, `results:check` refuses files with their numbers, and the website shows their list price and real-account check but no speed, size or bill. Blaxel's earlier numbers were removed from `results/`.
 
 ### Fixed
 - `cost run` measured the size a sandbox gets from `nproc` and `MemTotal`, which on Daytona now show the host (64 CPUs, 755 GB) rather than the sandbox's 1 vCPU / 1 GB. It now reads the cgroup limits (v2 `cpu.max` / `memory.max`, or v1) when they're set.
-
-### Changed
-- Providers whose terms forbid publishing benchmarks (`noBenchmarks` in the catalog, `benchmarksPublishable()`; today Blaxel, under §2.6(f) of its terms) are left out of everything meant to be published: `bench --share` and `cost run` drop them from the files they write, `check --save` keeps their pass/fail but no timings, `results:check` refuses files with their numbers, and the website shows their list price and real-account check but no speed, size or bill. Blaxel's earlier numbers were removed from `results/`.
 
 ## 0.3.2 (2026-11-07)
 
