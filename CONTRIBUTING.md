@@ -58,7 +58,7 @@ Maintainers: `npm run secrets:push -- --init` writes a gitignored `.env.provider
 Prices live in [`src/catalog.ts`](src/catalog.ts): `vcpuHour`, `gbHour`, a short `note`, the `source` URL and the date you `checked` it. Fixed-size providers also have a rule in `hourlyCost()`. Change the numbers, set `checked` to today, link the page in the PR, then regenerate the generated parts:
 
 ```bash
-node --import tsx scripts/readme-tables.ts --write   # regenerate the README tables (Prices, Env, Compatibility)
+node --import tsx scripts/readme-tables.ts --write   # regenerate the tables: Prices (README), Env and Compatibility (docs/reference.md)
 npm run site:data                             # web/src/data/site.json
 ```
 
@@ -78,7 +78,7 @@ One adapter file, one test file, and a few one-line registrations. Copy a plain-
    - Prefer plain `fetch` over an SDK. If an SDK is required, load it with `optionalImport` and add it to `peerDependenciesMeta` as optional.
 2. `test/<id>.test.ts`: a local mock (an HTTP server following the provider's API, or `vi.mock` of its SDK) that really runs the commands with `sh` in a temp dir, honouring cwd, env and the vendor's timeout behaviour. Call `describeConformance("<id>", { provider, dir })` from [`test/conformance.ts`](test/conformance.ts) so the adapter is held to the same contract as every other (output, env and cwd, streaming, binary files, timeout kill, connect, pause and resume, kill), then add the vendor-specific checks (spec mapping, error mapping). It must pass on macOS and Linux (CI runs Ubuntu); macOS has no coreutils `timeout`, so mocks that need one add a shim (see `test/koyeb.test.ts`). Kill whole process groups on timeouts.
 3. Register it: the id in `ProviderId` (`src/types.ts`), a catalog entry (and an `hourlyCost` rule for fixed sizes) in `src/catalog.ts`, `defaultProviders()` in `src/router.ts`, an export in `src/index.ts`, and the npm package (or `null`) in `web/src/lib/site.ts`.
-4. Docs: the intro list, the Install note and the "How each adapter maps the spec" row in `README.md`, then regenerate the tables and site data as above.
+4. Docs: the provider list at the top of `README.md`, and the Install note and the "How each adapter maps the spec" row in [`docs/reference.md`](docs/reference.md), then regenerate the tables and site data as above.
 
 Capabilities in the catalog describe what the **adapter** implements, not what the provider markets. Leave a capability out until it's implemented and tested.
 
