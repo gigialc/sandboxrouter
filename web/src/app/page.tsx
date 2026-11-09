@@ -24,10 +24,19 @@ const HTTP = `curl localhost:8787/v1/sandboxes \\
   -H "Authorization: Bearer $SANDBOXROUTER_TOKEN" \\
   -d '{}'`;
 
-const RULES = [
-  ["Cheapest first", "With no other instruction, a sandbox goes to the lowest list price for its size among the providers you have keys for. Ties go alphabetically. No provider pays for placement."],
-  ["Falls back", "If a provider is busy or down, the next one takes the sandbox. Every attempt is on sbx.attempts."],
-  ["Your keys", "Bring your own accounts. Nothing is proxied through anyone else. Free and MIT licensed."],
+const STEPS = [
+  [
+    "Set your keys",
+    "Add the API keys of the providers you already use, one or thirty. The router only ever uses those accounts; nothing is proxied through anyone else.",
+  ],
+  [
+    "create() picks a provider",
+    "The cheapest one that fits the size and features you ask for, by public list price. If it's down, busy or out of credit, the next one takes the sandbox, and every attempt is on sbx.attempts. No provider pays for placement.",
+  ],
+  [
+    "Same sandbox everywhere",
+    "Run commands, stream output, move files, pause. The sandbox stays on that provider until you kill it; if a script crashes first, sandboxrouter gc kills what it left behind.",
+  ],
 ];
 
 export default function Home() {
@@ -44,8 +53,9 @@ export default function Home() {
           One API for <span className="text-accent">every sandbox.</span>
         </h1>
         <p className="mt-5 max-w-xl text-[15px] leading-7 text-ink-2">
-          AI agents need a safe computer to run code. sandboxrouter starts it on whichever provider fits the job, and moves to the
-          next one if that provider is busy. One interface for {cloud} providers, plus Docker on your own machine.
+          AI agents need a safe computer to run code. sandboxrouter starts it on the cheapest provider you have keys for, and
+          moves to the next one if that provider is down, busy or out of credit. One interface for {cloud} providers, plus Docker on
+          your own machine.
         </p>
         <div className="mt-8 flex flex-wrap items-center gap-3">
           <InstallChip cmd={`npm i ${NPM}`} />
@@ -66,6 +76,26 @@ export default function Home() {
         />
       </div>
       </div>
+
+      <section className="mt-20">
+        <SectionTitle id="how" kicker="How it works">
+          Pick a provider when the sandbox starts
+        </SectionTitle>
+        <ol className="mt-8 grid gap-10 sm:grid-cols-3">
+          {STEPS.map(([title, body], i) => (
+            <li key={title}>
+              <span className="font-mono text-[12px] text-accent">0{i + 1}</span>
+              <h3 className="mt-2 text-[15px] text-ink">{title}</h3>
+              <p className="mt-2 text-[13px] leading-6 text-ink-2">{body}</p>
+            </li>
+          ))}
+        </ol>
+        <p className="mt-10 max-w-3xl border-l-2 border-accent pl-4 text-[14px] leading-6 text-ink-2">
+          <span className="text-ink">Built for anything that starts many short-lived sandboxes:</span> agents that open one per task
+          or per user, evals, and RL rollouts. Each new sandbox goes to the cheapest provider that&apos;s up, and switching providers is
+          a matter of which keys are set, not a rewrite. Free and MIT licensed.
+        </p>
+      </section>
 
       <section className="mt-24">
         <SectionTitle id="providers" kicker="Providers">
@@ -88,14 +118,6 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="mt-24 grid gap-10 border-t border-line pt-10 sm:grid-cols-3">
-        {RULES.map(([t, b]) => (
-          <div key={t}>
-            <h3 className="text-[15px] text-ink">{t}</h3>
-            <p className="mt-2 text-[13px] leading-6 text-ink-2">{b}</p>
-          </div>
-        ))}
-      </section>
     </div>
   );
 }
