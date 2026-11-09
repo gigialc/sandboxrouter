@@ -74,9 +74,10 @@ export interface RouteOptions {
   strategy?: Strategy;
   /**
    * What to do when a create fails. `true` (default): try the next candidate when the provider
-   * looks unavailable (timeout, network error, 429, 5xx, or an error without a status), but stop on
-   * a setup error (400, 401, 402, 403, 404, 422: a bad key, no billing, a bad image or request), so
-   * a mistake isn't hidden by quietly moving the work to another, maybe pricier, provider.
+   * looks unavailable (timeout, network error, 429, 5xx, or an error without a status) or can't bill
+   * (402: no balance, plan needed), but stop on a setup error (400, 401, 403, 404, 422: a bad key, a
+   * bad image or request), so a mistake isn't hidden by quietly moving the work to another, maybe
+   * pricier, provider. Every failed attempt is on `sandbox.attempts`.
    * `"any"`: try the next candidate on every error. `false`: only the first candidate.
    */
   fallback?: boolean | "any";

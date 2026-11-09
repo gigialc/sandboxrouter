@@ -56,7 +56,19 @@ export interface CostRun {
   entries: CostEntry[];
 }
 
-const PROBE = `echo "$(nproc) $(awk '/MemTotal/{printf "%d", $2/1024}' /proc/meminfo)"`;
+/**
+ * The size the sandbox really has, as "<vcpus> <memoryMb>". nproc and MemTotal can show the whole host
+ * (Daytona's containers report 64 CPUs and 755 GB while limited to 1 vCPU and 1 GB), so the cgroup limits
+ * win when they're set: cgroup v2 cpu.max / memory.max, or v1 cfs quota / memory limit. vCPUs can be
+ * fractional (a 50% quota is 0.5).
+ */
+export const PROBE = [
+  `n=$(nproc); m=$(awk '/MemTotal/{printf "%d", $2/1024}' /proc/meminfo)`,
+  `q=; p=; l=`,
+  `if [ -r /sys/fs/cgroup/cpu.max ]; then read q p < /sys/fs/cgroup/cpu.max; elif [ -r /sys/fs/cgroup/cpu/cpu.cfs_quota_us ]; then q=$(cat /sys/fs/cgroup/cpu/cpu.cfs_quota_us); p=$(cat /sys/fs/cgroup/cpu/cpu.cfs_period_us); fi`,
+  `if [ -r /sys/fs/cgroup/memory.max ]; then l=$(cat /sys/fs/cgroup/memory.max); elif [ -r /sys/fs/cgroup/memory/memory.limit_in_bytes ]; then l=$(cat /sys/fs/cgroup/memory/memory.limit_in_bytes); fi`,
+  `awk -v n="$n" -v m="$m" -v q="$q" -v p="$p" -v l="$l" 'BEGIN { c = n; if (q ~ /^[0-9]+$/ && p ~ /^[0-9]+$/ && p > 0 && q / p < c) c = q / p; if (l ~ /^[0-9]+$/ && l / 1048576 < m) m = int(l / 1048576); printf "%s %d\\n", (c == int(c) ? c : sprintf("%.2f", c)), m }'`,
+].join("; ");
 // One `yes` per core, detached so the exec returns; they die with the sandbox.
 const LOAD = `nohup sh -c 'for i in $(seq $(nproc)); do yes > /dev/null & done; wait' > /dev/null 2>&1 &`;
 

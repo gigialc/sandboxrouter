@@ -134,7 +134,8 @@ router.create(spec, { require: ["pause"] })         // only providers that can p
 //   { provider: "e2b", ok: true, ms: 840 } ]`}
         />
         <p>
-          A setup error (400, 401, 402, 403, 404 or 422: a bad key, no billing, a bad image or request) stops instead, so a
+          An account that can&apos;t pay (402: no balance, or a plan needed) also falls back, and stays on{" "}
+          <code>attempts</code>. A setup error (400, 401, 403, 404 or 422: a bad key, a bad image or request) stops instead, so a
           mistake isn&apos;t hidden by quietly sending the work to another, maybe pricier, provider. Pass{" "}
           <code>fallback: &quot;any&quot;</code> to fall back on every error, or <code>fallback: false</code> to try only the
           first candidate. If every candidate fails, <code>create</code> throws a <code>RouterError</code> with the same{" "}

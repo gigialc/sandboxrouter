@@ -61,8 +61,8 @@ describe("a provider whose create hangs", () => {
 describe("fallback", () => {
   const route = { provider: ["modal", "maritime"] as ("modal" | "maritime")[] };
 
-  it("stops on a setup error (bad key, billing, bad image or request) instead of moving the work", async () => {
-    for (const status of [400, 401, 402, 403, 404, 422]) {
+  it("stops on a setup error (bad key, bad image or request) instead of moving the work", async () => {
+    for (const status of [400, 401, 403, 404, 422]) {
       const fallback = new FakeProvider("maritime");
       const router = new Router({ providers: [new FakeProvider("modal", { fail: "invalid API key", failStatus: status }), fallback], ledger: false });
       const err = await router.create({}, route).catch((e) => e);
@@ -71,6 +71,25 @@ describe("fallback", () => {
       expect(err.attempts).toHaveLength(1);
       expect(fallback.created).toHaveLength(0);
     }
+  });
+
+  it("falls back when an account can't pay (402), and keeps the failed attempt", async () => {
+    const fallback = new FakeProvider("maritime");
+    const router = new Router({
+      providers: [new FakeProvider("modal", { fail: "insufficient_balance: add balance and try again", failStatus: 402 }), fallback],
+      ledger: false,
+    });
+    const sbx = await router.create({}, route);
+    expect(sbx.provider).toBe("maritime");
+    expect(sbx.attempts).toMatchObject([{ provider: "modal", ok: false, error: expect.stringMatching(/insufficient_balance/) }, { provider: "maritime", ok: true }]);
+    await sbx.kill();
+  });
+
+  it("with fallback: false, a 402 still fails on the one provider tried", async () => {
+    const router = new Router({ providers: [new FakeProvider("modal", { fail: "billing_required", failStatus: 402 }), new FakeProvider("maritime")], ledger: false });
+    const err = await router.create({}, { ...route, fallback: false }).catch((e) => e);
+    expect(err).toBeInstanceOf(RouterError);
+    expect(err.attempts).toHaveLength(1);
   });
 
   // The shapes each SDK's bad-key error really has (probed against the live APIs with fake keys).
