@@ -158,7 +158,7 @@ export default function BenchmarksPage() {
           </p>
           <p>
             Prices are each provider&apos;s public list price for the size, not a bill. Disk, network, monthly plans and minimum
-            billing increments are left out; each <Link href="/#providers">provider page</Link> has the details and a link to the
+            billing increments are left out; each <Link href="/providers">provider page</Link> has the details and a link to the
             source.
           </p>
         </section>

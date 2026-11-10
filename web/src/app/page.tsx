@@ -1,182 +1,185 @@
-import { Button, SectionTitle } from "@/components/chrome";
-import { CodeTabs, InstallChip } from "@/components/code";
-import { ProviderTable } from "@/components/ProviderTable";
-import { Sources } from "@/components/Sources";
-import { DesktopTable } from "@/components/DesktopTable";
+import Link from "next/link";
+import { Button } from "@/components/chrome";
+import { CodeTabs } from "@/components/code";
+import { Feature } from "@/components/Feature";
 import { RouteDemo } from "@/components/RouteDemo";
-import { HOSTED_FEE_PCT, HOSTED_URL, NPM, NPM_URL, REPO, REPO_PUBLIC, site } from "@/lib/site";
+import { DEFAULT_SHAPE, HOSTED_FEE_PCT, HOSTED_URL, NPM, REPO, REPO_PUBLIC, site } from "@/lib/site";
 
-const TS = `import { Router } from "${NPM}";
+const OWN_KEYS = `import { Router } from "${NPM}";
 
-const router = new Router();      // uses whichever provider keys you've set
-const sbx = await router.create();
-
-const r = await sbx.exec("python3 -c 'print(6*7)'");
-console.log(r.stdout, sbx.provider);
+// uses whichever provider keys you've set
+const sbx = await new Router().create();
+console.log((await sbx.exec("echo hi")).stdout, sbx.provider);
 await sbx.kill();`;
 
-const PY = `from sandboxrouter import Client
+const HOSTED = `import { Client } from "${NPM}";
 
-sr = Client("http://127.0.0.1:8787", token="...")
-with sr.create() as sbx:
-    print(sbx.exec("python3 -c 'print(6*7)'").stdout, sbx.provider)`;
+const sr = new Client({
+  baseUrl: "${HOSTED_URL}",
+  apiKey: process.env.SANDBOXROUTER_API_KEY,
+});
+const sbx = await sr.create();
+console.log((await sbx.exec("echo hi")).stdout, sbx.provider);
+await sbx.kill();`;
 
-const HTTP = `curl localhost:8787/v1/sandboxes \\
-  -H "Authorization: Bearer $SANDBOXROUTER_TOKEN" \\
-  -d '{}'`;
-
-const STEPS = [
-  [
-    "Set your keys",
-    "Add the API keys of the providers you already use, one or thirty, and the router only ever uses those accounts. Or skip them all with one hosted sandboxrouter key.",
-  ],
-  [
-    "create() picks a provider",
-    "Providers that passed our real-account test go first, cheapest first by public list price, then the untested ones. If one is down, busy or out of credit, the next takes the sandbox, and every attempt is on sbx.attempts. No provider pays for placement.",
-  ],
-  [
-    "Same sandbox everywhere",
-    "Run commands, stream output, move files, pause. The sandbox stays on that provider until you kill it; if a script crashes first, sandboxrouter gc kills what it left behind.",
-  ],
-];
+const HTTP = `curl ${HOSTED_URL}/v1/sandboxes \\
+  -H "Authorization: Bearer $SANDBOXROUTER_API_KEY" -d '{}'`;
 
 export default function Home() {
-  const cloud = site.providers.filter((p) => !p.local).length;
-  const passed = site.providers.filter((p) => !p.local && p.live.status === "passed").length;
+  const cloud = site.providers.filter((p) => !p.local);
+  const passed = cloud.filter((p) => p.live.status === "passed");
+  const desktops = cloud.filter((p) => p.computers.length).length;
+  // The strip under the hero: tested providers first, then the rest by name.
+  const short = (n: string) => n.replace(/ \(.*\)$/, "");
+  const strip = [...passed, ...cloud.filter((p) => p.live.status !== "passed").sort((a, b) => a.name.localeCompare(b.name))]
+    .filter((p) => short(p.name).length <= 14)
+    .slice(0, 9);
+  const cheapest = cloud
+    .filter((p) => p.prices[DEFAULT_SHAPE] && !p.prices[DEFAULT_SHAPE].unfit)
+    .sort((a, b) => a.prices[DEFAULT_SHAPE].usd - b.prices[DEFAULT_SHAPE].usd)
+    .slice(0, 6);
+  // Highlight the one the router would pick: tested providers go first.
+  const pick = cheapest.find((p) => p.live.status === "passed")?.id;
+  const [vcpu, gb] = DEFAULT_SHAPE.split("x");
+
   return (
     <div className="px-5 sm:px-10">
-      <div className="grid items-center gap-12 pt-16 pb-6 sm:pt-24 lg:grid-cols-2 lg:gap-16">
-      <section>
-        <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted">
-          Open source · {cloud} providers · <span className="text-accent">{passed} passing on real accounts</span>
-        </p>
-        <h1 className="mt-5 max-w-2xl text-4xl font-normal leading-[1.08] tracking-[-0.035em] sm:text-[52px]">
-          One API for <span className="text-accent">every sandbox.</span>
+      <section className="flex flex-col items-center pt-24 pb-16 text-center sm:pt-36">
+        <h1 className="text-[40px] font-normal leading-[1.08] tracking-[-0.04em] sm:text-[64px]">
+          One API for every sandbox.
+          <br />
+          <span className="text-muted">On the cheapest one that&apos;s up.</span>
         </h1>
-        <p className="mt-5 max-w-xl text-[15px] leading-7 text-ink-2">
-          AI agents need a safe computer to run code. sandboxrouter starts it on the cheapest tested provider you have keys for,
-          and moves to the next one if that provider is down, busy or out of credit. One interface for {cloud} providers, plus Docker on
-          your own machine. Bring your own provider keys for free, or use one hosted key with prepaid credit.
-        </p>
-        <div className="mt-8 flex flex-wrap items-center gap-3">
-          <InstallChip cmd={`npm i ${NPM}`} />
+        <div className="mt-10 flex flex-wrap justify-center gap-3">
           <Button href={`${HOSTED_URL}/dashboard`} primary>
             Get a key
           </Button>
           <Button href="/docs">Docs</Button>
-          <Button href={REPO_PUBLIC ? REPO : NPM_URL}>{REPO_PUBLIC ? "GitHub" : "npm"}</Button>
         </div>
+        <p className="mt-10 max-w-md text-[15px] leading-7 text-ink-2">
+          Sandboxes for agents, evals and RL rollouts, across {cloud.length} providers. Open source, or one hosted key.
+        </p>
       </section>
 
-      <div className="min-w-0 space-y-4">
-        <CodeTabs
-          tabs={[
-            { label: "TypeScript", code: TS },
-            { label: "Python", code: PY },
-            { label: "HTTP", code: HTTP },
-          ]}
-        />
-        <RouteDemo />
-      </div>
-      </div>
-
-      <section className="mt-20">
-        <SectionTitle id="how" kicker="How it works">
-          Pick a provider when the sandbox starts
-        </SectionTitle>
-        <ol className="mt-8 grid gap-10 sm:grid-cols-3">
-          {STEPS.map(([title, body], i) => (
-            <li key={title}>
-              <span className="font-mono text-[13px] text-accent">0{i + 1}</span>
-              <h3 className="mt-2 text-[16px] text-ink">{title}</h3>
-              <p className="mt-2 text-[14px] leading-6 text-ink-2">{body}</p>
+      <div className="overflow-hidden border-y border-line py-6">
+        <ul className="flex flex-wrap justify-center gap-x-10 gap-y-3 text-[15px] text-muted">
+          {strip.map((p) => (
+            <li key={p.id}>
+              <Link href={`/providers/${p.id}`} className="hover:text-ink">
+                {short(p.name)}
+              </Link>
             </li>
           ))}
-        </ol>
-        <p className="mt-10 max-w-3xl border-l-2 border-accent pl-4 text-[15px] leading-7 text-ink-2">
-          <span className="text-ink">Built for anything that starts many short-lived sandboxes:</span> agents that open one per task
-          or per user, evals, and RL rollouts. Each new sandbox goes to the cheapest tested provider that&apos;s up, and switching providers is
-          a matter of which keys are set, not a rewrite. Free and MIT licensed.
-        </p>
-      </section>
+          <li>
+            <Link href="/providers" className="text-ink-2 hover:text-ink">
+              +{cloud.length - strip.length} more
+            </Link>
+          </li>
+        </ul>
+      </div>
 
-      <section className="mt-24">
-        <SectionTitle id="hosted" kicker="Pricing">
-          Your keys, or ours
-        </SectionTitle>
-        <div className="mt-8 grid border border-line sm:grid-cols-2">
-          {[
-            {
-              title: "Self-hosted",
-              price: "Free",
-              unit: "MIT licensed",
-              points: [
-                "Use the provider accounts you already have",
-                "You pay each provider directly, at their price",
-                "Run it in your code, or as an HTTP server with sandboxrouter serve",
-              ],
-              cta: { href: "/docs#quickstart", label: "Quickstart" },
-            },
-            {
-              title: "Hosted key",
-              price: `List price + ${HOSTED_FEE_PCT}%`,
-              unit: "billed by the second",
-              points: [
-                "One sandboxrouter API key, no provider accounts",
-                "Prepaid credit by card; sandboxes stop when it runs out",
-                "Agents can sign up through the API and hand their person a payment link",
-              ],
-              cta: { href: `${HOSTED_URL}/dashboard`, label: "Get a key" },
-              primary: true,
-            },
-          ].map((plan, i) => (
-            <div key={plan.title} className={`flex flex-col p-6 ${i ? "border-t border-line sm:border-t-0 sm:border-l" : ""}`}>
-              <h3 className="text-[15px] text-ink">{plan.title}</h3>
-              <p className="mt-3 text-2xl tracking-[-0.025em]">
-                {plan.price} <span className="text-[13px] text-muted">{plan.unit}</span>
+      <div className="mt-28 space-y-32 sm:mt-36 sm:space-y-44">
+        <Feature
+          label="Route"
+          claim="Each sandbox starts on the cheapest tested provider, and moves on when one fails."
+          actions={
+            <>
+              <Button href="/docs#routing" primary>
+                How routing works
+              </Button>
+              <Button href="/playground">Try it</Button>
+            </>
+          }
+          points={[
+            { title: "Fallback on every failure", body: "Out of credit, rate-limited or down: the next provider takes the sandbox, and every attempt is on sbx.attempts." },
+            { title: "One handle, whatever ran it", body: "Run commands, stream output, move files and pause the same way on every provider." },
+            { title: "Nothing left running", body: "If a script crashes, sandboxrouter gc kills the sandboxes it left behind." },
+          ]}
+          visual={<RouteDemo />}
+        />
+
+        <Feature
+          flip
+          label="Price"
+          claim="Every provider's list price, side by side, at the size you ask for."
+          actions={
+            <>
+              <Button href="/providers" primary>
+                All {cloud.length} providers
+              </Button>
+              <Button href="/benchmarks">Benchmarks</Button>
+            </>
+          }
+          points={[
+            { title: "Tested on real accounts", body: `${passed.length} providers pass our real-account check. Untested ones are tried last.` },
+            { title: "No paid placement", body: "Order comes from price and test results only. No provider pays for its position." },
+            { title: "Desktops and phones too", body: `Computers your model can see and click, from ${desktops} providers.` },
+          ]}
+          visual={
+            <div className="bg-[#0c0f0e] p-6 sm:p-10">
+              <p className="mb-4 font-mono text-[11px] uppercase tracking-[0.14em] text-white/55">
+                Cheapest at {vcpu} vCPU / {gb} GB
               </p>
-              <ul className="mt-4 flex-1 space-y-2 text-[14px] leading-6 text-ink-2">
-                {plan.points.map((pt) => (
-                  <li key={pt} className="flex gap-2">
-                    <span className="text-accent">›</span>
-                    {pt}
-                  </li>
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                {cheapest.map((p) => (
+                  <Link
+                    key={p.id}
+                    href={`/providers/${p.id}`}
+                    className={`flex aspect-[4/3] flex-col justify-between p-4 ${p.id === pick ? "bg-[#f2f2f2] text-black" : "bg-white/[0.08] text-white hover:bg-white/[0.12]"}`}
+                  >
+                    <span className="text-[15px]">
+                      {short(p.name)}
+                      {p.id === pick && <span className="mt-1 block text-[12px] text-black/55">router&apos;s pick</span>}
+                    </span>
+                    <span className="text-[14px] tnum">
+                      ${p.prices[DEFAULT_SHAPE].usd.toFixed(3)}/hr
+                      {p.live.status === "passed" && <span className={p.id === pick ? "text-accent" : "text-[#2fbf7f]"}> · tested</span>}
+                    </span>
+                  </Link>
                 ))}
-              </ul>
-              <div className="mt-6">
-                <Button href={plan.cta.href} primary={plan.primary}>
-                  {plan.cta.label}
-                </Button>
               </div>
             </div>
-          ))}
-        </div>
-        <p className="mt-4 text-[13px] text-muted">
-          Both use the same router and the same API. Moving between them changes the base URL and the key, not your code.
-        </p>
-      </section>
+          }
+        />
 
-      <section className="mt-24">
-        <SectionTitle id="providers" kicker="Providers">
-          What a sandbox costs, everywhere
-        </SectionTitle>
-        <div className="mt-6">
-          <ProviderTable />
-        </div>
-        <div className="mt-12">
-          <Sources />
+        <Feature
+          id="hosted"
+          label="Pricing"
+          claim="The same code with your own provider keys, or with one sandboxrouter key."
+          actions={
+            <>
+              <Button href={`${HOSTED_URL}/dashboard`} primary>
+                Get a key
+              </Button>
+              <Button href={REPO_PUBLIC ? REPO : "/docs#quickstart"}>{REPO_PUBLIC ? "GitHub" : "Quickstart"}</Button>
+            </>
+          }
+          points={[
+            { title: "Your keys: free", body: "MIT licensed. Sandboxes run on your provider accounts and you pay each provider directly." },
+            { title: `One key: list price + ${HOSTED_FEE_PCT}%`, body: "Prepaid credit by card, billed by the second. Sandboxes stop when the credit runs out." },
+            { title: "Agents can sign up themselves", body: "POST /v1/signup returns a key; the agent hands its person a link to pay." },
+          ]}
+          visual={
+            <CodeTabs
+              tabs={[
+                { label: "One key", code: HOSTED },
+                { label: "Your keys", code: OWN_KEYS },
+                { label: "HTTP", code: HTTP },
+              ]}
+            />
+          }
+        />
+      </div>
+
+      <section className="mt-40 flex flex-col items-center border-t border-line pt-24 text-center">
+        <h2 className="text-[32px] font-normal tracking-[-0.03em] sm:text-[40px]">Start a sandbox in a minute.</h2>
+        <div className="mt-8 flex flex-wrap justify-center gap-3">
+          <Button href={`${HOSTED_URL}/dashboard`} primary>
+            Get a key
+          </Button>
+          <Button href="/docs#quickstart">Quickstart</Button>
         </div>
       </section>
-
-      <section className="mt-24">
-        <SectionTitle id="desktops" kicker="Desktops & phones">
-          Computers your model can see and click
-        </SectionTitle>
-        <div className="mt-6">
-          <DesktopTable />
-        </div>
-      </section>
-
     </div>
   );
 }

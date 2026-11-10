@@ -83,7 +83,7 @@ await sbx.kill();`;
 
   return (
     <div className="px-5 sm:px-10 pt-12">
-      <Link href="/#providers" className="text-[13px] text-muted hover:text-ink">
+      <Link href="/providers" className="text-[13px] text-muted hover:text-ink">
         ← Providers
       </Link>
       <h1 className="mt-8 text-4xl font-normal tracking-[-0.035em]">{p.name}</h1>

@@ -17,8 +17,7 @@ export function Logo({ className = "" }: { className?: string }) {
 }
 
 const NAV = [
-  { href: "/#providers", label: "Providers" },
-  { href: "/#desktops", label: "Desktops" },
+  { href: "/providers", label: "Providers" },
   { href: "/benchmarks", label: "Benchmarks" },
   { href: "/docs", label: "Docs" },
   { href: "/playground", label: "Playground" },
