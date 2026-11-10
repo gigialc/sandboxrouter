@@ -278,7 +278,7 @@ Provider keys stay on the server. Clients only hold `SANDBOXROUTER_TOKEN`. It bi
 
 ### TypeScript client
 
-`Client` talks to this API, yours or the hosted one ([`hosted/`](../hosted/): one key, prepaid credit), so only the server holds provider keys:
+`Client` talks to this API, so only the server holds provider keys:
 
 ```ts
 import { Client } from "@sandboxrouter/sdk";
@@ -289,7 +289,7 @@ await sbx.exec("npm test", { onStdout: (c) => process.stdout.write(c) });
 await sbx.kill();
 ```
 
-`createApp(router, token, cors, hooks)` takes `ServerHooks` (per-caller auth, checks before a create, ownership) for running it for many users, which is how `hosted/` is built.
+`createApp(router, token, cors, hooks)` takes `ServerHooks` (per-caller auth, checks before a create, ownership) for running it for many users.
 
 ### Python
 
