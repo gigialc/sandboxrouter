@@ -5,7 +5,7 @@ import { Router, type RoutedSandbox } from "./router.js";
 import { ProviderError, RouterError, type RouteOptions, type SandboxSpec } from "./types.js";
 
 /**
- * Hooks for running this API for many users, as the hosted service does (hosted/). With none set,
+ * Hooks for running this API for many users (accounts, billing, per-user sandboxes). With none set,
  * the server is single-user: one SANDBOXROUTER_TOKEN, every sandbox reachable by anyone holding it.
  */
 export interface ServerHooks {
