@@ -131,7 +131,7 @@ export function ProviderTable() {
         </tbody>
       </table>
       <p className="mt-4 max-w-4xl text-[13px] leading-6 text-ink-2">
-        Cheapest first, open sign-ups before waitlisted ones. ≤ = billed only while the CPU is busy. &ldquo;Not yet&rdquo; = tested
+        Cheapest first, open sign-ups before waitlisted ones; the router tries ones that passed on a real account first. ≤ = billed only while the CPU is busy. &ldquo;Not yet&rdquo; = tested
         against mocks only.{" "}
         <Link href="/docs#price-table" className="underline decoration-line-2 underline-offset-2 hover:text-ink">
           How to read this table

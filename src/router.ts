@@ -11,6 +11,7 @@ import {
 import { loadBench, median } from "./bench-store.js";
 import { Ledger, defaultLedgerFile } from "./ledger.js";
 import { DEFAULT_EXEC_TIMEOUT_S, errorStatus, timeoutError } from "./util.js";
+import { VERIFIED } from "./verified.js";
 import { DaytonaProvider } from "./providers/daytona.js";
 import { E2BProvider } from "./providers/e2b.js";
 import { MaritimeProvider } from "./providers/maritime.js";
@@ -67,6 +68,8 @@ export interface Candidate {
   provider: ProviderId;
   estimatedHourlyUsd: number;
   medianCreateMs?: number;
+  /** Passed the real-account check (as of this release, or `RouterOptions.verified`). */
+  verified: boolean;
   /** Why this provider won't be tried, if it won't. */
   skip?: string;
 }
@@ -84,6 +87,11 @@ export interface RouterOptions {
    * false to keep no record. SANDBOXROUTER_LEDGER=off also turns it off.
    */
   ledger?: string | false;
+  /**
+   * Providers the default "verified" strategy tries first. Default: those whose last real-account check
+   * passed as of this release (`VERIFIED`). Pass your own list, e.g. after running `check` yourself.
+   */
+  verified?: ProviderId[];
 }
 
 /** Desktop-only providers. Filled in as adapters are added. */
@@ -133,6 +141,7 @@ export function defaultProviders(): Provider[] {
 export class Router {
   private providers: Map<ProviderId, Provider>;
   private benchFile?: string;
+  private readonly verified: Set<ProviderId>;
   private computerOnly: ComputerProvider[];
   /** The local record of sandboxes this router created, or undefined when turned off. */
   readonly ledger?: Ledger;
@@ -142,6 +151,7 @@ export class Router {
     if (file) this.ledger = new Ledger(file);
     this.providers = new Map((opts.providers ?? defaultProviders()).map((p) => [p.id, p]));
     this.benchFile = opts.benchFile;
+    this.verified = new Set(opts.verified ?? (Object.keys(VERIFIED) as ProviderId[]));
     this.computerOnly = opts.computers ?? (opts.providers ? [] : defaultComputerProviders());
   }
 
@@ -171,12 +181,13 @@ export class Router {
 
     const list: Candidate[] = ids.map((id) => {
       // An id the catalog has never heard of (a typo in an explicit list) has no price to look up.
-      if (!CATALOG.some((c) => c.id === id)) return { provider: id, estimatedHourlyUsd: 0, skip: "unknown provider" };
+      if (!CATALOG.some((c) => c.id === id)) return { provider: id, estimatedHourlyUsd: 0, verified: false, skip: "unknown provider" };
       const p = this.providers.get(id);
       const c: Candidate = {
         provider: id,
         estimatedHourlyUsd: round(hourlyCost(id, spec)),
         medianCreateMs: median(bench[id]?.createMs),
+        verified: this.verified.has(id),
       };
       if (!p) c.skip = "no adapter registered";
       else {
@@ -186,14 +197,17 @@ export class Router {
       return c;
     });
 
-    // Neutral by construction: price (or measured speed) decides, ties break alphabetically by id.
+    // Neutral by construction: the same rule for every provider, ties alphabetical by id. The default
+    // puts providers that passed the real-account check first; any provider gets there by passing it.
     // An explicit provider list keeps the caller's order.
     if (!explicit) {
       const byPrice = (a: Candidate, b: Candidate) => a.estimatedHourlyUsd - b.estimatedHourlyUsd || a.provider.localeCompare(b.provider);
       if (route.strategy === "fastest") {
         list.sort((a, b) => (a.medianCreateMs ?? Infinity) - (b.medianCreateMs ?? Infinity) || byPrice(a, b));
-      } else {
+      } else if (route.strategy === "cheapest") {
         list.sort(byPrice);
+      } else {
+        list.sort((a, b) => Number(b.verified) - Number(a.verified) || byPrice(a, b));
       }
     }
     return list;

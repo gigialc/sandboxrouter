@@ -78,7 +78,7 @@ Set the keys for the providers you want. Providers without keys are skipped.
 const router = new Router();
 
 // Cheapest provider that can do 8 vCPU / 16 GB, falling back on failure
-const a = await router.create({ vcpu: 8, memoryGb: 16 }, { strategy: "cheapest" });
+const a = await router.create({ vcpu: 8, memoryGb: 16 }, { strategy: "cheapest" }); // price alone; the default tries tested providers first
 
 // GPU: only GPU-capable providers are tried (Modal today)
 const b = await router.create({ gpu: "A10G", image: { modal: "pytorch/pytorch:latest" } });

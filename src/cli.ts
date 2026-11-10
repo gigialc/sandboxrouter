@@ -40,7 +40,7 @@ Usage:
   sandboxrouter serve     [--port 8787] [--host 127.0.0.1] [--cors https://site.example,http://localhost:3000]
 
 Spec flags:   --vcpu N  --memory GB  --gpu T4  --timeout MIN
-Route flags:  --provider e2b[,modal,...]  --strategy cheapest|fastest
+Route flags:  --provider e2b[,modal,...]  --strategy verified|cheapest|fastest (default verified: tested providers first)
               --no-fallback  --fallback-any (also on setup errors like a bad key)
               --create-timeout SEC (per provider, default 120)  --require gpu,custom-image
 
@@ -163,7 +163,8 @@ async function main() {
     let n = 0;
     for (const c of plan) {
       const mark = c.skip ? "  -" : `${++n}.`.padStart(3);
-      console.log(`${mark} ${c.provider.padEnd(11)} $${c.estimatedHourlyUsd.toFixed(4)}/hr${c.skip ? `  (skipped: ${c.skip})` : ""}`);
+      const tested = c.verified ? "tested  " : "        ";
+      console.log(`${mark} ${c.provider.padEnd(11)} $${c.estimatedHourlyUsd.toFixed(4)}/hr  ${tested}${c.skip ? `(skipped: ${c.skip})` : ""}`.trimEnd());
     }
     return;
   }

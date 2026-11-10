@@ -21,7 +21,7 @@ try {
 
 Runs as plain JavaScript on Node 20+. (In TypeScript 5.2+, or Node 24+, `await using sbx = ...` kills the sandbox for you.)
 
-Set the keys of the providers you use. `create()` starts the sandbox on the cheapest one that fits, by public list price (ties alphabetical, and no provider pays for placement). If that provider is down, busy or out of credit, the next one takes it, and every attempt is on `sbx.attempts`. The sandbox stays on that provider until you `kill()` it.
+Set the keys of the providers you use. `create()` starts the sandbox on the cheapest one that fits among those that passed the real-account check, then the untested ones, by public list price (ties alphabetical, and no provider pays for placement). If that provider is down, busy or out of credit, the next one takes it, and every attempt is on `sbx.attempts`. The sandbox stays on that provider until you `kill()` it.
 
 Site and docs: [sandboxrouter.vercel.app](https://sandboxrouter.vercel.app) · npm: [`@sandboxrouter/sdk`](https://www.npmjs.com/package/@sandboxrouter/sdk)
 
@@ -30,14 +30,14 @@ Site and docs: [sandboxrouter.vercel.app](https://sandboxrouter.vercel.app) · n
 AI agents need a disposable computer to run code a model wrote: install packages, run tests, do an RL rollout. Dozens of providers sell one, each with its own SDK and auth, and the same 2 vCPU / 4 GB sandbox costs from under a cent to over thirty cents an hour. sandboxrouter is one interface over all of them:
 
 - **Same code everywhere.** `create`, `exec` (streamed), `writeFile`, `readFile`, `pause`, `kill`. Switch providers by changing which keys are set.
-- **Cheapest first, with fallback.** Or `fastest`, by cold starts you measured, or a list of providers you name.
+- **Tested first, then cheapest, with fallback.** Or `cheapest` for price alone, `fastest` by cold starts you measured, or a list of providers you name.
 - **Your keys.** Your accounts and your bills; nothing is proxied through anyone else.
 - **Cleanup.** A local ledger of every sandbox started, so `sandboxrouter gc` kills what a crashed script left behind.
 - **TypeScript, Python, HTTP and a CLI.** Plus desktops and phones for computer-use models.
 
 ## Prices
 
-List price while running, 2 vCPU / 4 GB, cheapest first; waitlisted sign-ups follow. "Up to" = CPU billed only while busy, shown with every core busy. "Not run yet" = built from the provider's docs and tested against mocks only. Click a provider for its billing details; more in [Reading the price table](https://sandboxrouter.vercel.app/docs#price-table).
+List price while running, 2 vCPU / 4 GB, cheapest first; waitlisted sign-ups follow. The router tries the ones that passed the real-account check first. "Up to" = CPU billed only while busy, shown with every core busy. "Not run yet" = built from the provider's docs and tested against mocks only. Click a provider for its billing details; more in [Reading the price table](https://sandboxrouter.vercel.app/docs#price-table).
 
 | Provider | $/hr | Plan needed | Real-account check | Source |
 |---|---|---|---|---|

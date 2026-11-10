@@ -8,8 +8,8 @@ const fakes = (over: Partial<Record<string, ConstructorParameters<typeof FakePro
   ALL.map((id) => new FakeProvider(id, over[id]));
 
 describe("routing", () => {
-  it("defaults to the cheapest provider, ties broken alphabetically", async () => {
-    const r = new Router({ providers: fakes() });
+  it("with nothing marked verified, goes cheapest first, ties broken alphabetically", async () => {
+    const r = new Router({ providers: fakes(), verified: [] });
     // daytona and e2b list the same price, so they sort by name
     expect(r.plan().map((c) => c.provider)).toEqual(["maritime", "daytona", "e2b", "modal", "vercel"]);
     expect(r.plan({}, { strategy: "default" })).toEqual(r.plan({}, { strategy: "cheapest" }));
@@ -18,9 +18,39 @@ describe("routing", () => {
     expect(sbx.id).toBe("maritime:maritime-1");
   });
 
+  it("defaults to verified providers first, then cheapest within each group", () => {
+    // modal and vercel are pricier than maritime; mark only them verified and they go first.
+    const r = new Router({ providers: fakes(), verified: ["vercel", "modal"] });
+    expect(r.plan().map((c) => [c.provider, c.verified])).toEqual([
+      ["modal", true],
+      ["vercel", true],
+      ["maritime", false],
+      ["daytona", false],
+      ["e2b", false],
+    ]);
+    expect(r.plan({}, { strategy: "verified" })).toEqual(r.plan());
+    // "cheapest" ignores verification.
+    expect(r.plan({}, { strategy: "cheapest" }).map((c) => c.provider)).toEqual(["maritime", "daytona", "e2b", "modal", "vercel"]);
+    // An explicit list keeps the caller's order.
+    expect(r.plan({}, { provider: ["e2b", "modal"] }).map((c) => c.provider)).toEqual(["e2b", "modal"]);
+  });
+
+  it("uses the release's verified list by default", async () => {
+    const { VERIFIED } = await import("../src/verified.js");
+    const r = new Router({ providers: fakes() });
+    for (const c of r.plan()) expect(c.verified).toBe(c.provider in VERIFIED);
+  });
+
+  it("falls back from a verified provider to an unverified one", async () => {
+    const r = new Router({ providers: fakes({ modal: { fail: "busy", failStatus: 503 } }), verified: ["modal"] });
+    const sbx = await r.create();
+    expect(sbx.attempts.map((a) => a.provider)).toEqual(["modal", "maritime"]);
+    await sbx.kill();
+  });
+
   it("re-ranks when the size changes the price order", () => {
     // Vercel fixes memory at 2 GB/vCPU, Morph bills whole MCUs: ordering follows each shape's real price
-    const r = new Router({ providers: fakes() });
+    const r = new Router({ providers: fakes(), verified: [] });
     for (const spec of [{ vcpu: 1, memoryGb: 2 }, { vcpu: 8, memoryGb: 16 }, { vcpu: 2, memoryGb: 8 }]) {
       const prices = r.plan(spec).map((c) => c.estimatedHourlyUsd);
       expect(prices).toEqual([...prices].sort((a, b) => a - b));
