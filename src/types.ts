@@ -62,15 +62,18 @@ export interface SandboxSpec {
 }
 
 /**
- * "cheapest" (and "default", the same thing): lowest list price for the spec, ties alphabetical.
+ * "verified" (and "default", the same thing): providers that passed the real-account check first
+ * (as of this release; `VERIFIED` in src/verified.ts), then the rest; cheapest first within each,
+ * ties alphabetical.
+ * "cheapest": lowest list price for the spec, tested or not, ties alphabetical.
  * "fastest": lowest median cold start you measured with `bench`, then cheapest.
  */
-export type Strategy = "default" | "cheapest" | "fastest";
+export type Strategy = "default" | "verified" | "cheapest" | "fastest";
 
 export interface RouteOptions {
   /** Pin to one provider, or give an ordered list to try. Omit to let the router choose. */
   provider?: ProviderId | ProviderId[];
-  /** How to order candidates when no explicit list is given. Default: cheapest. */
+  /** How to order candidates when no explicit list is given. Default: "verified" (tested providers first, then cheapest). */
   strategy?: Strategy;
   /**
    * What to do when a create fails. `true` (default): try the next candidate when the provider

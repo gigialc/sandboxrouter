@@ -2,6 +2,11 @@
 
 All notable changes. Versions follow [semver](https://semver.org/); while the version is 0.x, a minor bump can change the API.
 
+## Unreleased
+
+### Changed
+- **The default route tries tested providers first.** New strategy `verified` (also what `"default"` means now): providers whose last real-account check passed go first, then the rest, each group cheapest first by list price, ties alphabetical. The list ships with each release as `VERIFIED` (`src/verified.ts`, generated from `results/conformance`); `new Router({ verified: [...] })` replaces it. `strategy: "cheapest"` keeps the old price-only order. `Candidate.verified` says which is which, and `sandboxrouter route` marks them "tested".
+
 ## 0.3.3 (2026-11-09)
 
 ### Changed
