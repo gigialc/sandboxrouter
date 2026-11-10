@@ -4,7 +4,7 @@ import { ProviderTable } from "@/components/ProviderTable";
 import { Sources } from "@/components/Sources";
 import { DesktopTable } from "@/components/DesktopTable";
 import { RouteDemo } from "@/components/RouteDemo";
-import { NPM, NPM_URL, REPO, REPO_PUBLIC, site } from "@/lib/site";
+import { HOSTED_FEE_PCT, HOSTED_URL, NPM, NPM_URL, REPO, REPO_PUBLIC, site } from "@/lib/site";
 
 const TS = `import { Router } from "${NPM}";
 
@@ -28,7 +28,7 @@ const HTTP = `curl localhost:8787/v1/sandboxes \\
 const STEPS = [
   [
     "Set your keys",
-    "Add the API keys of the providers you already use, one or thirty. The router only ever uses those accounts; nothing is proxied through anyone else.",
+    "Add the API keys of the providers you already use, one or thirty, and the router only ever uses those accounts. Or skip them all with one hosted sandboxrouter key.",
   ],
   [
     "create() picks a provider",
@@ -56,13 +56,14 @@ export default function Home() {
         <p className="mt-5 max-w-xl text-[15px] leading-7 text-ink-2">
           AI agents need a safe computer to run code. sandboxrouter starts it on the cheapest tested provider you have keys for,
           and moves to the next one if that provider is down, busy or out of credit. One interface for {cloud} providers, plus Docker on
-          your own machine.
+          your own machine. Bring your own provider keys for free, or use one hosted key with prepaid credit.
         </p>
         <div className="mt-8 flex flex-wrap items-center gap-3">
           <InstallChip cmd={`npm i ${NPM}`} />
-          <Button href="/docs" primary>
-            Docs
+          <Button href={`${HOSTED_URL}/dashboard`} primary>
+            Get a key
           </Button>
+          <Button href="/docs">Docs</Button>
           <Button href={REPO_PUBLIC ? REPO : NPM_URL}>{REPO_PUBLIC ? "GitHub" : "npm"}</Button>
         </div>
       </section>
@@ -96,6 +97,62 @@ export default function Home() {
           <span className="text-ink">Built for anything that starts many short-lived sandboxes:</span> agents that open one per task
           or per user, evals, and RL rollouts. Each new sandbox goes to the cheapest tested provider that&apos;s up, and switching providers is
           a matter of which keys are set, not a rewrite. Free and MIT licensed.
+        </p>
+      </section>
+
+      <section className="mt-24">
+        <SectionTitle id="hosted" kicker="Pricing">
+          Your keys, or ours
+        </SectionTitle>
+        <div className="mt-8 grid border border-line sm:grid-cols-2">
+          {[
+            {
+              title: "Self-hosted",
+              price: "Free",
+              unit: "MIT licensed",
+              points: [
+                "Use the provider accounts you already have",
+                "You pay each provider directly, at their price",
+                "Run it in your code, or as an HTTP server with sandboxrouter serve",
+              ],
+              cta: { href: "/docs#quickstart", label: "Quickstart" },
+            },
+            {
+              title: "Hosted key",
+              price: `List price + ${HOSTED_FEE_PCT}%`,
+              unit: "billed by the second",
+              points: [
+                "One sandboxrouter API key, no provider accounts",
+                "Prepaid credit by card; sandboxes stop when it runs out",
+                "Agents can sign up through the API and hand their person a payment link",
+              ],
+              cta: { href: `${HOSTED_URL}/dashboard`, label: "Get a key" },
+              primary: true,
+            },
+          ].map((plan, i) => (
+            <div key={plan.title} className={`flex flex-col p-6 ${i ? "border-t border-line sm:border-t-0 sm:border-l" : ""}`}>
+              <h3 className="text-[15px] text-ink">{plan.title}</h3>
+              <p className="mt-3 text-2xl tracking-[-0.025em]">
+                {plan.price} <span className="text-[13px] text-muted">{plan.unit}</span>
+              </p>
+              <ul className="mt-4 flex-1 space-y-2 text-[14px] leading-6 text-ink-2">
+                {plan.points.map((pt) => (
+                  <li key={pt} className="flex gap-2">
+                    <span className="text-accent">›</span>
+                    {pt}
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-6">
+                <Button href={plan.cta.href} primary={plan.primary}>
+                  {plan.cta.label}
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+        <p className="mt-4 text-[13px] text-muted">
+          Both use the same router and the same API. Moving between them changes the base URL and the key, not your code.
         </p>
       </section>
 
