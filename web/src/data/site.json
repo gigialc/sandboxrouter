@@ -1,6 +1,6 @@
 {
   "version": "0.3.3",
-  "generatedAt": "2026-11-09T23:25:42.368Z",
+  "generatedAt": "2026-11-10T16:22:59.018Z",
   "shapes": [
     "1x2",
     "2x4",
@@ -451,9 +451,9 @@
       "planLabel": "none",
       "defaultSize": null,
       "check": {
-        "date": "2026-11-09T16:33:02.374Z",
+        "date": "2026-11-10T16:19:10.320Z",
         "version": "0.3.3",
-        "by": null,
+        "by": "gigialc",
         "passed": 13,
         "failed": [],
         "skipped": [
@@ -480,7 +480,7 @@
       },
       "live": {
         "status": "passed",
-        "label": "passed (2026-11-09)"
+        "label": "passed (2026-11-10)"
       },
       "computers": [],
       "prices": {
@@ -745,9 +745,9 @@
         "memoryGb": 1
       },
       "check": {
-        "date": "2026-11-09T16:33:26.609Z",
+        "date": "2026-11-10T16:19:39.701Z",
         "version": "0.3.3",
-        "by": null,
+        "by": "gigialc",
         "passed": 14,
         "failed": [],
         "skipped": [],
@@ -772,7 +772,7 @@
       },
       "live": {
         "status": "passed",
-        "label": "passed (2026-11-09)"
+        "label": "passed (2026-11-10)"
       },
       "computers": [
         "linux"
@@ -1059,9 +1059,9 @@
         "memoryGb": 0.5
       },
       "check": {
-        "date": "2026-11-09T16:33:57.626Z",
+        "date": "2026-11-10T16:19:57.811Z",
         "version": "0.3.3",
-        "by": null,
+        "by": "gigialc",
         "passed": 14,
         "failed": [],
         "skipped": [],
@@ -1086,7 +1086,7 @@
       },
       "live": {
         "status": "passed",
-        "label": "passed (2026-11-09)"
+        "label": "passed (2026-11-10)"
       },
       "computers": [
         "linux"
@@ -1620,9 +1620,9 @@
       "planLabel": "$20/mo (credited)",
       "defaultSize": null,
       "check": {
-        "date": "2026-11-09T16:34:23.285Z",
+        "date": "2026-11-10T16:20:22.545Z",
         "version": "0.3.3",
-        "by": null,
+        "by": "gigialc",
         "passed": 14,
         "failed": [],
         "skipped": [],
@@ -1647,7 +1647,7 @@
       },
       "live": {
         "status": "passed",
-        "label": "passed (2026-11-09)"
+        "label": "passed (2026-11-10)"
       },
       "computers": [
         "linux",
@@ -1973,9 +1973,9 @@
         "memoryGb": 1
       },
       "check": {
-        "date": "2026-11-09T16:34:23.910Z",
+        "date": "2026-11-10T16:20:24.312Z",
         "version": "0.3.3",
-        "by": null,
+        "by": "gigialc",
         "passed": 0,
         "failed": [
           {
@@ -2005,7 +2005,7 @@
       },
       "live": {
         "status": "failing",
-        "label": "failed 1 step (2026-11-09)"
+        "label": "failed 1 step (2026-11-10)"
       },
       "computers": [],
       "prices": {
@@ -2130,9 +2130,9 @@
       "planLabel": "none",
       "defaultSize": null,
       "check": {
-        "date": "2026-11-09T16:34:46.447Z",
+        "date": "2026-11-10T16:21:00.694Z",
         "version": "0.3.3",
-        "by": null,
+        "by": "gigialc",
         "passed": 14,
         "failed": [],
         "skipped": [],
@@ -2157,7 +2157,7 @@
       },
       "live": {
         "status": "passed",
-        "label": "passed (2026-11-09)"
+        "label": "passed (2026-11-10)"
       },
       "computers": [],
       "prices": {

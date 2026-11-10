@@ -1,14 +1,15 @@
 {
   "tool": "sandboxrouter-check",
   "version": "0.3.3",
-  "date": "2026-11-09T16:34:23.910Z",
-  "platform": "linux-x64",
+  "date": "2026-11-10T16:20:24.312Z",
+  "platform": "darwin-arm64",
+  "by": "gigialc",
   "provider": "openscale",
   "results": [
     {
       "step": "create",
       "status": "fail",
-      "ms": 625,
+      "ms": 1766,
       "detail": "all providers failed: openscale: openscale: 402: Your OpenScale balance is empty. Claim more credits at https://openscale.so/app/billing to start sandboxes."
     }
   ],

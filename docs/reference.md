@@ -210,8 +210,8 @@ It prints one line per step and exits 1 if any fails. `checkProvider(router, id)
 |---|---|---|
 | Agent37 | not run yet | |
 | Boat | not run yet | |
-| Maritime | 14/14 passed | 2026-11-09, v0.3.3 |
-| Sailboxes (Sail Research) | 14/14 passed | 2026-11-09, v0.3.3 |
+| Maritime | 14/14 passed | 2026-11-10, v0.3.3 |
+| Sailboxes (Sail Research) | 14/14 passed | 2026-11-10, v0.3.3 |
 | Northflank | not run yet | |
 | Morph Cloud | not run yet | |
 | exe.dev | not run yet | |
@@ -220,7 +220,7 @@ It prints one line per step and exits 1 if any fails. `checkProvider(router, id)
 | Beam | not run yet | |
 | CodeSandbox SDK (Together) | not run yet | |
 | Fly.io Sprites | not run yet | |
-| Blaxel | 13/13 passed; n/a: pause and resume | 2026-11-09, v0.3.3 |
+| Blaxel | 13/13 passed; n/a: pause and resume | 2026-11-10, v0.3.3 |
 | HOPX | not run yet | |
 | Superserve | not run yet | |
 | Tensorlake | not run yet | |
@@ -236,11 +236,11 @@ It prints one line per step and exits 1 if any fails. `checkProvider(router, id)
 | Koyeb Sandboxes | not run yet | |
 | Dedalus Machines | not run yet | |
 | LangSmith Sandboxes | not run yet | |
-| OpenScale Sandboxes | 0/14 passed; failed: create | 2026-11-09, v0.3.3 |
+| OpenScale Sandboxes | 0/14 passed; failed: create | 2026-11-10, v0.3.3 |
 | Azure Container Apps dynamic sessions | not run yet | |
-| Daytona | 14/14 passed | 2026-11-09, v0.3.3 |
+| Daytona | 14/14 passed | 2026-11-10, v0.3.3 |
 | Alibaba Cloud Agent Sandbox | not run yet | |
-| E2B | 14/14 passed | 2026-11-09, v0.3.3 |
+| E2B | 14/14 passed | 2026-11-10, v0.3.3 |
 | Docker (local) | 14/14 passed | 2026-11-09, v0.3.3 |
 
 ## HTTP API
