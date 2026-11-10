@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { MobileNav } from "@/components/MobileNav";
-import { NPM_URL, REPO, REPO_PUBLIC, site } from "@/lib/site";
+import { HOSTED_URL, NPM_URL, REPO, REPO_PUBLIC, site } from "@/lib/site";
 
 export function Logo({ className = "" }: { className?: string }) {
   return (
@@ -22,6 +22,8 @@ const NAV = [
   { href: "/benchmarks", label: "Benchmarks" },
   { href: "/docs", label: "Docs" },
   { href: "/playground", label: "Playground" },
+  { href: "/#hosted", label: "Pricing" },
+  ...(REPO_PUBLIC ? [{ href: REPO, label: "GitHub" }] : []),
 ];
 
 export function Nav() {
@@ -38,8 +40,8 @@ export function Nav() {
             </Link>
           ))}
           <MobileNav links={NAV} />
-          <a href={REPO_PUBLIC ? REPO : NPM_URL} className="rounded-full bg-ink px-4 py-1.5 text-[13px] font-medium text-bg hover:bg-ink-2">
-            {REPO_PUBLIC ? "GitHub" : "npm"}
+          <a href={`${HOSTED_URL}/dashboard`} className="rounded-full bg-ink px-4 py-1.5 text-[13px] font-medium text-bg hover:bg-ink-2">
+            Get a key
           </a>
         </nav>
       </div>
@@ -52,13 +54,16 @@ export function Footer() {
     <footer className="mt-32 border-t border-line">
       <div className="flex flex-col gap-4 px-5 sm:px-10 py-10 text-[13px] text-muted sm:flex-row sm:items-center">
         <Logo className="text-ink-2" />
-        <span>Free and open source. MIT. v{site.version}</span>
+        <span>Open source, MIT. v{site.version}. Hosted keys by AlgiAI, Corp.</span>
         <div className="flex flex-wrap gap-x-6 gap-y-3 sm:ml-auto">
           <Link href="/benchmarks" className="hover:text-ink">Benchmarks</Link>
           <Link href="/docs" className="hover:text-ink">Docs</Link>
           <Link href="/playground" className="hover:text-ink">Playground</Link>
           {REPO_PUBLIC && <a href={REPO} className="hover:text-ink">GitHub</a>}
           <a href={NPM_URL} className="hover:text-ink">npm</a>
+          <a href={`${HOSTED_URL}/dashboard`} className="hover:text-ink">Dashboard</a>
+          <a href={`${HOSTED_URL}/terms`} className="hover:text-ink">Terms</a>
+          <a href={`${HOSTED_URL}/privacy`} className="hover:text-ink">Privacy</a>
         </div>
       </div>
     </footer>

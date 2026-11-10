@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { TableScroll } from "@/components/chrome";
 import { CodeBlock } from "@/components/code";
-import { REPO, REPO_PUBLIC, site } from "@/lib/site";
+import { HOSTED_FEE_PCT, HOSTED_URL, REPO, REPO_PUBLIC, site } from "@/lib/site";
 
 export const metadata: Metadata = { title: "Docs" };
 
@@ -16,6 +16,7 @@ const SECTIONS = [
   ["pause", "Pause and resume"],
   ["computers", "Desktops and phones"],
   ["server", "HTTP server"],
+  ["hosted", "Hosted key"],
   ["python", "Python"],
   ["bench", "Bench and leaderboard"],
   ["providers", "Adding a provider"],
@@ -279,6 +280,28 @@ SANDBOXROUTER_TOKEN=secret npx @sandboxrouter/sdk serve --cors https://your-site
         <p>
           With <code>stream: true</code>, exec answers <code>text/event-stream</code>: <code>stdout</code> and{" "}
           <code>stderr</code> events carry JSON string chunks, then one <code>result</code> event.
+        </p>
+
+        <h2 id="hosted">Hosted key</h2>
+        <p>
+          The hosted service runs the same HTTP API on sandboxrouter&apos;s own provider accounts, so one key replaces all the provider
+          keys. Sign in at <a href={`${HOSTED_URL}/dashboard`}>the dashboard</a>, add credit by card and create a key. Each sandbox
+          is billed by the second at its provider&apos;s list price plus {HOSTED_FEE_PCT}%, and the dashboard shows what each one cost.
+        </p>
+        <CodeBlock
+          title="agent.ts"
+          code={`import { Client } from "@sandboxrouter/sdk";
+
+const sr = new Client({ baseUrl: "${HOSTED_URL}", apiKey: process.env.SANDBOXROUTER_API_KEY });
+const sbx = await sr.create({ vcpu: 2, memoryGb: 4 });
+console.log(sbx.provider, (await sbx.exec("echo hi")).stdout);
+await sbx.kill();`}
+        />
+        <p>
+          An agent can open an account itself: <code>POST /v1/signup</code> returns a key with no credit and a link its person uses to
+          pay and claim the account. The steps are in <a href={`${HOSTED_URL}/auth.md`}>/auth.md</a>. On the hosted API, pause and
+          desktops are off for now, and accounts run up to 5 sandboxes at once for up to 4 hours each. See the{" "}
+          <a href={`${HOSTED_URL}/terms`}>terms</a> and <a href={`${HOSTED_URL}/refunds`}>refund policy</a>.
         </p>
 
         <h2 id="python">Python</h2>
