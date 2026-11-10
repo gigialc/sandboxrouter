@@ -4,9 +4,9 @@
 import type { ProviderId } from "./types.js";
 
 export const VERIFIED: Partial<Record<ProviderId, string>> = {
-  blaxel: "2026-11-09",
-  daytona: "2026-11-09",
-  e2b: "2026-11-09",
-  maritime: "2026-11-09",
-  sail: "2026-11-09",
+  blaxel: "2026-11-10",
+  daytona: "2026-11-10",
+  e2b: "2026-11-10",
+  maritime: "2026-11-10",
+  sail: "2026-11-10",
 };
