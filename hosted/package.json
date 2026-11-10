@@ -1,0 +1,20 @@
+{
+  "name": "sandboxrouter-hosted",
+  "private": true,
+  "type": "module",
+  "description": "The hosted sandboxrouter API: one key, prepaid credits, sandboxes on the service's provider accounts.",
+  "scripts": {
+    "start": "tsx main.ts",
+    "admin": "tsx admin.ts",
+    "test": "vitest run --root .",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "pg": "^8.13.1",
+    "tsx": "^4.19.2"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.2.17",
+    "@types/pg": "^8.11.10"
+  }
+}
