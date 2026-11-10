@@ -4,6 +4,9 @@ All notable changes. Versions follow [semver](https://semver.org/); while the ve
 
 ## Unreleased
 
+### Changed
+- **The default route tries tested providers first.** New strategy `verified` (also what `"default"` means now): providers whose last real-account check passed go first, then the rest, each group cheapest first by list price, ties alphabetical. The list ships with each release as `VERIFIED` (`src/verified.ts`, generated from `results/conformance`); `new Router({ verified: [...] })` replaces it. `strategy: "cheapest"` keeps the old price-only order. `Candidate.verified` says which is which, and `sandboxrouter route` marks them "tested".
+
 ### Added
 - `Client`: a TypeScript client for the HTTP API (create, exec with streaming, files, kill), for the hosted service or your own `serve`. Reads `SANDBOXROUTER_URL` and `SANDBOXROUTER_API_KEY`; the Python client reads `SANDBOXROUTER_API_KEY` too.
 - `ServerHooks` on `createApp`: per-caller auth, checks before a create, sandbox ownership, and switches for computers and pause.

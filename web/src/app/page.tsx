@@ -32,7 +32,7 @@ const STEPS = [
   ],
   [
     "create() picks a provider",
-    "The cheapest one that fits the size and features you ask for, by public list price. If it's down, busy or out of credit, the next one takes the sandbox, and every attempt is on sbx.attempts. No provider pays for placement.",
+    "Providers that passed our real-account test go first, cheapest first by public list price, then the untested ones. If one is down, busy or out of credit, the next takes the sandbox, and every attempt is on sbx.attempts. No provider pays for placement.",
   ],
   [
     "Same sandbox everywhere",
@@ -54,8 +54,8 @@ export default function Home() {
           One API for <span className="text-accent">every sandbox.</span>
         </h1>
         <p className="mt-5 max-w-xl text-[15px] leading-7 text-ink-2">
-          AI agents need a safe computer to run code. sandboxrouter starts it on the cheapest provider you have keys for, and
-          moves to the next one if that provider is down, busy or out of credit. One interface for {cloud} providers, plus Docker on
+          AI agents need a safe computer to run code. sandboxrouter starts it on the cheapest tested provider you have keys for,
+          and moves to the next one if that provider is down, busy or out of credit. One interface for {cloud} providers, plus Docker on
           your own machine.
         </p>
         <div className="mt-8 flex flex-wrap items-center gap-3">
@@ -94,7 +94,7 @@ export default function Home() {
         </ol>
         <p className="mt-10 max-w-3xl border-l-2 border-accent pl-4 text-[15px] leading-7 text-ink-2">
           <span className="text-ink">Built for anything that starts many short-lived sandboxes:</span> agents that open one per task
-          or per user, evals, and RL rollouts. Each new sandbox goes to the cheapest provider that&apos;s up, and switching providers is
+          or per user, evals, and RL rollouts. Each new sandbox goes to the cheapest tested provider that&apos;s up, and switching providers is
           a matter of which keys are set, not a rewrite. Free and MIT licensed.
         </p>
       </section>

@@ -108,7 +108,7 @@ class Client:
 
     def create(self, **spec: Any) -> "Sandbox":
         """Start a sandbox. Spec: vcpu, memory_gb, gpu, env, timeout_minutes, image, metadata.
-        Routing: provider (str or list), strategy ("default" | "cheapest" | "fastest"), fallback
+        Routing: provider (str or list), strategy ("default" | "verified" | "cheapest" | "fastest"; default: tested providers first), fallback
         (True, False or "any"), create_timeout_seconds, require."""
         d = self._json("POST", "/v1/sandboxes", _camel(spec))
         return Sandbox(self, d["id"], d["provider"], d.get("estimatedHourlyUsd"), d.get("attempts", []))
