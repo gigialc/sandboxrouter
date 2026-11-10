@@ -2,6 +2,14 @@
 
 All notable changes. Versions follow [semver](https://semver.org/); while the version is 0.x, a minor bump can change the API.
 
+## Unreleased
+
+### Added
+- `Client`: a TypeScript client for the HTTP API (create, exec with streaming, files, kill), for the hosted service or your own `serve`. Reads `SANDBOXROUTER_URL` and `SANDBOXROUTER_API_KEY`; the Python client reads `SANDBOXROUTER_API_KEY` too.
+- `ServerHooks` on `createApp`: per-caller auth, checks before a create, sandbox ownership, and switches for computers and pause.
+- `hosted/`: the hosted API. GitHub sign-in, `sr_live_` API keys, Stripe top-ups, per-second billing at list price plus a fee, and caps on size, count and lifetime. Not part of the npm package.
+- `results:check` refuses `sr_live_` keys.
+
 ## 0.3.3 (2026-11-09)
 
 ### Changed

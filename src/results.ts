@@ -54,6 +54,7 @@ const MAX_MS = 15 * 60_000;
 const SECRET_SHAPES: [string, RegExp][] = [
   ["Stripe-style or Sail key", /\bsk_(?:live_|test_)?[A-Za-z0-9]{16,}/],
   ["OpenAI-style key", /\bsk-[A-Za-z0-9_-]{20,}/],
+  ["sandboxrouter key", /\bsr_live_[A-Za-z0-9_-]{20,}/],
   ["E2B key", /\be2b_[A-Za-z0-9]{20,}/],
   ["Daytona key", /\bdtn_[A-Za-z0-9]{20,}/],
   ["LangSmith key", /\blsv2_(?:sk|pt)_[A-Za-z0-9_]{20,}/],

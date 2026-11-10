@@ -276,6 +276,21 @@ curl -s localhost:8787/v1/sandboxes -H "Authorization: Bearer secret" \
 
 Provider keys stay on the server. Clients only hold `SANDBOXROUTER_TOKEN`. It binds to `127.0.0.1` by default. Without a token it only starts on a loopback address with CORS off: `--cors` (any browser page could otherwise start sandboxes on your keys) and a public `--host` both need `SANDBOXROUTER_TOKEN`.
 
+### TypeScript client
+
+`Client` talks to this API, yours or the hosted one ([`hosted/`](../hosted/): one key, prepaid credit), so only the server holds provider keys:
+
+```ts
+import { Client } from "@sandboxrouter/sdk";
+
+const sr = new Client({ baseUrl: "http://127.0.0.1:8787", apiKey: "secret" }); // or SANDBOXROUTER_URL / SANDBOXROUTER_API_KEY
+const sbx = await sr.create({ vcpu: 2 });
+await sbx.exec("npm test", { onStdout: (c) => process.stdout.write(c) });
+await sbx.kill();
+```
+
+`createApp(router, token, cors, hooks)` takes `ServerHooks` (per-caller auth, checks before a create, ownership) for running it for many users, which is how `hosted/` is built.
+
 ### Python
 
 A standard-library client for the HTTP API lives in [`python/`](../python/):

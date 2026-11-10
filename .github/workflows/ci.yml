@@ -28,5 +28,8 @@ jobs:
         run: npm run results:check -- ${{ github.event_name == 'pull_request' && '--against HEAD^1' || '' }}
       - run: npm test
       - run: npm run test:py
+      - name: Hosted API
+        run: npm ci && npm run typecheck && npm test
+        working-directory: hosted
       - run: npm ci && npm run build
         working-directory: web

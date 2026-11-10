@@ -5,6 +5,29 @@ import { Router, type RoutedSandbox } from "./router.js";
 import { ProviderError, RouterError, type RouteOptions, type SandboxSpec } from "./types.js";
 
 /**
+ * Hooks for running this API for many users, as the hosted service does (hosted/). With none set,
+ * the server is single-user: one SANDBOXROUTER_TOKEN, every sandbox reachable by anyone holding it.
+ */
+export interface ServerHooks {
+  /** Who is calling, or null for 401. Replaces the single-token check. */
+  authorize?(req: IncomingMessage): Promise<unknown | null>;
+  /** Routes outside /v1 (sign-in, billing webhooks, pages), checked before auth. Return true if handled. */
+  extra?(req: IncomingMessage, res: ServerResponse, url: URL): Promise<boolean>;
+  /** Before a sandbox starts. Throw HttpError to refuse (402 out of credit, 429 too many); may edit spec. */
+  beforeCreate?(caller: unknown, spec: SandboxSpec, route: RouteOptions): Promise<void>;
+  /** After it started. If this throws, the sandbox is killed and the error returned. */
+  afterCreate?(caller: unknown, sbx: RoutedSandbox, spec: SandboxSpec): Promise<void>;
+  /** May this caller use this sandbox? No means 404. */
+  owns?(caller: unknown, id: string): Promise<boolean>;
+  /** After DELETE killed it. */
+  afterKill?(caller: unknown, id: string): Promise<void>;
+  /** false turns off /v1/computers. */
+  computers?: boolean;
+  /** false turns off pause. */
+  pause?: boolean;
+}
+
+/**
  * OpenRouter-style HTTP API in front of every provider. One token for your clients; provider keys
  * stay on this host.
  *
@@ -35,11 +58,12 @@ export function createApp(
   token = process.env.SANDBOXROUTER_TOKEN,
   /** Browser origins allowed to call this server (e.g. the website's Playground). Off by default. */
   corsOrigins: string[] = (process.env.SANDBOXROUTER_CORS ?? "").split(",").map((s) => s.trim()).filter(Boolean),
+  hooks: ServerHooks = {},
 ) {
   // With CORS on, any page open in a browser on this machine can call the server (Chrome even
   // lets a public page reach localhost, which the Private-Network header below allows), so it
   // would start sandboxes on these provider keys. A token is required for that.
-  if (corsOrigins.length && !token) {
+  if (corsOrigins.length && !token && !hooks.authorize) {
     throw new Error("CORS is on but SANDBOXROUTER_TOKEN is not set: browser pages could start sandboxes on your keys. Set a token, or turn CORS off.");
   }
   const expected = token ? Buffer.from(`Bearer ${token}`) : undefined;
@@ -76,10 +100,18 @@ export function createApp(
     }
 
     if (url.pathname === "/health") return json(res, 200, { ok: true });
-    if (!authorized(req)) return json(res, 401, { error: "unauthorized" });
+    if (hooks.extra && (await hooks.extra(req, res, url))) return;
+    let caller: unknown = null;
+    if (hooks.authorize) {
+      caller = await hooks.authorize(req);
+      if (caller === null) return json(res, 401, { error: "unauthorized" });
+    } else if (!authorized(req)) return json(res, 401, { error: "unauthorized" });
     if (parts[0] !== "v1") return json(res, 404, { error: "not found" });
 
-    const box = async (id: string) => live.get(id) ?? router.get(id);
+    const box = async (id: string) => {
+      if (hooks.owns && !(await hooks.owns(caller, id))) throw new HttpError(404, "no such sandbox");
+      return live.get(id) ?? router.get(id);
+    };
 
     // GET /v1/providers
     if (req.method === "GET" && parts[1] === "providers" && parts.length === 2) {
@@ -98,13 +130,23 @@ export function createApp(
       return json(res, 200, { candidates: router.plan(spec, route) });
     }
 
-    if (parts[1] === "computers") return computers(req, res, url, parts);
+    if (parts[1] === "computers") {
+      if (hooks.computers === false) return json(res, 404, { error: "computers aren't available on this server" });
+      return computers(req, res, url, parts);
+    }
     if (parts[1] !== "sandboxes") return json(res, 404, { error: "not found" });
 
     // POST /v1/sandboxes
     if (req.method === "POST" && parts.length === 2) {
       const { spec, route } = splitBody(await readJson(req));
+      await hooks.beforeCreate?.(caller, spec, route);
       const sbx = await router.create(spec, route);
+      try {
+        await hooks.afterCreate?.(caller, sbx, spec);
+      } catch (err) {
+        await sbx.kill().catch(() => {});
+        throw err;
+      }
       live.set(sbx.id, sbx);
       return json(res, 201, {
         id: sbx.id,
@@ -138,6 +180,7 @@ export function createApp(
 
     // POST /v1/sandboxes/:id/pause
     if (req.method === "POST" && parts[3] === "pause" && parts.length === 4) {
+      if (hooks.pause === false) return json(res, 400, { error: "pause isn't available on this server" });
       await (await box(id)).pause();
       // Drop the cached handle so the next call reattaches through router.get(), which resumes.
       live.delete(id);
@@ -163,6 +206,7 @@ export function createApp(
     if (req.method === "DELETE" && parts.length === 3) {
       await (await box(id)).kill();
       live.delete(id);
+      await hooks.afterKill?.(caller, id);
       return json(res, 200, { id, killed: true });
     }
 
@@ -236,7 +280,7 @@ export function createApp(
   });
 }
 
-class HttpError extends Error {
+export class HttpError extends Error {
   constructor(
     readonly status: number,
     message: string,

@@ -4,7 +4,8 @@ export { conformanceTable, loadConformance, type ConformanceRow, type SavedCheck
 export { gc, listOpen, isGone, type GcResult, type OpenSandbox } from "./gc.js";
 export { Router, RoutedSandbox, defaultProviders, defaultComputerProviders, parseId, type Candidate, type RouterOptions } from "./router.js";
 export { CATALOG, hourlyCost, unfit, info, type ProviderInfo } from "./catalog.js";
-export { createApp } from "./server.js";
+export { createApp, HttpError, type ServerHooks } from "./server.js";
+export { Client, ClientError, RemoteSandbox } from "./client.js";
 export {
   RoutedComputer,
   createComputer,

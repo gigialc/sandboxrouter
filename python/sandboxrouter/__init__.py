@@ -62,7 +62,7 @@ _SPEC_KEYS = {
 class Client:
     def __init__(self, base_url: Optional[str] = None, token: Optional[str] = None, timeout: float = 660):
         self.base_url = (base_url or os.environ.get("SANDBOXROUTER_URL") or "http://127.0.0.1:8787").rstrip("/")
-        self.token = token if token is not None else os.environ.get("SANDBOXROUTER_TOKEN")
+        self.token = token if token is not None else (os.environ.get("SANDBOXROUTER_API_KEY") or os.environ.get("SANDBOXROUTER_TOKEN"))
         self.timeout = timeout
 
     # -- transport -------------------------------------------------------------------------
