@@ -1,0 +1,100 @@
+{
+  "tool": "sandboxrouter",
+  "version": "0.3.4",
+  "date": "2026-11-11T20:13:54.544Z",
+  "label": "home-eu",
+  "runs": 5,
+  "spec": {},
+  "node": "v22.22.0",
+  "platform": "darwin-arm64",
+  "rows": [
+    {
+      "provider": "novita",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 344,
+      "medianExecMs": 590,
+      "hourlyUsd": 0.11664
+    },
+    {
+      "provider": "openscale",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 381,
+      "medianExecMs": 1155,
+      "hourlyUsd": 0.013999999999999999
+    },
+    {
+      "provider": "vercel",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 405,
+      "medianExecMs": 344,
+      "hourlyUsd": 0.3408
+    },
+    {
+      "provider": "e2b",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 411,
+      "medianExecMs": 228,
+      "hourlyUsd": 0.1089
+    },
+    {
+      "provider": "superserve",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 414,
+      "medianExecMs": 160,
+      "hourlyUsd": 0.1656
+    },
+    {
+      "provider": "daytona",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 580,
+      "medianExecMs": 608,
+      "hourlyUsd": 0.06659999999999999
+    },
+    {
+      "provider": "cloudflare",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 606,
+      "medianExecMs": 291,
+      "hourlyUsd": 0.21599999999999997
+    },
+    {
+      "provider": "agent37",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 759,
+      "medianExecMs": 420,
+      "hourlyUsd": 0.006520547945205479
+    },
+    {
+      "provider": "maritime",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 1166,
+      "medianExecMs": 544,
+      "hourlyUsd": 0.022
+    },
+    {
+      "provider": "sail",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 2899,
+      "medianExecMs": 299,
+      "hourlyUsd": 0.062
+    },
+    {
+      "provider": "lambda",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 3418,
+      "medianExecMs": 626,
+      "hourlyUsd": 0.25220016
+    }
+  ]
+}

@@ -1,0 +1,85 @@
+{
+  "tool": "sandboxrouter-check",
+  "version": "0.3.4",
+  "date": "2026-11-11T20:06:12.653Z",
+  "platform": "darwin-arm64",
+  "provider": "cloudflare",
+  "sandboxId": "cloudflare:3aaa9b12-421d-46b8-a0dd-d52a8e1d4888",
+  "results": [
+    {
+      "step": "create",
+      "ms": 4612,
+      "status": "pass",
+      "detail": "cloudflare:3aaa9b12-421d-46b8-a0dd-d52a8e1d4888, ~$0.216/hr"
+    },
+    {
+      "step": "exec: stdout, stderr, exit code",
+      "ms": 284,
+      "status": "pass"
+    },
+    {
+      "step": "exec: env and cwd",
+      "ms": 101,
+      "status": "pass"
+    },
+    {
+      "step": "exec: UTF-8 output",
+      "ms": 67,
+      "status": "pass"
+    },
+    {
+      "step": "exec: streaming",
+      "ms": 3070,
+      "status": "pass",
+      "detail": "first output after 65 ms"
+    },
+    {
+      "step": "files: binary round-trip",
+      "ms": 165,
+      "status": "pass"
+    },
+    {
+      "step": "files: 1 MB round-trip",
+      "ms": 548,
+      "status": "pass"
+    },
+    {
+      "step": "files: missing file is an error",
+      "ms": 61,
+      "status": "pass"
+    },
+    {
+      "step": "files: visible to commands",
+      "ms": 343,
+      "status": "pass"
+    },
+    {
+      "step": "exec: command timeout",
+      "ms": 3098,
+      "status": "pass",
+      "detail": "threw after 3098 ms"
+    },
+    {
+      "step": "exec: timed-out command was stopped",
+      "ms": 6452,
+      "status": "pass"
+    },
+    {
+      "step": "pause and resume",
+      "status": "skip",
+      "ms": 0,
+      "detail": "adapter has no pause"
+    },
+    {
+      "step": "kill",
+      "ms": 357,
+      "status": "pass"
+    },
+    {
+      "step": "killed sandbox is gone",
+      "ms": 73,
+      "status": "pass"
+    }
+  ],
+  "ok": true
+}

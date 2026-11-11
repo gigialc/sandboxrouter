@@ -1,0 +1,84 @@
+{
+  "tool": "sandboxrouter-check",
+  "version": "0.3.4",
+  "date": "2026-11-11T20:06:10.679Z",
+  "platform": "darwin-arm64",
+  "provider": "superserve",
+  "sandboxId": "superserve:d0bb7000-ecdf-423c-b438-9f160a631a15",
+  "results": [
+    {
+      "step": "create",
+      "ms": 477,
+      "status": "pass",
+      "detail": "superserve:d0bb7000-ecdf-423c-b438-9f160a631a15, ~$0.1656/hr"
+    },
+    {
+      "step": "exec: stdout, stderr, exit code",
+      "ms": 328,
+      "status": "pass"
+    },
+    {
+      "step": "exec: env and cwd",
+      "ms": 171,
+      "status": "pass"
+    },
+    {
+      "step": "exec: UTF-8 output",
+      "ms": 104,
+      "status": "pass"
+    },
+    {
+      "step": "exec: streaming",
+      "ms": 3107,
+      "status": "pass",
+      "detail": "first output after 137 ms"
+    },
+    {
+      "step": "files: binary round-trip",
+      "ms": 294,
+      "status": "pass"
+    },
+    {
+      "step": "files: 1 MB round-trip",
+      "ms": 1167,
+      "status": "pass"
+    },
+    {
+      "step": "files: missing file is an error",
+      "ms": 103,
+      "status": "pass"
+    },
+    {
+      "step": "files: visible to commands",
+      "ms": 403,
+      "status": "pass"
+    },
+    {
+      "step": "exec: command timeout",
+      "ms": 3106,
+      "status": "pass",
+      "detail": "threw after 3106 ms"
+    },
+    {
+      "step": "exec: timed-out command was stopped",
+      "ms": 6512,
+      "status": "pass"
+    },
+    {
+      "step": "pause and resume",
+      "ms": 1173,
+      "status": "pass"
+    },
+    {
+      "step": "kill",
+      "ms": 205,
+      "status": "pass"
+    },
+    {
+      "step": "killed sandbox is gone",
+      "ms": 111,
+      "status": "pass"
+    }
+  ],
+  "ok": true
+}

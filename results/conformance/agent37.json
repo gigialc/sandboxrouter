@@ -1,0 +1,84 @@
+{
+  "tool": "sandboxrouter-check",
+  "version": "0.3.4",
+  "date": "2026-11-11T20:06:27.451Z",
+  "platform": "darwin-arm64",
+  "provider": "agent37",
+  "sandboxId": "agent37:ybycyxr1fz",
+  "results": [
+    {
+      "step": "create",
+      "ms": 1010,
+      "status": "pass",
+      "detail": "agent37:ybycyxr1fz, ~$0.0065/hr"
+    },
+    {
+      "step": "exec: stdout, stderr, exit code",
+      "ms": 428,
+      "status": "pass"
+    },
+    {
+      "step": "exec: env and cwd",
+      "ms": 319,
+      "status": "pass"
+    },
+    {
+      "step": "exec: UTF-8 output",
+      "ms": 394,
+      "status": "pass"
+    },
+    {
+      "step": "exec: streaming",
+      "ms": 3471,
+      "status": "info",
+      "detail": "output arrived only at the end (no live streaming)"
+    },
+    {
+      "step": "files: binary round-trip",
+      "ms": 1327,
+      "status": "pass"
+    },
+    {
+      "step": "files: 1 MB round-trip",
+      "ms": 11240,
+      "status": "pass"
+    },
+    {
+      "step": "files: missing file is an error",
+      "ms": 334,
+      "status": "pass"
+    },
+    {
+      "step": "files: visible to commands",
+      "ms": 1552,
+      "status": "pass"
+    },
+    {
+      "step": "exec: command timeout",
+      "ms": 3365,
+      "status": "pass",
+      "detail": "threw after 3365 ms"
+    },
+    {
+      "step": "exec: timed-out command was stopped",
+      "ms": 6779,
+      "status": "pass"
+    },
+    {
+      "step": "pause and resume",
+      "ms": 3366,
+      "status": "pass"
+    },
+    {
+      "step": "kill",
+      "ms": 374,
+      "status": "pass"
+    },
+    {
+      "step": "killed sandbox is gone",
+      "ms": 178,
+      "status": "pass"
+    }
+  ],
+  "ok": true
+}

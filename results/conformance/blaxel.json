@@ -1,16 +1,15 @@
 {
   "tool": "sandboxrouter-check",
-  "version": "0.3.3",
-  "date": "2026-11-10T16:19:10.320Z",
+  "version": "0.3.4",
+  "date": "2026-11-11T20:06:20.627Z",
   "platform": "darwin-arm64",
-  "by": "gigialc",
   "provider": "blaxel",
-  "sandboxId": "blaxel:8c8b2f69-e38f-45ae-b13d-b2fb949cec52",
+  "sandboxId": "blaxel:bf525192-e81d-46ac-8c5d-075a72635e9f",
   "results": [
     {
       "step": "create",
       "status": "pass",
-      "detail": "blaxel:8c8b2f69-e38f-45ae-b13d-b2fb949cec52, ~$0.1656/hr"
+      "detail": "blaxel:bf525192-e81d-46ac-8c5d-075a72635e9f, ~$0.1656/hr"
     },
     {
       "step": "exec: stdout, stderr, exit code",

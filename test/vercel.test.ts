@@ -20,6 +20,7 @@ const creates: any[] = [];
 const gets: any[] = [];
 const runs: any[] = [];
 const stopped: string[] = [];
+const deleted: string[] = [];
 const children = new Set<ChildProcess>();
 let runError: Error | undefined;
 const sandboxes = new Map<string, FakeSandbox>();
@@ -77,11 +78,16 @@ class FakeCommand {
 
 class FakeSandbox {
   alive = true;
+  deleted = false;
   constructor(
     readonly name: string,
     private env: Record<string, string>,
+    // Like the real SDK: a persistent sandbox (the default) starts again on the next call after stop().
+    private persistent = true,
   ) {}
   private live() {
+    if (this.deleted) throw new Error(`Sandbox ${this.name} was deleted`);
+    if (!this.alive && this.persistent) this.alive = true;
     if (!this.alive) throw new Error(`Sandbox ${this.name} is stopped`);
   }
   async runCommand(params: any) {
@@ -106,6 +112,11 @@ class FakeSandbox {
     stopped.push(this.name);
     this.alive = false;
   }
+  async delete(_opts?: { deleteOrphanSnapshots?: boolean }) {
+    deleted.push(this.name);
+    this.alive = false;
+    this.deleted = true;
+  }
 }
 
 vi.mock("@vercel/sandbox", () => ({
@@ -113,7 +124,7 @@ vi.mock("@vercel/sandbox", () => ({
     create: async (params: any) => {
       creates.push(params);
       if (params.token !== "vt_test") throw Object.assign(new Error("Unauthorized: invalid token"), { status: 401 });
-      const sbx = new FakeSandbox(`sbx_${sandboxes.size + 1}`, params.env ?? {});
+      const sbx = new FakeSandbox(`sbx_${sandboxes.size + 1}`, params.env ?? {}, params.persistent ?? true);
       sandboxes.set(sbx.name, sbx);
       return sbx;
     },
@@ -134,7 +145,7 @@ const p = () => new VercelProvider();
 beforeEach(() => {
   Object.assign(process.env, ENV);
   delete process.env.VERCEL_OIDC_TOKEN;
-  creates.length = gets.length = runs.length = stopped.length = 0;
+  creates.length = gets.length = runs.length = stopped.length = deleted.length = 0;
   runError = undefined;
 });
 
@@ -170,9 +181,10 @@ describe("VercelProvider", () => {
       resources: { vcpus: 4 },
       env: { A: "1" },
       tags: { team: "a" },
+      persistent: false,
     });
     await p().create({});
-    expect(creates[1]).toEqual({ token: "vt_test", teamId: "team_test", projectId: "prj_test", runtime: "node22", timeout: 1_800_000, resources: { vcpus: 2 }, env: undefined, tags: undefined });
+    expect(creates[1]).toEqual({ token: "vt_test", teamId: "team_test", projectId: "prj_test", runtime: "node22", timeout: 1_800_000, resources: { vcpus: 2 }, env: undefined, tags: undefined, persistent: false });
     await p().create({ vcpu: 16, memoryGb: 1 });
     expect(creates[2].resources).toEqual({ vcpus: 8 });
     // With only an OIDC token the SDK finds the credentials itself; create's errors pass through unwrapped.
@@ -217,14 +229,16 @@ describe("VercelProvider", () => {
     await expect(sbx.readFile(join(root, "missing"))).rejects.toMatchObject({ name: "ProviderError", message: `vercel: no such file: ${join(root, "missing")}` });
   });
 
-  it("connects by name with the credentials, stops on kill, and has no pause", async () => {
+  it("connects by name with the credentials, deletes on kill, and has no pause", async () => {
     const created = await p().create({});
     const sbx = await p().connect(created.nativeId);
     expect(gets[0]).toEqual({ token: "vt_test", teamId: "team_test", projectId: "prj_test", name: created.nativeId });
     expect((await sbx.exec("echo hi")).stdout).toBe("hi\n");
     expect(sbx.pause).toBeUndefined();
     await sbx.kill();
-    expect(stopped).toEqual([created.nativeId]);
+    // stop() alone would let the next command start the sandbox again (and bill it).
+    expect(deleted).toEqual([created.nativeId]);
+    expect(stopped).toEqual([]);
     await expect(sbx.exec("true")).rejects.toMatchObject({ name: "ProviderError" });
   });
 });
