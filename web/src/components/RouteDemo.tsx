@@ -12,7 +12,7 @@ type Line = { kind: "cmd" | "skip" | "ok" | "out"; text: string; note?: string }
 
 const SCENARIOS: { title: string; lines: Line[] }[] = [
   {
-    title: "Cheapest tested provider you have a key for",
+    title: "Cheapest provider you have a key for",
     lines: [
       { kind: "cmd", text: 'sandboxrouter run "python3 -c \'print(6*7)\'"' },
       { kind: "ok", text: "maritime", note: "started · $0.022/hr" },
@@ -110,7 +110,7 @@ export function RouteDemo() {
         ))}
       </pre>
       <figcaption className="border-t border-white/10 px-4 py-2 text-[12px] leading-5 text-white/55">
-        Example runs. The router tries the providers you have keys for, tested ones first, cheapest first, and records each attempt on{" "}
+        Example runs. The router tries the providers you have keys for, cheapest first, and records each attempt on{" "}
         <code className="font-mono text-white/75">sbx.attempts</code>.
       </figcaption>
     </figure>

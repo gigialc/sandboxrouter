@@ -109,19 +109,23 @@ try {
         <h2 id="routing">Routing</h2>
         <p>The second argument to <code>create</code> decides where a sandbox goes.</p>
         <CodeBlock
-          code={`router.create(spec)                                // tested providers first, then cheapest
-router.create(spec, { strategy: "cheapest" })      // lowest list price, tested or not
-router.create(spec, { strategy: "fastest" })       // lowest cold start you measured with bench
+          code={`router.create(spec)                                // cheapest real cost; speed breaks near-ties
+router.create(spec, { strategy: "cheapest" })      // lowest list price alone
+router.create(spec, { strategy: "fastest" })       // lowest start time, measured where you run it
+router.create(spec, { strategy: "verified" })      // providers that passed the check first
 router.create(spec, { provider: ["e2b", "modal"] }) // try these, in this order
 router.create({ gpu: "A10G" })                      // only GPU-capable providers are tried
 router.create(spec, { require: ["pause"] })         // only providers that can pause`}
         />
         <p>
-          With no strategy, the router uses <code>verified</code>: providers that passed the 14-step real-account check go first,
-          then the rest, each group cheapest first by list price for the size you asked for, among providers you have keys for. Ties
-          break alphabetically, so no provider gets a better slot; any provider moves up by passing the check. The list ships with each
-          release (<code>VERIFIED</code>), and <code>new Router({`{ verified: [...] }`})</code> replaces it with your own. Prices come from each
-          provider&apos;s public pricing page and live in <code>src/catalog.ts</code>. Docker is never picked automatically; name it
+          With no strategy, the router goes cheapest first among providers you have keys for, by list price for the size you asked
+          for. Where we measured what a provider really bills (a sandbox run for a fixed time, then the provider&apos;s own bill),
+          its price is corrected by that ratio (<code>BILLED_VS_LIST</code>). Providers within 10% of each other on price go fastest first,
+          by start times this router measured itself, or from your <code>sandboxrouter bench</code> run until it has some. Speed depends on
+          where you run it, so the published benchmarks are never used for routing. Providers whose last 14-step real-account check
+          failed go last. Ties break alphabetically, so no provider gets a better slot by who it is. Prices come from each
+          provider&apos;s public pricing page and live in <code>src/catalog.ts</code>. A service that runs sandboxes on its own accounts can
+          pass <code>{`{ requireVerified: true }`}</code> to use only providers that passed the check. Docker is never picked automatically; name it
           with <code>{`{ provider: "docker" }`}</code>. To see what would happen without starting anything, call{" "}
           <code>router.plan(spec, route)</code> or run <code>npx @sandboxrouter/sdk route</code>. Every skipped provider comes with
           a reason, like <code>not configured</code> or <code>max 16 vCPU</code>.
@@ -131,8 +135,8 @@ router.create(spec, { require: ["pause"] })         // only providers that can p
         <ul>
           <li>
             <strong>Order:</strong> providers anyone can sign up for come first, cheapest first, ties alphabetical; waitlisted or
-            closed sign-ups follow, then providers that can&apos;t take the size. The router tries the ones that passed the
-            real-account check first, then the rest, each cheapest first, among providers you have keys for.
+            closed sign-ups follow, then providers that can&apos;t take the size. The router goes cheapest first among providers you
+            have keys for, with speed breaking near-ties (see Routing).
           </li>
           <li>
             <strong>List price / hr:</strong> each provider&apos;s public list price while running, read off its pricing page. An

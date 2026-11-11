@@ -62,18 +62,21 @@ export interface SandboxSpec {
 }
 
 /**
- * "verified" (and "default", the same thing): providers that passed the real-account check first
- * (as of this release; `VERIFIED` in src/verified.ts), then the rest; cheapest first within each,
- * ties alphabetical.
+ * "balanced" (and "default", the same thing): cheapest first by effective price (list price x what the
+ * provider really billed, where measured; `BILLED_VS_LIST`), with providers within 10% of each other on
+ * price ordered by speed (this router's own recent create times, else your `bench` file). Providers
+ * whose last real-account check failed (`FAILING`) go last.
+ * "verified": providers that passed the real-account check first (`VERIFIED`), then the rest; cheapest
+ * list price first within each.
  * "cheapest": lowest list price for the spec, tested or not, ties alphabetical.
- * "fastest": lowest median cold start you measured with `bench`, then cheapest.
+ * "fastest": lowest median create time (this router's own, else your `bench` file), then cheapest.
  */
-export type Strategy = "default" | "verified" | "cheapest" | "fastest";
+export type Strategy = "default" | "balanced" | "verified" | "cheapest" | "fastest";
 
 export interface RouteOptions {
   /** Pin to one provider, or give an ordered list to try. Omit to let the router choose. */
   provider?: ProviderId | ProviderId[];
-  /** How to order candidates when no explicit list is given. Default: "verified" (tested providers first, then cheapest). */
+  /** How to order candidates when no explicit list is given. Default: "balanced" (cheapest real cost, speed breaks near-ties). */
   strategy?: Strategy;
   /**
    * What to do when a create fails. `true` (default): try the next candidate when the provider

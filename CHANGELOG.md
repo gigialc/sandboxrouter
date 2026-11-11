@@ -2,6 +2,19 @@
 
 All notable changes. Versions follow [semver](https://semver.org/); while the version is 0.x, a minor bump can change the API.
 
+## 0.4.0 (2026-11-11)
+
+### Changed
+- **The default route is cheapest real cost first, with speed breaking near-ties.** New strategy `balanced` (also what `"default"` means now). It ranks by list price for the size you asked for, times what the provider really billed against list price where that was measured (`BILLED_VS_LIST`, generated from `results/cost` into `src/billing.ts`; today only Sail, at 1.458x). Providers within 10% of each other on that price go fastest first, by this router's own recent create times (after 3 creates), else your `sandboxrouter bench` file. The published benchmarks are never used, since speed depends on where you run. Providers whose last real-account check failed (`FAILING`) go last, and still serve as fallback. Passing the check no longer moves a provider up: the old order is `strategy: "verified"`.
+- `Candidate` has `effectiveHourlyUsd` (the ranked price) and `failing`. `estimatedHourlyUsd` stays the list price, and is still what `RoutedSandbox.estimatedHourlyUsd` reports.
+- `strategy: "fastest"` also uses the router's own create times, so it works on a server that never ran `bench`.
+- The bench file follows `$SANDBOXROUTER_HOME` like the ledger does (`$SANDBOXROUTER_BENCH_FILE` still wins).
+
+### Added
+- `RouterOptions.requireVerified`: only route to providers that passed the real-account check. For services that run sandboxes on their own accounts, where a provider that misbehaves without failing (keeps billing after kill, garbles output) costs money.
+- `RouterOptions.failing` and `RouterOptions.billedVsList` replace the shipped lists.
+- `sandboxrouter route` shows the billed price where it differs from list, start times, and failed checks.
+
 ## 0.3.5 (2026-11-11)
 
 ### Fixed
@@ -13,7 +26,7 @@ All notable changes. Versions follow [semver](https://semver.org/); while the ve
 
 ### Changed
 - Real-account checks: 16 cloud providers now pass, up from 5. New: Agent37, AWS AgentCore, AWS Lambda MicroVMs, Cloudflare Sandbox, Freestyle, Fly.io Sprites, Modal, Novita, OpenScale, Superserve and Vercel. The default route tries them before untested providers.
-- New benchmarks: `results/bench-2026-11-11-home-eu.json` (11 providers) and `results/bench-2026-11-11-home-eu-b.json` (AgentCore, Freestyle, Modal, Sprites), 5 runs each at 2 vCPU / 4 GB.
+- New benchmarks: `results/bench-2026-11-11-home-eu.json` (11 providers) and `results/bench-2026-11-11-home-eu-b.json` (AgentCore, Freestyle, Modal, Sprites), 5 runs each at each provider's default size.
 
 ## 0.3.4 (2026-11-10)
 

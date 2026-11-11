@@ -41,7 +41,7 @@ export function Playground() {
   const [configured, setConfigured] = useState<string[] | null>(null);
   const [connErr, setConnErr] = useState<string | null>(null);
   const [provider, setProvider] = useState("auto");
-  const [strategy, setStrategy] = useState("verified");
+  const [strategy, setStrategy] = useState("balanced");
   const [shape, setShape] = useState("2x4");
   const [sbx, setSbx] = useState<Sbx | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
@@ -213,8 +213,9 @@ export function Playground() {
             <label className="block text-xs text-muted">
               Strategy
               <select value={strategy} onChange={(e) => setStrategy(e.target.value)} className={`${field} mt-1`} disabled={!configured || provider !== "auto"}>
-                <option value="verified">verified</option>
+                <option value="balanced">balanced</option>
                 <option value="cheapest">cheapest</option>
+                <option value="verified">verified</option>
                 <option value="fastest">fastest</option>
               </select>
             </label>

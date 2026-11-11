@@ -1,6 +1,6 @@
 {
-  "version": "0.3.5",
-  "generatedAt": "2026-11-11T21:29:23.778Z",
+  "version": "0.4.0",
+  "generatedAt": "2026-11-11T22:34:09.377Z",
   "shapes": [
     "1x2",
     "2x4",
@@ -76,6 +76,7 @@
         "status": "passed",
         "label": "passed (2026-11-11)"
       },
+      "billedVsList": null,
       "computers": [],
       "prices": {
         "1x2": {
@@ -139,6 +140,7 @@
         "status": "untested",
         "label": "not run yet"
       },
+      "billedVsList": null,
       "computers": [],
       "prices": {
         "1x2": {
@@ -240,6 +242,7 @@
         "status": "passed",
         "label": "passed (2026-11-11)"
       },
+      "billedVsList": null,
       "computers": [],
       "prices": {
         "1x2": {
@@ -337,6 +340,7 @@
         "status": "passed",
         "label": "passed (2026-11-11)"
       },
+      "billedVsList": null,
       "computers": [],
       "prices": {
         "1x2": {
@@ -405,6 +409,7 @@
         "status": "untested",
         "label": "not run yet"
       },
+      "billedVsList": null,
       "computers": [],
       "prices": {
         "1x2": {
@@ -474,6 +479,7 @@
         "status": "untested",
         "label": "not run yet"
       },
+      "billedVsList": null,
       "computers": [],
       "prices": {
         "1x2": {
@@ -569,6 +575,7 @@
         "status": "passed",
         "label": "passed (2026-11-11)"
       },
+      "billedVsList": null,
       "computers": [],
       "prices": {
         "1x2": {
@@ -638,6 +645,7 @@
         "status": "untested",
         "label": "not run yet"
       },
+      "billedVsList": null,
       "computers": [],
       "prices": {
         "1x2": {
@@ -732,6 +740,7 @@
         "status": "passed",
         "label": "passed (2026-11-11)"
       },
+      "billedVsList": null,
       "computers": [],
       "prices": {
         "1x2": {
@@ -796,6 +805,7 @@
         "status": "untested",
         "label": "not run yet"
       },
+      "billedVsList": null,
       "computers": [],
       "prices": {
         "1x2": {
@@ -888,6 +898,7 @@
         "status": "passed",
         "label": "passed (2026-11-11)"
       },
+      "billedVsList": null,
       "computers": [
         "linux"
       ],
@@ -957,6 +968,7 @@
         "status": "untested",
         "label": "not run yet"
       },
+      "billedVsList": null,
       "computers": [],
       "prices": {
         "1x2": {
@@ -1025,6 +1037,7 @@
         "status": "untested",
         "label": "not run yet"
       },
+      "billedVsList": null,
       "computers": [],
       "prices": {
         "1x2": {
@@ -1110,6 +1123,7 @@
         "status": "passed",
         "label": "passed (2026-11-09)"
       },
+      "billedVsList": null,
       "computers": [],
       "prices": {
         "1x2": {
@@ -1202,6 +1216,7 @@
         "status": "passed",
         "label": "passed (2026-11-11)"
       },
+      "billedVsList": null,
       "computers": [
         "linux"
       ],
@@ -1272,6 +1287,7 @@
         "status": "untested",
         "label": "not run yet"
       },
+      "billedVsList": null,
       "computers": [],
       "prices": {
         "1x2": {
@@ -1360,6 +1376,7 @@
         "status": "passed",
         "label": "passed (2026-11-11)"
       },
+      "billedVsList": null,
       "computers": [],
       "prices": {
         "1x2": {
@@ -1454,6 +1471,7 @@
         "status": "passed",
         "label": "passed (2026-11-11)"
       },
+      "billedVsList": null,
       "computers": [],
       "prices": {
         "1x2": {
@@ -1518,6 +1536,7 @@
         "status": "untested",
         "label": "not run yet"
       },
+      "billedVsList": null,
       "computers": [],
       "prices": {
         "1x2": {
@@ -1586,6 +1605,7 @@
         "status": "untested",
         "label": "not run yet"
       },
+      "billedVsList": null,
       "computers": [],
       "prices": {
         "1x2": {
@@ -1658,6 +1678,7 @@
         "status": "untested",
         "label": "not run yet"
       },
+      "billedVsList": null,
       "computers": [],
       "prices": {
         "1x2": {
@@ -1726,6 +1747,7 @@
         "status": "untested",
         "label": "not run yet"
       },
+      "billedVsList": null,
       "computers": [],
       "prices": {
         "1x2": {
@@ -1820,6 +1842,7 @@
         "status": "passed",
         "label": "passed (2026-11-11)"
       },
+      "billedVsList": null,
       "computers": [
         "linux",
         "windows",
@@ -1916,6 +1939,7 @@
         "status": "passed",
         "label": "passed (2026-11-11)"
       },
+      "billedVsList": null,
       "computers": [],
       "prices": {
         "1x2": {
@@ -1980,6 +2004,7 @@
         "status": "untested",
         "label": "not run yet"
       },
+      "billedVsList": null,
       "computers": [],
       "prices": {
         "1x2": {
@@ -2044,6 +2069,7 @@
         "status": "untested",
         "label": "not run yet"
       },
+      "billedVsList": null,
       "computers": [],
       "prices": {
         "1x2": {
@@ -2133,6 +2159,7 @@
         "status": "passed",
         "label": "passed (2026-11-11)"
       },
+      "billedVsList": null,
       "computers": [],
       "prices": {
         "1x2": {
@@ -2225,6 +2252,7 @@
         "status": "passed",
         "label": "passed (2026-11-11)"
       },
+      "billedVsList": null,
       "computers": [],
       "prices": {
         "1x2": {
@@ -2289,6 +2317,7 @@
         "status": "untested",
         "label": "not run yet"
       },
+      "billedVsList": null,
       "computers": [],
       "prices": {
         "1x2": {
@@ -2376,6 +2405,10 @@
       "live": {
         "status": "passed",
         "label": "passed (2026-11-11)"
+      },
+      "billedVsList": {
+        "ratio": 1.458,
+        "date": "2026-11-06"
       },
       "computers": [],
       "prices": {
@@ -2472,6 +2505,7 @@
         "status": "passed",
         "label": "passed (2026-11-11)"
       },
+      "billedVsList": null,
       "computers": [],
       "prices": {
         "1x2": {
@@ -2536,6 +2570,7 @@
         "status": "untested",
         "label": "not run yet"
       },
+      "billedVsList": null,
       "computers": [],
       "prices": {
         "1x2": {
@@ -2597,6 +2632,7 @@
         "status": "untested",
         "label": "not run yet"
       },
+      "billedVsList": null,
       "computers": [],
       "prices": {
         "1x2": {
@@ -2690,6 +2726,7 @@
         "status": "passed",
         "label": "passed (2026-11-11)"
       },
+      "billedVsList": null,
       "computers": [],
       "prices": {
         "1x2": {

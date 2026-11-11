@@ -24,6 +24,8 @@ export interface SiteProvider {
   defaultSize: null | { vcpu: number; memoryGb: number };
   /** Last real-account run: passed, failing, or untested (mock-tested only). */
   live: { status: "passed" | "failing" | "untested"; label: string };
+  /** What the provider really billed / the list-price prediction, from a saved cost run; the router ranks by list price x this. */
+  billedVsList: null | { ratio: number; date: string };
   computers: string[];
   prices: Record<Shape, { usd: number; unfit: string | null }>;
   /** The last saved real-account `check` run, or null when none has been saved. */

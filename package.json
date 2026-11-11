@@ -1,6 +1,6 @@
 {
   "name": "@sandboxrouter/sdk",
-  "version": "0.3.5",
+  "version": "0.4.0",
   "description": "One API for every sandbox provider: route AI agents' code by price, speed or capability, with automatic fallback. Free and open source.",
   "type": "module",
   "main": "dist/index.js",

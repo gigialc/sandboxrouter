@@ -21,7 +21,7 @@ try {
 
 Runs as plain JavaScript on Node 20+. (In TypeScript 5.2+, or Node 24+, `await using sbx = ...` kills the sandbox for you.)
 
-Set the keys of the providers you use. `create()` starts the sandbox on the cheapest one that fits among those that passed the real-account check, then the untested ones, by public list price (ties alphabetical, and no provider pays for placement). If that provider is down, busy or out of credit, the next one takes it, and every attempt is on `sbx.attempts`. The sandbox stays on that provider until you `kill()` it.
+Set the keys of the providers you use. `create()` starts the sandbox on the cheapest one that fits: list price for the size you asked for, corrected where we measured what a provider really bills. Providers within 10% of each other on price go fastest first, by start times measured where you run the router. Providers that failed their last real-account check go last. Ties are alphabetical, and no provider pays for placement. If that provider is down, busy or out of credit, the next one takes it, and every attempt is on `sbx.attempts`. The sandbox stays on that provider until you `kill()` it.
 
 Site and docs: [sandboxrouter.vercel.app](https://sandboxrouter.vercel.app) · npm: [`@sandboxrouter/sdk`](https://www.npmjs.com/package/@sandboxrouter/sdk)
 
@@ -30,7 +30,7 @@ Site and docs: [sandboxrouter.vercel.app](https://sandboxrouter.vercel.app) · n
 AI agents need a disposable computer to run code a model wrote: install packages, run tests, do an RL rollout. Dozens of providers sell one, each with its own SDK and auth, and the same 2 vCPU / 4 GB sandbox costs from under a cent to over thirty cents an hour. sandboxrouter is one interface over all of them:
 
 - **Same code everywhere.** `create`, `exec` (streamed), `writeFile`, `readFile`, `pause`, `kill`. Switch providers by changing which keys are set.
-- **Tested first, then cheapest, with fallback.** Or `cheapest` for price alone, `fastest` by cold starts you measured, or a list of providers you name.
+- **Cheapest real cost, then speed, with fallback.** Or `cheapest` for list price alone, `fastest` by start times, `verified` for tested providers first, or a list of providers you name.
 - **Your keys.** Your accounts and your bills; nothing is proxied through anyone else.
 - **Cleanup.** A local ledger of every sandbox started, so `sandboxrouter gc` kills what a crashed script left behind.
 - **TypeScript, Python, HTTP and a CLI.** Plus desktops and phones for computer-use models.
