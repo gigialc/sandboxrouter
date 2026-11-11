@@ -1,6 +1,6 @@
 import { fixedSize } from "./catalog.js";
 import type { Router, RoutedSandbox } from "./router.js";
-import type { ProviderId, SandboxSpec } from "./types.js";
+import type { Attempt, ProviderId, SandboxSpec } from "./types.js";
 
 /** Every step `check` runs, in order. Each provider's saved report is scored against this list. */
 export const CHECK_STEPS = [
@@ -35,6 +35,11 @@ export interface CheckReport {
   results: CheckResult[];
   /** True when no step failed. */
   ok: boolean;
+  /**
+   * Set when the run says nothing about the provider: the account running it couldn't pay (402: no
+   * balance, plan not started). Such a run isn't saved, so the provider keeps its last real result.
+   */
+  inconclusive?: string;
 }
 
 /**
@@ -67,10 +72,18 @@ export async function checkProvider(
   };
 
   let sbx: RoutedSandbox | undefined;
+  let unpaid: string | undefined;
   await step("create", async () => {
-    sbx = await router.create({ timeoutMinutes: 10, ...fixedSize(provider), ...opts.spec }, { provider, fallback: false });
+    try {
+      sbx = await router.create({ timeoutMinutes: 10, ...fixedSize(provider), ...opts.spec }, { provider, fallback: false });
+    } catch (err) {
+      if ((err as { attempts?: Attempt[] }).attempts?.at(-1)?.status !== 402) throw err;
+      unpaid = (err as Error).message;
+      return { status: "skip" as const, detail: `the account can't pay (402), so this run says nothing about ${provider}: ${unpaid}` };
+    }
     return `${sbx.id}, ~$${sbx.estimatedHourlyUsd}/hr`;
   });
+  if (unpaid) return { provider, results, ok: false, inconclusive: "the account running the check can't pay (402)" };
   if (!sbx) return { provider, results, ok: false };
   const box = sbx;
 

@@ -70,6 +70,23 @@ describe("sandboxrouter check", () => {
     expect(report.ok).toBe(true);
   }, 25_000);
 
+  it("calls a run inconclusive, not failing, when the account can't pay (402)", async () => {
+    const p = new GoodProvider();
+    p.create = async () => {
+      throw new ProviderError("boat", "POST /sandboxes -> 402 billing_required: start the plan", 402);
+    };
+    const report = await checkProvider(new Router({ providers: [p] }), "boat");
+    expect(report.inconclusive).toMatch(/can't pay/);
+    expect(report.results).toEqual([expect.objectContaining({ step: "create", status: "skip" })]);
+    // Any other create failure is still the provider's.
+    p.create = async () => {
+      throw new ProviderError("boat", "500 internal", 500);
+    };
+    const failed = await checkProvider(new Router({ providers: [p] }), "boat");
+    expect(failed.inconclusive).toBeUndefined();
+    expect(failed.results[0]).toMatchObject({ step: "create", status: "fail" });
+  });
+
   it("fails when kill doesn't actually stop the sandbox", async () => {
     const report = await checkProvider(new Router({ providers: [new GoodProvider({ leak: true })] }), "boat");
     expect(report.ok).toBe(false);

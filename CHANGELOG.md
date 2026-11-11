@@ -14,6 +14,7 @@ All notable changes. Versions follow [semver](https://semver.org/); while the ve
 - `RouterOptions.requireVerified`: only route to providers that passed the real-account check. For services that run sandboxes on their own accounts, where a provider that misbehaves without failing (keeps billing after kill, garbles output) costs money.
 - `RouterOptions.failing` and `RouterOptions.billedVsList` replace the shipped lists.
 - `sandboxrouter route` shows the billed price where it differs from list, start times, and failed checks.
+- `check`: a create refused with 402 (the account running the check can't pay) is inconclusive, not a failure, and `--save` doesn't write it, so the provider keeps its last real result. A failed check now sends a provider last, so an empty balance on our side mustn't count against it. `Attempt.status` carries the HTTP status of each failed attempt.
 
 ## 0.3.5 (2026-11-11)
 
