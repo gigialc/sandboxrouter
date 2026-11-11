@@ -320,8 +320,8 @@ export class Router {
         // A create that answers after we gave up still made a sandbox: record it, then kill it,
         // so it can't bill unseen. If the kill fails, the ledger entry is left for `gc`.
         if (timedOut) pending.then((late) => this.discard(c.provider, late, c.estimatedHourlyUsd, spec.timeoutMinutes), () => {});
-        attempts.push({ provider: c.provider, ok: false, ms: Date.now() - t0, error: (err as Error).message });
         const status = errorStatus(err);
+        attempts.push({ provider: c.provider, ok: false, ms: Date.now() - t0, error: (err as Error).message, ...(status ? { status } : {}) });
         const setup = err instanceof SetupError || (status !== undefined && SETUP_ERRORS.has(status));
         if (route.fallback !== "any" && setup) {
           const msg = (err as Error).message.replace(/[.\s]+$/, "");

@@ -135,6 +135,8 @@ export interface Attempt {
   ok: boolean;
   ms: number;
   error?: string;
+  /** HTTP status of the failure, when the provider gave one (402: the account can't pay). */
+  status?: number;
 }
 
 export class RouterError extends Error {

@@ -217,6 +217,10 @@ async function main() {
         },
       });
       reports.push(report);
+      if (report.inconclusive) {
+        if (!values.json) console.log(`  not saved: ${report.inconclusive}; ${p} keeps its last saved result`);
+        continue;
+      }
       if (saveDir) {
         mkdirSync(saveDir, { recursive: true });
         const saved = publishableCheck({ tool: "sandboxrouter-check", version, date: new Date().toISOString(), platform: `${platform()}-${arch()}`, ...(by ? { by } : {}), ...report });
@@ -224,8 +228,12 @@ async function main() {
       }
     }
     if (values.json) console.log(JSON.stringify(reports, null, 2));
-    else console.log(`\n${reports.filter((r) => r.ok).length}/${reports.length} passed`);
-    if (reports.some((r) => !r.ok)) process.exitCode = 1;
+    else {
+      const unpaid = reports.filter((r) => r.inconclusive).length;
+      const ran = reports.length - unpaid;
+      console.log(`\n${reports.filter((r) => r.ok).length}/${ran} passed${unpaid ? `; ${unpaid} not run (the account can't pay)` : ""}`);
+    }
+    if (reports.some((r) => !r.ok && !r.inconclusive)) process.exitCode = 1;
     return;
   }
 
