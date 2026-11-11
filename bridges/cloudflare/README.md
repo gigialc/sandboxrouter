@@ -55,6 +55,8 @@ Every route requires `Authorization: Bearer <BRIDGE_TOKEN>`. Errors come back as
 | `GET /sandboxes/:id/files?path=` | | raw bytes, or `404` |
 | `DELETE /sandboxes/:id` | | `204`. Calling it again is harmless |
 
+Startup is limited to 60 seconds. A failed start triggers cleanup; if Cloudflare is slow to stop the instance, the response waits at most another 5 seconds while cleanup continues. The hard-lifetime alarm is installed before startup and remains available to retry cleanup. A fresh deployment may need time for Cloudflare to provision container capacity.
+
 The `POST /sandboxes` fields:
 
 - `instance`: one of `lite`, `basic`, `standard-1` (the default), `standard-2`, `standard-3`, `standard-4`.
