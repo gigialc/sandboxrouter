@@ -40,7 +40,8 @@ function textStream(src: NodeJS.ReadableStream, done: Promise<unknown>) {
   return new ReadableStream<string>({
     start(controller) {
       src.on("data", (d) => controller.enqueue(String(d)));
-      done.then(() => controller.close());
+      // Like the SDK: a failed exec ends the output streams with its error.
+      done.then(() => controller.close(), (err) => controller.error(err));
     },
   });
 }
