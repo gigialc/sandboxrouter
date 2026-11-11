@@ -1,0 +1,85 @@
+{
+  "tool": "sandboxrouter-check",
+  "version": "0.3.5",
+  "date": "2026-11-11T21:16:54.556Z",
+  "platform": "darwin-arm64",
+  "provider": "sprites",
+  "sandboxId": "sprites:sbr-379aa2c6-e99",
+  "results": [
+    {
+      "step": "create",
+      "ms": 552,
+      "status": "pass",
+      "detail": "sprites:sbr-379aa2c6-e99, ~$0.1645/hr"
+    },
+    {
+      "step": "exec: stdout, stderr, exit code",
+      "ms": 358,
+      "status": "pass"
+    },
+    {
+      "step": "exec: env and cwd",
+      "ms": 1082,
+      "status": "pass"
+    },
+    {
+      "step": "exec: UTF-8 output",
+      "ms": 485,
+      "status": "pass"
+    },
+    {
+      "step": "exec: streaming",
+      "ms": 3250,
+      "status": "pass",
+      "detail": "first output after 259 ms"
+    },
+    {
+      "step": "files: binary round-trip",
+      "ms": 2533,
+      "status": "pass"
+    },
+    {
+      "step": "files: 1 MB round-trip",
+      "ms": 10726,
+      "status": "pass"
+    },
+    {
+      "step": "files: missing file is an error",
+      "ms": 131,
+      "status": "pass"
+    },
+    {
+      "step": "files: visible to commands",
+      "ms": 386,
+      "status": "pass"
+    },
+    {
+      "step": "exec: command timeout",
+      "ms": 3003,
+      "status": "pass",
+      "detail": "threw after 3003 ms"
+    },
+    {
+      "step": "exec: timed-out command was stopped",
+      "ms": 8283,
+      "status": "pass"
+    },
+    {
+      "step": "pause and resume",
+      "status": "skip",
+      "ms": 0,
+      "detail": "adapter has no pause"
+    },
+    {
+      "step": "kill",
+      "ms": 1628,
+      "status": "pass"
+    },
+    {
+      "step": "killed sandbox is gone",
+      "ms": 1228,
+      "status": "pass"
+    }
+  ],
+  "ok": true
+}

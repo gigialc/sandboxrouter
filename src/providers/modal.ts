@@ -82,7 +82,10 @@ class ModalBox implements ProviderSandbox {
       return { exitCode, stdout, stderr, durationMs };
     } catch (err: any) {
       if (err instanceof ProviderError) throw err;
-      throw new ProviderError("modal", err?.message ?? String(err));
+      const message = err?.message ?? String(err);
+      // Newer SDKs end the output streams with "Deadline exceeded" at timeoutMs instead of a signal exit.
+      if (/deadline exceeded/i.test(message) && killedByTimeout(-1, Date.now() - t0, seconds)) throw timeoutError("modal", seconds);
+      throw new ProviderError("modal", message);
     }
   }
 

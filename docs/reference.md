@@ -216,18 +216,18 @@ It prints one line per step and exits 1 if any fails. `checkProvider(router, id)
 | Morph Cloud | not run yet | |
 | exe.dev | not run yet | |
 | Novita AI Agent Sandbox | 14/14 passed | 2026-11-11, v0.3.4 |
-| Freestyle | not run yet | |
+| Freestyle | 14/14 passed; note: output arrived only at the end (no live streaming) | 2026-11-11, v0.3.5 |
 | Beam | not run yet | |
 | CodeSandbox SDK (Together) | not run yet | |
-| Fly.io Sprites | not run yet | |
+| Fly.io Sprites | 13/13 passed; n/a: pause and resume | 2026-11-11, v0.3.5 |
 | Blaxel | 13/13 passed; n/a: pause and resume | 2026-11-11, v0.3.4 |
 | HOPX | not run yet | |
 | Superserve | 14/14 passed | 2026-11-11, v0.3.4 |
 | Tensorlake | not run yet | |
 | Upstash Box | not run yet | |
 | Cloudflare Sandbox | 13/13 passed; n/a: pause and resume | 2026-11-11, v0.3.4 |
-| Amazon Bedrock AgentCore Code Interpreter | not run yet | |
-| Modal | not run yet | |
+| Amazon Bedrock AgentCore Code Interpreter | 13/13 passed; n/a: pause and resume; note: output arrived only at the end (no live streaming) | 2026-11-11, v0.3.5 |
+| Modal | 13/13 passed; n/a: pause and resume | 2026-11-11, v0.3.5 |
 | AWS Lambda MicroVMs | 14/14 passed | 2026-11-11, v0.3.4 |
 | Deno Sandbox | not run yet | |
 | Runloop | not run yet | |

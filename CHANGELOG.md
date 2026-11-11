@@ -6,10 +6,14 @@ All notable changes. Versions follow [semver](https://semver.org/); while the ve
 
 ### Fixed
 - **Vercel: `kill()` now deletes the sandbox.** `@vercel/sandbox` v3 keeps sandboxes by default, and `stop()` only ends the session: the next SDK call started it again, so a killed sandbox could keep running and billing. Sandboxes are now created with `persistent: false`, and `kill()` calls `delete()`. The real-account check caught it ("killed sandbox is gone").
+- **AgentCore: stdout and stderr are separate again.** The service runs commands in a terminal, so both streams came back as one (labelled stderr whenever the exit code wasn't 0), with `\r\n` line endings. stderr now goes to a file and comes back after a marker, and `stty -onlcr` keeps newlines as they are.
+- **Modal: a command timeout is reported as one.** Newer SDKs end the output with "Deadline exceeded" at the deadline instead of a signal exit; that now becomes `command timed out after Ns`.
+- **Sprites: a command timeout is reported as one.** Killing the command reported exit -1 before the timeout error could, so exec returned -1. The timeout now rejects first; the same race on SDK errors is fixed too.
+- **Freestyle: commands can write in folders that `writeFile` created.** The file API runs as root, so folders it made were read-only to commands. `writeFile` now makes the folder with a command, as the command user.
 
 ### Changed
-- Real-account checks: 12 cloud providers now pass, up from 5. New: Agent37, AWS Lambda MicroVMs, Cloudflare Sandbox, Novita, OpenScale, Superserve and Vercel. The default route tries them before untested providers.
-- New benchmark: `results/bench-2026-11-11-home-eu.json` (11 providers, 5 runs each, 2 vCPU / 4 GB).
+- Real-account checks: 16 cloud providers now pass, up from 5. New: Agent37, AWS AgentCore, AWS Lambda MicroVMs, Cloudflare Sandbox, Freestyle, Fly.io Sprites, Modal, Novita, OpenScale, Superserve and Vercel. The default route tries them before untested providers.
+- New benchmarks: `results/bench-2026-11-11-home-eu.json` (11 providers) and `results/bench-2026-11-11-home-eu-b.json` (AgentCore, Freestyle, Modal, Sprites), 5 runs each at 2 vCPU / 4 GB.
 
 ## 0.3.4 (2026-11-10)
 

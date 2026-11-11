@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { ProviderError, type ExecOptions, type ExecResult, type Provider, type ProviderSandbox, type SandboxSpec } from "../types.js";
-import { dirname, toBytes, wrapCommand } from "../util.js";
+import { dirname, shq, toBytes, wrapCommand } from "../util.js";
 
 /**
  * Freestyle VMs over the public REST API (no SDK needed). Auth: Authorization: Bearer
@@ -236,10 +236,17 @@ class FreestyleBox implements ProviderSandbox {
 
   async writeFile(path: string, content: string | Uint8Array): Promise<void> {
     const bytes = toBytes(content);
-    // Best effort (whether mkdir of an existing directory errors is not documented); the write
+    // The file API runs as root, so a folder it creates belongs to root and commands (which run as
+    // the image's user) can't write in it. Make the folder with a command instead, as that user;
+    // fall back to the file API where the user can't (e.g. under /root). Best effort: the write
     // itself reports any real problem.
     const dir = dirname(path);
-    if (dir !== "/") await this.p.request("POST", `${this.path}/fs/mkdir`, { json: { path: dir }, background: true }).catch(() => {});
+    if (dir !== "/") {
+      const r = await this.p
+        .json<ExecResponse>("POST", `${this.path}/exec-await`, { json: { command: `mkdir -p ${shq(dir)}`, timeoutMs: 30_000 }, background: true })
+        .catch(() => undefined);
+      if (r?.statusCode !== 0) await this.p.request("POST", `${this.path}/fs/mkdir`, { json: { path: dir }, background: true }).catch(() => {});
+    }
     const q = new URLSearchParams({ path, sha256: createHash("sha256").update(bytes).digest("hex") });
     await this.p.request("PUT", `${this.path}/fs/write?${q}`, { bytes, background: true });
   }

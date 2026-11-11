@@ -1,6 +1,6 @@
 {
   "version": "0.3.5",
-  "generatedAt": "2026-11-11T20:21:23.193Z",
+  "generatedAt": "2026-11-11T21:29:23.778Z",
   "shapes": [
     "1x2",
     "2x4",
@@ -203,10 +203,42 @@
       "noBenchmarks": null,
       "planLabel": "none",
       "defaultSize": null,
-      "check": null,
+      "check": {
+        "date": "2026-11-11T21:21:26.601Z",
+        "version": "0.3.5",
+        "by": null,
+        "passed": 13,
+        "failed": [],
+        "skipped": [
+          "pause and resume"
+        ],
+        "notRun": [],
+        "notes": [
+          {
+            "step": "exec: streaming",
+            "detail": "output arrived only at the end (no live streaming)"
+          }
+        ],
+        "steps": {
+          "create": "pass",
+          "exec: stdout, stderr, exit code": "pass",
+          "exec: env and cwd": "pass",
+          "exec: UTF-8 output": "pass",
+          "exec: streaming": "info",
+          "files: binary round-trip": "pass",
+          "files: 1 MB round-trip": "pass",
+          "files: missing file is an error": "pass",
+          "files: visible to commands": "pass",
+          "exec: command timeout": "pass",
+          "exec: timed-out command was stopped": "pass",
+          "pause and resume": "skip",
+          "kill": "pass",
+          "killed sandbox is gone": "pass"
+        }
+      },
       "live": {
-        "status": "untested",
-        "label": "not run yet"
+        "status": "passed",
+        "label": "passed (2026-11-11)"
       },
       "computers": [],
       "prices": {
@@ -1296,10 +1328,37 @@
       "noBenchmarks": null,
       "planLabel": "none",
       "defaultSize": null,
-      "check": null,
+      "check": {
+        "date": "2026-11-11T21:16:54.556Z",
+        "version": "0.3.5",
+        "by": null,
+        "passed": 13,
+        "failed": [],
+        "skipped": [
+          "pause and resume"
+        ],
+        "notRun": [],
+        "notes": [],
+        "steps": {
+          "create": "pass",
+          "exec: stdout, stderr, exit code": "pass",
+          "exec: env and cwd": "pass",
+          "exec: UTF-8 output": "pass",
+          "exec: streaming": "pass",
+          "files: binary round-trip": "pass",
+          "files: 1 MB round-trip": "pass",
+          "files: missing file is an error": "pass",
+          "files: visible to commands": "pass",
+          "exec: command timeout": "pass",
+          "exec: timed-out command was stopped": "pass",
+          "pause and resume": "skip",
+          "kill": "pass",
+          "killed sandbox is gone": "pass"
+        }
+      },
       "live": {
-        "status": "untested",
-        "label": "not run yet"
+        "status": "passed",
+        "label": "passed (2026-11-11)"
       },
       "computers": [],
       "prices": {
@@ -1360,10 +1419,40 @@
       "noBenchmarks": null,
       "planLabel": "none",
       "defaultSize": null,
-      "check": null,
+      "check": {
+        "date": "2026-11-11T21:25:54.215Z",
+        "version": "0.3.5",
+        "by": null,
+        "passed": 14,
+        "failed": [],
+        "skipped": [],
+        "notRun": [],
+        "notes": [
+          {
+            "step": "exec: streaming",
+            "detail": "output arrived only at the end (no live streaming)"
+          }
+        ],
+        "steps": {
+          "create": "pass",
+          "exec: stdout, stderr, exit code": "pass",
+          "exec: env and cwd": "pass",
+          "exec: UTF-8 output": "pass",
+          "exec: streaming": "info",
+          "files: binary round-trip": "pass",
+          "files: 1 MB round-trip": "pass",
+          "files: missing file is an error": "pass",
+          "files: visible to commands": "pass",
+          "exec: command timeout": "pass",
+          "exec: timed-out command was stopped": "pass",
+          "pause and resume": "pass",
+          "kill": "pass",
+          "killed sandbox is gone": "pass"
+        }
+      },
       "live": {
-        "status": "untested",
-        "label": "not run yet"
+        "status": "passed",
+        "label": "passed (2026-11-11)"
       },
       "computers": [],
       "prices": {
@@ -1795,10 +1884,37 @@
       "noBenchmarks": null,
       "planLabel": "none",
       "defaultSize": null,
-      "check": null,
+      "check": {
+        "date": "2026-11-11T21:16:54.699Z",
+        "version": "0.3.5",
+        "by": null,
+        "passed": 13,
+        "failed": [],
+        "skipped": [
+          "pause and resume"
+        ],
+        "notRun": [],
+        "notes": [],
+        "steps": {
+          "create": "pass",
+          "exec: stdout, stderr, exit code": "pass",
+          "exec: env and cwd": "pass",
+          "exec: UTF-8 output": "pass",
+          "exec: streaming": "pass",
+          "files: binary round-trip": "pass",
+          "files: 1 MB round-trip": "pass",
+          "files: missing file is an error": "pass",
+          "files: visible to commands": "pass",
+          "exec: command timeout": "pass",
+          "exec: timed-out command was stopped": "pass",
+          "pause and resume": "skip",
+          "kill": "pass",
+          "killed sandbox is gone": "pass"
+        }
+      },
       "live": {
-        "status": "untested",
-        "label": "not run yet"
+        "status": "passed",
+        "label": "passed (2026-11-11)"
       },
       "computers": [],
       "prices": {
@@ -2758,6 +2874,19 @@
   ],
   "leaderboard": [
     {
+      "provider": "sprites",
+      "name": "Fly.io Sprites",
+      "submissions": 1,
+      "medianCreateMs": 304,
+      "medianExecMs": 203,
+      "successRate": 1,
+      "hourlyUsd": 0.16449999999999998,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      }
+    },
+    {
       "provider": "novita",
       "name": "Novita AI Agent Sandbox",
       "submissions": 1,
@@ -2836,6 +2965,19 @@
       }
     },
     {
+      "provider": "modal",
+      "name": "Modal",
+      "submissions": 1,
+      "medianCreateMs": 554,
+      "medianExecMs": 1073,
+      "successRate": 1,
+      "hourlyUsd": 0.23796,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      }
+    },
+    {
       "provider": "cloudflare",
       "name": "Cloudflare Sandbox",
       "submissions": 1,
@@ -2856,6 +2998,32 @@
       "medianExecMs": 420,
       "successRate": 1,
       "hourlyUsd": 0.006520547945205479,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      }
+    },
+    {
+      "provider": "freestyle",
+      "name": "Freestyle",
+      "submissions": 1,
+      "medianCreateMs": 838,
+      "medianExecMs": 229,
+      "successRate": 1,
+      "hourlyUsd": 0.13362,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      }
+    },
+    {
+      "provider": "agentcore",
+      "name": "Amazon Bedrock AgentCore Code Interpreter",
+      "submissions": 1,
+      "medianCreateMs": 930,
+      "medianExecMs": 309,
+      "successRate": 1,
+      "hourlyUsd": 0.2168,
       "size": {
         "vcpu": 2,
         "memoryGb": 4
@@ -3023,6 +3191,20 @@
         "openscale",
         "daytona",
         "maritime"
+      ]
+    },
+    {
+      "date": "2026-11-11T21:29:12.572Z",
+      "label": "home-eu",
+      "by": null,
+      "platform": "darwin-arm64",
+      "runs": 5,
+      "providers": 4,
+      "ids": [
+        "sprites",
+        "modal",
+        "freestyle",
+        "agentcore"
       ]
     },
     {

@@ -1,0 +1,84 @@
+{
+  "tool": "sandboxrouter-check",
+  "version": "0.3.5",
+  "date": "2026-11-11T21:25:54.215Z",
+  "platform": "darwin-arm64",
+  "provider": "freestyle",
+  "sandboxId": "freestyle:vm-16a8a8af669a4b2093a6de8041ea7e0a",
+  "results": [
+    {
+      "step": "create",
+      "ms": 1648,
+      "status": "pass",
+      "detail": "freestyle:vm-16a8a8af669a4b2093a6de8041ea7e0a, ~$0.1336/hr"
+    },
+    {
+      "step": "exec: stdout, stderr, exit code",
+      "ms": 215,
+      "status": "pass"
+    },
+    {
+      "step": "exec: env and cwd",
+      "ms": 217,
+      "status": "pass"
+    },
+    {
+      "step": "exec: UTF-8 output",
+      "ms": 265,
+      "status": "pass"
+    },
+    {
+      "step": "exec: streaming",
+      "ms": 3248,
+      "status": "info",
+      "detail": "output arrived only at the end (no live streaming)"
+    },
+    {
+      "step": "files: binary round-trip",
+      "ms": 716,
+      "status": "pass"
+    },
+    {
+      "step": "files: 1 MB round-trip",
+      "ms": 3467,
+      "status": "pass"
+    },
+    {
+      "step": "files: missing file is an error",
+      "ms": 205,
+      "status": "pass"
+    },
+    {
+      "step": "files: visible to commands",
+      "ms": 790,
+      "status": "pass"
+    },
+    {
+      "step": "exec: command timeout",
+      "ms": 3230,
+      "status": "pass",
+      "detail": "threw after 3230 ms"
+    },
+    {
+      "step": "exec: timed-out command was stopped",
+      "ms": 6974,
+      "status": "pass"
+    },
+    {
+      "step": "pause and resume",
+      "ms": 5156,
+      "status": "pass"
+    },
+    {
+      "step": "kill",
+      "ms": 725,
+      "status": "pass"
+    },
+    {
+      "step": "killed sandbox is gone",
+      "ms": 181,
+      "status": "pass"
+    }
+  ],
+  "ok": true
+}
