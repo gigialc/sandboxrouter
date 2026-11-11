@@ -34,6 +34,9 @@ export class VercelProvider implements Provider {
       resources: { vcpus },
       env: spec.env,
       tags: spec.metadata,
+      // v3 keeps sandboxes by default and restarts a stopped one on the next command; a router
+      // sandbox is single-use, so nothing should outlive kill().
+      persistent: false,
     });
     return new VercelBox(sbx);
   }
@@ -97,6 +100,7 @@ class VercelBox implements ProviderSandbox {
   }
 
   async kill(): Promise<void> {
-    await this.sbx.stop();
+    // stop() only ends the session: the next SDK call would start it again. delete() makes it inert.
+    await this.sbx.delete({ deleteOrphanSnapshots: true });
   }
 }

@@ -1,0 +1,84 @@
+{
+  "tool": "sandboxrouter-check",
+  "version": "0.3.4",
+  "date": "2026-11-11T20:09:14.474Z",
+  "platform": "darwin-arm64",
+  "provider": "novita",
+  "sandboxId": "novita:ihu4ra9oez6jhfqagalrx",
+  "results": [
+    {
+      "step": "create",
+      "ms": 975,
+      "status": "pass",
+      "detail": "novita:ihu4ra9oez6jhfqagalrx, ~$0.1166/hr"
+    },
+    {
+      "step": "exec: stdout, stderr, exit code",
+      "ms": 622,
+      "status": "pass"
+    },
+    {
+      "step": "exec: env and cwd",
+      "ms": 531,
+      "status": "pass"
+    },
+    {
+      "step": "exec: UTF-8 output",
+      "ms": 186,
+      "status": "pass"
+    },
+    {
+      "step": "exec: streaming",
+      "ms": 3185,
+      "status": "pass",
+      "detail": "first output after 179 ms"
+    },
+    {
+      "step": "files: binary round-trip",
+      "ms": 372,
+      "status": "pass"
+    },
+    {
+      "step": "files: 1 MB round-trip",
+      "ms": 4643,
+      "status": "pass"
+    },
+    {
+      "step": "files: missing file is an error",
+      "ms": 179,
+      "status": "pass"
+    },
+    {
+      "step": "files: visible to commands",
+      "ms": 578,
+      "status": "pass"
+    },
+    {
+      "step": "exec: command timeout",
+      "ms": 3250,
+      "status": "pass",
+      "detail": "threw after 3250 ms"
+    },
+    {
+      "step": "exec: timed-out command was stopped",
+      "ms": 6808,
+      "status": "pass"
+    },
+    {
+      "step": "pause and resume",
+      "ms": 1757,
+      "status": "pass"
+    },
+    {
+      "step": "kill",
+      "ms": 226,
+      "status": "pass"
+    },
+    {
+      "step": "killed sandbox is gone",
+      "ms": 194,
+      "status": "pass"
+    }
+  ],
+  "ok": true
+}

@@ -2,6 +2,15 @@
 
 All notable changes. Versions follow [semver](https://semver.org/); while the version is 0.x, a minor bump can change the API.
 
+## 0.3.5 (2026-11-11)
+
+### Fixed
+- **Vercel: `kill()` now deletes the sandbox.** `@vercel/sandbox` v3 keeps sandboxes by default, and `stop()` only ends the session: the next SDK call started it again, so a killed sandbox could keep running and billing. Sandboxes are now created with `persistent: false`, and `kill()` calls `delete()`. The real-account check caught it ("killed sandbox is gone").
+
+### Changed
+- Real-account checks: 12 cloud providers now pass, up from 5. New: Agent37, AWS Lambda MicroVMs, Cloudflare Sandbox, Novita, OpenScale, Superserve and Vercel. The default route tries them before untested providers.
+- New benchmark: `results/bench-2026-11-11-home-eu.json` (11 providers, 5 runs each, 2 vCPU / 4 GB).
+
 ## 0.3.4 (2026-11-10)
 
 ### Changed

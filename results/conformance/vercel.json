@@ -1,0 +1,85 @@
+{
+  "tool": "sandboxrouter-check",
+  "version": "0.3.4",
+  "date": "2026-11-11T20:08:33.499Z",
+  "platform": "darwin-arm64",
+  "provider": "vercel",
+  "sandboxId": "vercel:peach-revolutionary-aardvark-ZRG1wU",
+  "results": [
+    {
+      "step": "create",
+      "ms": 620,
+      "status": "pass",
+      "detail": "vercel:peach-revolutionary-aardvark-ZRG1wU, ~$0.3408/hr"
+    },
+    {
+      "step": "exec: stdout, stderr, exit code",
+      "ms": 351,
+      "status": "pass"
+    },
+    {
+      "step": "exec: env and cwd",
+      "ms": 218,
+      "status": "pass"
+    },
+    {
+      "step": "exec: UTF-8 output",
+      "ms": 295,
+      "status": "pass"
+    },
+    {
+      "step": "exec: streaming",
+      "ms": 3404,
+      "status": "pass",
+      "detail": "first output after 548 ms"
+    },
+    {
+      "step": "files: binary round-trip",
+      "ms": 470,
+      "status": "pass"
+    },
+    {
+      "step": "files: 1 MB round-trip",
+      "ms": 614,
+      "status": "pass"
+    },
+    {
+      "step": "files: missing file is an error",
+      "ms": 227,
+      "status": "pass"
+    },
+    {
+      "step": "files: visible to commands",
+      "ms": 592,
+      "status": "pass"
+    },
+    {
+      "step": "exec: command timeout",
+      "ms": 18008,
+      "status": "pass",
+      "detail": "threw after 18008 ms"
+    },
+    {
+      "step": "exec: timed-out command was stopped",
+      "ms": 9716,
+      "status": "pass"
+    },
+    {
+      "step": "pause and resume",
+      "status": "skip",
+      "ms": 0,
+      "detail": "adapter has no pause"
+    },
+    {
+      "step": "kill",
+      "ms": 252,
+      "status": "pass"
+    },
+    {
+      "step": "killed sandbox is gone",
+      "ms": 271,
+      "status": "pass"
+    }
+  ],
+  "ok": true
+}

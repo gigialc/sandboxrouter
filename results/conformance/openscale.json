@@ -1,17 +1,84 @@
 {
   "tool": "sandboxrouter-check",
-  "version": "0.3.3",
-  "date": "2026-11-10T16:20:24.312Z",
+  "version": "0.3.4",
+  "date": "2026-11-11T20:06:34.296Z",
   "platform": "darwin-arm64",
-  "by": "gigialc",
   "provider": "openscale",
+  "sandboxId": "openscale:aiiaah527i1temynwqi9",
   "results": [
     {
       "step": "create",
-      "status": "fail",
-      "ms": 1766,
-      "detail": "all providers failed: openscale: openscale: 402: Your OpenScale balance is empty. Claim more credits at https://openscale.so/app/billing to start sandboxes."
+      "ms": 18062,
+      "status": "pass",
+      "detail": "openscale:aiiaah527i1temynwqi9, ~$0.014/hr"
+    },
+    {
+      "step": "exec: stdout, stderr, exit code",
+      "ms": 1045,
+      "status": "pass"
+    },
+    {
+      "step": "exec: env and cwd",
+      "ms": 259,
+      "status": "pass"
+    },
+    {
+      "step": "exec: UTF-8 output",
+      "ms": 263,
+      "status": "pass"
+    },
+    {
+      "step": "exec: streaming",
+      "ms": 3266,
+      "status": "pass",
+      "detail": "first output after 251 ms"
+    },
+    {
+      "step": "files: binary round-trip",
+      "ms": 1501,
+      "status": "pass"
+    },
+    {
+      "step": "files: 1 MB round-trip",
+      "ms": 2067,
+      "status": "pass"
+    },
+    {
+      "step": "files: missing file is an error",
+      "ms": 248,
+      "status": "pass"
+    },
+    {
+      "step": "files: visible to commands",
+      "ms": 1303,
+      "status": "pass"
+    },
+    {
+      "step": "exec: command timeout",
+      "ms": 3260,
+      "status": "pass",
+      "detail": "threw after 3260 ms"
+    },
+    {
+      "step": "exec: timed-out command was stopped",
+      "ms": 7012,
+      "status": "pass"
+    },
+    {
+      "step": "pause and resume",
+      "ms": 1969,
+      "status": "pass"
+    },
+    {
+      "step": "kill",
+      "ms": 339,
+      "status": "pass"
+    },
+    {
+      "step": "killed sandbox is gone",
+      "ms": 342,
+      "status": "pass"
     }
   ],
-  "ok": false
+  "ok": true
 }

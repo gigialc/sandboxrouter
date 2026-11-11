@@ -208,39 +208,39 @@ It prints one line per step and exits 1 if any fails. `checkProvider(router, id)
 
 | Provider | Real-account check (14 steps) | Result since |
 |---|---|---|
-| Agent37 | not run yet | |
+| Agent37 | 14/14 passed; note: output arrived only at the end (no live streaming) | 2026-11-11, v0.3.4 |
 | Boat | not run yet | |
-| Maritime | 14/14 passed | 2026-11-10, v0.3.3 |
-| Sailboxes (Sail Research) | 14/14 passed | 2026-11-10, v0.3.3 |
+| Maritime | 14/14 passed | 2026-11-11, v0.3.4 |
+| Sailboxes (Sail Research) | 14/14 passed | 2026-11-11, v0.3.4 |
 | Northflank | not run yet | |
 | Morph Cloud | not run yet | |
 | exe.dev | not run yet | |
-| Novita AI Agent Sandbox | not run yet | |
+| Novita AI Agent Sandbox | 14/14 passed | 2026-11-11, v0.3.4 |
 | Freestyle | not run yet | |
 | Beam | not run yet | |
 | CodeSandbox SDK (Together) | not run yet | |
 | Fly.io Sprites | not run yet | |
-| Blaxel | 13/13 passed; n/a: pause and resume | 2026-11-10, v0.3.3 |
+| Blaxel | 13/13 passed; n/a: pause and resume | 2026-11-11, v0.3.4 |
 | HOPX | not run yet | |
-| Superserve | not run yet | |
+| Superserve | 14/14 passed | 2026-11-11, v0.3.4 |
 | Tensorlake | not run yet | |
 | Upstash Box | not run yet | |
-| Cloudflare Sandbox | not run yet | |
+| Cloudflare Sandbox | 13/13 passed; n/a: pause and resume | 2026-11-11, v0.3.4 |
 | Amazon Bedrock AgentCore Code Interpreter | not run yet | |
 | Modal | not run yet | |
-| AWS Lambda MicroVMs | not run yet | |
+| AWS Lambda MicroVMs | 14/14 passed | 2026-11-11, v0.3.4 |
 | Deno Sandbox | not run yet | |
 | Runloop | not run yet | |
-| Vercel Sandbox | not run yet | |
+| Vercel Sandbox | 13/13 passed; n/a: pause and resume | 2026-11-11, v0.3.4 |
 | InstaBox | not run yet | |
 | Koyeb Sandboxes | not run yet | |
 | Dedalus Machines | not run yet | |
 | LangSmith Sandboxes | not run yet | |
-| OpenScale Sandboxes | 0/14 passed; failed: create | 2026-11-10, v0.3.3 |
+| OpenScale Sandboxes | 14/14 passed | 2026-11-11, v0.3.4 |
 | Azure Container Apps dynamic sessions | not run yet | |
-| Daytona | 14/14 passed | 2026-11-10, v0.3.3 |
+| Daytona | 14/14 passed | 2026-11-11, v0.3.4 |
 | Alibaba Cloud Agent Sandbox | not run yet | |
-| E2B | 14/14 passed | 2026-11-10, v0.3.3 |
+| E2B | 14/14 passed | 2026-11-11, v0.3.4 |
 | Docker (local) | 14/14 passed | 2026-11-09, v0.3.3 |
 
 ## HTTP API

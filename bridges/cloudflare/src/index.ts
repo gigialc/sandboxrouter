@@ -151,20 +151,46 @@ export class BridgeSandbox extends DurableObject<Env> {
 			idleMs: Math.min(MAX_IDLE_MS, minutes * 60_000),
 		};
 
-		if (!this.container.running) {
-			this.container.start({ image, instance, env, enableInternet: this.env.SANDBOX_INTERNET !== "false" });
-		}
+		// Persist the hard deadline before starting: startup itself can stall.
+		await this.ctx.storage.put("meta", meta);
+		await this.ctx.storage.setAlarm(meta.deadline);
+		let startupTimer: ReturnType<typeof setTimeout> | undefined;
+		let phase = "start";
 		try {
-			await this.container.setInactivityTimeout(meta.idleMs);
-			await this.ctx.storage.put("meta", meta);
-			// Hard lifetime: the alarm destroys the container at the deadline.
-			await this.ctx.storage.setAlarm(meta.deadline);
-			// start() returns before the container is ready; the first exec() waits for it.
-			const ready = await this.container.exec(["true"]);
-			await ready.exitCode;
+			if (!this.container.running) {
+				this.container.start({ image, instance, env, enableInternet: this.env.SANDBOX_INTERNET !== "false" });
+			}
+			const stopped = this.container.monitor().then(() => {
+				throw new Error("container exited before startup completed");
+			});
+			await Promise.race([
+				(async () => {
+					phase = "inactivity timeout";
+					await this.container.setInactivityTimeout(meta.idleMs);
+					phase = "readiness command";
+					const ready = await this.container.exec(["true"]);
+					const code = await ready.exitCode;
+					if (code !== 0) throw new Error(`readiness command exited ${code}`);
+				})(),
+				stopped,
+				new Promise<never>((_, reject) => {
+					startupTimer = setTimeout(() => reject(new Error(`container startup timed out after 60s during ${phase}`)), 60_000);
+				}),
+			]);
 		} catch (err) {
-			await this.destroy();
+			// Keep the hard-deadline alarm if the platform cannot stop a starting VM promptly.
+			const cleanup = this.destroy();
+			this.ctx.waitUntil(cleanup.catch(() => {}));
+			let cleanupTimer: ReturnType<typeof setTimeout> | undefined;
+			try {
+				await Promise.race([cleanup, new Promise<void>((resolve) => {
+					cleanupTimer = setTimeout(resolve, 5_000);
+				})]);
+			} catch { /* Preserve the startup error; the alarm retries cleanup. */ }
+			finally { if (cleanupTimer) clearTimeout(cleanupTimer); }
 			throw err;
+		} finally {
+			if (startupTimer) clearTimeout(startupTimer);
 		}
 	}
 

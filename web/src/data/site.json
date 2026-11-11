@@ -1,6 +1,6 @@
 {
-  "version": "0.3.4",
-  "generatedAt": "2026-11-10T16:58:21.274Z",
+  "version": "0.3.5",
+  "generatedAt": "2026-11-11T20:21:23.193Z",
   "shapes": [
     "1x2",
     "2x4",
@@ -41,10 +41,40 @@
       "noBenchmarks": null,
       "planLabel": "none",
       "defaultSize": null,
-      "check": null,
+      "check": {
+        "date": "2026-11-11T20:06:27.451Z",
+        "version": "0.3.4",
+        "by": null,
+        "passed": 14,
+        "failed": [],
+        "skipped": [],
+        "notRun": [],
+        "notes": [
+          {
+            "step": "exec: streaming",
+            "detail": "output arrived only at the end (no live streaming)"
+          }
+        ],
+        "steps": {
+          "create": "pass",
+          "exec: stdout, stderr, exit code": "pass",
+          "exec: env and cwd": "pass",
+          "exec: UTF-8 output": "pass",
+          "exec: streaming": "info",
+          "files: binary round-trip": "pass",
+          "files: 1 MB round-trip": "pass",
+          "files: missing file is an error": "pass",
+          "files: visible to commands": "pass",
+          "exec: command timeout": "pass",
+          "exec: timed-out command was stopped": "pass",
+          "pause and resume": "pass",
+          "kill": "pass",
+          "killed sandbox is gone": "pass"
+        }
+      },
       "live": {
-        "status": "untested",
-        "label": "not run yet"
+        "status": "passed",
+        "label": "passed (2026-11-11)"
       },
       "computers": [],
       "prices": {
@@ -245,10 +275,35 @@
       "noBenchmarks": null,
       "planLabel": "none",
       "defaultSize": null,
-      "check": null,
+      "check": {
+        "date": "2026-11-11T20:06:15.514Z",
+        "version": "0.3.4",
+        "by": null,
+        "passed": 14,
+        "failed": [],
+        "skipped": [],
+        "notRun": [],
+        "notes": [],
+        "steps": {
+          "create": "pass",
+          "exec: stdout, stderr, exit code": "pass",
+          "exec: env and cwd": "pass",
+          "exec: UTF-8 output": "pass",
+          "exec: streaming": "pass",
+          "files: binary round-trip": "pass",
+          "files: 1 MB round-trip": "pass",
+          "files: missing file is an error": "pass",
+          "files: visible to commands": "pass",
+          "exec: command timeout": "pass",
+          "exec: timed-out command was stopped": "pass",
+          "pause and resume": "pass",
+          "kill": "pass",
+          "killed sandbox is gone": "pass"
+        }
+      },
       "live": {
-        "status": "untested",
-        "label": "not run yet"
+        "status": "passed",
+        "label": "passed (2026-11-11)"
       },
       "computers": [],
       "prices": {
@@ -451,9 +506,9 @@
       "planLabel": "none",
       "defaultSize": null,
       "check": {
-        "date": "2026-11-10T16:19:10.320Z",
-        "version": "0.3.3",
-        "by": "gigialc",
+        "date": "2026-11-11T20:06:20.627Z",
+        "version": "0.3.4",
+        "by": null,
         "passed": 13,
         "failed": [],
         "skipped": [
@@ -480,7 +535,7 @@
       },
       "live": {
         "status": "passed",
-        "label": "passed (2026-11-10)"
+        "label": "passed (2026-11-11)"
       },
       "computers": [],
       "prices": {
@@ -613,10 +668,37 @@
       "noBenchmarks": null,
       "planLabel": "$5/mo",
       "defaultSize": null,
-      "check": null,
+      "check": {
+        "date": "2026-11-11T20:06:12.653Z",
+        "version": "0.3.4",
+        "by": null,
+        "passed": 13,
+        "failed": [],
+        "skipped": [
+          "pause and resume"
+        ],
+        "notRun": [],
+        "notes": [],
+        "steps": {
+          "create": "pass",
+          "exec: stdout, stderr, exit code": "pass",
+          "exec: env and cwd": "pass",
+          "exec: UTF-8 output": "pass",
+          "exec: streaming": "pass",
+          "files: binary round-trip": "pass",
+          "files: 1 MB round-trip": "pass",
+          "files: missing file is an error": "pass",
+          "files: visible to commands": "pass",
+          "exec: command timeout": "pass",
+          "exec: timed-out command was stopped": "pass",
+          "pause and resume": "skip",
+          "kill": "pass",
+          "killed sandbox is gone": "pass"
+        }
+      },
       "live": {
-        "status": "untested",
-        "label": "not run yet"
+        "status": "passed",
+        "label": "passed (2026-11-11)"
       },
       "computers": [],
       "prices": {
@@ -745,9 +827,9 @@
         "memoryGb": 1
       },
       "check": {
-        "date": "2026-11-10T16:19:39.701Z",
-        "version": "0.3.3",
-        "by": "gigialc",
+        "date": "2026-11-11T20:06:14.558Z",
+        "version": "0.3.4",
+        "by": null,
         "passed": 14,
         "failed": [],
         "skipped": [],
@@ -772,7 +854,7 @@
       },
       "live": {
         "status": "passed",
-        "label": "passed (2026-11-10)"
+        "label": "passed (2026-11-11)"
       },
       "computers": [
         "linux"
@@ -1059,9 +1141,9 @@
         "memoryGb": 0.5
       },
       "check": {
-        "date": "2026-11-10T16:19:57.811Z",
-        "version": "0.3.3",
-        "by": "gigialc",
+        "date": "2026-11-11T20:06:11.817Z",
+        "version": "0.3.4",
+        "by": null,
         "passed": 14,
         "failed": [],
         "skipped": [],
@@ -1086,7 +1168,7 @@
       },
       "live": {
         "status": "passed",
-        "label": "passed (2026-11-10)"
+        "label": "passed (2026-11-11)"
       },
       "computers": [
         "linux"
@@ -1620,9 +1702,9 @@
       "planLabel": "$20/mo (credited)",
       "defaultSize": null,
       "check": {
-        "date": "2026-11-10T16:20:22.545Z",
-        "version": "0.3.3",
-        "by": "gigialc",
+        "date": "2026-11-11T20:06:14.945Z",
+        "version": "0.3.4",
+        "by": null,
         "passed": 14,
         "failed": [],
         "skipped": [],
@@ -1647,7 +1729,7 @@
       },
       "live": {
         "status": "passed",
-        "label": "passed (2026-11-10)"
+        "label": "passed (2026-11-11)"
       },
       "computers": [
         "linux",
@@ -1905,10 +1987,35 @@
       "noBenchmarks": null,
       "planLabel": "none",
       "defaultSize": null,
-      "check": null,
+      "check": {
+        "date": "2026-11-11T20:09:14.474Z",
+        "version": "0.3.4",
+        "by": null,
+        "passed": 14,
+        "failed": [],
+        "skipped": [],
+        "notRun": [],
+        "notes": [],
+        "steps": {
+          "create": "pass",
+          "exec: stdout, stderr, exit code": "pass",
+          "exec: env and cwd": "pass",
+          "exec: UTF-8 output": "pass",
+          "exec: streaming": "pass",
+          "files: binary round-trip": "pass",
+          "files: 1 MB round-trip": "pass",
+          "files: missing file is an error": "pass",
+          "files: visible to commands": "pass",
+          "exec: command timeout": "pass",
+          "exec: timed-out command was stopped": "pass",
+          "pause and resume": "pass",
+          "kill": "pass",
+          "killed sandbox is gone": "pass"
+        }
+      },
       "live": {
-        "status": "untested",
-        "label": "not run yet"
+        "status": "passed",
+        "label": "passed (2026-11-11)"
       },
       "computers": [],
       "prices": {
@@ -1973,39 +2080,34 @@
         "memoryGb": 1
       },
       "check": {
-        "date": "2026-11-10T16:20:24.312Z",
-        "version": "0.3.3",
-        "by": "gigialc",
-        "passed": 0,
-        "failed": [
-          {
-            "step": "create",
-            "detail": "all providers failed: openscale: openscale: 402: Your OpenScale balance is empty. Claim more credits at https://openscale.so/app/billing to start sandboxes."
-          }
-        ],
+        "date": "2026-11-11T20:06:34.296Z",
+        "version": "0.3.4",
+        "by": null,
+        "passed": 14,
+        "failed": [],
         "skipped": [],
         "notRun": [],
         "notes": [],
         "steps": {
-          "create": "fail",
-          "exec: stdout, stderr, exit code": "not run",
-          "exec: env and cwd": "not run",
-          "exec: UTF-8 output": "not run",
-          "exec: streaming": "not run",
-          "files: binary round-trip": "not run",
-          "files: 1 MB round-trip": "not run",
-          "files: missing file is an error": "not run",
-          "files: visible to commands": "not run",
-          "exec: command timeout": "not run",
-          "exec: timed-out command was stopped": "not run",
-          "pause and resume": "not run",
-          "kill": "not run",
-          "killed sandbox is gone": "not run"
+          "create": "pass",
+          "exec: stdout, stderr, exit code": "pass",
+          "exec: env and cwd": "pass",
+          "exec: UTF-8 output": "pass",
+          "exec: streaming": "pass",
+          "files: binary round-trip": "pass",
+          "files: 1 MB round-trip": "pass",
+          "files: missing file is an error": "pass",
+          "files: visible to commands": "pass",
+          "exec: command timeout": "pass",
+          "exec: timed-out command was stopped": "pass",
+          "pause and resume": "pass",
+          "kill": "pass",
+          "killed sandbox is gone": "pass"
         }
       },
       "live": {
-        "status": "failing",
-        "label": "failed 1 step (2026-11-10)"
+        "status": "passed",
+        "label": "passed (2026-11-11)"
       },
       "computers": [],
       "prices": {
@@ -2130,9 +2232,9 @@
       "planLabel": "none",
       "defaultSize": null,
       "check": {
-        "date": "2026-11-10T16:21:00.694Z",
-        "version": "0.3.3",
-        "by": "gigialc",
+        "date": "2026-11-11T20:06:26.444Z",
+        "version": "0.3.4",
+        "by": null,
         "passed": 14,
         "failed": [],
         "skipped": [],
@@ -2157,7 +2259,7 @@
       },
       "live": {
         "status": "passed",
-        "label": "passed (2026-11-10)"
+        "label": "passed (2026-11-11)"
       },
       "computers": [],
       "prices": {
@@ -2224,10 +2326,35 @@
       "noBenchmarks": null,
       "planLabel": "maybe $20/mo (credited)",
       "defaultSize": null,
-      "check": null,
+      "check": {
+        "date": "2026-11-11T20:06:10.679Z",
+        "version": "0.3.4",
+        "by": null,
+        "passed": 14,
+        "failed": [],
+        "skipped": [],
+        "notRun": [],
+        "notes": [],
+        "steps": {
+          "create": "pass",
+          "exec: stdout, stderr, exit code": "pass",
+          "exec: env and cwd": "pass",
+          "exec: UTF-8 output": "pass",
+          "exec: streaming": "pass",
+          "files: binary round-trip": "pass",
+          "files: 1 MB round-trip": "pass",
+          "files: missing file is an error": "pass",
+          "files: visible to commands": "pass",
+          "exec: command timeout": "pass",
+          "exec: timed-out command was stopped": "pass",
+          "pause and resume": "pass",
+          "kill": "pass",
+          "killed sandbox is gone": "pass"
+        }
+      },
       "live": {
-        "status": "untested",
-        "label": "not run yet"
+        "status": "passed",
+        "label": "passed (2026-11-11)"
       },
       "computers": [],
       "prices": {
@@ -2415,10 +2542,37 @@
       "noBenchmarks": null,
       "planLabel": "none",
       "defaultSize": null,
-      "check": null,
+      "check": {
+        "date": "2026-11-11T20:08:33.499Z",
+        "version": "0.3.4",
+        "by": null,
+        "passed": 13,
+        "failed": [],
+        "skipped": [
+          "pause and resume"
+        ],
+        "notRun": [],
+        "notes": [],
+        "steps": {
+          "create": "pass",
+          "exec: stdout, stderr, exit code": "pass",
+          "exec: env and cwd": "pass",
+          "exec: UTF-8 output": "pass",
+          "exec: streaming": "pass",
+          "files: binary round-trip": "pass",
+          "files: 1 MB round-trip": "pass",
+          "files: missing file is an error": "pass",
+          "files: visible to commands": "pass",
+          "exec: command timeout": "pass",
+          "exec: timed-out command was stopped": "pass",
+          "pause and resume": "skip",
+          "kill": "pass",
+          "killed sandbox is gone": "pass"
+        }
+      },
       "live": {
-        "status": "untested",
-        "label": "not run yet"
+        "status": "passed",
+        "label": "passed (2026-11-11)"
       },
       "computers": [],
       "prices": {
@@ -2604,24 +2758,24 @@
   ],
   "leaderboard": [
     {
-      "provider": "e2b",
-      "name": "E2B",
+      "provider": "novita",
+      "name": "Novita AI Agent Sandbox",
       "submissions": 1,
-      "medianCreateMs": 332,
-      "medianExecMs": 169,
+      "medianCreateMs": 344,
+      "medianExecMs": 590,
       "successRate": 1,
-      "hourlyUsd": 0.1089,
+      "hourlyUsd": 0.11664,
       "size": {
         "vcpu": 2,
-        "memoryGb": 0.5
+        "memoryGb": 4
       }
     },
     {
       "provider": "openscale",
       "name": "OpenScale Sandboxes",
-      "submissions": 1,
-      "medianCreateMs": 350,
-      "medianExecMs": 992,
+      "submissions": 2,
+      "medianCreateMs": 366,
+      "medianExecMs": 1074,
       "successRate": 1,
       "hourlyUsd": 0.013999999999999999,
       "size": {
@@ -2630,11 +2784,50 @@
       }
     },
     {
+      "provider": "e2b",
+      "name": "E2B",
+      "submissions": 2,
+      "medianCreateMs": 372,
+      "medianExecMs": 199,
+      "successRate": 1,
+      "hourlyUsd": 0.1089,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 0.5
+      }
+    },
+    {
+      "provider": "vercel",
+      "name": "Vercel Sandbox",
+      "submissions": 1,
+      "medianCreateMs": 405,
+      "medianExecMs": 344,
+      "successRate": 1,
+      "hourlyUsd": 0.3408,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      }
+    },
+    {
+      "provider": "superserve",
+      "name": "Superserve",
+      "submissions": 1,
+      "medianCreateMs": 414,
+      "medianExecMs": 160,
+      "successRate": 1,
+      "hourlyUsd": 0.1656,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      }
+    },
+    {
       "provider": "daytona",
       "name": "Daytona",
-      "submissions": 1,
-      "medianCreateMs": 363,
-      "medianExecMs": 403,
+      "submissions": 2,
+      "medianCreateMs": 472,
+      "medianExecMs": 506,
       "successRate": 1,
       "hourlyUsd": 0.06659999999999999,
       "size": {
@@ -2643,13 +2836,65 @@
       }
     },
     {
+      "provider": "cloudflare",
+      "name": "Cloudflare Sandbox",
+      "submissions": 1,
+      "medianCreateMs": 606,
+      "medianExecMs": 291,
+      "successRate": 1,
+      "hourlyUsd": 0.21599999999999997,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      }
+    },
+    {
+      "provider": "agent37",
+      "name": "Agent37",
+      "submissions": 1,
+      "medianCreateMs": 759,
+      "medianExecMs": 420,
+      "successRate": 1,
+      "hourlyUsd": 0.006520547945205479,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      }
+    },
+    {
       "provider": "maritime",
       "name": "Maritime",
-      "submissions": 1,
-      "medianCreateMs": 1231,
-      "medianExecMs": 188,
+      "submissions": 2,
+      "medianCreateMs": 1199,
+      "medianExecMs": 366,
       "successRate": 1,
       "hourlyUsd": 0.022,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      }
+    },
+    {
+      "provider": "sail",
+      "name": "Sailboxes (Sail Research)",
+      "submissions": 1,
+      "medianCreateMs": 2899,
+      "medianExecMs": 299,
+      "successRate": 1,
+      "hourlyUsd": 0.062,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      }
+    },
+    {
+      "provider": "lambda",
+      "name": "AWS Lambda MicroVMs",
+      "submissions": 1,
+      "medianCreateMs": 3418,
+      "medianExecMs": 626,
+      "successRate": 1,
+      "hourlyUsd": 0.25220016,
       "size": {
         "vcpu": 2,
         "memoryGb": 4
@@ -2778,6 +3023,27 @@
         "openscale",
         "daytona",
         "maritime"
+      ]
+    },
+    {
+      "date": "2026-11-11T20:13:54.544Z",
+      "label": "home-eu",
+      "by": null,
+      "platform": "darwin-arm64",
+      "runs": 5,
+      "providers": 11,
+      "ids": [
+        "novita",
+        "openscale",
+        "vercel",
+        "e2b",
+        "superserve",
+        "daytona",
+        "cloudflare",
+        "agent37",
+        "maritime",
+        "sail",
+        "lambda"
       ]
     }
   ]
