@@ -1,4 +1,6 @@
-import { fittingSpec, hourlyCost } from "./catalog.js";
+import { readdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
+import { benchmarksPublishable, fittingSpec, hourlyCost } from "./catalog.js";
 import { Router } from "./router.js";
 import type { ProviderId, SandboxSpec } from "./types.js";
 
@@ -234,4 +236,39 @@ export function costMarkdown(run: CostRun): string {
     );
   }
   return lines.join("\n");
+}
+
+/**
+ * Billed / predicted per provider, from the saved cost runs in `dir` (default results/cost): the latest
+ * entry whose bill is precise enough to compare. A bill rounded to whole cents only counts when the
+ * prediction is at least $1, so rounding can't move the ratio by more than 1%. Providers whose terms
+ * forbid publishing benchmarks are left out, like everywhere else results are published.
+ */
+export function billedVsList(dir = "results/cost"): { provider: ProviderId; ratio: number; date: string }[] {
+  let files: string[];
+  try {
+    files = readdirSync(dir).filter((f) => f.endsWith(".json"));
+  } catch {
+    return [];
+  }
+  const latest = new Map<ProviderId, { ratio: number; date: string }>();
+  for (const f of files) {
+    let run: CostRun;
+    try {
+      run = JSON.parse(readFileSync(join(dir, f), "utf8"));
+    } catch {
+      continue;
+    }
+    if (run?.tool !== "sandboxrouter-cost" || !Array.isArray(run.entries)) continue;
+    for (const e of run.entries) {
+      const usd = e.bill?.usd;
+      const predicted = e.predictedUsd;
+      if (!usd || !predicted || usd <= 0 || predicted <= 0 || !benchmarksPublishable(e.provider)) continue;
+      if (/integer cents/i.test(e.bill!.source) && predicted < 1) continue;
+      const date = run.date.slice(0, 10);
+      const prev = latest.get(e.provider);
+      if (!prev || date >= prev.date) latest.set(e.provider, { ratio: Math.round((usd / predicted) * 1000) / 1000, date });
+    }
+  }
+  return [...latest].map(([provider, v]) => ({ provider, ...v })).sort((a, b) => a.provider.localeCompare(b.provider));
 }

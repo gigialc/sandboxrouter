@@ -11,7 +11,8 @@ import {
 import { loadBench, median } from "./bench-store.js";
 import { Ledger, defaultLedgerFile } from "./ledger.js";
 import { DEFAULT_EXEC_TIMEOUT_S, errorStatus, timeoutError } from "./util.js";
-import { VERIFIED } from "./verified.js";
+import { BILLED_VS_LIST } from "./billing.js";
+import { FAILING, VERIFIED } from "./verified.js";
 import { DaytonaProvider } from "./providers/daytona.js";
 import { E2BProvider } from "./providers/e2b.js";
 import { MaritimeProvider } from "./providers/maritime.js";
@@ -66,18 +67,34 @@ import {
 
 export interface Candidate {
   provider: ProviderId;
+  /** List price for the spec, USD/hour. What the sandbox is expected to cost at the provider's published rates. */
   estimatedHourlyUsd: number;
+  /**
+   * List price x what the provider really billed against list price, where that was measured
+   * (`BILLED_VS_LIST`, or `RouterOptions.billedVsList`); the list price otherwise. The default strategy ranks by this.
+   */
+  effectiveHourlyUsd: number;
+  /** Median create time: this router's own recent creates when it has a few, else your `bench` file. */
   medianCreateMs?: number;
   /** Passed the real-account check (as of this release, or `RouterOptions.verified`). */
   verified: boolean;
+  /** Failed a step of its last real-account check (as of this release, or `RouterOptions.failing`). */
+  failing: boolean;
   /** Why this provider won't be tried, if it won't. */
   skip?: string;
 }
 
+/** Providers within this share of the cheapest remaining price count as a tie, broken by speed. */
+export const PRICE_TIE = 0.1;
+/** Creates this router must have seen for a provider before its own timings replace the bench file's. */
+const LIVE_MIN_SAMPLES = 3;
+/** Recent creates kept per provider for the live median. */
+const LIVE_SAMPLES = 20;
+
 export interface RouterOptions {
   /** Replace the built-in adapters (tests, custom providers). */
   providers?: Provider[];
-  /** Path of the bench results file used by strategy "fastest". */
+  /** Path of the bench results file: start times for the speed tie-break and strategy "fastest". */
   benchFile?: string;
   /** Desktop-only computer providers (sandbox providers that also sell computers are found automatically). */
   computers?: ComputerProvider[];
@@ -88,10 +105,21 @@ export interface RouterOptions {
    */
   ledger?: string | false;
   /**
-   * Providers the default "verified" strategy tries first. Default: those whose last real-account check
-   * passed as of this release (`VERIFIED`). Pass your own list, e.g. after running `check` yourself.
+   * Providers that passed the real-account check: tried first by strategy "verified", and the only ones
+   * used with `requireVerified`. Default: those that passed as of this release (`VERIFIED`). Pass your own
+   * list, e.g. after running `check` yourself.
    */
   verified?: ProviderId[];
+  /** Providers whose last real-account check failed. The default strategy tries them last. Default: `FAILING`. */
+  failing?: ProviderId[];
+  /**
+   * Only route to providers in `verified`; the rest are skipped. For services that run sandboxes on their own
+   * accounts, where a provider that misbehaves without failing (keeps billing after kill, garbles output)
+   * costs money. Default false.
+   */
+  requireVerified?: boolean;
+  /** Billed / list-price ratio per provider, for the default ranking. Default: `BILLED_VS_LIST` from saved cost runs. */
+  billedVsList?: Partial<Record<ProviderId, number>>;
 }
 
 /** Desktop-only providers. Filled in as adapters are added. */
@@ -142,6 +170,11 @@ export class Router {
   private providers: Map<ProviderId, Provider>;
   private benchFile?: string;
   private readonly verified: Set<ProviderId>;
+  private readonly failing: Set<ProviderId>;
+  private readonly requireVerified: boolean;
+  private readonly billed: Partial<Record<ProviderId, number>>;
+  /** Create times this router measured, most recent last. */
+  private readonly live = new Map<ProviderId, number[]>();
   private computerOnly: ComputerProvider[];
   /** The local record of sandboxes this router created, or undefined when turned off. */
   readonly ledger?: Ledger;
@@ -152,6 +185,10 @@ export class Router {
     this.providers = new Map((opts.providers ?? defaultProviders()).map((p) => [p.id, p]));
     this.benchFile = opts.benchFile;
     this.verified = new Set(opts.verified ?? (Object.keys(VERIFIED) as ProviderId[]));
+    this.failing = new Set(opts.failing ?? (Object.keys(FAILING) as ProviderId[]));
+    this.requireVerified = opts.requireVerified ?? false;
+    this.billed =
+      opts.billedVsList ?? Object.fromEntries(Object.entries(BILLED_VS_LIST).map(([id, b]) => [id, b!.ratio]));
     this.computerOnly = opts.computers ?? (opts.providers ? [] : defaultComputerProviders());
   }
 
@@ -177,37 +214,48 @@ export class Router {
     // Local providers (Docker) are never picked automatically: they always "cost" $0 and isolate
     // less than a cloud micro-VM. Name them explicitly to use them.
     const ids = explicit ?? CATALOG.filter((c) => !c.local && this.providers.has(c.id)).map((c) => c.id);
-    const bench = route.strategy === "fastest" ? loadBench(this.benchFile) : {};
+    const strategy = route.strategy ?? "default";
+    const speed = strategy === "default" || strategy === "balanced" || strategy === "fastest";
+    const bench = speed ? loadBench(this.benchFile) : {};
 
     const list: Candidate[] = ids.map((id) => {
       // An id the catalog has never heard of (a typo in an explicit list) has no price to look up.
-      if (!CATALOG.some((c) => c.id === id)) return { provider: id, estimatedHourlyUsd: 0, verified: false, skip: "unknown provider" };
+      if (!CATALOG.some((c) => c.id === id)) return { provider: id, estimatedHourlyUsd: 0, effectiveHourlyUsd: 0, verified: false, failing: false, skip: "unknown provider" };
       const p = this.providers.get(id);
+      const list = round(hourlyCost(id, spec));
+      const live = this.live.get(id);
       const c: Candidate = {
         provider: id,
-        estimatedHourlyUsd: round(hourlyCost(id, spec)),
-        medianCreateMs: median(bench[id]?.createMs),
+        estimatedHourlyUsd: list,
+        effectiveHourlyUsd: round(list * (this.billed[id] ?? 1)),
+        medianCreateMs: speed ? (live && live.length >= LIVE_MIN_SAMPLES ? median(live) : median(bench[id]?.createMs)) : undefined,
         verified: this.verified.has(id),
+        failing: this.failing.has(id),
       };
       if (!p) c.skip = "no adapter registered";
       else {
         const gated = accessLabel(id);
-        c.skip = unfit(id, spec, route.require) ?? (p.configured() ? undefined : gated ? `not configured; ${gated}` : "not configured");
+        c.skip =
+          unfit(id, spec, route.require) ??
+          (p.configured() ? undefined : gated ? `not configured; ${gated}` : "not configured") ??
+          (this.requireVerified && !c.verified ? "not tested (this router only uses providers that passed the real-account check)" : undefined);
       }
       return c;
     });
 
-    // Neutral by construction: the same rule for every provider, ties alphabetical by id. The default
-    // puts providers that passed the real-account check first; any provider gets there by passing it.
-    // An explicit provider list keeps the caller's order.
+    // Neutral by construction: the same rule for every provider, ties alphabetical by id. Nothing here
+    // depends on who the provider is, only on its price, what it really billed, how fast it started for
+    // this router and whether its last real-account check failed. An explicit list keeps the caller's order.
     if (!explicit) {
       const byPrice = (a: Candidate, b: Candidate) => a.estimatedHourlyUsd - b.estimatedHourlyUsd || a.provider.localeCompare(b.provider);
-      if (route.strategy === "fastest") {
+      if (strategy === "fastest") {
         list.sort((a, b) => (a.medianCreateMs ?? Infinity) - (b.medianCreateMs ?? Infinity) || byPrice(a, b));
-      } else if (route.strategy === "cheapest") {
+      } else if (strategy === "cheapest") {
         list.sort(byPrice);
-      } else {
+      } else if (strategy === "verified") {
         list.sort((a, b) => Number(b.verified) - Number(a.verified) || byPrice(a, b));
+      } else {
+        return balanced(list);
       }
     }
     return list;
@@ -264,6 +312,7 @@ export class Router {
           return new ProviderError(c.provider, `create timed out after ${limitS}s`);
         });
         attempts.push({ provider: c.provider, ok: true, ms: Date.now() - t0 });
+        this.observe(c.provider, Date.now() - t0);
         const sbx = new RoutedSandbox(c.provider, box, attempts, c.estimatedHourlyUsd, this.ledger);
         this.record(sbx, c.estimatedHourlyUsd, spec.timeoutMinutes);
         return sbx;
@@ -288,6 +337,14 @@ export class Router {
       `all providers failed: ${attempts.map((a) => `${a.provider}: ${a.error}`).join(" | ")}`,
       attempts,
     );
+  }
+
+  /** Remember a successful create's time, for the speed tie-break and strategy "fastest". */
+  private observe(id: ProviderId, ms: number) {
+    const xs = this.live.get(id) ?? [];
+    xs.push(ms);
+    if (xs.length > LIVE_SAMPLES) xs.shift();
+    this.live.set(id, xs);
   }
 
   private record(sbx: RoutedSandbox, usdHour: number, timeoutMinutes?: number) {
@@ -414,6 +471,30 @@ export function parseId(id: string): { provider: ProviderId; nativeId: string } 
 
 function round(n: number) {
   return Math.round(n * 10000) / 10000;
+}
+
+/**
+ * The default order. Providers whose last real-account check failed go last. The rest go cheapest
+ * first by effective price (list price x what the provider really billed, where measured), except that
+ * providers within PRICE_TIE of the cheapest remaining one count as a tie and go fastest first (by
+ * median create time; unknown speed after known), then cheapest, then alphabetical.
+ */
+export function balanced(list: Candidate[]): Candidate[] {
+  const byCost = (a: Candidate, b: Candidate) => a.effectiveHourlyUsd - b.effectiveHourlyUsd || a.provider.localeCompare(b.provider);
+  const bySpeed = (a: Candidate, b: Candidate) =>
+    (a.medianCreateMs ?? Infinity) - (b.medianCreateMs ?? Infinity) || byCost(a, b);
+  const order = (group: Candidate[]) => {
+    const rest = [...group].sort(byCost);
+    const out: Candidate[] = [];
+    while (rest.length) {
+      const limit = rest[0].effectiveHourlyUsd * (1 + PRICE_TIE);
+      const tie = rest.filter((c) => c.effectiveHourlyUsd <= limit);
+      out.push(...tie.sort(bySpeed));
+      rest.splice(0, tie.length);
+    }
+    return out;
+  };
+  return [...order(list.filter((c) => !c.failing)), ...order(list.filter((c) => c.failing))];
 }
 
 /** Seconds to wait for one provider's create before trying the next (RouteOptions.createTimeoutSeconds). */

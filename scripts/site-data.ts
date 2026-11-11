@@ -6,6 +6,7 @@ import { aggregate, loadReports } from "../src/leaderboard.js";
 import { computerCatalog } from "../src/computers.js";
 import { CHECK_STEPS } from "../src/check.js";
 import { conformanceTable, liveStatus } from "../src/conformance.js";
+import { BILLED_VS_LIST } from "../src/billing.js";
 import type { CostRun } from "../src/cost.js";
 
 const SHAPES = [
@@ -69,6 +70,7 @@ const data = {
     defaultSize: c.defaultSize ? { vcpu: c.defaultSize.vcpu, memoryGb: c.defaultSize.memoryGb } : null,
     check: conformance.get(c.id) ?? null,
     live: liveStatus(rows.get(c.id)!),
+    billedVsList: BILLED_VS_LIST[c.id] ?? null,
     computers: Object.keys(computerCatalog().find((d) => d.id === c.id)?.os ?? {}),
     prices: Object.fromEntries(
       SHAPES.map((s) => [`${s.vcpu}x${s.memoryGb}`, { usd: Math.round(hourlyCost(c.id, s) * 10000) / 10000, unfit: unfit(c.id, s) }]),

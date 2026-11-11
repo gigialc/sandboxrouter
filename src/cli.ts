@@ -40,7 +40,7 @@ Usage:
   sandboxrouter serve     [--port 8787] [--host 127.0.0.1] [--cors https://site.example,http://localhost:3000]
 
 Spec flags:   --vcpu N  --memory GB  --gpu T4  --timeout MIN
-Route flags:  --provider e2b[,modal,...]  --strategy verified|cheapest|fastest (default verified: tested providers first)
+Route flags:  --provider e2b[,modal,...]  --strategy balanced|verified|cheapest|fastest (default balanced: cheapest real cost, speed breaks near-ties)
               --no-fallback  --fallback-any (also on setup errors like a bad key)
               --create-timeout SEC (per provider, default 120)  --require gpu,custom-image
 
@@ -163,8 +163,11 @@ async function main() {
     let n = 0;
     for (const c of plan) {
       const mark = c.skip ? "  -" : `${++n}.`.padStart(3);
-      const tested = c.verified ? "tested  " : "        ";
-      console.log(`${mark} ${c.provider.padEnd(11)} $${c.estimatedHourlyUsd.toFixed(4)}/hr  ${tested}${c.skip ? `(skipped: ${c.skip})` : ""}`.trimEnd());
+      const tested = c.failing ? "check failed " : c.verified ? "tested       " : "             ";
+      // The billed column only shows where a measured bill moved it off list price.
+      const real = c.effectiveHourlyUsd !== c.estimatedHourlyUsd ? ` (billed ~$${c.effectiveHourlyUsd.toFixed(4)})` : "";
+      const speed = c.medianCreateMs !== undefined ? `${c.medianCreateMs} ms  ` : "";
+      console.log(`${mark} ${c.provider.padEnd(11)} $${c.estimatedHourlyUsd.toFixed(4)}/hr${real}  ${speed}${tested}${c.skip ? `(skipped: ${c.skip})` : ""}`.trimEnd());
     }
     return;
   }

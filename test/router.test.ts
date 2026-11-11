@@ -1,3 +1,6 @@
+import { mkdtempSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { CATALOG, fittingSpec, hourlyCost, unfit } from "../src/catalog.js";
 import { EXEC_GRACE_S, Router, parseId } from "../src/router.js";
@@ -8,27 +11,28 @@ const fakes = (over: Partial<Record<string, ConstructorParameters<typeof FakePro
   ALL.map((id) => new FakeProvider(id, over[id]));
 
 describe("routing", () => {
-  it("with nothing marked verified, goes cheapest first, ties broken alphabetically", async () => {
-    const r = new Router({ providers: fakes(), verified: [] });
-    // daytona and e2b list the same price, so they sort by name
+  it("by default goes cheapest first, ties broken alphabetically, whether or not providers are tested", async () => {
+    const r = new Router({ providers: fakes(), verified: ["vercel"] });
+    // vercel being tested doesn't move it up
     expect(r.plan().map((c) => c.provider)).toEqual(["maritime", "daytona", "e2b", "modal", "vercel"]);
-    expect(r.plan({}, { strategy: "default" })).toEqual(r.plan({}, { strategy: "cheapest" }));
+    // with no measured bills or speeds, the default is the plain list-price order
+    expect(r.plan({}, { strategy: "default" })).toEqual(r.plan({}, { strategy: "balanced" }));
+    expect(r.plan().map((c) => c.provider)).toEqual(r.plan({}, { strategy: "cheapest" }).map((c) => c.provider));
     const sbx = await r.create();
     expect(sbx.provider).toBe("maritime");
     expect(sbx.id).toBe("maritime:maritime-1");
   });
 
-  it("defaults to verified providers first, then cheapest within each group", () => {
+  it("strategy verified puts tested providers first, then cheapest within each group", () => {
     // modal and vercel are pricier than maritime; mark only them verified and they go first.
     const r = new Router({ providers: fakes(), verified: ["vercel", "modal"] });
-    expect(r.plan().map((c) => [c.provider, c.verified])).toEqual([
+    expect(r.plan({}, { strategy: "verified" }).map((c) => [c.provider, c.verified])).toEqual([
       ["modal", true],
       ["vercel", true],
       ["maritime", false],
       ["daytona", false],
       ["e2b", false],
     ]);
-    expect(r.plan({}, { strategy: "verified" })).toEqual(r.plan());
     // "cheapest" ignores verification.
     expect(r.plan({}, { strategy: "cheapest" }).map((c) => c.provider)).toEqual(["maritime", "daytona", "e2b", "modal", "vercel"]);
     // An explicit list keeps the caller's order.
@@ -43,9 +47,75 @@ describe("routing", () => {
 
   it("falls back from a verified provider to an unverified one", async () => {
     const r = new Router({ providers: fakes({ modal: { fail: "busy", failStatus: 503 } }), verified: ["modal"] });
-    const sbx = await r.create();
+    const sbx = await r.create({}, { strategy: "verified" });
     expect(sbx.attempts.map((a) => a.provider)).toEqual(["modal", "maritime"]);
     await sbx.kill();
+  });
+
+  it("tries providers whose last check failed last, still as a fallback", async () => {
+    const r = new Router({ providers: fakes({ daytona: { fail: "down", failStatus: 503 }, e2b: { fail: "down", failStatus: 503 }, modal: { fail: "down", failStatus: 503 }, vercel: { fail: "down", failStatus: 503 } }), failing: ["maritime"] });
+    const plan = r.plan();
+    expect(plan.map((c) => [c.provider, c.failing])).toEqual([
+      ["daytona", false],
+      ["e2b", false],
+      ["modal", false],
+      ["vercel", false],
+      ["maritime", true],
+    ]);
+    const sbx = await r.create();
+    expect(sbx.provider).toBe("maritime");
+  });
+
+  it("ranks by what providers really billed, but keeps list price as the sandbox's rate", async () => {
+    // maritime billing 6x its list price makes it pricier than daytona and e2b
+    const r = new Router({ providers: fakes(), billedVsList: { maritime: 6 } });
+    const plan = r.plan();
+    expect(plan.map((c) => c.provider)).toEqual(["daytona", "e2b", "maritime", "modal", "vercel"]);
+    const m = plan.find((c) => c.provider === "maritime")!;
+    expect(m.effectiveHourlyUsd).toBeCloseTo(m.estimatedHourlyUsd * 6, 3);
+    const sbx = await r.create({}, { provider: "maritime" });
+    expect(sbx.estimatedHourlyUsd).toBe(m.estimatedHourlyUsd);
+  });
+
+  it("uses the release's measured bills by default", async () => {
+    const { BILLED_VS_LIST } = await import("../src/billing.js");
+    const r = new Router({ providers: ALL.map((id) => new FakeProvider(id)) });
+    for (const c of r.plan()) expect(c.effectiveHourlyUsd).toBeCloseTo(c.estimatedHourlyUsd * (BILLED_VS_LIST[c.provider]?.ratio ?? 1), 3);
+  });
+
+  it("breaks near-ties on price by speed, from the bench file", () => {
+    const dir = mkdtempSync(join(tmpdir(), "sbr-bench-"));
+    const benchFile = join(dir, "bench.json");
+    // e2b billed at 0.643 x list ($0.070) is within 10% of daytona ($0.0666): a tie, and the faster one goes first
+    writeFileSync(benchFile, JSON.stringify({ e2b: { createMs: [300, 310, 320], execMs: [], failures: 0, at: "x" }, daytona: { createMs: [900], execMs: [], failures: 0, at: "x" } }));
+    const r = new Router({ providers: fakes(), benchFile, billedVsList: { e2b: 0.643 } });
+    expect(r.plan().map((c) => c.provider)).toEqual(["maritime", "e2b", "daytona", "modal", "vercel"]);
+    // a big price gap isn't a tie: a much faster but pricier provider stays behind
+    writeFileSync(benchFile, JSON.stringify({ vercel: { createMs: [10], execMs: [], failures: 0, at: "x" } }));
+    expect(r.plan().map((c) => c.provider)).toEqual(["maritime", "daytona", "e2b", "modal", "vercel"]);
+  });
+
+  it("learns speed from its own creates, which beat the bench file", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "sbr-bench-"));
+    const benchFile = join(dir, "bench.json");
+    writeFileSync(benchFile, JSON.stringify({ daytona: { createMs: [100], execMs: [], failures: 0, at: "x" }, e2b: { createMs: [900], execMs: [], failures: 0, at: "x" } }));
+    // e2b billed at 0.643 x list is within 10% of daytona on price, so speed decides between them
+    const r = new Router({ providers: fakes({ daytona: { createMs: 120 } }), benchFile, billedVsList: { e2b: 0.643 } });
+    expect(r.plan()[1].provider).toBe("daytona");
+    for (let i = 0; i < 3; i++) await (await r.create({}, { provider: ["daytona"] })).kill();
+    for (let i = 0; i < 3; i++) await (await r.create({}, { provider: ["e2b"] })).kill();
+    // this router saw e2b start in ~0 ms and daytona in ~120 ms
+    expect(r.plan().map((c) => c.provider).slice(1, 3)).toEqual(["e2b", "daytona"]);
+    expect(r.plan({}, { strategy: "fastest" })[0].provider).not.toBe("daytona");
+  });
+
+  it("with requireVerified, skips providers that haven't passed the check", async () => {
+    const r = new Router({ providers: fakes(), verified: ["modal", "vercel"], requireVerified: true });
+    const plan = r.plan();
+    expect(plan.filter((c) => !c.skip).map((c) => c.provider)).toEqual(["modal", "vercel"]);
+    expect(plan.find((c) => c.provider === "maritime")!.skip).toMatch(/^not tested/);
+    expect((await r.create()).provider).toBe("modal");
+    await expect(r.create({}, { provider: "maritime" })).rejects.toThrow(/not tested/);
   });
 
   it("re-ranks when the size changes the price order", () => {

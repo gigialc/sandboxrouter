@@ -12,9 +12,12 @@ export interface BenchSample {
 
 export type BenchData = Partial<Record<ProviderId, BenchSample>>;
 
-export const DEFAULT_BENCH_FILE = process.env.SANDBOXROUTER_BENCH_FILE ?? join(homedir(), ".sandboxrouter", "bench.json");
+/** $SANDBOXROUTER_BENCH_FILE, else bench.json next to the ledger: $SANDBOXROUTER_HOME, else ~/.sandboxrouter/. */
+export function defaultBenchFile(): string {
+  return process.env.SANDBOXROUTER_BENCH_FILE || join(process.env.SANDBOXROUTER_HOME || join(homedir(), ".sandboxrouter"), "bench.json");
+}
 
-export function loadBench(file = DEFAULT_BENCH_FILE): BenchData {
+export function loadBench(file = defaultBenchFile()): BenchData {
   try {
     return JSON.parse(readFileSync(file, "utf8")) as BenchData;
   } catch {
@@ -22,7 +25,7 @@ export function loadBench(file = DEFAULT_BENCH_FILE): BenchData {
   }
 }
 
-export function saveBench(data: BenchData, file = DEFAULT_BENCH_FILE) {
+export function saveBench(data: BenchData, file = defaultBenchFile()) {
   mkdirSync(dirname(file), { recursive: true });
   writeFileSync(file, JSON.stringify(data, null, 2));
 }

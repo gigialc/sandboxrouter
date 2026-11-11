@@ -34,12 +34,14 @@ export default function Home() {
   const strip = [...passed, ...cloud.filter((p) => p.live.status !== "passed").sort((a, b) => a.name.localeCompare(b.name))]
     .filter((p) => short(p.name).length <= 14)
     .slice(0, 9);
+  // Ranked like the router: list price x what the provider really billed, where measured.
+  const real = (p: (typeof cloud)[number]) => p.prices[DEFAULT_SHAPE].usd * (p.billedVsList?.ratio ?? 1);
   const cheapest = cloud
     .filter((p) => p.prices[DEFAULT_SHAPE] && !p.prices[DEFAULT_SHAPE].unfit)
-    .sort((a, b) => a.prices[DEFAULT_SHAPE].usd - b.prices[DEFAULT_SHAPE].usd)
+    .sort((a, b) => real(a) - real(b))
     .slice(0, 6);
-  // Highlight the one the router would pick: tested providers go first.
-  const pick = cheapest.find((p) => p.live.status === "passed")?.id;
+  // Highlight the one the router would pick: the cheapest that anyone can sign up for and that didn't fail its check.
+  const pick = cheapest.find((p) => p.live.status !== "failing" && !p.access)?.id;
   const [vcpu, gb] = DEFAULT_SHAPE.split("x");
 
   return (
@@ -81,7 +83,7 @@ export default function Home() {
       <div className="mt-28 space-y-32 sm:mt-36 sm:space-y-44">
         <Feature
           label="Route"
-          claim="Each sandbox starts on the cheapest tested provider, and moves on when one fails."
+          claim="Each sandbox starts on the cheapest provider that fits, and moves on when one fails."
           actions={
             <>
               <Button href="/docs#routing" primary>
@@ -111,7 +113,7 @@ export default function Home() {
             </>
           }
           points={[
-            { title: "Tested on real accounts", body: `${passed.length} providers pass our real-account check. Untested ones are tried last.` },
+            { title: "Tested on real accounts", body: `${passed.length} providers pass our real-account check. Ones that fail it are tried last.` },
             { title: "No paid placement", body: "Order comes from price and test results only. No provider pays for its position." },
             { title: "Desktops and phones too", body: `Computers your model can see and click, from ${desktops} providers.` },
           ]}
