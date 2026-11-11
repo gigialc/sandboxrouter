@@ -2,10 +2,28 @@ export { checkProvider, CHECK_STEPS, type CheckReport, type CheckResult, type Ch
 export { Ledger, defaultLedgerFile, type LedgerEntry } from "./ledger.js";
 export { conformanceTable, loadConformance, type ConformanceRow, type SavedCheck } from "./conformance.js";
 export { gc, listOpen, isGone, type GcResult, type OpenSandbox } from "./gc.js";
-export { Router, RoutedSandbox, defaultProviders, defaultComputerProviders, parseId, type Candidate, type RouterOptions } from "./router.js";
+export {
+  Router,
+  RoutedSandbox,
+  defaultProviders,
+  defaultComputerProviders,
+  parseId,
+  balanced,
+  sizeOf,
+  PRICE_TIE,
+  DEFAULT_CREATE_TIMEOUT_S,
+  DEFAULT_CREATE_DEADLINE_S,
+  type Candidate,
+  type RouterOptions,
+  type SandboxPrice,
+  type Size,
+} from "./router.js";
+export { VERIFIED, FAILING } from "./verified.js";
+export { BILLED_VS_LIST } from "./billing.js";
+export { validate, splitRequest, SPEC_KEYS, ROUTE_KEYS, STRATEGIES } from "./validate.js";
 export { CATALOG, hourlyCost, unfit, info, type ProviderInfo } from "./catalog.js";
-export { createApp, HttpError, type ServerHooks } from "./server.js";
-export { Client, ClientError, RemoteSandbox } from "./client.js";
+export { createApp, HttpError, ERROR_STATUS, type ServerHooks } from "./server.js";
+export { Client, ClientError, RemoteSandbox, type CreateResponse } from "./client.js";
 export {
   RoutedComputer,
   createComputer,

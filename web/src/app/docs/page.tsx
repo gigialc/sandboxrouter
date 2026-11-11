@@ -125,7 +125,7 @@ router.create(spec, { require: ["pause"] })         // only providers that can p
           where you run it, so the published benchmarks are never used for routing. Providers whose last 14-step real-account check
           failed go last. Ties break alphabetically, so no provider gets a better slot by who it is. Prices come from each
           provider&apos;s public pricing page and live in <code>src/catalog.ts</code>. A service that runs sandboxes on its own accounts can
-          pass <code>{`{ requireVerified: true }`}</code> to use only providers that passed the check. Docker is never picked automatically; name it
+          create its router with <code>{`new Router({ requireVerified: true })`}</code> to use only providers that passed the check. Docker is never picked automatically; name it
           with <code>{`{ provider: "docker" }`}</code>. To see what would happen without starting anything, call{" "}
           <code>router.plan(spec, route)</code> or run <code>npx @sandboxrouter/sdk route</code>. Every skipped provider comes with
           a reason, like <code>not configured</code> or <code>max 16 vCPU</code>.

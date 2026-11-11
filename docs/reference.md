@@ -4,8 +4,6 @@ Everything the [README](../README.md) leaves out. The tables marked generated ar
 
 ## Install
 
-With no size you get 2 vCPU / 4 GB, except on providers whose default image has a fixed size (Daytona 1 vCPU / 1 GB, E2B 2 vCPU / 0.5 GB, OpenScale 2 vCPU / 1 GB), where you get that. Ask for more than that and those providers are skipped unless you pass a custom `image` built at the size you need.
-
 ```bash
 npm i @sandboxrouter/sdk
 # then the SDK of each provider you use (Agent37, Azure, AgentCore, Boat, Cloudflare, Dedalus, exe.dev, Freestyle, InstaBox, Koyeb,
@@ -83,7 +81,7 @@ const a = await router.create({ vcpu: 8, memoryGb: 16 }, { strategy: "cheapest" 
 // GPU: only GPU-capable providers are tried (Modal today)
 const b = await router.create({ gpu: "A10G", image: { modal: "pytorch/pytorch:latest" } });
 
-// Pin providers in order and turn fallback off
+// Pin providers in order; with fallback off it's the first one named or an error, never another
 const c = await router.create({}, { provider: ["e2b", "daytona"], fallback: false });
 
 // Fallback moves on when a provider is down: a timeout, a network error, 429 or 5xx, and a create
@@ -91,8 +89,8 @@ const c = await router.create({}, { provider: ["e2b", "daytona"], fallback: fals
 // killed, or left in the ledger for `gc`), and when an account can't pay (402: no balance, plan
 // needed). A setup error (400, 401, 403, 404, 422: a bad key, a bad image or request) stops instead,
 // so a mistake isn't hidden by a pricier provider. Every failed attempt is on sbx.attempts.
-// fallback: "any" falls back on every error.
-const e = await router.create({}, { fallback: "any", createTimeoutSeconds: 300 });
+// fallback: "any" falls back on every error. deadlineSeconds (default 240) bounds the whole create.
+const e = await router.create({}, { fallback: "any", createTimeoutSeconds: 300, deadlineSeconds: 600 });
 
 // Per-provider images: each provider names its templates differently
 const d = await router.create({ image: { e2b: "code-interpreter-v1", modal: "python:3.13-slim" } });
@@ -117,7 +115,43 @@ console.table(router.plan({ vcpu: 32 }));
 await a.kill();
 ```
 
-`create` throws a `RouterError` whose `attempts` lists every provider it tried and why each failed.
+### Sizes and prices
+
+With no size, any provider can take the sandbox at the size it starts by default: 2 vCPU / 4 GB on most, but a fixed, smaller image on some (Daytona 1 vCPU / 1 GB, E2B 2 vCPU / 0.5 GB, OpenScale 2 vCPU / 1 GB). Set `vcpu` or `memoryGb` and only providers that can give that size are tried (those three need a custom `image` built at the size). Each candidate and each sandbox says what it gets:
+
+| Field | On | Meaning |
+|---|---|---|
+| `size` | `Candidate`, `RoutedSandbox`, HTTP create | `{ vcpu, memoryGb }`: the fixed image size, or what you asked for. Some providers round up |
+| `listHourlyUsd` | same | the provider's published price for that size |
+| `estimatedHourlyUsd` | same | what it's expected to cost: list price times what the provider really billed against list, where we measured that (`billedVsList`, from `BILLED_VS_LIST`). This is what the default route ranks by, and what a service reselling sandboxes should charge from |
+
+A handle from `router.get(id)` has these only if this machine's ledger recorded the create.
+
+### Routing
+
+`strategy` orders the providers you have keys for:
+
+- `balanced` (default): cheapest `estimatedHourlyUsd`; providers within 10% of each other go fastest first, by this router's own recent create times (after 3), else your `bench` file. Providers whose last real-account check failed (`FAILING`) go last, still as fallback.
+- `cheapest`: lowest list price alone.
+- `fastest`: lowest create time, then cheapest.
+- `verified`: providers that passed the real-account check (`VERIFIED`) first, then the rest, each cheapest first.
+
+`new Router({ requireVerified: true })` uses only providers that passed the check: for a service that runs sandboxes on its own accounts. `verified`, `failing` and `billedVsList` replace the shipped lists.
+
+### Errors
+
+`create`, `plan` and `get` throw a `RouterError` with a `code`, and `attempts` listing every provider tried and why each failed (`status` is the provider's HTTP status, where it gave one). The HTTP API returns `{ error, code, attempts }` with the matching status:
+
+| `code` | HTTP | When | What to do |
+|---|---|---|---|
+| `bad_request` | 400 | an invalid spec, route option or id (sizes and times must be positive numbers; unknown fields are refused) | fix the request |
+| `unsupported` | 400 | the provider can't do this, e.g. pause | create with `require: [...]` |
+| `no_provider` | 422 | no provider you have keys for can take it; the message says why for each | add a key, change the size, or `plan()` to see |
+| `setup` | 502 | a provider refused the key, image or request (400/401/403/404/422 from it) | fix the key or image; `fallback: "any"` moves on instead |
+| `all_failed` | 503 | every provider tried was down, busy or out of credit | retry later |
+| `timeout` | 504 | the create ran out of `deadlineSeconds` | retry, or raise it |
+
+A command that outlives its `timeoutSeconds` rejects with `ProviderError("<provider>: command timed out after Ns")`, HTTP 504.
 
 ## Computers (desktops and phones)
 
@@ -253,7 +287,7 @@ SANDBOXROUTER_TOKEN=secret npx @sandboxrouter/sdk serve
 |---|---|---|
 | `GET` | `/v1/providers` | |
 | `POST` | `/v1/route` | same as create; returns the candidate order |
-| `POST` | `/v1/sandboxes` | `{ vcpu, memoryGb, gpu, env, timeoutMinutes, image, metadata, provider, strategy, fallback, createTimeoutSeconds, require }` |
+| `POST` | `/v1/sandboxes` | `{ vcpu, memoryGb, gpu, env, timeoutMinutes, image, metadata, provider, strategy, fallback, createTimeoutSeconds, deadlineSeconds, require }`. Other fields are refused. Answers `{ id, provider, size, estimatedHourlyUsd, listHourlyUsd, attempts }` |
 | `POST` | `/v1/sandboxes/:id/exec` | `{ cmd, cwd, env, timeoutSeconds, stream }`. With `stream: true` the answer is `text/event-stream`: `stdout` and `stderr` events, then `result` |
 | `POST` | `/v1/sandboxes/:id/pause` | |
 | `PUT` | `/v1/sandboxes/:id/files?path=` | raw bytes |
@@ -271,10 +305,10 @@ SANDBOXROUTER_TOKEN=secret npx @sandboxrouter/sdk serve
 ```bash
 curl -s localhost:8787/v1/sandboxes -H "Authorization: Bearer secret" \
   -d '{"vcpu":2,"strategy":"cheapest"}'
-# {"id":"e2b:iz5sb5a4bt3pmjx7c5ms2","provider":"e2b","estimatedHourlyUsd":0.1656,"attempts":[...]}
+# {"id":"maritime:sbx-…","provider":"maritime","size":{"vcpu":2,"memoryGb":4},"estimatedHourlyUsd":0.022,"listHourlyUsd":0.022,"attempts":[...]}
 ```
 
-Provider keys stay on the server. Clients only hold `SANDBOXROUTER_TOKEN`. It binds to `127.0.0.1` by default. Without a token it only starts on a loopback address with CORS off: `--cors` (any browser page could otherwise start sandboxes on your keys) and a public `--host` both need `SANDBOXROUTER_TOKEN`.
+Errors are `{ error, code, attempts }` (see [Errors](#errors)). If the client hangs up before a create finishes, the sandbox is killed when it's ready rather than left running. Provider keys stay on the server. Clients only hold `SANDBOXROUTER_TOKEN`. It binds to `127.0.0.1` by default. Without a token it only starts on a loopback address with CORS off: `--cors` (any browser page could otherwise start sandboxes on your keys) and a public `--host` both need `SANDBOXROUTER_TOKEN`.
 
 ### TypeScript client
 

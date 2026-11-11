@@ -2,6 +2,31 @@
 
 All notable changes. Versions follow [semver](https://semver.org/); while the version is 0.x, a minor bump can change the API.
 
+## 0.5.0 (2026-11-12)
+
+A design pass after an outside review of the library and the hosted service.
+
+### Fixed
+- **A size that isn't a number no longer hangs the router.** `plan({ vcpu: "x" })` looped forever in 0.4.0's tie-break, and one `POST /v1/route` could stall a server. Every spec and route option is now checked first (`validate()`): sizes and times must be positive numbers, maps must be string maps, and strategy, fallback and provider ids must be known. The HTTP API also refuses fields it doesn't know (`{"memory": 64}` used to be ignored silently). The tie-break loop always moves on, whatever the prices.
+- **A sandbox that starts after its HTTP caller hung up is killed,** instead of running (and, on a billing server, charging) with nobody holding its id.
+- **A create can't outlast the client waiting for it.** New `deadlineSeconds` (default 240) bounds the whole create across every provider tried. Before, with the 120 s per-provider timeout, a few slow providers took longer than an HTTP client waits.
+- **`fallback: false` with a list of providers never runs on one you didn't name first:** if the first can't take it, create throws `no_provider` instead of silently using the second.
+- **On a multi-user server, `/v1/computers` is off unless turned on** (`ServerHooks.computers: true`): computers don't go through `owns` or the create hooks yet.
+- `DELETE /v1/sandboxes/:id` on a sandbox the provider no longer has succeeds, so the caller isn't left paying for it.
+- The create timeout message keeps fractions (`after 0.2s`, not `after 0s`).
+
+### Changed
+- **Prices.** `estimatedHourlyUsd` is now the expected cost everywhere it appears: list price times what the provider really billed against list, where measured. New `listHourlyUsd` (the published price), `billedVsList` (the ratio, on `Candidate`) and `size` (`{ vcpu, memoryGb }`: the provider's fixed image size, or what was asked for) are on `Candidate`, `RoutedSandbox`, the HTTP create answer, `RemoteSandbox` and the Python `Sandbox`. `effectiveHourlyUsd` from 0.4.0 is gone (it's now `estimatedHourlyUsd`). `strategy: "cheapest"` still means list price alone.
+- **Errors carry a `code`.** `RouterError.code` is one of `bad_request`, `unsupported`, `no_provider`, `setup`, `all_failed`, `timeout`, and the HTTP API maps each to one status (400, 400, 422, 502, 503, 504; `ERROR_STATUS`) with `{ error, code, attempts }`. Before, every RouterError was 502. Command timeouts are 504. `ClientError.code` and the Python `SandboxRouterError.code` expose it. `Attempt.status` has each failed attempt's HTTP status.
+- `router.get(id)` takes the price and size from this machine's ledger, and leaves them undefined otherwise (it used to report the default size's price for any sandbox). The ledger records list price and size.
+- `strategy: "verified"` orders within each group by expected cost, like the default.
+
+### Added
+- `ServerHooks.afterCreate` may return fields to add to the create answer (a hosted service: what it charges, when it expires), `createFailed` releases whatever `beforeCreate` held, and `afterKill` gets `{ error }` when the provider's kill failed, so a service can stop charging and retry the kill itself.
+- Exports: `VERIFIED`, `FAILING`, `BILLED_VS_LIST`, `PRICE_TIE`, `DEFAULT_CREATE_TIMEOUT_S`, `DEFAULT_CREATE_DEADLINE_S`, `balanced`, `sizeOf`, `validate`, `splitRequest`, `ERROR_STATUS`, and the types `Size`, `SandboxPrice`, `CreateResponse`.
+- `RemoteSandbox`: `readText()`, `await using` (`Symbol.asyncDispose`), and `details` (the server's whole create answer). `Client.route()` returns full `Candidate`s. Python `Client(api_key=...)` as another name for `token`, and `deadline_seconds`.
+- Docs: Sizes and prices, Routing and Errors sections in docs/reference.md.
+
 ## 0.4.0 (2026-11-11)
 
 ### Changed

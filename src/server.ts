@@ -1,8 +1,10 @@
 import { timingSafeEqual } from "node:crypto";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
-import { CATALOG, hourlyCost } from "./catalog.js";
+import { CATALOG } from "./catalog.js";
 import { Router, type RoutedSandbox } from "./router.js";
-import { ProviderError, RouterError, type RouteOptions, type SandboxSpec } from "./types.js";
+import { ProviderError, RouterError, type RouteOptions, type RouterErrorCode, type SandboxSpec } from "./types.js";
+import { errorStatus } from "./util.js";
+import { splitRequest } from "./validate.js";
 
 /**
  * Hooks for running this API for many users (accounts, billing, per-user sandboxes). With none set,
@@ -13,15 +15,25 @@ export interface ServerHooks {
   authorize?(req: IncomingMessage): Promise<unknown | null>;
   /** Routes outside /v1 (sign-in, billing webhooks, pages), checked before auth. Return true if handled. */
   extra?(req: IncomingMessage, res: ServerResponse, url: URL): Promise<boolean>;
-  /** Before a sandbox starts. Throw HttpError to refuse (402 out of credit, 429 too many); may edit spec. */
+  /** Before a sandbox starts. Throw HttpError to refuse (402 out of credit, 429 too many); may edit spec and route. */
   beforeCreate?(caller: unknown, spec: SandboxSpec, route: RouteOptions): Promise<void>;
-  /** After it started. If this throws, the sandbox is killed and the error returned. */
-  afterCreate?(caller: unknown, sbx: RoutedSandbox, spec: SandboxSpec): Promise<void>;
+  /**
+   * After it started. Return fields to add to the create response (e.g. what the caller is charged). If
+   * this throws, the sandbox is killed and the error returned. Not called when the caller hung up before
+   * the sandbox was ready: that sandbox is killed instead.
+   */
+  afterCreate?(caller: unknown, sbx: RoutedSandbox, spec: SandboxSpec): Promise<Record<string, unknown> | void>;
+  /** A create that passed beforeCreate ended without a sandbox for the caller. Release whatever beforeCreate held. */
+  createFailed?(caller: unknown): Promise<void> | void;
   /** May this caller use this sandbox? No means 404. */
   owns?(caller: unknown, id: string): Promise<boolean>;
-  /** After DELETE killed it. */
-  afterKill?(caller: unknown, id: string): Promise<void>;
-  /** false turns off /v1/computers. */
+  /**
+   * After DELETE. `error` is set when the provider's kill failed (the sandbox may still be running): the
+   * server answers with the error, but the caller asked for it gone, so stop charging them for it. A kill
+   * of a sandbox the provider no longer has counts as done.
+   */
+  afterKill?(caller: unknown, id: string, outcome?: { error?: Error }): Promise<void>;
+  /** /v1/computers. Default: on for a single-user server, off when `authorize` is set (computers don't go through these hooks). */
   computers?: boolean;
   /** false turns off pause. */
   pause?: boolean;
@@ -73,6 +85,7 @@ export function createApp(
     return got.length === expected.length && timingSafeEqual(got, expected);
   };
   const live = new Map<string, RoutedSandbox>();
+  const computersOn = hooks.computers ?? !hooks.authorize;
 
   const cors = (req: IncomingMessage, res: ServerResponse) => {
     const origin = req.headers.origin;
@@ -116,43 +129,58 @@ export function createApp(
     // GET /v1/providers
     if (req.method === "GET" && parts[1] === "providers" && parts.length === 2) {
       return json(res, 200, {
-        providers: CATALOG.filter((c) => router.registered().includes(c.id)).map((c) => ({
-          ...c,
-          configured: router.isConfigured(c.id),
-          estimatedHourlyUsd: hourlyCost(c.id),
-        })),
+        providers: CATALOG.filter((c) => router.registered().includes(c.id)).map((c) => {
+          const p = router.plan({}, { provider: c.id })[0];
+          return { ...c, configured: router.isConfigured(c.id), estimatedHourlyUsd: p.estimatedHourlyUsd, listHourlyUsd: p.listHourlyUsd, size: p.size };
+        }),
       });
     }
 
     // POST /v1/route
     if (req.method === "POST" && parts[1] === "route" && parts.length === 2) {
-      const { spec, route } = splitBody(await readJson(req));
+      const { spec, route } = splitRequest(await readJson(req));
       return json(res, 200, { candidates: router.plan(spec, route) });
     }
 
     if (parts[1] === "computers") {
-      if (hooks.computers === false) return json(res, 404, { error: "computers aren't available on this server" });
+      if (!computersOn) return json(res, 404, { error: "computers aren't available on this server" });
       return computers(req, res, url, parts);
     }
     if (parts[1] !== "sandboxes") return json(res, 404, { error: "not found" });
 
     // POST /v1/sandboxes
     if (req.method === "POST" && parts.length === 2) {
-      const { spec, route } = splitBody(await readJson(req));
+      const { spec, route } = splitRequest(await readJson(req));
       await hooks.beforeCreate?.(caller, spec, route);
-      const sbx = await router.create(spec, route);
+      // A caller that gives up (client timeout, closed connection) never learns the id: kill what
+      // starts after that rather than leave it running, and billing, unseen.
+      let hungUp = false;
+      res.on("close", () => (hungUp = !res.writableFinished));
+      let sbx: RoutedSandbox;
+      let extra: Record<string, unknown> | void;
       try {
-        await hooks.afterCreate?.(caller, sbx, spec);
+        sbx = await router.create(spec, route);
+      } catch (err) {
+        await hooks.createFailed?.(caller);
+        throw err;
+      }
+      try {
+        if (hungUp) throw new HttpError(499, "the client closed the connection before the sandbox was ready; it was killed");
+        extra = await hooks.afterCreate?.(caller, sbx, spec);
       } catch (err) {
         await sbx.kill().catch(() => {});
+        await hooks.createFailed?.(caller);
         throw err;
       }
       live.set(sbx.id, sbx);
       return json(res, 201, {
         id: sbx.id,
         provider: sbx.provider,
+        size: sbx.size,
         estimatedHourlyUsd: sbx.estimatedHourlyUsd,
+        listHourlyUsd: sbx.listHourlyUsd,
         attempts: sbx.attempts,
+        ...(extra ?? {}),
       });
     }
 
@@ -173,7 +201,8 @@ export function createApp(
         const r = await sbx.exec(body.cmd, { ...opts, onStdout: (c) => emit("stdout", c), onStderr: (c) => emit("stderr", c) });
         emit("result", r);
       } catch (err) {
-        emit("error", { error: (err as Error).message });
+        const e = describeError(err);
+        emit("error", { ...e.body, status: e.status });
       }
       return res.end();
     }
@@ -204,7 +233,18 @@ export function createApp(
 
     // DELETE /v1/sandboxes/:id
     if (req.method === "DELETE" && parts.length === 3) {
-      await (await box(id)).kill();
+      try {
+        await (await box(id)).kill();
+      } catch (err) {
+        // Already gone at the provider: that's what the caller wanted.
+        if (!(err instanceof HttpError) && errorStatus(err) === 404) {
+          live.delete(id);
+          await hooks.afterKill?.(caller, id);
+          return json(res, 200, { id, killed: true });
+        }
+        if (!(err instanceof HttpError)) await hooks.afterKill?.(caller, id, { error: err as Error });
+        throw err;
+      }
       live.delete(id);
       await hooks.afterKill?.(caller, id);
       return json(res, 200, { id, killed: true });
@@ -270,12 +310,10 @@ export function createApp(
 
   return createServer((req, res) => {
     handle(req, res).catch((err) => {
-      const status =
-        err instanceof HttpError ? err.status
-        : err instanceof RouterError ? 502
-        : err instanceof ProviderError && err.status ? err.status
-        : 500;
-      json(res, status, { error: err.message, attempts: err.attempts });
+      // A closed connection can't be answered.
+      if (res.writableEnded || res.destroyed) return;
+      const e = describeError(err);
+      json(res, e.status, e.body);
     });
   });
 }
@@ -289,18 +327,29 @@ export class HttpError extends Error {
   }
 }
 
-const ROUTE_KEYS = ["provider", "strategy", "fallback", "require", "createTimeoutSeconds"] as const;
-
-function splitBody(body: Record<string, any>): { spec: SandboxSpec; route: RouteOptions } {
-  const route: Record<string, unknown> = {};
-  const spec: Record<string, unknown> = {};
-  for (const [k, v] of Object.entries(body)) ((ROUTE_KEYS as readonly string[]).includes(k) ? route : spec)[k] = v;
-  // A provider id the catalog does not know is the client's mistake, not a routing failure.
-  const ids = route.provider === undefined ? [] : ([] as unknown[]).concat(route.provider);
-  const unknown = ids.filter((id) => !CATALOG.some((c) => c.id === id));
-  if (unknown.length) throw new HttpError(400, `unknown provider: ${unknown.join(", ")}`);
-  return { spec: spec as SandboxSpec, route: route as RouteOptions };
+/**
+ * The HTTP status and JSON body for an error: `{ error, code?, attempts? }`. RouterErrors carry a code
+ * (see RouterErrorCode) that maps to one status; a ProviderError with an HTTP status passes it on.
+ */
+function describeError(err: any): { status: number; body: { error: string; code?: RouterErrorCode; attempts?: unknown[] } } {
+  const status =
+    err instanceof HttpError ? err.status
+    : err instanceof RouterError ? ERROR_STATUS[err.code]
+    : err instanceof ProviderError && err.status ? err.status
+    : 500;
+  const code = err instanceof RouterError ? err.code : undefined;
+  return { status, body: { error: err?.message ?? String(err), ...(code ? { code } : {}), ...(err?.attempts?.length ? { attempts: err.attempts } : {}) } };
 }
+
+/** The HTTP status for each RouterError code (see RouterErrorCode). */
+export const ERROR_STATUS: Record<RouterErrorCode, number> = {
+  bad_request: 400,
+  unsupported: 400,
+  no_provider: 422,
+  setup: 502,
+  all_failed: 503,
+  timeout: 504,
+};
 
 const MAX_BODY = 100 * 1024 * 1024;
 

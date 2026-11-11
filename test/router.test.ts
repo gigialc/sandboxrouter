@@ -66,21 +66,60 @@ describe("routing", () => {
     expect(sbx.provider).toBe("maritime");
   });
 
-  it("ranks by what providers really billed, but keeps list price as the sandbox's rate", async () => {
+  it("ranks by what providers really billed, and the sandbox carries both that and the list price", async () => {
     // maritime billing 6x its list price makes it pricier than daytona and e2b
     const r = new Router({ providers: fakes(), billedVsList: { maritime: 6 } });
     const plan = r.plan();
     expect(plan.map((c) => c.provider)).toEqual(["daytona", "e2b", "maritime", "modal", "vercel"]);
     const m = plan.find((c) => c.provider === "maritime")!;
-    expect(m.effectiveHourlyUsd).toBeCloseTo(m.estimatedHourlyUsd * 6, 3);
+    expect(m.estimatedHourlyUsd).toBeCloseTo(m.listHourlyUsd * 6, 3);
+    expect(m.billedVsList).toBe(6);
+    expect(plan.find((c) => c.provider === "daytona")!.billedVsList).toBeUndefined();
     const sbx = await r.create({}, { provider: "maritime" });
-    expect(sbx.estimatedHourlyUsd).toBe(m.estimatedHourlyUsd);
+    expect(sbx).toMatchObject({ estimatedHourlyUsd: m.estimatedHourlyUsd, listHourlyUsd: m.listHourlyUsd, size: m.size });
+  });
+
+  it("says what size each provider gives: its fixed image, or what was asked for", () => {
+    const r = new Router({ providers: fakes() });
+    const size = (spec = {}) => Object.fromEntries(r.plan(spec).map((c) => [c.provider, c.size]));
+    expect(size()).toMatchObject({ e2b: { vcpu: 2, memoryGb: 0.5 }, maritime: { vcpu: 2, memoryGb: 4 } });
+    expect(size({ vcpu: 4, memoryGb: 8 }).maritime).toEqual({ vcpu: 4, memoryGb: 8 });
+  });
+
+  it("refuses specs and route options that aren't valid, before trying anything", async () => {
+    const r = new Router({ providers: fakes() });
+    for (const [spec, route] of [
+      [{ vcpu: "x" }, {}],
+      [{ vcpu: -2 }, {}],
+      [{ memoryGb: Number.NaN }, {}],
+      [{ timeoutMinutes: 0 }, {}],
+      [{ env: { A: 1 } }, {}],
+      [{}, { strategy: "quickest" }],
+      [{}, { fallback: "sometimes" }],
+      [{}, { createTimeoutSeconds: -1 }],
+      [{}, { provider: ["nope"] }],
+    ] as const) {
+      expect(() => r.plan(spec as never, route as never)).toThrow(expect.objectContaining({ code: "bad_request" }));
+      await expect(r.create(spec as never, route as never)).rejects.toMatchObject({ code: "bad_request" });
+    }
+  });
+
+  it("gives up when the whole create runs out of deadlineSeconds", async () => {
+    const r = new Router({ providers: fakes({ maritime: { createMs: 400 }, daytona: { createMs: 400 } }), ledger: false });
+    const err = await r.create({}, { provider: ["maritime", "daytona", "e2b"], createTimeoutSeconds: 0.25, deadlineSeconds: 0.3 }).catch((e) => e);
+    expect(err).toMatchObject({ code: "timeout" });
+    expect(err.attempts.map((a: { provider: string }) => a.provider)).toEqual(["maritime", "daytona"]);
+  });
+
+  it("with fallback false, a pinned list never runs on a provider other than the first", async () => {
+    const r = new Router({ providers: fakes({ e2b: { configured: false } }) });
+    await expect(r.create({}, { provider: ["e2b", "daytona"], fallback: false })).rejects.toMatchObject({ code: "no_provider", message: expect.stringMatching(/^e2b can't take this sandbox: not configured/) });
   });
 
   it("uses the release's measured bills by default", async () => {
     const { BILLED_VS_LIST } = await import("../src/billing.js");
     const r = new Router({ providers: ALL.map((id) => new FakeProvider(id)) });
-    for (const c of r.plan()) expect(c.effectiveHourlyUsd).toBeCloseTo(c.estimatedHourlyUsd * (BILLED_VS_LIST[c.provider]?.ratio ?? 1), 3);
+    for (const c of r.plan()) expect(c.estimatedHourlyUsd).toBeCloseTo(c.listHourlyUsd * (BILLED_VS_LIST[c.provider]?.ratio ?? 1), 3);
   });
 
   it("breaks near-ties on price by speed, from the bench file", () => {
@@ -202,13 +241,12 @@ describe("routing", () => {
     expect(sbx.provider).toBe("modal");
   });
 
-  it("reports an unknown provider id as a skipped candidate, and create refuses it", async () => {
+  it("refuses an unknown provider id as a bad request", async () => {
     const r = new Router({ providers: fakes() });
-    const plan = r.plan({}, { provider: ["nope" as never, "modal"] });
-    expect(plan.map((c) => [c.provider, c.skip])).toEqual([["nope", "unknown provider"], ["modal", undefined]]);
+    expect(() => r.plan({}, { provider: ["nope" as never, "modal"] })).toThrow(/unknown provider: "nope"/);
     const err = await r.create({}, { provider: "nope" as never }).catch((e) => e);
     expect(err).toBeInstanceOf(RouterError);
-    expect(err.message).toMatch(/nope \(unknown provider\)/);
+    expect(err.code).toBe("bad_request");
   });
 
   it("explains why nothing can run", async () => {

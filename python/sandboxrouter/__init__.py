@@ -24,11 +24,15 @@ __version__ = "0.1.0"
 
 
 class SandboxRouterError(Exception):
-    def __init__(self, status: int, message: str, attempts: Optional[list] = None):
+    """An HTTP error from the server. `code` is the router's reason when it has one:
+    bad_request, unsupported, no_provider, setup, all_failed or timeout."""
+
+    def __init__(self, status: int, message: str, attempts: Optional[list] = None, code: Optional[str] = None):
         super().__init__(f"{status}: {message}")
         self.status = status
         self.message = message
         self.attempts = attempts or []
+        self.code = code
 
 
 @dataclass
@@ -55,14 +59,17 @@ _SPEC_KEYS = {
     "strategy": "strategy",
     "fallback": "fallback",
     "create_timeout_seconds": "createTimeoutSeconds",
+    "deadline_seconds": "deadlineSeconds",
     "require": "require",
 }
 
 
 class Client:
-    def __init__(self, base_url: Optional[str] = None, token: Optional[str] = None, timeout: float = 660):
+    def __init__(self, base_url: Optional[str] = None, token: Optional[str] = None, timeout: float = 660, api_key: Optional[str] = None):
+        """`api_key` (the hosted service's sr_live_ key) and `token` (a self-hosted server's) are the same thing."""
         self.base_url = (base_url or os.environ.get("SANDBOXROUTER_URL") or "http://127.0.0.1:8787").rstrip("/")
-        self.token = token if token is not None else (os.environ.get("SANDBOXROUTER_API_KEY") or os.environ.get("SANDBOXROUTER_TOKEN"))
+        given = api_key if api_key is not None else token
+        self.token = given if given is not None else (os.environ.get("SANDBOXROUTER_API_KEY") or os.environ.get("SANDBOXROUTER_TOKEN"))
         self.timeout = timeout
 
     # -- transport -------------------------------------------------------------------------
@@ -87,7 +94,7 @@ class Client:
                 body = json.loads(raw)
             except ValueError:
                 body = {"error": raw}
-            raise SandboxRouterError(e.code, body.get("error", raw), body.get("attempts")) from None
+            raise SandboxRouterError(e.code, body.get("error", raw), body.get("attempts"), body.get("code")) from None
 
     def _json(self, method: str, path: str, body: Any = None) -> Any:
         with self._open(method, path, json_body=body) as r:
@@ -108,10 +115,12 @@ class Client:
 
     def create(self, **spec: Any) -> "Sandbox":
         """Start a sandbox. Spec: vcpu, memory_gb, gpu, env, timeout_minutes, image, metadata.
-        Routing: provider (str or list), strategy ("default" | "balanced" | "verified" | "cheapest" | "fastest"; default: cheapest real cost, speed breaks near-ties), fallback
-        (True, False or "any"), create_timeout_seconds, require."""
+        Routing: provider (str or list), strategy ("balanced" | "verified" | "cheapest" | "fastest"; default
+        balanced: cheapest real cost, speed breaks near-ties), fallback (True, False or "any"),
+        create_timeout_seconds, deadline_seconds, require.
+        The sandbox's `details` is the server's whole answer (a hosted service adds what it charges)."""
         d = self._json("POST", "/v1/sandboxes", _camel(spec))
-        return Sandbox(self, d["id"], d["provider"], d.get("estimatedHourlyUsd"), d.get("attempts", []))
+        return Sandbox(self, d["id"], d["provider"], d.get("estimatedHourlyUsd"), d.get("attempts", []), d.get("listHourlyUsd"), d.get("size"), d)
 
     def sandbox(self, sandbox_id: str) -> "Sandbox":
         """Handle for an existing sandbox id ("provider:nativeId")."""
@@ -159,6 +168,9 @@ class Sandbox:
     provider: str
     estimated_hourly_usd: Optional[float] = None
     attempts: list = field(default_factory=list)
+    list_hourly_usd: Optional[float] = None
+    size: Optional[dict] = None
+    details: dict = field(default_factory=dict)
 
     def _p(self, suffix: str = "") -> str:
         return f"/v1/sandboxes/{urllib.parse.quote(self.id, safe='')}{suffix}"
