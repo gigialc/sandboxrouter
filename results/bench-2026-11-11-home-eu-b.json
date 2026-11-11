@@ -1,0 +1,44 @@
+{
+  "tool": "sandboxrouter",
+  "version": "0.3.5",
+  "date": "2026-11-11T21:29:12.572Z",
+  "label": "home-eu",
+  "runs": 5,
+  "spec": {},
+  "node": "v22.22.0",
+  "platform": "darwin-arm64",
+  "rows": [
+    {
+      "provider": "sprites",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 304,
+      "medianExecMs": 203,
+      "hourlyUsd": 0.16449999999999998
+    },
+    {
+      "provider": "modal",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 554,
+      "medianExecMs": 1073,
+      "hourlyUsd": 0.23796
+    },
+    {
+      "provider": "freestyle",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 838,
+      "medianExecMs": 229,
+      "hourlyUsd": 0.13362
+    },
+    {
+      "provider": "agentcore",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 930,
+      "medianExecMs": 309,
+      "hourlyUsd": 0.2168
+    }
+  ]
+}

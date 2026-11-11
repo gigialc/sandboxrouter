@@ -58,11 +58,12 @@ describe("routing", () => {
   });
 
   it("skips providers without credentials", async () => {
-    const r = new Router({ providers: fakes({ maritime: { configured: false } }) });
+    // Price order only (verified: []), so the result doesn't depend on the shipped check results.
+    const r = new Router({ providers: fakes({ maritime: { configured: false } }), verified: [] });
     expect(r.plan()[0]).toMatchObject({ provider: "maritime", skip: "not configured" });
-    // daytona and e2b are next among tested providers; their default images are smaller than 2 vCPU /
-    // 4 GB, so they only take a create that names no size. vercel is the next tested one.
-    expect((await r.create({ vcpu: 2, memoryGb: 4 })).provider).toBe("vercel");
+    // daytona and e2b are next by price; their default images are smaller than 2 vCPU / 4 GB, so
+    // they only take a create that names no size
+    expect((await r.create({ vcpu: 2, memoryGb: 4 })).provider).toBe("modal");
     expect((await r.create()).provider).toBe("daytona");
   });
 
@@ -76,13 +77,13 @@ describe("routing", () => {
   });
 
   it("falls back down the list and records every attempt", async () => {
-    const r = new Router({ providers: fakes({ maritime: { fail: "429 concurrency_limit" }, vercel: { fail: "503" } }) });
+    const r = new Router({ providers: fakes({ maritime: { fail: "429 concurrency_limit" }, modal: { fail: "503" } }), verified: [] });
     const sbx = await r.create({ vcpu: 2, memoryGb: 4 });
-    expect(sbx.provider).toBe("modal");
+    expect(sbx.provider).toBe("vercel");
     expect(sbx.attempts.map((a) => [a.provider, a.ok])).toEqual([
       ["maritime", false],
-      ["vercel", false],
-      ["modal", true],
+      ["modal", false],
+      ["vercel", true],
     ]);
     expect(sbx.attempts[0].error).toContain("429");
   });
@@ -93,13 +94,13 @@ describe("routing", () => {
   });
 
   it("throws RouterError with attempts when everything fails", async () => {
-    const r = new Router({ providers: ALL.map((id) => new FakeProvider(id, { fail: `${id} down` })) });
+    const r = new Router({ providers: ALL.map((id) => new FakeProvider(id, { fail: `${id} down` })), verified: [] });
     const err = await r.create().catch((e) => e);
     expect(err).toBeInstanceOf(RouterError);
-    expect(err.attempts.map((a: { provider: string }) => a.provider)).toEqual(["maritime", "daytona", "e2b", "vercel", "modal"]);
+    expect(err.attempts.map((a: { provider: string }) => a.provider)).toEqual(["maritime", "daytona", "e2b", "modal", "vercel"]);
     // with a size bigger than their default images, daytona and e2b aren't tried
     const sized = await r.create({ vcpu: 2, memoryGb: 4 }).catch((e) => e);
-    expect(sized.attempts.map((a: { provider: string }) => a.provider)).toEqual(["maritime", "vercel", "modal"]);
+    expect(sized.attempts.map((a: { provider: string }) => a.provider)).toEqual(["maritime", "modal", "vercel"]);
   });
 
   it("cheapest sorts by estimated hourly price", () => {

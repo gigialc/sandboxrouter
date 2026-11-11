@@ -43,6 +43,17 @@ function run(cmd: string, cwd: string): Promise<{ code: number; stdout: string; 
   });
 }
 
+/**
+ * Like the real service, which runs commands in a terminal: stdout and stderr are one stream, \n
+ * becomes \r\n unless the command starts with `stty -onlcr`, and the whole stream is labelled
+ * stdout on exit 0 and stderr otherwise.
+ */
+async function pty(cmd: string, cwd: string): Promise<{ code: number; stdout: string; stderr: string }> {
+  const r = await run(`{ ${cmd}\n} 2>&1`, cwd);
+  const out = cmd.startsWith("stty -onlcr") ? r.stdout : r.stdout.replace(/\n/g, "\r\n");
+  return r.code === 0 ? { code: 0, stdout: out, stderr: "" } : { code: r.code, stdout: "", stderr: out };
+}
+
 const resultFrame = (result: unknown) =>
   encodeEvent({ ":message-type": "event", ":event-type": "result", ":content-type": "application/json" }, JSON.stringify(result));
 
@@ -101,9 +112,9 @@ beforeAll(async () => {
         res.end(encodeEvent({ ":message-type": "exception", ":exception-type": "throttlingException", ":content-type": "application/json" }, JSON.stringify({ message: "slow down" })));
         return;
       }
-      const r = await run(body.arguments.command, s.dir);
+      const r = await pty(body.arguments.command, s.dir);
       const result = {
-        content: [{ type: "text", text: r.stdout }],
+        content: [{ type: "text", text: r.stdout + r.stderr }],
         structuredContent: { stdout: r.stdout, stderr: r.stderr, exitCode: r.code, executionTime: 0.01 },
         isError: r.code !== 0,
       };
@@ -200,9 +211,12 @@ describe("AgentCore Code Interpreter", () => {
     const box = await provider().create({});
     mode = "split";
     const seen: string[] = [];
-    const r = await box.exec(`printf 'abcdefgh'`, { onStdout: (s) => seen.push(s) });
-    expect(r).toMatchObject({ exitCode: 0, stdout: "abcdefgh" });
-    expect(seen).toEqual(["abcd", "efgh"]);
+    // The service's events split the terminal stream anywhere, the stderr marker included.
+    const text = "a".repeat(100) + "b".repeat(100);
+    const r = await box.exec(`printf '${text}'; echo oops >&2`, { onStdout: (s) => seen.push(s) });
+    expect(r).toMatchObject({ exitCode: 0, stdout: text, stderr: "oops\n" });
+    expect(seen.length).toBe(2);
+    expect(seen.join("")).toBe(text);
     mode = "json";
     expect((await box.exec("echo plain-json")).stdout).toBe("plain-json\n");
     await box.kill();

@@ -1,0 +1,85 @@
+{
+  "tool": "sandboxrouter-check",
+  "version": "0.3.5",
+  "date": "2026-11-11T21:21:26.601Z",
+  "platform": "darwin-arm64",
+  "provider": "agentcore",
+  "sandboxId": "agentcore:01M767PHNFJ37RFHCXM6X8M36E",
+  "results": [
+    {
+      "step": "create",
+      "ms": 1641,
+      "status": "pass",
+      "detail": "agentcore:01M767PHNFJ37RFHCXM6X8M36E, ~$0.2168/hr"
+    },
+    {
+      "step": "exec: stdout, stderr, exit code",
+      "ms": 533,
+      "status": "pass"
+    },
+    {
+      "step": "exec: env and cwd",
+      "ms": 267,
+      "status": "pass"
+    },
+    {
+      "step": "exec: UTF-8 output",
+      "ms": 269,
+      "status": "pass"
+    },
+    {
+      "step": "exec: streaming",
+      "ms": 3325,
+      "status": "info",
+      "detail": "output arrived only at the end (no live streaming)"
+    },
+    {
+      "step": "files: binary round-trip",
+      "ms": 787,
+      "status": "pass"
+    },
+    {
+      "step": "files: 1 MB round-trip",
+      "ms": 71106,
+      "status": "pass"
+    },
+    {
+      "step": "files: missing file is an error",
+      "ms": 717,
+      "status": "pass"
+    },
+    {
+      "step": "files: visible to commands",
+      "ms": 1060,
+      "status": "pass"
+    },
+    {
+      "step": "exec: command timeout",
+      "ms": 4594,
+      "status": "pass",
+      "detail": "threw after 4594 ms"
+    },
+    {
+      "step": "exec: timed-out command was stopped",
+      "ms": 8220,
+      "status": "pass"
+    },
+    {
+      "step": "pause and resume",
+      "status": "skip",
+      "ms": 0,
+      "detail": "adapter has no pause"
+    },
+    {
+      "step": "kill",
+      "ms": 469,
+      "status": "pass"
+    },
+    {
+      "step": "killed sandbox is gone",
+      "ms": 503,
+      "status": "pass"
+    }
+  ],
+  "ok": true
+}

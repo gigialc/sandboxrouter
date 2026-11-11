@@ -26,6 +26,7 @@ const terminated: string[] = [];
 const children = new Set<ChildProcess>();
 const sandboxes = new Map<string, FakeSandbox>();
 let signalCode: number | undefined; // when set, a killed process reports this instead of 137
+let deadlineThrows = false; // newer SDKs: the deadline ends exec with a "Deadline exceeded" error
 let execError: Error | undefined;
 
 const killGroup = (c: ChildProcess) => {
@@ -39,7 +40,8 @@ function textStream(src: NodeJS.ReadableStream, done: Promise<unknown>) {
   return new ReadableStream<string>({
     start(controller) {
       src.on("data", (d) => controller.enqueue(String(d)));
-      done.then(() => controller.close());
+      // Like the SDK: a failed exec ends the output streams with its error.
+      done.then(() => controller.close(), (err) => controller.error(err));
     },
   });
 }
@@ -60,11 +62,18 @@ class FakeSandbox {
     if (params.workdir && !existsSync(params.workdir)) throw new Error(`failed to exec: chdir ${params.workdir}: no such file or directory`);
     const child = spawn(command[0], command.slice(1), { cwd: params.workdir ?? root, env: { ...process.env, ...this.env, ...(params.env ?? {}) }, detached: true });
     children.add(child);
-    const timer = params.timeoutMs ? setTimeout(() => killGroup(child), params.timeoutMs) : undefined;
-    const exit = new Promise<number>((resolve) =>
+    let deadline = false;
+    const timer = params.timeoutMs
+      ? setTimeout(() => {
+          deadline = true;
+          killGroup(child);
+        }, params.timeoutMs)
+      : undefined;
+    const exit = new Promise<number>((resolve, reject) =>
       child.on("close", (code, signal) => {
         clearTimeout(timer);
         children.delete(child);
+        if (deadline && deadlineThrows) return reject(new Error("Deadline exceeded while streaming stdio for exec 44aee20d"));
         resolve(code ?? (signal ? (signalCode ?? 128 + constants.signals[signal]) : -1));
       }),
     );
@@ -119,6 +128,7 @@ beforeEach(() => {
   process.env.MODAL_TOKEN_SECRET = "as-test";
   apps.length = images.length = creates.length = fromIds.length = execs.length = terminated.length = 0;
   signalCode = execError = undefined;
+  deadlineThrows = false;
 });
 
 afterEach(() => {
@@ -171,6 +181,12 @@ describe("ModalProvider", () => {
     await expect(sbx.exec("sleep 5", { timeoutSeconds: 0.5 })).rejects.toMatchObject({ message: "modal: command timed out after 0.5s" });
     // Exit 137 well before the deadline is the command's own result.
     expect((await sbx.exec("exit 137", { timeoutSeconds: 5 })).exitCode).toBe(137);
+  });
+
+  it("treats a \"Deadline exceeded\" error at the deadline as the timeout", async () => {
+    const sbx = await p().create({});
+    deadlineThrows = true;
+    await expect(sbx.exec("sleep 5", { timeoutSeconds: 0.5 })).rejects.toMatchObject({ name: "ProviderError", message: "modal: command timed out after 0.5s" });
   });
 
   it("wraps SDK failures in ProviderError", async () => {

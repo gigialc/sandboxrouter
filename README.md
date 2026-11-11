@@ -49,18 +49,18 @@ List price while running, 2 vCPU / 4 GB, cheapest first; waitlisted sign-ups fol
 | [Morph Cloud](https://sandboxrouter.vercel.app/providers/morph) | $0.100 | none | not run yet | [pricing](https://cloud.morph.so/web/pricing) |
 | [exe.dev](https://sandboxrouter.vercel.app/providers/exedev) | $0.105 | $15/mo | not run yet | [pricing](https://exe.dev/docs/standalone-vms.md) |
 | [Novita AI Agent Sandbox](https://sandboxrouter.vercel.app/providers/novita) | $0.117 | none | passed (2026-11-11) | [pricing](https://docs.novita.ai/guides/sandbox-pricing) |
-| [Freestyle](https://sandboxrouter.vercel.app/providers/freestyle) | $0.134 | none | not run yet | [pricing](https://www.freestyle.sh/docs/vms/pricing-and-limits) |
+| [Freestyle](https://sandboxrouter.vercel.app/providers/freestyle) | $0.134 | none | passed (2026-11-11) | [pricing](https://www.freestyle.sh/docs/vms/pricing-and-limits) |
 | [Beam](https://sandboxrouter.vercel.app/providers/beam) | $0.140 | $20/mo (credited) | not run yet | [pricing](https://www.beam.cloud/pricing) |
 | [CodeSandbox SDK (Together)](https://sandboxrouter.vercel.app/providers/codesandbox) | $0.149 | none | not run yet | [pricing](https://docs.together.ai/docs/together-code-sandbox-legacy) |
-| [Fly.io Sprites](https://sandboxrouter.vercel.app/providers/sprites) | up to $0.164 | none | not run yet | [pricing](https://fly.io/sprites) |
+| [Fly.io Sprites](https://sandboxrouter.vercel.app/providers/sprites) | up to $0.164 | none | passed (2026-11-11) | [pricing](https://fly.io/sprites) |
 | [Blaxel](https://sandboxrouter.vercel.app/providers/blaxel) | $0.166 | none | passed (2026-11-11) | [pricing](https://blaxel.ai/pricing) |
 | [HOPX](https://sandboxrouter.vercel.app/providers/hopx) | $0.166 | none | not run yet | [pricing](https://hopx.ai/pricing) |
 | [Superserve](https://sandboxrouter.vercel.app/providers/superserve) | $0.166 | maybe $20/mo (credited) | passed (2026-11-11) | [pricing](https://superserve.ai/pricing) |
 | [Tensorlake](https://sandboxrouter.vercel.app/providers/tensorlake) | up to $0.200 | none | not run yet | [pricing](https://www.tensorlake.ai/pricing) |
 | [Upstash Box](https://sandboxrouter.vercel.app/providers/upstash) | up to $0.200 | none | not run yet | [pricing](https://upstash.com/pricing/box) |
 | [Cloudflare Sandbox](https://sandboxrouter.vercel.app/providers/cloudflare) | up to $0.216 | $5/mo | passed (2026-11-11) | [pricing](https://developers.cloudflare.com/containers/platform/pricing/) |
-| [Amazon Bedrock AgentCore Code Interpreter](https://sandboxrouter.vercel.app/providers/agentcore) | up to $0.217 | none | not run yet | [pricing](https://aws.amazon.com/bedrock/agentcore/pricing/) |
-| [Modal](https://sandboxrouter.vercel.app/providers/modal) | up to $0.238 | none | not run yet | [pricing](https://modal.com/pricing) |
+| [Amazon Bedrock AgentCore Code Interpreter](https://sandboxrouter.vercel.app/providers/agentcore) | up to $0.217 | none | passed (2026-11-11) | [pricing](https://aws.amazon.com/bedrock/agentcore/pricing/) |
+| [Modal](https://sandboxrouter.vercel.app/providers/modal) | up to $0.238 | none | passed (2026-11-11) | [pricing](https://modal.com/pricing) |
 | [AWS Lambda MicroVMs](https://sandboxrouter.vercel.app/providers/lambda) | $0.252 | none | passed (2026-11-11) | [pricing](https://aws.amazon.com/lambda/pricing/) |
 | [Deno Sandbox](https://sandboxrouter.vercel.app/providers/deno) | up to $0.300 | $20/mo | not run yet | [pricing](https://deno.com/sandbox) |
 | [Runloop](https://sandboxrouter.vercel.app/providers/runloop) | $0.317 | none | not run yet | [pricing](https://www.runloop.ai/pricing) |

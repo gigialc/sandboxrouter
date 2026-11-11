@@ -1,6 +1,6 @@
 import { spawn } from "node:child_process";
 import { createHash } from "node:crypto";
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { createServer, type Server } from "node:http";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
@@ -22,6 +22,8 @@ let state = "starting";
 let resources = { cpu: 2, memory: 4096, storage: 16384 };
 const background = new Map<string, { done: boolean; status: number; body: unknown }>();
 let bgCount = 0;
+
+const rootDirs = new Set<string>();
 
 function runCommand(command: string, env: Record<string, string>, timeoutMs: number) {
   return new Promise<{ statusCode: number | null; stdout: string; stderr: string }>((resolve) => {
@@ -127,7 +129,11 @@ beforeAll(async () => {
       return maybeBackground(runCommand(body.command, body.env ?? {}, body.timeoutMs ?? 30_000).then((r) => ({ status: 200, body: r })));
     }
     if (sub === "/fs/mkdir") {
+      // The real file API runs as root: folders it makes are read-only to commands. Here, mode 555.
+      const made: string[] = [];
+      for (let d = body.path; !existsSync(d); d = dirname(d)) made.push(d);
       mkdirSync(body.path, { recursive: true });
+      for (const d of made) chmodSync(d, 0o555), rootDirs.add(d);
       return send(204);
     }
     if (sub === "/fs/write" && req.method === "PUT") {
@@ -135,7 +141,11 @@ beforeAll(async () => {
       if (!path.startsWith("/")) return error(400, "BAD_REQUEST", "path must be absolute");
       if (url.searchParams.get("sha256") !== createHash("sha256").update(raw).digest("hex")) return error(400, "BAD_REQUEST", "sha256 mismatch");
       if (!existsSync(dirname(path))) return error(404, "NOT_FOUND", "parent directory missing");
+      // ...but root can still write in them.
+      const parent = dirname(path);
+      if (rootDirs.has(parent)) chmodSync(parent, 0o755);
       writeFileSync(path, raw);
+      if (rootDirs.has(parent)) chmodSync(parent, 0o555);
       return send(204);
     }
     if (sub === "/fs/read") {
@@ -154,6 +164,7 @@ beforeAll(async () => {
 });
 
 afterAll(() => {
+  for (const d of rootDirs) chmodSync(d, 0o755);
   server.close();
   rmSync(root, { recursive: true, force: true });
 });
@@ -233,6 +244,15 @@ describe("FreestyleProvider", () => {
     await sbx.writeFile(join(root, "big.bin"), big);
     expect(Buffer.from(await sbx.readFile(join(root, "big.bin"))).equals(Buffer.from(big))).toBe(true);
     await expect(sbx.readFile(join(root, "missing"))).rejects.toMatchObject({ status: 404 });
+  });
+
+  it("makes parent folders that commands can write in", async () => {
+    const sbx = await p().create({});
+    const dir = join(root, "shared", "work");
+    await sbx.writeFile(join(dir, "in.txt"), "in");
+    const r = await sbx.exec(`printf out > '${dir}/out.txt'`);
+    expect(r).toMatchObject({ exitCode: 0, stderr: "" });
+    expect(new TextDecoder().decode(await sbx.readFile(join(dir, "out.txt")))).toBe("out");
   });
 
   it("pauses, resumes on the next exec, and resumes on connect", async () => {

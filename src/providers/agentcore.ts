@@ -395,13 +395,35 @@ class AgentCoreSandbox implements ProviderSandbox {
     const timeout = Math.max(1, Math.round(opts.timeoutSeconds ?? 60));
     const full = wrapCommand(cmd, { cwd: opts.cwd, env: { ...this.env, ...opts.env } });
     const b64 = Buffer.from(full).toString("base64");
+    // The service runs commands in a terminal: stdout and stderr come back as one stream (labelled
+    // "stdout" on exit 0 and "stderr" otherwise), with \n turned into \r\n. So stderr goes to a file
+    // and is printed base64-encoded after a marker, and `stty -onlcr` keeps newlines as they are.
+    const nonce = randomBytes(6).toString("hex");
+    const errFile = `/tmp/.sbr-stderr-${nonce}`;
+    const marker = `__SBR_STDERR_${nonce}__`;
     // base64 keeps the user's command intact through whatever quoting the service applies.
-    const command = `timeout -k 5 ${timeout} bash -c "$(echo ${b64} | base64 -d)"`;
-    const r = await this.command(command, { onStdout: opts.onStdout, onStderr: opts.onStderr, timeoutMs: (timeout + 60) * 1000 });
+    const command =
+      `stty -onlcr 2>/dev/null; timeout -k 5 ${timeout} bash -c "$(echo ${b64} | base64 -d)" 2>${errFile}; c=$?; ` +
+      `printf '\\n${marker}\\n'; base64 < ${errFile} | tr -d '\\r\\n'; rm -f ${errFile}; exit $c`;
+    // Stream stdout as it arrives, holding back only what could be the start of the marker.
+    let combined = "";
+    let sent = 0;
+    const feed = (chunk: string) => {
+      combined += chunk;
+      if (!opts.onStdout) return;
+      const at = combined.indexOf(`\n${marker}`);
+      const safe = at >= 0 ? at : Math.max(sent, combined.length - marker.length - 2);
+      if (safe > sent) opts.onStdout(combined.slice(sent, safe));
+      sent = Math.max(sent, safe);
+    };
+    const r = await this.command(command, { onStdout: feed, onStderr: feed, timeoutMs: (timeout + 60) * 1000 });
     const durationMs = Date.now() - t0;
+    const { stdout, stderr } = splitOutput(combined || r.stdout + r.stderr, marker);
+    if (opts.onStdout && stdout.length > sent) opts.onStdout(stdout.slice(sent));
+    if (stderr) opts.onStderr?.(stderr);
     // `timeout` leaves exit 124 (or 137 after SIGKILL) when it had to stop the command.
     if (killedByTimeout(r.exitCode, durationMs, timeout)) throw timeoutError(ID, timeout);
-    return { ...r, durationMs };
+    return { stdout, stderr, exitCode: r.exitCode, durationMs };
   }
 
   async writeFile(path: string, content: string | Uint8Array): Promise<void> {
@@ -431,6 +453,21 @@ class AgentCoreSandbox implements ProviderSandbox {
       throw err;
     }
   }
+}
+
+/**
+ * Splits exec's combined terminal output at the stderr marker: the command's stdout comes before
+ * it, its stderr (base64) after. If the terminal still translated newlines (stty unavailable), the
+ * marker is preceded by \r\n and stdout's \r\n are turned back into \n.
+ */
+export function splitOutput(combined: string, marker: string): { stdout: string; stderr: string } {
+  const at = combined.lastIndexOf(`\n${marker}`);
+  if (at < 0) return { stdout: combined, stderr: "" };
+  const translated = combined[at - 1] === "\r";
+  let stdout = combined.slice(0, translated ? at - 1 : at);
+  if (translated) stdout = stdout.replace(/\r\n/g, "\n");
+  const b64 = combined.slice(at + marker.length + 1).replace(/\s/g, "");
+  return { stdout, stderr: Buffer.from(b64, "base64").toString("utf8") };
 }
 
 function exceptionStatus(name: string): number | undefined {

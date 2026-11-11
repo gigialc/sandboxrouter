@@ -59,11 +59,22 @@ class FakeCommand extends EventEmitter {
       this.emit("exit", code ?? (signal ? 137 : -1));
     });
   }
+  private exited = false;
+  override emit(event: string | symbol, ...args: any[]): boolean {
+    if (event === "exit") {
+      if (this.exited) return false;
+      this.exited = true;
+    }
+    return super.emit(event, ...args);
+  }
   kill(signal = "SIGTERM") {
     kills.push(signal);
     if (this.child) killGroup(this.child, signal as NodeJS.Signals);
   }
-  close() {}
+  // Like the SDK: closing the connection ends the command at once, reported as exit -1.
+  close() {
+    this.emit("exit", -1);
+  }
 }
 
 class FakeSprite {

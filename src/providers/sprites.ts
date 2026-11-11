@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { StringDecoder } from "node:string_decoder";
 import { ProviderError, type ExecOptions, type ExecResult, type Provider, type ProviderSandbox, type SandboxSpec } from "../types.js";
-import { optionalImport, toBytes } from "../util.js";
+import { optionalImport, timeoutError, toBytes } from "../util.js";
 
 type SpritesModule = typeof import("@fly/sprites");
 type SpritesClient = InstanceType<SpritesModule["SpritesClient"]>;
@@ -81,9 +81,10 @@ class SpritesBox implements ProviderSandbox {
     try {
       const exitCode = await new Promise<number>((resolve, reject) => {
         const timer = setTimeout(() => {
+          // Reject first: killing can report an exit (-1) right away, and that must not count as the result.
+          reject(timeoutError("sprites", limit / 1000));
           proc.kill("SIGKILL");
           proc.close();
-          reject(new ProviderError("sprites", `command timed out after ${limit / 1000}s`));
         }, limit);
         timer.unref();
         proc.on("exit", (code: number) => {
@@ -92,8 +93,8 @@ class SpritesBox implements ProviderSandbox {
         });
         proc.on("error", (e: Error) => {
           clearTimeout(timer);
-          proc.close();
           reject(e);
+          proc.close();
         });
       });
       const so = out.end();
