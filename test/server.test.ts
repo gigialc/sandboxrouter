@@ -93,15 +93,23 @@ describe("HTTP API", () => {
     for (const path of ["/v1/route", "/v1/sandboxes"]) {
       const r = await api(path, { method: "POST", body: JSON.stringify({ provider: ["nope", "e2b"] }) });
       expect(r.status).toBe(400);
-      expect((await r.json()).error).toBe("unknown provider: nope");
+      expect(await r.json()).toMatchObject({ error: 'unknown provider: "nope"', code: "bad_request" });
     }
   });
 
-  it("returns 400 for bad input and 502 when routing fails", async () => {
+  it("returns 400 for bad input, and a status and code for each way routing fails", async () => {
     expect((await api("/v1/sandboxes", { method: "POST", body: "{nope" })).status).toBe(400);
     expect((await api("/v1/sandboxes/e2b:x/exec", { method: "POST", body: "{}" })).status).toBe(400);
+    // A misspelled field is refused, not silently ignored.
+    const typo = await api("/v1/sandboxes", { method: "POST", body: JSON.stringify({ memory: 64 }) });
+    expect(typo.status).toBe(400);
+    expect((await typo.json()).error).toMatch(/^unknown field memory: a sandbox takes vcpu, memoryGb/);
+    expect((await api("/v1/route", { method: "POST", body: JSON.stringify({ vcpu: "x" }) })).status).toBe(400);
+    // Every provider down: 503, retry later.
     const r = await api("/v1/sandboxes", { method: "POST", body: JSON.stringify({ provider: "maritime", fallback: false }) });
-    expect(r.status).toBe(502);
-    expect((await r.json()).attempts[0]).toMatchObject({ provider: "maritime", ok: false });
+    expect(r.status).toBe(503);
+    const body = await r.json();
+    expect(body.code).toBe("all_failed");
+    expect(body.attempts[0]).toMatchObject({ provider: "maritime", ok: false });
   });
 });

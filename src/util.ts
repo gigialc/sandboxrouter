@@ -29,7 +29,8 @@ export function wrapCommand(cmd: string, opts: { cwd?: string; env?: Record<stri
 
 /** The one error every adapter throws when a command outlives ExecOptions.timeoutSeconds. */
 export function timeoutError(provider: ProviderId | (string & {}), seconds: number): ProviderError {
-  return new ProviderError(provider, `command timed out after ${seconds}s`);
+  // 504 for the HTTP API: the command ran out of time, not the server.
+  return new ProviderError(provider, `command timed out after ${seconds}s`, 504);
 }
 
 /**

@@ -163,11 +163,13 @@ async function main() {
     let n = 0;
     for (const c of plan) {
       const mark = c.skip ? "  -" : `${++n}.`.padStart(3);
-      const tested = c.failing ? "check failed " : c.verified ? "tested       " : "             ";
-      // The billed column only shows where a measured bill moved it off list price.
-      const real = c.effectiveHourlyUsd !== c.estimatedHourlyUsd ? ` (billed ~$${c.effectiveHourlyUsd.toFixed(4)})` : "";
-      const speed = c.medianCreateMs !== undefined ? `${c.medianCreateMs} ms  ` : "";
-      console.log(`${mark} ${c.provider.padEnd(11)} $${c.estimatedHourlyUsd.toFixed(4)}/hr${real}  ${speed}${tested}${c.skip ? `(skipped: ${c.skip})` : ""}`.trimEnd());
+      const tested = c.failing ? "check failed" : c.verified ? "tested" : "";
+      // The list price only shows where a measured bill moved the estimate off it.
+      const list = c.listHourlyUsd !== c.estimatedHourlyUsd ? ` (list $${c.listHourlyUsd.toFixed(4)})` : "";
+      const size = `${c.size.vcpu} vCPU / ${c.size.memoryGb} GB`;
+      const speed = c.medianCreateMs !== undefined ? `${c.medianCreateMs} ms` : "";
+      const cols = [`$${c.estimatedHourlyUsd.toFixed(4)}/hr${list}`, size, speed, tested].filter(Boolean).join("  ");
+      console.log(`${mark} ${c.provider.padEnd(11)} ${cols}${c.skip ? `  (skipped: ${c.skip})` : ""}`);
     }
     return;
   }

@@ -72,7 +72,8 @@ class ClientTest(unittest.TestCase):
     def test_routing_failure_carries_attempts(self):
         with self.assertRaises(SandboxRouterError) as e:
             self.sr.create(provider="maritime", fallback=False)
-        self.assertEqual(e.exception.status, 502)
+        self.assertEqual(e.exception.status, 503)
+        self.assertEqual(e.exception.code, "all_failed")
         self.assertEqual(e.exception.attempts[0]["provider"], "maritime")
 
     def test_rejects_unknown_option(self):

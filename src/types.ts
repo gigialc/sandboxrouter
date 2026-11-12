@@ -42,9 +42,14 @@ export type Capability =
 
 /** What the caller wants. Every field is optional; providers map it to their own knobs. */
 export interface SandboxSpec {
-  /** vCPUs (default 2). */
+  /**
+   * vCPUs. Leave vcpu and memoryGb out to take any provider at the size it starts by default: most give
+   * 2 vCPU / 4 GB, but some only run a fixed, smaller image (E2B 2 vCPU / 0.5 GB, Daytona 1 / 1). Set
+   * either one and only providers that can give that size are tried. `Candidate.size` and
+   * `RoutedSandbox.size` say what you get.
+   */
   vcpu?: number;
-  /** Memory in GB (default 4). */
+  /** Memory in GB. See `vcpu`. */
   memoryGb?: number;
   /** GPU type, e.g. "T4", "A100". Only providers with the "gpu" capability accept it. */
   gpu?: string;
@@ -78,6 +83,12 @@ export interface RouteOptions {
   provider?: ProviderId | ProviderId[];
   /** How to order candidates when no explicit list is given. Default: "balanced" (cheapest real cost, speed breaks near-ties). */
   strategy?: Strategy;
+  /**
+   * Seconds the whole create may take, over every provider it tries (default 240, under the 300 s an
+   * HTTP client usually waits). When it runs out, create stops trying and throws a RouterError with
+   * code "timeout"; a provider still starting is killed when it answers.
+   */
+  deadlineSeconds?: number;
   /**
    * What to do when a create fails. `true` (default): try the next candidate when the provider
    * looks unavailable (timeout, network error, 429, 5xx, or an error without a status) or can't bill
@@ -139,10 +150,23 @@ export interface Attempt {
   status?: number;
 }
 
+/**
+ * Why the router couldn't do what was asked. Each maps to one HTTP status in the server.
+ * - bad_request (400): an invalid spec, route option or sandbox id
+ * - unsupported (400): the sandbox's provider can't do this (e.g. pause)
+ * - no_provider (422): no provider you have keys for can take this sandbox (`plan()` says why for each)
+ * - setup (502): a provider refused the request or the key (400/401/403/404/422 from it); fix the key,
+ *   image or request rather than retrying
+ * - all_failed (503): every provider tried was down, busy or out of credit; retrying later can work
+ * - timeout (504): the create ran out of `deadlineSeconds`
+ */
+export type RouterErrorCode = "bad_request" | "unsupported" | "no_provider" | "setup" | "all_failed" | "timeout";
+
 export class RouterError extends Error {
   constructor(
     message: string,
     readonly attempts: Attempt[] = [],
+    readonly code: RouterErrorCode = "all_failed",
   ) {
     super(message);
     this.name = "RouterError";

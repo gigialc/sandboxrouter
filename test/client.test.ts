@@ -85,6 +85,64 @@ describe("server hooks", () => {
     expect(killed).toEqual([sbx.id]);
   });
 
+  it("adds afterCreate's fields to the create response, and tells createFailed about failures", async () => {
+    let failed = 0;
+    const base = await start(new Router({ providers: [new FakeProvider("maritime"), new FakeProvider("daytona", { fail: "down", failStatus: 503 })] }), undefined, [], {
+      authorize: async () => "x",
+      afterCreate: async () => ({ hourlyUsd: 0.0232, expiresAt: "2026-01-01T00:00:00.000Z" }),
+      createFailed: () => void failed++,
+    });
+    const sr = new Client({ baseUrl: base });
+    const sbx = await sr.create();
+    expect(sbx.details).toMatchObject({ hourlyUsd: 0.0232, expiresAt: "2026-01-01T00:00:00.000Z" });
+    expect(sbx).toMatchObject({ provider: "maritime", size: { vcpu: 2, memoryGb: 4 } });
+    expect(sbx.listHourlyUsd).toBeGreaterThan(0);
+    await expect(sr.create({}, { provider: "daytona", fallback: false })).rejects.toMatchObject({ status: 503, code: "all_failed" });
+    expect(failed).toBe(1);
+  });
+
+  it("kills a sandbox that finishes starting after the caller hung up", async () => {
+    const fake = new FakeProvider("maritime", { createMs: 300 });
+    let failed = 0;
+    let recorded = 0;
+    const base = await start(new Router({ providers: [fake], ledger: false }), undefined, [], {
+      authorize: async () => "x",
+      afterCreate: async () => void recorded++,
+      createFailed: () => void failed++,
+    });
+    const ac = new AbortController();
+    const req = fetch(`${base}/v1/sandboxes`, { method: "POST", body: "{}", signal: ac.signal }).catch(() => "aborted");
+    setTimeout(() => ac.abort(), 50);
+    expect(await req).toBe("aborted");
+    await new Promise((r) => setTimeout(r, 500));
+    expect([...fake.live.values()].map((b) => b.killed)).toEqual([true]);
+    expect(recorded).toBe(0);
+    expect(failed).toBe(1);
+  });
+
+  it("treats a kill of a sandbox the provider no longer has as done, and reports a real kill failure to afterKill", async () => {
+    const outcomes: unknown[] = [];
+    const gone = new FakeProvider("maritime", { killFails: true, killStatus: 404 });
+    const stuck = new FakeProvider("daytona", { killFails: true, killStatus: 500 });
+    const base = await start(new Router({ providers: [gone, stuck], ledger: false }), undefined, [], {
+      authorize: async () => "x",
+      afterKill: async (_who, id, outcome) => void outcomes.push([id.split(":")[0], outcome?.error?.message ?? "ok"]),
+    });
+    const sr = new Client({ baseUrl: base });
+    await (await sr.create({}, { provider: "maritime" })).kill();
+    await expect((await sr.create({}, { provider: "daytona" })).kill()).rejects.toMatchObject({ status: 500 });
+    expect(outcomes).toEqual([
+      ["maritime", "ok"],
+      ["daytona", "daytona: kill failed"],
+    ]);
+  });
+
+  it("turns computers off when authorize is set, unless asked", async () => {
+    const router = new Router({ providers: [new FakeProvider("maritime")] });
+    const multi = await start(router, undefined, [], { authorize: async () => "x" });
+    expect((await fetch(`${multi}/v1/computers`, { method: "POST", body: "{}" })).status).toBe(404);
+  });
+
   it("kills the sandbox when afterCreate fails", async () => {
     const fake = new FakeProvider("maritime");
     const base = await start(new Router({ providers: [fake] }), undefined, [], {

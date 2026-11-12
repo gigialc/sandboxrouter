@@ -1,4 +1,4 @@
-import { CATALOG, accessLabel, hourlyCost, unfit } from "./catalog.js";
+import { CATALOG, DEFAULT_MEMORY_GB, DEFAULT_VCPU, accessLabel, fixedSize, hourlyCost, unfit } from "./catalog.js";
 import {
   RoutedComputer,
   createComputer,
@@ -13,6 +13,7 @@ import { Ledger, defaultLedgerFile } from "./ledger.js";
 import { DEFAULT_EXEC_TIMEOUT_S, errorStatus, timeoutError } from "./util.js";
 import { BILLED_VS_LIST } from "./billing.js";
 import { FAILING, VERIFIED } from "./verified.js";
+import { validate } from "./validate.js";
 import { DaytonaProvider } from "./providers/daytona.js";
 import { E2BProvider } from "./providers/e2b.js";
 import { MaritimeProvider } from "./providers/maritime.js";
@@ -65,15 +66,29 @@ import {
   type SandboxSpec,
 } from "./types.js";
 
+/** vCPUs and memory a sandbox gets. */
+export interface Size {
+  vcpu: number;
+  memoryGb: number;
+}
+
 export interface Candidate {
   provider: ProviderId;
-  /** List price for the spec, USD/hour. What the sandbox is expected to cost at the provider's published rates. */
-  estimatedHourlyUsd: number;
   /**
-   * List price x what the provider really billed against list price, where that was measured
-   * (`BILLED_VS_LIST`, or `RouterOptions.billedVsList`); the list price otherwise. The default strategy ranks by this.
+   * What the sandbox is expected to cost, USD/hour: the provider's list price for this size, times what
+   * it really billed against list price where we measured that (`billedVsList`). The default strategy
+   * ranks by this, and a service reselling sandboxes should charge from it.
    */
-  effectiveHourlyUsd: number;
+  estimatedHourlyUsd: number;
+  /** The provider's published list price for this size, USD/hour. */
+  listHourlyUsd: number;
+  /** Billed / list-price ratio behind `estimatedHourlyUsd`, when measured (`BILLED_VS_LIST`). */
+  billedVsList?: number;
+  /**
+   * The size the sandbox gets: the provider's fixed default image size where it has one, else what was
+   * asked for (2 vCPU / 4 GB when nothing was). Some providers round up to their next size.
+   */
+  size: Size;
   /** Median create time: this router's own recent creates when it has a few, else your `bench` file. */
   medianCreateMs?: number;
   /** Passed the real-account check (as of this release, or `RouterOptions.verified`). */
@@ -118,7 +133,7 @@ export interface RouterOptions {
    * costs money. Default false.
    */
   requireVerified?: boolean;
-  /** Billed / list-price ratio per provider, for the default ranking. Default: `BILLED_VS_LIST` from saved cost runs. */
+  /** Billed / list-price ratio per provider, behind `estimatedHourlyUsd`. Default: the ratios in `BILLED_VS_LIST`, from saved cost runs. */
   billedVsList?: Partial<Record<ProviderId, number>>;
 }
 
@@ -204,12 +219,13 @@ export class Router {
 
   provider(id: ProviderId): Provider {
     const p = this.providers.get(id);
-    if (!p) throw new RouterError(`unknown provider: ${id}`);
+    if (!p) throw new RouterError(`unknown provider: ${id}`, [], "bad_request");
     return p;
   }
 
   /** The ordered list of providers a create would try, with the reason any are skipped. */
   plan(spec: SandboxSpec = {}, route: RouteOptions = {}): Candidate[] {
+    validate(spec, route);
     const explicit = route.provider ? ([] as ProviderId[]).concat(route.provider) : null;
     // Local providers (Docker) are never picked automatically: they always "cost" $0 and isolate
     // less than a cloud micro-VM. Name them explicitly to use them.
@@ -220,14 +236,19 @@ export class Router {
 
     const list: Candidate[] = ids.map((id) => {
       // An id the catalog has never heard of (a typo in an explicit list) has no price to look up.
-      if (!CATALOG.some((c) => c.id === id)) return { provider: id, estimatedHourlyUsd: 0, effectiveHourlyUsd: 0, verified: false, failing: false, skip: "unknown provider" };
+      if (!CATALOG.some((c) => c.id === id)) {
+        return { provider: id, estimatedHourlyUsd: 0, listHourlyUsd: 0, size: { vcpu: 0, memoryGb: 0 }, verified: false, failing: false, skip: "unknown provider" };
+      }
       const p = this.providers.get(id);
       const list = round(hourlyCost(id, spec));
+      const ratio = this.billed[id];
       const live = this.live.get(id);
       const c: Candidate = {
         provider: id,
-        estimatedHourlyUsd: list,
-        effectiveHourlyUsd: round(list * (this.billed[id] ?? 1)),
+        estimatedHourlyUsd: round(list * (ratio ?? 1)),
+        listHourlyUsd: list,
+        ...(ratio !== undefined ? { billedVsList: ratio } : {}),
+        size: sizeOf(id, spec),
         medianCreateMs: speed ? (live && live.length >= LIVE_MIN_SAMPLES ? median(live) : median(bench[id]?.createMs)) : undefined,
         verified: this.verified.has(id),
         failing: this.failing.has(id),
@@ -247,13 +268,14 @@ export class Router {
     // depends on who the provider is, only on its price, what it really billed, how fast it started for
     // this router and whether its last real-account check failed. An explicit list keeps the caller's order.
     if (!explicit) {
-      const byPrice = (a: Candidate, b: Candidate) => a.estimatedHourlyUsd - b.estimatedHourlyUsd || a.provider.localeCompare(b.provider);
+      const byCost = (a: Candidate, b: Candidate) => a.estimatedHourlyUsd - b.estimatedHourlyUsd || a.provider.localeCompare(b.provider);
+      const byList = (a: Candidate, b: Candidate) => a.listHourlyUsd - b.listHourlyUsd || a.provider.localeCompare(b.provider);
       if (strategy === "fastest") {
-        list.sort((a, b) => (a.medianCreateMs ?? Infinity) - (b.medianCreateMs ?? Infinity) || byPrice(a, b));
+        list.sort((a, b) => (a.medianCreateMs ?? Infinity) - (b.medianCreateMs ?? Infinity) || byCost(a, b));
       } else if (strategy === "cheapest") {
-        list.sort(byPrice);
+        list.sort(byList);
       } else if (strategy === "verified") {
-        list.sort((a, b) => Number(b.verified) - Number(a.verified) || byPrice(a, b));
+        list.sort((a, b) => Number(b.verified) - Number(a.verified) || byCost(a, b));
       } else {
         return balanced(list);
       }
@@ -297,29 +319,44 @@ export class Router {
   async create(spec: SandboxSpec = {}, route: RouteOptions = {}): Promise<RoutedSandbox> {
     const plan = this.plan(spec, route);
     const usable = plan.filter((c) => !c.skip);
-    if (usable.length === 0) throw new RouterError(this.whyNone(plan, !!route.provider));
+    if (usable.length === 0) throw new RouterError(this.whyNone(plan, !!route.provider), [], "no_provider");
+    // Pinned with no fallback: the first provider named, or nothing. Never a different one.
+    if (route.provider && route.fallback === false && plan[0].skip) {
+      throw new RouterError(`${plan[0].provider} can't take this sandbox: ${plan[0].skip}`, [], "no_provider");
+    }
 
     const attempts: Attempt[] = [];
     const tries = route.fallback === false ? usable.slice(0, 1) : usable;
     const limitS = route.createTimeoutSeconds ?? DEFAULT_CREATE_TIMEOUT_S;
+    const deadline = Date.now() + (route.deadlineSeconds ?? DEFAULT_CREATE_DEADLINE_S) * 1000;
     for (const c of tries) {
+      const left = deadline - Date.now();
+      if (left <= 0) {
+        throw new RouterError(
+          `create ran out of time (deadlineSeconds) after trying ${attempts.map((a) => a.provider).join(", ")}: ${attempts.map((a) => `${a.provider}: ${a.error}`).join(" | ")}`,
+          attempts,
+          "timeout",
+        );
+      }
       const t0 = Date.now();
       const pending = this.provider(c.provider).create(spec);
+      const waitS = Math.min(limitS, left / 1000);
+      const price: SandboxPrice = { estimatedHourlyUsd: c.estimatedHourlyUsd, listHourlyUsd: c.listHourlyUsd, size: c.size };
       let timedOut = false;
       try {
-        const box = await withDeadline(pending, limitS * 1000, () => {
+        const box = await withDeadline(pending, waitS * 1000, () => {
           timedOut = true;
-          return new ProviderError(c.provider, `create timed out after ${limitS}s`);
+          return new ProviderError(c.provider, `create timed out after ${Number(waitS.toFixed(1))}s`);
         });
         attempts.push({ provider: c.provider, ok: true, ms: Date.now() - t0 });
         this.observe(c.provider, Date.now() - t0);
-        const sbx = new RoutedSandbox(c.provider, box, attempts, c.estimatedHourlyUsd, this.ledger);
-        this.record(sbx, c.estimatedHourlyUsd, spec.timeoutMinutes);
+        const sbx = new RoutedSandbox(c.provider, box, attempts, price, this.ledger);
+        this.record(sbx, price, spec.timeoutMinutes);
         return sbx;
       } catch (err) {
         // A create that answers after we gave up still made a sandbox: record it, then kill it,
         // so it can't bill unseen. If the kill fails, the ledger entry is left for `gc`.
-        if (timedOut) pending.then((late) => this.discard(c.provider, late, c.estimatedHourlyUsd, spec.timeoutMinutes), () => {});
+        if (timedOut) pending.then((late) => this.discard(c.provider, late, price, spec.timeoutMinutes), () => {});
         const status = errorStatus(err);
         attempts.push({ provider: c.provider, ok: false, ms: Date.now() - t0, error: (err as Error).message, ...(status ? { status } : {}) });
         const setup = err instanceof SetupError || (status !== undefined && SETUP_ERRORS.has(status));
@@ -329,6 +366,7 @@ export class Router {
             `${msg.startsWith(c.provider) ? msg : `${c.provider}: ${msg}`}. This looks like a setup problem with ${c.provider} (key, image, request or a missing package), ` +
               `so the router stopped instead of moving the work to another provider; pass fallback: "any" to fall back on every error`,
             attempts,
+            "setup",
           );
         }
       }
@@ -336,6 +374,7 @@ export class Router {
     throw new RouterError(
       `all providers failed: ${attempts.map((a) => `${a.provider}: ${a.error}`).join(" | ")}`,
       attempts,
+      "all_failed",
     );
   }
 
@@ -347,20 +386,22 @@ export class Router {
     this.live.set(id, xs);
   }
 
-  private record(sbx: RoutedSandbox, usdHour: number, timeoutMinutes?: number) {
+  private record(sbx: RoutedSandbox, price: SandboxPrice, timeoutMinutes?: number) {
     const now = Date.now();
     this.ledger?.open({
       id: sbx.id,
       provider: sbx.provider,
       createdAt: new Date(now).toISOString(),
       expiresAt: new Date(now + (timeoutMinutes ?? 30) * 60_000).toISOString(),
-      usdHour,
+      usdHour: price.estimatedHourlyUsd,
+      listUsdHour: price.listHourlyUsd,
+      size: price.size,
     });
   }
 
-  private discard(provider: ProviderId, box: ProviderSandbox, usdHour: number, timeoutMinutes?: number) {
-    const sbx = new RoutedSandbox(provider, box, [], usdHour, this.ledger);
-    this.record(sbx, usdHour, timeoutMinutes);
+  private discard(provider: ProviderId, box: ProviderSandbox, price: SandboxPrice, timeoutMinutes?: number) {
+    const sbx = new RoutedSandbox(provider, box, [], price, this.ledger);
+    this.record(sbx, price, timeoutMinutes);
     return sbx.kill().catch(() => {});
   }
 
@@ -395,23 +436,45 @@ export class Router {
   async get(id: string): Promise<RoutedSandbox> {
     const { provider, nativeId } = parseId(id);
     const box = await this.provider(provider).connect(nativeId);
-    return new RoutedSandbox(provider, box, [], round(hourlyCost(provider)), this.ledger);
+    // The price and size come from this machine's ledger when it started the sandbox; otherwise
+    // they're unknown (a guess at the default size would be wrong for anything bigger).
+    const e = this.ledger?.list().find((x) => x.id === id);
+    const price = e && e.listUsdHour !== undefined && e.size ? { estimatedHourlyUsd: e.usdHour, listHourlyUsd: e.listUsdHour, size: e.size } : undefined;
+    return new RoutedSandbox(provider, box, [], price, this.ledger);
   }
+}
+
+/** What a sandbox costs and its size, as the router priced it when it was created. */
+export interface SandboxPrice {
+  /** Expected cost, USD/hour: list price x what the provider really billed against it, where measured. */
+  estimatedHourlyUsd: number;
+  /** The provider's published list price for this size, USD/hour. */
+  listHourlyUsd: number;
+  size: Size;
 }
 
 export class RoutedSandbox {
   /** Stable id across processes: `provider:nativeId`. */
   readonly id: string;
+  /** Expected cost, USD/hour (see `Candidate.estimatedHourlyUsd`). Undefined for a handle from `get()` this machine didn't create. */
+  readonly estimatedHourlyUsd?: number;
+  /** The provider's list price for this size, USD/hour. */
+  readonly listHourlyUsd?: number;
+  /** The size it was created at (see `Candidate.size`). */
+  readonly size?: Size;
 
   constructor(
     readonly provider: ProviderId,
     private box: ProviderSandbox,
     /** Every create attempt, including failed fallbacks. */
     readonly attempts: Attempt[],
-    readonly estimatedHourlyUsd: number,
+    price?: SandboxPrice,
     private ledger?: Ledger,
   ) {
     this.id = `${provider}:${box.nativeId}`;
+    this.estimatedHourlyUsd = price?.estimatedHourlyUsd;
+    this.listHourlyUsd = price?.listHourlyUsd;
+    this.size = price?.size;
   }
 
   get nativeId() {
@@ -448,7 +511,7 @@ export class RoutedSandbox {
 
   /** Pause, keeping the disk. Resume with router.get(id) or, on Maritime, any call. */
   async pause(): Promise<void> {
-    if (!this.box.pause) throw new RouterError(`${this.provider} does not support pause; create with require: ["pause"]`);
+    if (!this.box.pause) throw new RouterError(`${this.provider} does not support pause; create with require: ["pause"]`, [], "unsupported");
     await this.box.pause();
   }
 
@@ -463,9 +526,9 @@ export class RoutedSandbox {
 
 export function parseId(id: string): { provider: ProviderId; nativeId: string } {
   const i = id.indexOf(":");
-  if (i <= 0) throw new RouterError(`bad sandbox id "${id}": expected provider:id`);
+  if (i <= 0) throw new RouterError(`bad sandbox id "${id}": expected provider:id`, [], "bad_request");
   const provider = id.slice(0, i) as ProviderId;
-  if (!CATALOG.some((c) => c.id === provider)) throw new RouterError(`unknown provider in id: ${provider}`);
+  if (!CATALOG.some((c) => c.id === provider)) throw new RouterError(`unknown provider in id: ${provider}`, [], "bad_request");
   return { provider, nativeId: id.slice(i + 1) };
 }
 
@@ -480,15 +543,16 @@ function round(n: number) {
  * median create time; unknown speed after known), then cheapest, then alphabetical.
  */
 export function balanced(list: Candidate[]): Candidate[] {
-  const byCost = (a: Candidate, b: Candidate) => a.effectiveHourlyUsd - b.effectiveHourlyUsd || a.provider.localeCompare(b.provider);
+  const byCost = (a: Candidate, b: Candidate) => a.estimatedHourlyUsd - b.estimatedHourlyUsd || a.provider.localeCompare(b.provider);
   const bySpeed = (a: Candidate, b: Candidate) =>
     (a.medianCreateMs ?? Infinity) - (b.medianCreateMs ?? Infinity) || byCost(a, b);
   const order = (group: Candidate[]) => {
     const rest = [...group].sort(byCost);
     const out: Candidate[] = [];
     while (rest.length) {
-      const limit = rest[0].effectiveHourlyUsd * (1 + PRICE_TIE);
-      const tie = rest.filter((c) => c.effectiveHourlyUsd <= limit);
+      const limit = rest[0].estimatedHourlyUsd * (1 + PRICE_TIE);
+      // Always take at least the cheapest, so the loop ends whatever the prices are.
+      const tie = rest.filter((c, i) => i === 0 || c.estimatedHourlyUsd <= limit);
       out.push(...tie.sort(bySpeed));
       rest.splice(0, tie.length);
     }
@@ -499,6 +563,9 @@ export function balanced(list: Candidate[]): Candidate[] {
 
 /** Seconds to wait for one provider's create before trying the next (RouteOptions.createTimeoutSeconds). */
 export const DEFAULT_CREATE_TIMEOUT_S = 120;
+
+/** Seconds a whole create may take over every provider it tries (RouteOptions.deadlineSeconds). */
+export const DEFAULT_CREATE_DEADLINE_S = 240;
 
 /**
  * HTTP statuses that mean the request or the key is wrong, not that the provider is down. 402 (out of
@@ -523,4 +590,9 @@ async function withDeadline<T>(work: Promise<T>, ms: number, onExpire: () => Err
     clearTimeout(timer);
     work.catch(() => {});
   }
+}
+
+/** The size a provider gives for a spec: its fixed default image size, else what was asked for. */
+export function sizeOf(id: ProviderId, spec: SandboxSpec = {}): Size {
+  return fixedSize(id, spec) ?? { vcpu: spec.vcpu ?? DEFAULT_VCPU, memoryGb: spec.memoryGb ?? DEFAULT_MEMORY_GB };
 }

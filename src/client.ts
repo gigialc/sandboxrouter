@@ -1,4 +1,5 @@
-import type { Attempt, ExecOptions, ExecResult, RouteOptions, SandboxSpec } from "./types.js";
+import type { Candidate, Size } from "./router.js";
+import type { Attempt, ExecOptions, ExecResult, RouteOptions, RouterErrorCode, SandboxSpec } from "./types.js";
 
 /**
  * Client for the sandboxrouter HTTP API: the hosted service (one key, prepaid credits) or your own
@@ -34,11 +35,11 @@ export class Client {
     });
     if (!res.ok) {
       const text = await res.text();
-      let parsed: { error?: string; attempts?: Attempt[] } = {};
+      let parsed: { error?: string; attempts?: Attempt[]; code?: RouterErrorCode } = {};
       try {
         parsed = JSON.parse(text);
       } catch {}
-      throw new ClientError(res.status, parsed.error ?? (text || res.statusText), parsed.attempts ?? []);
+      throw new ClientError(res.status, parsed.error ?? (text || res.statusText), parsed.attempts ?? [], parsed.code);
     }
     return res;
   }
@@ -47,23 +48,20 @@ export class Client {
     return (await this.request(method, path, body)).json() as Promise<T>;
   }
 
-  /** Providers this server can route to, with list prices. */
-  async providers(): Promise<{ id: string; configured: boolean; estimatedHourlyUsd: number }[]> {
+  /** Providers this server can route to, with prices at the default size. */
+  async providers(): Promise<{ id: string; configured: boolean; estimatedHourlyUsd: number; listHourlyUsd: number; size: Size }[]> {
     return (await this.json<{ providers: any[] }>("GET", "/v1/providers")).providers;
   }
 
-  /** Dry run: which providers would be tried, in order. */
-  async route(spec: SandboxSpec = {}, route: RouteOptions = {}): Promise<{ provider: string; estimatedHourlyUsd: number; skip?: string }[]> {
-    return (await this.json<{ candidates: any[] }>("POST", "/v1/route", { ...spec, ...route })).candidates;
+  /** Dry run: which providers would be tried, in order, each with its price, size and any reason it's skipped. */
+  async route(spec: SandboxSpec = {}, route: RouteOptions = {}): Promise<Candidate[]> {
+    return (await this.json<{ candidates: Candidate[] }>("POST", "/v1/route", { ...spec, ...route })).candidates;
   }
 
   /** Start a sandbox on the first provider that works, as the server routes it. */
   async create(spec: SandboxSpec = {}, route: RouteOptions = {}): Promise<RemoteSandbox> {
-    const r = await this.json<{ id: string; provider: string; estimatedHourlyUsd: number; attempts: Attempt[] }>("POST", "/v1/sandboxes", {
-      ...spec,
-      ...route,
-    });
-    return new RemoteSandbox(this, r.id, r.provider, r.estimatedHourlyUsd, r.attempts);
+    const r = await this.json<CreateResponse>("POST", "/v1/sandboxes", { ...spec, ...route });
+    return new RemoteSandbox(this, r.id, r.provider, r);
   }
 
   /** A handle on a sandbox you created earlier. */
@@ -79,20 +77,43 @@ export class ClientError extends Error {
     readonly status: number,
     message: string,
     readonly attempts: Attempt[] = [],
+    /** The server's RouterErrorCode, when the router refused or failed (e.g. "no_provider", "all_failed"). */
+    readonly code?: RouterErrorCode,
   ) {
     super(`${status}: ${message}`);
     this.name = "ClientError";
   }
 }
 
+/** What POST /v1/sandboxes answers. A hosted service may add fields (e.g. what it charges). */
+export interface CreateResponse {
+  id: string;
+  provider: string;
+  size?: Size;
+  estimatedHourlyUsd?: number;
+  listHourlyUsd?: number;
+  attempts: Attempt[];
+  [field: string]: unknown;
+}
+
 export class RemoteSandbox {
+  readonly estimatedHourlyUsd?: number;
+  readonly listHourlyUsd?: number;
+  readonly size?: Size;
+  readonly attempts: Attempt[];
+
   constructor(
     private readonly client: Client,
     readonly id: string,
     readonly provider: string,
-    readonly estimatedHourlyUsd?: number,
-    readonly attempts: Attempt[] = [],
-  ) {}
+    /** The full create response, including any fields the server added. Empty for `client.sandbox(id)`. */
+    readonly details: Partial<CreateResponse> = {},
+  ) {
+    this.estimatedHourlyUsd = details.estimatedHourlyUsd;
+    this.listHourlyUsd = details.listHourlyUsd;
+    this.size = details.size;
+    this.attempts = details.attempts ?? [];
+  }
 
   private path(suffix = "") {
     return `/v1/sandboxes/${encodeURIComponent(this.id)}${suffix}`;
@@ -122,7 +143,7 @@ export class RemoteSandbox {
         if (event === "stdout") onStdout?.(payload);
         else if (event === "stderr") onStderr?.(payload);
         else if (event === "result") return payload as ExecResult;
-        else if (event === "error") throw new ClientError(502, payload.error ?? data);
+        else if (event === "error") throw new ClientError(payload.status ?? 502, payload.error ?? data, [], payload.code);
       }
     }
     throw new ClientError(502, "stream ended before the command finished");
@@ -138,11 +159,20 @@ export class RemoteSandbox {
     return new Uint8Array(await res.arrayBuffer());
   }
 
+  async readText(path: string): Promise<string> {
+    return new TextDecoder().decode(await this.readFile(path));
+  }
+
   async pause(): Promise<void> {
     await this.client.request("POST", this.path("/pause"));
   }
 
   async kill(): Promise<void> {
     await this.client.request("DELETE", this.path());
+  }
+
+  /** `await using sbx = await client.create()` kills it when the block ends. */
+  async [Symbol.asyncDispose]() {
+    await this.kill();
   }
 }

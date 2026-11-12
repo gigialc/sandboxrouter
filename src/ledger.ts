@@ -12,8 +12,12 @@ export interface LedgerEntry {
   createdAt: string;
   /** ISO time its requested lifetime (spec.timeoutMinutes) runs out. */
   expiresAt: string;
-  /** Estimated list price per hour while it runs. */
+  /** Expected cost per hour while it runs (list price x measured billed ratio). */
   usdHour: number;
+  /** List price per hour. Missing in entries written before 0.5.0. */
+  listUsdHour?: number;
+  /** Size it was created at. Missing in entries written before 0.5.0. */
+  size?: { vcpu: number; memoryGb: number };
 }
 
 type Line = ({ op: "open" } & LedgerEntry) | { op: "close"; id: string; at: string; why: string };

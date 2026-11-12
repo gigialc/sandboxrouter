@@ -11,9 +11,9 @@ export class FakeProvider implements Provider {
     /**
      * `hang`: exec never settles, like an adapter that lost its connection. `failStatus`: the HTTP
      * status `fail` carries. `createMs`: create takes this long (and still makes a sandbox).
-     * `killFails`: kill rejects.
+     * `killFails`: kill rejects (with `killStatus` as its HTTP status, if set; 404 means "already gone").
      */
-    public opts: { configured?: boolean; fail?: string; failStatus?: number; failWith?: unknown; pause?: boolean; hang?: boolean; createMs?: number; killFails?: boolean } = {},
+    public opts: { configured?: boolean; fail?: string; failStatus?: number; failWith?: unknown; pause?: boolean; hang?: boolean; createMs?: number; killFails?: boolean; killStatus?: number } = {},
   ) {}
 
   configured() {
@@ -29,7 +29,7 @@ export class FakeProvider implements Provider {
     if (this.opts.pause === false) (box as { pause?: unknown }).pause = undefined;
     if (this.opts.hang) box.exec = () => new Promise<ExecResult>(() => {});
     if (this.opts.killFails) box.kill = async () => {
-      throw new Error("kill failed");
+      throw this.opts.killStatus ? new ProviderError(this.id, "kill failed", this.opts.killStatus) : new Error("kill failed");
     };
     this.live.set(box.nativeId, box);
     return box;
