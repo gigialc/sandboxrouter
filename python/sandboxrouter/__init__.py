@@ -74,8 +74,8 @@ class Client:
 
     # -- transport -------------------------------------------------------------------------
 
-    def _open(self, method: str, path: str, *, json_body: Any = None, data: Optional[bytes] = None, accept: Optional[str] = None):
-        headers = {}
+    def _open(self, method: str, path: str, *, json_body: Any = None, data: Optional[bytes] = None, accept: Optional[str] = None, extra_headers: Optional[dict] = None):
+        headers = dict(extra_headers or {})
         if self.token:
             headers["Authorization"] = f"Bearer {self.token}"
         if json_body is not None:
@@ -96,8 +96,8 @@ class Client:
                 body = {"error": raw}
             raise SandboxRouterError(e.code, body.get("error", raw), body.get("attempts"), body.get("code")) from None
 
-    def _json(self, method: str, path: str, body: Any = None) -> Any:
-        with self._open(method, path, json_body=body) as r:
+    def _json(self, method: str, path: str, body: Any = None, headers: Optional[dict] = None) -> Any:
+        with self._open(method, path, json_body=body, extra_headers=headers) as r:
             raw = r.read()
         return json.loads(raw) if raw else {}
 
@@ -113,13 +113,14 @@ class Client:
     def route(self, **spec: Any) -> list:
         return self._json("POST", "/v1/route", _camel(spec))["candidates"]
 
-    def create(self, **spec: Any) -> "Sandbox":
+    def create(self, idempotency_key: Optional[str] = None, **spec: Any) -> "Sandbox":
         """Start a sandbox. Spec: vcpu, memory_gb, gpu, env, timeout_minutes, image, metadata.
         Routing: provider (str or list), strategy ("balanced" | "verified" | "cheapest" | "fastest"; default
         balanced: cheapest real cost, speed breaks near-ties), fallback (True, False or "any"),
         create_timeout_seconds, deadline_seconds, require.
-        The sandbox's `details` is the server's whole answer (a hosted service adds what it charges)."""
-        d = self._json("POST", "/v1/sandboxes", _camel(spec))
+        The sandbox's `details` is the server's whole answer (a hosted service adds what it charges).
+        With `idempotency_key`, sending the same create again returns the same sandbox, not a second one."""
+        d = self._json("POST", "/v1/sandboxes", _camel(spec), {"Idempotency-Key": idempotency_key} if idempotency_key else None)
         return Sandbox(self, d["id"], d["provider"], d.get("estimatedHourlyUsd"), d.get("attempts", []), d.get("listHourlyUsd"), d.get("size"), d)
 
     def sandbox(self, sandbox_id: str) -> "Sandbox":

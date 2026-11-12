@@ -142,7 +142,8 @@ export interface Provider {
 }
 
 export interface Attempt {
-  provider: ProviderId;
+  /** A sandbox provider, or a computer provider (some sell only computers). */
+  provider: ProviderId | (string & {});
   ok: boolean;
   ms: number;
   error?: string;

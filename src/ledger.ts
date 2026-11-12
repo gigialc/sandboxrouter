@@ -7,7 +7,9 @@ import type { ProviderId } from "./types.js";
 export interface LedgerEntry {
   /** Routed id, `provider:nativeId`. */
   id: string;
-  provider: ProviderId;
+  provider: ProviderId | (string & {});
+  /** "computer" for desktops and phones (deleted with getComputer); sandboxes leave it out. */
+  kind?: "computer";
   /** ISO time the create returned. */
   createdAt: string;
   /** ISO time its requested lifetime (spec.timeoutMinutes) runs out. */

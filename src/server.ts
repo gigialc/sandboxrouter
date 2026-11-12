@@ -1,7 +1,8 @@
-import { timingSafeEqual } from "node:crypto";
+import { createHash, timingSafeEqual } from "node:crypto";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { CATALOG } from "./catalog.js";
 import { Router, type RoutedSandbox } from "./router.js";
+import { splitComputerRequest, type ComputerSpec, type RoutedComputer } from "./computers.js";
 import { ProviderError, RouterError, type RouteOptions, type RouterErrorCode, type SandboxSpec } from "./types.js";
 import { errorStatus } from "./util.js";
 import { splitRequest } from "./validate.js";
@@ -33,8 +34,19 @@ export interface ServerHooks {
    * of a sandbox the provider no longer has counts as done.
    */
   afterKill?(caller: unknown, id: string, outcome?: { error?: Error }): Promise<void>;
-  /** /v1/computers. Default: on for a single-user server, off when `authorize` is set (computers don't go through these hooks). */
+  /**
+   * /v1/computers. Default: on for a single-user server, off when `authorize` is set. When on with
+   * `authorize`, `owns` guards computer ids too, and the computer hooks below run.
+   */
   computers?: boolean;
+  /** Before a computer starts. Throw HttpError to refuse; may edit spec. */
+  beforeCreateComputer?(caller: unknown, spec: ComputerSpec): Promise<void>;
+  /** After a computer started. Return fields to add to the answer. If this throws, the computer is deleted. */
+  afterCreateComputer?(caller: unknown, computer: RoutedComputer): Promise<Record<string, unknown> | void>;
+  /** After DELETE /v1/computers/:id; `error` is set when the provider's delete failed. */
+  afterDeleteComputer?(caller: unknown, id: string, outcome?: { error?: Error }): Promise<void>;
+  /** Milliseconds a sandbox whose caller hung up (having sent an Idempotency-Key) waits for a retry to collect it. Default 120000. */
+  orphanGraceMs?: number;
   /** false turns off pause. */
   pause?: boolean;
 }
@@ -86,6 +98,57 @@ export function createApp(
   };
   const live = new Map<string, RoutedSandbox>();
   const computersOn = hooks.computers ?? !hooks.authorize;
+
+  /**
+   * Idempotency-Key: a create retried with the same key (by the same caller, to the same path) gets the
+   * first create's answer instead of starting another sandbox, for 24 hours. A retry that arrives while
+   * the first is still starting waits for it. The same key with a different body is refused (422).
+   * Failed creates aren't remembered, so retrying one runs it again.
+   */
+  const replays = new Map<string, { bodyHash: string; result: Promise<Created>; at: number; claimed: boolean }>();
+  type Created = { status: number; body: Record<string, unknown>; discard?: () => Promise<void> };
+  const once = async (req: IncomingMessage, res: ServerResponse, body: unknown, run: (keepIfHungUp: boolean) => Promise<Created>) => {
+    const raw = req.headers["idempotency-key"];
+    if (raw === undefined) {
+      const r = await run(false);
+      return json(res, r.status, r.body);
+    }
+    const key = Array.isArray(raw) ? raw[0] : raw;
+    if (!key || key.length > 255) throw new HttpError(400, "Idempotency-Key must be 1 to 255 characters");
+    const now = Date.now();
+    for (const [k, v] of replays) if (now - v.at > IDEMPOTENCY_TTL_MS) replays.delete(k);
+    while (replays.size >= IDEMPOTENCY_MAX) replays.delete(replays.keys().next().value!);
+    const scope = sha256(`${req.headers.authorization ?? ""}\n${req.url}\n${key}`);
+    const bodyHash = sha256(JSON.stringify(body ?? {}));
+    const hit = replays.get(scope);
+    if (hit) {
+      if (hit.bodyHash !== bodyHash) throw new HttpError(422, "this Idempotency-Key was already used with a different request");
+      const r = await hit.result;
+      hit.claimed = true;
+      res.setHeader("Idempotent-Replayed", "true");
+      return json(res, r.status, r.body);
+    }
+    const entry = { bodyHash, result: run(true), at: now, claimed: false };
+    replays.set(scope, entry);
+    let r: Created;
+    try {
+      r = await entry.result;
+    } catch (err) {
+      replays.delete(scope);
+      throw err;
+    }
+    // The caller hung up but sent a key, so it means to retry: keep the sandbox for a retry to
+    // collect, and only then give up on it.
+    if (!res.writableEnded && (res.destroyed || !res.writable) && r.discard) {
+      setTimeout(() => {
+        if (!entry.claimed) {
+          replays.delete(scope);
+          r.discard!().catch(() => {});
+        }
+      }, hooks.orphanGraceMs ?? ORPHAN_GRACE_MS).unref();
+    } else entry.claimed = true;
+    return json(res, r.status, r.body);
+  };
 
   const cors = (req: IncomingMessage, res: ServerResponse) => {
     const origin = req.headers.origin;
@@ -144,43 +207,56 @@ export function createApp(
 
     if (parts[1] === "computers") {
       if (!computersOn) return json(res, 404, { error: "computers aren't available on this server" });
-      return computers(req, res, url, parts);
+      return computers(req, res, url, parts, caller);
     }
     if (parts[1] !== "sandboxes") return json(res, 404, { error: "not found" });
 
     // POST /v1/sandboxes
     if (req.method === "POST" && parts.length === 2) {
-      const { spec, route } = splitRequest(await readJson(req));
-      await hooks.beforeCreate?.(caller, spec, route);
+      const body = await readJson(req);
+      const { spec, route } = splitRequest(body);
       // A caller that gives up (client timeout, closed connection) never learns the id: kill what
-      // starts after that rather than leave it running, and billing, unseen.
+      // starts after that rather than leave it running, and billing, unseen. With an Idempotency-Key
+      // it's kept for a retry instead (see once).
       let hungUp = false;
       res.on("close", () => (hungUp = !res.writableFinished));
-      let sbx: RoutedSandbox;
-      let extra: Record<string, unknown> | void;
-      try {
-        sbx = await router.create(spec, route);
-      } catch (err) {
-        await hooks.createFailed?.(caller);
-        throw err;
-      }
-      try {
-        if (hungUp) throw new HttpError(499, "the client closed the connection before the sandbox was ready; it was killed");
-        extra = await hooks.afterCreate?.(caller, sbx, spec);
-      } catch (err) {
-        await sbx.kill().catch(() => {});
-        await hooks.createFailed?.(caller);
-        throw err;
-      }
-      live.set(sbx.id, sbx);
-      return json(res, 201, {
-        id: sbx.id,
-        provider: sbx.provider,
-        size: sbx.size,
-        estimatedHourlyUsd: sbx.estimatedHourlyUsd,
-        listHourlyUsd: sbx.listHourlyUsd,
-        attempts: sbx.attempts,
-        ...(extra ?? {}),
+      return once(req, res, body, async (keepIfHungUp) => {
+        await hooks.beforeCreate?.(caller, spec, route);
+        let sbx: RoutedSandbox;
+        let extra: Record<string, unknown> | void;
+        try {
+          sbx = await router.create(spec, route);
+        } catch (err) {
+          await hooks.createFailed?.(caller);
+          throw err;
+        }
+        try {
+          if (hungUp && !keepIfHungUp) throw new HttpError(499, "the client closed the connection before the sandbox was ready; it was killed");
+          extra = await hooks.afterCreate?.(caller, sbx, spec);
+        } catch (err) {
+          await sbx.kill().catch(() => {});
+          await hooks.createFailed?.(caller);
+          throw err;
+        }
+        live.set(sbx.id, sbx);
+        const made = sbx;
+        return {
+          status: 201,
+          body: {
+            id: sbx.id,
+            provider: sbx.provider,
+            size: sbx.size,
+            estimatedHourlyUsd: sbx.estimatedHourlyUsd,
+            listHourlyUsd: sbx.listHourlyUsd,
+            attempts: sbx.attempts,
+            ...(extra ?? {}),
+          },
+          discard: async () => {
+            live.delete(made.id);
+            await made.kill().catch(() => {});
+            await hooks.afterKill?.(caller, made.id);
+          },
+        };
       });
     }
 
@@ -253,20 +329,43 @@ export function createApp(
     return json(res, 404, { error: "not found" });
   };
 
-  const computers = async (req: IncomingMessage, res: ServerResponse, url: URL, parts: string[]) => {
+  const computers = async (req: IncomingMessage, res: ServerResponse, url: URL, parts: string[], caller: unknown) => {
     if (req.method === "POST" && parts.length === 2) {
-      const { provider, ...spec } = await readJson(req);
-      const c = await router.computer(spec, { provider });
-      return json(res, 201, { ...(await c.info()), id: c.id, nativeId: c.nativeId, provider: c.provider });
+      const body = await readJson(req);
+      const { spec, route } = splitComputerRequest(body);
+      return once(req, res, body, async () => {
+        await hooks.beforeCreateComputer?.(caller, spec);
+        const c = await router.computer(spec, route);
+        let extra: Record<string, unknown> | void;
+        try {
+          extra = await hooks.afterCreateComputer?.(caller, c);
+        } catch (err) {
+          await c.delete().catch(() => {});
+          throw err;
+        }
+        return {
+          status: 201,
+          body: { ...(await c.info()), id: c.id, nativeId: c.nativeId, provider: c.provider, estimatedHourlyUsd: c.estimatedHourlyUsd, attempts: c.attempts, ...(extra ?? {}) },
+        };
+      });
     }
     const id = parts[2] ? decodeURIComponent(parts[2]) : "";
     if (!id) return json(res, 404, { error: "not found" });
+    if (hooks.owns && !(await hooks.owns(caller, id))) throw new HttpError(404, "no such computer");
     const c = await router.getComputer(id);
     const sub = parts[3];
 
     if (req.method === "GET" && !sub) return json(res, 200, { ...(await c.info()), id, nativeId: c.nativeId });
     if (req.method === "DELETE" && !sub) {
-      await c.delete();
+      try {
+        await c.delete();
+      } catch (err) {
+        if (errorStatus(err) !== 404) {
+          await hooks.afterDeleteComputer?.(caller, id, { error: err as Error });
+          throw err;
+        }
+      }
+      await hooks.afterDeleteComputer?.(caller, id);
       return json(res, 200, { id, deleted: true });
     }
     if (req.method === "POST" && sub === "actions") {
@@ -340,6 +439,14 @@ function describeError(err: any): { status: number; body: { error: string; code?
   const code = err instanceof RouterError ? err.code : undefined;
   return { status, body: { error: err?.message ?? String(err), ...(code ? { code } : {}), ...(err?.attempts?.length ? { attempts: err.attempts } : {}) } };
 }
+
+/** How long an Idempotency-Key is remembered, and how many at most. */
+const IDEMPOTENCY_TTL_MS = 24 * 3600_000;
+const IDEMPOTENCY_MAX = 10_000;
+/** How long a sandbox whose caller hung up (with an Idempotency-Key) waits for a retry to collect it. */
+export const ORPHAN_GRACE_MS = 120_000;
+
+const sha256 = (s: string) => createHash("sha256").update(s).digest("hex");
 
 /** The HTTP status for each RouterError code (see RouterErrorCode). */
 export const ERROR_STATUS: Record<RouterErrorCode, number> = {

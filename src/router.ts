@@ -1,5 +1,6 @@
 import { CATALOG, DEFAULT_MEMORY_GB, DEFAULT_VCPU, accessLabel, fixedSize, hourlyCost, unfit } from "./catalog.js";
 import {
+  type ComputerRoute,
   RoutedComputer,
   createComputer,
   planComputer,
@@ -10,7 +11,7 @@ import {
 } from "./computers.js";
 import { loadBench, median } from "./bench-store.js";
 import { Ledger, defaultLedgerFile } from "./ledger.js";
-import { DEFAULT_EXEC_TIMEOUT_S, errorStatus, timeoutError } from "./util.js";
+import { DEFAULT_EXEC_TIMEOUT_S, SETUP_ERRORS, errorStatus, timeoutError, withDeadline } from "./util.js";
 import { BILLED_VS_LIST } from "./billing.js";
 import { FAILING, VERIFIED } from "./verified.js";
 import { validate } from "./validate.js";
@@ -418,18 +419,20 @@ export class Router {
   }
 
   /** Start a desktop or phone on the cheapest provider for its OS (ties alphabetical), with fallback. */
-  computer(spec: ComputerSpec = {}, opts: { provider?: ComputerProviderId | ComputerProviderId[] } = {}): Promise<RoutedComputer> {
-    const prefer = opts.provider ? ([] as ComputerProviderId[]).concat(opts.provider) : undefined;
-    return createComputer(this.computerProviders(), spec, prefer);
+  /** Start a desktop or phone, routed like a sandbox (see createComputer). */
+  computer(spec: ComputerSpec = {}, route: ComputerRoute = {}): Promise<RoutedComputer> {
+    const prefer = route.provider ? ([] as ComputerProviderId[]).concat(route.provider) : undefined;
+    return createComputer(this.computerProviders(), spec, prefer, { ...route, ledger: this.ledger });
   }
 
   async getComputer(id: string): Promise<RoutedComputer> {
     const i = id.indexOf(":");
-    if (i <= 0) throw new RouterError(`bad computer id "${id}": expected provider:id`);
+    if (i <= 0) throw new RouterError(`bad computer id "${id}": expected provider:id`, [], "bad_request");
     const provider = id.slice(0, i);
     const p = this.computerProviders().find((c) => c.id === provider);
-    if (!p) throw new RouterError(`${provider} does not offer computers`);
-    return new RoutedComputer(provider, await p.connectComputer(id.slice(i + 1)));
+    if (!p) throw new RouterError(`${provider} does not offer computers`, [], "bad_request");
+    const e = this.ledger?.list().find((x) => x.id === id);
+    return new RoutedComputer(provider, await p.connectComputer(id.slice(i + 1)), [], e?.usdHour, this.ledger);
   }
 
   /** Reattach to a sandbox by its routed id (`provider:nativeId`). */
@@ -567,30 +570,10 @@ export const DEFAULT_CREATE_TIMEOUT_S = 120;
 /** Seconds a whole create may take over every provider it tries (RouteOptions.deadlineSeconds). */
 export const DEFAULT_CREATE_DEADLINE_S = 240;
 
-/**
- * HTTP statuses that mean the request or the key is wrong, not that the provider is down. 402 (out of
- * balance, plan needed) isn't one: an unfunded account is exactly when the next provider should take the
- * sandbox, and the failed attempt stays on `attempts` (the CLI prints it), so it isn't hidden.
- */
-const SETUP_ERRORS = new Set([400, 401, 403, 404, 422]);
 
 /** Seconds past a command's timeout before the router stops waiting for the adapter. */
 export const EXEC_GRACE_S = 30;
 
-/** Resolve with `work`, or reject with `onExpire()` after `ms`. A late `work` rejection is swallowed. */
-async function withDeadline<T>(work: Promise<T>, ms: number, onExpire: () => Error): Promise<T> {
-  let timer: NodeJS.Timeout | undefined;
-  const expired = new Promise<never>((_, reject) => {
-    timer = setTimeout(() => reject(onExpire()), ms);
-    timer.unref();
-  });
-  try {
-    return await Promise.race([work, expired]);
-  } finally {
-    clearTimeout(timer);
-    work.catch(() => {});
-  }
-}
 
 /** The size a provider gives for a spec: its fixed default image size, else what was asked for. */
 export function sizeOf(id: ProviderId, spec: SandboxSpec = {}): Size {

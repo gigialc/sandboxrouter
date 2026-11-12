@@ -155,7 +155,9 @@ A command that outlives its `timeoutSeconds` rejects with `ProviderError("<provi
 
 ## Computers (desktops and phones)
 
-For computer-use agents: a machine with a screen that your model drives with clicks and keys. `router.computer({ os })` starts one on the cheapest provider for that OS among those you have keys for, ties alphabetical, with fallback. Actions use the Anthropic computer-use shape on every provider.
+For computer-use agents: a machine with a screen that your model drives with clicks and keys. `router.computer({ os }, route)` starts one on the cheapest provider for that OS among those you have keys for, ties alphabetical, with the same fallback rules as a sandbox: on to the next provider when one is down, slow or can't bill, a stop on a setup error, `createTimeoutSeconds` (default 120) and `deadlineSeconds` (default 240), and every attempt on `pc.attempts`. Actions use the Anthropic computer-use shape on every provider.
+
+Computers go in the same ledger as sandboxes. They have no lifetime of their own (the same `externalUserId` gets the same desktop back), so `sandboxrouter ls` shows them and `gc --all` deletes them, but plain `gc` leaves them. `pc.delete()` (or `pc.kill()`, or `await using`) removes one and everything on it.
 
 | Provider | Linux | Windows | Android | iOS | Default size | Live view |
 |---|---|---|---|---|---|---|
@@ -174,7 +176,7 @@ const desk = await router.computer({ os: "linux", externalUserId: "user_42" }); 
 const shot = await desk.act({ action: "screenshot" });            // { frameId, width, height, imageB64 }
 await desk.act({ action: "left_click", coordinate: [412, 230] });
 await desk.actBatch([{ action: "type", text: "hello" }, { action: "key", text: "Return" }]);
-await desk.exec("ls /data");
+await desk.exec("ls /data", { timeoutSeconds: 20 });
 
 // Hit a login or CAPTCHA? Hand the desktop to a person, then carry on.
 const { url } = await desk.viewer("control", { reason: "Please sign in" });
@@ -293,7 +295,7 @@ SANDBOXROUTER_TOKEN=secret npx @sandboxrouter/sdk serve
 | `PUT` | `/v1/sandboxes/:id/files?path=` | raw bytes |
 | `GET` | `/v1/sandboxes/:id/files?path=` | |
 | `DELETE` | `/v1/sandboxes/:id` | |
-| `POST` | `/v1/computers` | `{ os, externalUserId, name, screen, arch, provider }` |
+| `POST` | `/v1/computers` | `{ os, externalUserId, name, screen, arch, provider, fallback, createTimeoutSeconds, deadlineSeconds }`. Other fields are refused. On a server with `authorize`, off unless `computers: true`, and then guarded by `owns` and the computer hooks |
 | `POST` | `/v1/computers/:id/actions` | one action, or `{ actions: [...] }` (up to 50) |
 | `GET` | `/v1/computers/:id/screenshot` | image bytes (`?format=jpeg&quality=80`) |
 | `POST` | `/v1/computers/:id/exec` | `{ command, timeoutSeconds }` (max 30 s) |
@@ -308,7 +310,7 @@ curl -s localhost:8787/v1/sandboxes -H "Authorization: Bearer secret" \
 # {"id":"maritime:sbx-…","provider":"maritime","size":{"vcpu":2,"memoryGb":4},"estimatedHourlyUsd":0.022,"listHourlyUsd":0.022,"attempts":[...]}
 ```
 
-Errors are `{ error, code, attempts }` (see [Errors](#errors)). If the client hangs up before a create finishes, the sandbox is killed when it's ready rather than left running. Provider keys stay on the server. Clients only hold `SANDBOXROUTER_TOKEN`. It binds to `127.0.0.1` by default. Without a token it only starts on a loopback address with CORS off: `--cors` (any browser page could otherwise start sandboxes on your keys) and a public `--host` both need `SANDBOXROUTER_TOKEN`.
+Errors are `{ error, code, attempts }` (see [Errors](#errors)). Send `Idempotency-Key: <unique string>` on `POST /v1/sandboxes` or `/v1/computers` to make a retry safe: the same key from the same caller returns the first create's answer (with `Idempotent-Replayed: true`) for 24 hours instead of starting another, waits if the first is still starting, and is refused (422) with a different body. A failed create isn't remembered. With a key, a sandbox whose caller hung up is kept for 2 minutes for the retry to collect, then killed. From TypeScript: `client.create(spec, route, { idempotencyKey })`; from Python: `create(idempotency_key=...)`. If the client hangs up before a create finishes, the sandbox is killed when it's ready rather than left running. Provider keys stay on the server. Clients only hold `SANDBOXROUTER_TOKEN`. It binds to `127.0.0.1` by default. Without a token it only starts on a loopback address with CORS off: `--cors` (any browser page could otherwise start sandboxes on your keys) and a public `--host` both need `SANDBOXROUTER_TOKEN`.
 
 ### TypeScript client
 

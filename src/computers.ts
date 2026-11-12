@@ -1,4 +1,6 @@
-import { RouterError } from "./types.js";
+import type { Ledger } from "./ledger.js";
+import { ProviderError, RouterError, SetupError, type Attempt } from "./types.js";
+import { SETUP_ERRORS, errorStatus, withDeadline } from "./util.js";
 
 /**
  * Computers: machines with a screen that a model drives with clicks and keys (computer use).
@@ -110,6 +112,11 @@ export class RoutedComputer {
   constructor(
     readonly provider: ComputerProviderId,
     private c: ProviderComputer,
+    /** Every create attempt, including failed fallbacks (empty for a handle from getComputer). */
+    readonly attempts: Attempt[] = [],
+    /** List price per hour for this OS, where the provider publishes one. */
+    readonly estimatedHourlyUsd?: number,
+    private ledger?: Ledger,
   ) {
     this.id = `${provider}:${c.nativeId}`;
   }
@@ -129,8 +136,9 @@ export class RoutedComputer {
   screenshot(opts?: { format?: "png" | "jpeg"; quality?: number }) {
     return this.c.screenshot(opts);
   }
-  exec(command: string, timeoutSeconds?: number) {
-    return this.c.exec(command, timeoutSeconds);
+  /** Run a shell command (max 30 s). The second argument is `{ timeoutSeconds }`, or the number alone. */
+  exec(command: string, opts?: number | { timeoutSeconds?: number }) {
+    return this.c.exec(command, typeof opts === "number" ? opts : opts?.timeoutSeconds);
   }
   readFile(path: string) {
     return this.c.readFile(path);
@@ -150,8 +158,20 @@ export class RoutedComputer {
     if (!this.c.sleep) throw new RouterError(`${this.provider} can't sleep a computer; delete it instead`);
     await this.c.sleep();
   }
-  delete() {
-    return this.c.delete();
+  /** Delete the computer and everything on it (its files and logins). */
+  async delete(): Promise<void> {
+    await this.c.delete();
+    this.ledger?.close(this.id, "deleted");
+  }
+
+  /** Same as delete(), named like a sandbox's. */
+  kill(): Promise<void> {
+    return this.delete();
+  }
+
+  /** `await using pc = await router.computer(...)` deletes it when the block ends. */
+  async [Symbol.asyncDispose]() {
+    await this.delete();
   }
 }
 
@@ -303,28 +323,135 @@ export function planComputer(providers: ComputerProvider[], os: ComputerOs = "li
   return list;
 }
 
+/** How a computer create is routed: the same knobs and rules as a sandbox's (see RouteOptions). */
+export interface ComputerRoute {
+  provider?: ComputerProviderId | ComputerProviderId[];
+  /** true (default): move on when a provider is down or can't bill, stop on a setup error. "any": move on always. false: first only. */
+  fallback?: boolean | "any";
+  /** Seconds to wait for one provider before trying the next (default 120). */
+  createTimeoutSeconds?: number;
+  /** Seconds the whole create may take (default 240). */
+  deadlineSeconds?: number;
+}
+
+const OS_LIST: readonly ComputerOs[] = ["linux", "windows", "android", "ios"];
+const SPEC_FIELDS = ["os", "externalUserId", "name", "screen", "arch"] as const;
+const ROUTE_FIELDS = ["provider", "fallback", "createTimeoutSeconds", "deadlineSeconds"] as const;
+
+/** Split and check a POST /v1/computers body, like splitRequest does for sandboxes. */
+export function splitComputerRequest(body: Record<string, unknown>): { spec: ComputerSpec; route: ComputerRoute } {
+  const bad = (msg: string) => new RouterError(msg, [], "bad_request");
+  const spec: Record<string, unknown> = {};
+  const route: Record<string, unknown> = {};
+  const unknown: string[] = [];
+  for (const [k, v] of Object.entries(body ?? {})) {
+    if ((SPEC_FIELDS as readonly string[]).includes(k)) spec[k] = v;
+    else if ((ROUTE_FIELDS as readonly string[]).includes(k)) route[k] = v;
+    else unknown.push(k);
+  }
+  if (unknown.length) throw bad(`unknown field${unknown.length > 1 ? "s" : ""} ${unknown.join(", ")}: a computer takes ${[...SPEC_FIELDS, ...ROUTE_FIELDS].join(", ")}`);
+  if (spec.os !== undefined && !OS_LIST.includes(spec.os as ComputerOs)) throw bad(`os must be one of ${OS_LIST.join(", ")}`);
+  for (const k of ["externalUserId", "name"] as const) if (spec[k] !== undefined && typeof spec[k] !== "string") throw bad(`${k} must be a string`);
+  const screen = spec.screen as { width?: unknown; height?: unknown } | undefined;
+  if (screen !== undefined && !(typeof screen === "object" && [screen.width, screen.height].every((n) => typeof n === "number" && Number.isFinite(n) && n > 0))) {
+    throw bad("screen must be { width, height } in pixels");
+  }
+  if (spec.arch !== undefined && spec.arch !== "x86_64" && spec.arch !== "arm64") throw bad('arch must be "x86_64" or "arm64"');
+  for (const k of ["createTimeoutSeconds", "deadlineSeconds"] as const) {
+    const v = route[k];
+    if (v !== undefined && !(typeof v === "number" && Number.isFinite(v) && v > 0)) throw bad(`${k} must be a positive number`);
+  }
+  if (route.fallback !== undefined && route.fallback !== true && route.fallback !== false && route.fallback !== "any") throw bad('fallback must be true, false or "any"');
+  return { spec: spec as ComputerSpec, route: route as ComputerRoute };
+}
+
 /**
  * Start a computer on the cheapest provider that offers this OS and has credentials (ties
- * alphabetical), falling back down the list. An explicit `prefer` list keeps its order.
+ * alphabetical), falling back down the list like a sandbox create: on to the next when a provider is
+ * down, slow or can't bill, but stopping on a setup error (a bad key or request). An explicit
+ * provider list keeps its order. Each computer goes in the ledger, so `ls` and `gc --all` find it;
+ * computers have no lifetime of their own, so plain `gc` leaves them.
  */
-export async function createComputer(providers: ComputerProvider[], spec: ComputerSpec = {}, prefer?: ComputerProviderId[]): Promise<RoutedComputer> {
+export async function createComputer(
+  providers: ComputerProvider[],
+  spec: ComputerSpec = {},
+  prefer?: ComputerProviderId[],
+  route: ComputerRoute & { ledger?: Ledger } = {},
+): Promise<RoutedComputer> {
   const os = spec.os ?? "linux";
-  const usable = planComputer(providers, os, prefer)
-    .filter((c) => !c.skip)
-    .map((c) => providers.find((p) => p.id === c.provider)!);
+  const plan = planComputer(providers, os, prefer);
+  const usable = plan.filter((c) => !c.skip);
   if (usable.length === 0) {
     const offering = providers.filter((p) => p.computerOs.includes(os)).map((p) => p.id);
     throw new RouterError(
       offering.length ? `no configured provider for a ${os} computer (offered by: ${offering.join(", ")})` : `no provider offers a ${os} computer`,
+      [],
+      "no_provider",
     );
   }
-  const errors: string[] = [];
-  for (const p of usable) {
+  if (prefer && route.fallback === false && plan[0].skip) {
+    throw new RouterError(`${plan[0].provider} can't start this computer: ${plan[0].skip}`, [], "no_provider");
+  }
+  const tries = route.fallback === false ? usable.slice(0, 1) : usable;
+  const limitS = route.createTimeoutSeconds ?? DEFAULT_COMPUTER_TIMEOUT_S;
+  const deadline = Date.now() + (route.deadlineSeconds ?? DEFAULT_COMPUTER_DEADLINE_S) * 1000;
+  const attempts: Attempt[] = [];
+  for (const c of tries) {
+    const left = deadline - Date.now();
+    if (left <= 0) throw new RouterError(`computer create ran out of time: ${attempts.map((a) => `${a.provider}: ${a.error}`).join(" | ")}`, attempts, "timeout");
+    const p = providers.find((x) => x.id === c.provider)!;
+    const t0 = Date.now();
+    const pending = p.createComputer({ ...spec, os });
+    const waitS = Math.min(limitS, left / 1000);
+    let timedOut = false;
     try {
-      return new RoutedComputer(p.id, await p.createComputer({ ...spec, os }));
+      const made = await withDeadline(pending, waitS * 1000, () => {
+        timedOut = true;
+        return new ProviderError(p.id, `create timed out after ${Number(waitS.toFixed(1))}s`);
+      });
+      attempts.push({ provider: p.id, ok: true, ms: Date.now() - t0 });
+      const pc = new RoutedComputer(p.id, made, attempts, c.estimatedHourlyUsd, route.ledger);
+      record(route.ledger, pc);
+      return pc;
     } catch (err) {
-      errors.push(`${p.id}: ${(err as Error).message}`);
+      // One that turns up after we gave up is deleted, so it can't bill unseen (or left in the ledger for gc).
+      if (timedOut) {
+        pending.then((late) => {
+          const pc = new RoutedComputer(p.id, late, [], c.estimatedHourlyUsd, route.ledger);
+          record(route.ledger, pc);
+          return pc.delete();
+        }).catch(() => {});
+      }
+      const status = errorStatus(err);
+      attempts.push({ provider: p.id, ok: false, ms: Date.now() - t0, error: (err as Error).message, ...(status ? { status } : {}) });
+      const setup = err instanceof SetupError || (status !== undefined && SETUP_ERRORS.has(status));
+      if (route.fallback !== "any" && setup) {
+        throw new RouterError(
+          `${(err as Error).message.replace(/[.\s]+$/, "")}. This looks like a setup problem with ${p.id} (key or request), so the router stopped instead of moving to another provider; pass fallback: "any" to fall back on every error`,
+          attempts,
+          "setup",
+        );
+      }
     }
   }
-  throw new RouterError(`all computer providers failed: ${errors.join(" | ")}`);
+  throw new RouterError(`all computer providers failed: ${attempts.map((a) => `${a.provider}: ${a.error}`).join(" | ")}`, attempts, "all_failed");
 }
+
+/** Computers keep running until deleted: the ledger gives them no lifetime, so only `gc --all` takes them. */
+const NO_LIFETIME = "9999-12-31T00:00:00.000Z";
+
+function record(ledger: Ledger | undefined, pc: RoutedComputer) {
+  ledger?.open({
+    id: pc.id,
+    provider: pc.provider,
+    kind: "computer",
+    createdAt: new Date().toISOString(),
+    expiresAt: NO_LIFETIME,
+    usdHour: pc.estimatedHourlyUsd ?? 0,
+  });
+}
+
+/** Seconds to wait for one provider's computer before trying the next. */
+export const DEFAULT_COMPUTER_TIMEOUT_S = 120;
+/** Seconds a whole computer create may take. */
+export const DEFAULT_COMPUTER_DEADLINE_S = 240;
