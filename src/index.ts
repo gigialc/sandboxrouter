@@ -22,11 +22,15 @@ export { VERIFIED, FAILING } from "./verified.js";
 export { BILLED_VS_LIST } from "./billing.js";
 export { validate, splitRequest, SPEC_KEYS, ROUTE_KEYS, STRATEGIES } from "./validate.js";
 export { CATALOG, hourlyCost, unfit, info, type ProviderInfo } from "./catalog.js";
-export { createApp, HttpError, ERROR_STATUS, type ServerHooks } from "./server.js";
+export { createApp, HttpError, ERROR_STATUS, ORPHAN_GRACE_MS, type ServerHooks } from "./server.js";
 export { Client, ClientError, RemoteSandbox, type CreateResponse } from "./client.js";
 export {
   RoutedComputer,
   createComputer,
+  splitComputerRequest,
+  DEFAULT_COMPUTER_TIMEOUT_S,
+  DEFAULT_COMPUTER_DEADLINE_S,
+  type ComputerRoute,
   planComputer,
   computerCatalog,
   computerHourly,

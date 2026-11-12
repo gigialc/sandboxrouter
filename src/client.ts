@@ -22,7 +22,7 @@ export class Client {
   }
 
   /** @internal */
-  async request(method: string, path: string, body?: unknown, accept = "application/json"): Promise<Response> {
+  async request(method: string, path: string, body?: unknown, accept = "application/json", headers: Record<string, string> = {}): Promise<Response> {
     const raw = body instanceof Uint8Array;
     const res = await this.fetch(this.baseUrl + path, {
       method,
@@ -30,6 +30,7 @@ export class Client {
         Accept: accept,
         ...(this.apiKey ? { Authorization: `Bearer ${this.apiKey}` } : {}),
         ...(body === undefined ? {} : { "Content-Type": raw ? "application/octet-stream" : "application/json" }),
+        ...headers,
       },
       body: body === undefined ? undefined : raw ? (body as unknown as BodyInit) : JSON.stringify(body),
     });
@@ -58,10 +59,16 @@ export class Client {
     return (await this.json<{ candidates: Candidate[] }>("POST", "/v1/route", { ...spec, ...route })).candidates;
   }
 
-  /** Start a sandbox on the first provider that works, as the server routes it. */
-  async create(spec: SandboxSpec = {}, route: RouteOptions = {}): Promise<RemoteSandbox> {
-    const r = await this.json<CreateResponse>("POST", "/v1/sandboxes", { ...spec, ...route });
-    return new RemoteSandbox(this, r.id, r.provider, r);
+  /**
+   * Start a sandbox on the first provider that works, as the server routes it. With `idempotencyKey`,
+   * sending the same create again (say, after a timeout) returns the same sandbox instead of starting
+   * a second one; use a new key for each sandbox you mean to start.
+   */
+  async create(spec: SandboxSpec = {}, route: RouteOptions = {}, opts: { idempotencyKey?: string } = {}): Promise<RemoteSandbox> {
+    const headers: Record<string, string> = opts.idempotencyKey ? { "Idempotency-Key": opts.idempotencyKey } : {};
+    const res = await this.request("POST", "/v1/sandboxes", { ...spec, ...route }, "application/json", headers);
+    const r = (await res.json()) as CreateResponse;
+    return new RemoteSandbox(this, r.id, r.provider, { ...r, replayed: res.headers.get("idempotent-replayed") === "true" });
   }
 
   /** A handle on a sandbox you created earlier. */

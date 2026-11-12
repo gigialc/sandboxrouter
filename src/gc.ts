@@ -57,8 +57,9 @@ export async function gc(
       continue;
     }
     try {
-      const box = await router.get(s.id);
-      await box.kill(); // closes the ledger entry
+      // Both close the ledger entry.
+      if (s.kind === "computer") await (await router.getComputer(s.id)).delete();
+      else await (await router.get(s.id)).kill();
       results.push({ id: s.id, action: "killed" });
     } catch (err) {
       if (isGone(err)) {

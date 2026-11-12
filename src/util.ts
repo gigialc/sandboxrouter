@@ -113,3 +113,25 @@ export function errorStatus(err: unknown, depth = 0): number | undefined {
   if (/RateLimitError$/.test(name)) return 429;
   return errorStatus(e.cause, depth + 1);
 }
+
+/**
+ * HTTP statuses that mean the request or the key is wrong, not that the provider is down. 402 (out of
+ * balance, plan needed) isn't one: an unfunded account is exactly when the next provider should take the
+ * sandbox, and the failed attempt stays on `attempts` (the CLI prints it), so it isn't hidden.
+ */
+export const SETUP_ERRORS = new Set([400, 401, 403, 404, 422]);
+
+/** Resolve with `work`, or reject with `onExpire()` after `ms`. A late `work` rejection is swallowed. */
+export async function withDeadline<T>(work: Promise<T>, ms: number, onExpire: () => Error): Promise<T> {
+  let timer: NodeJS.Timeout | undefined;
+  const expired = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(onExpire()), ms);
+    timer.unref();
+  });
+  try {
+    return await Promise.race([work, expired]);
+  } finally {
+    clearTimeout(timer);
+    work.catch(() => {});
+  }
+}

@@ -143,6 +143,117 @@ describe("server hooks", () => {
     expect((await fetch(`${multi}/v1/computers`, { method: "POST", body: "{}" })).status).toBe(404);
   });
 
+  it("returns the same sandbox for a retried create with the same Idempotency-Key", async () => {
+    const fake = new FakeProvider("maritime", { createMs: 100 });
+    const base = await start(new Router({ providers: [fake], ledger: false }), undefined, [], { authorize: async (req) => req.headers.authorization ?? "anon" });
+    const alice = new Client({ baseUrl: base, apiKey: "alice" });
+    const a = await alice.create({}, {}, { idempotencyKey: "k1" });
+    const again = await alice.create({}, {}, { idempotencyKey: "k1" });
+    expect(again.id).toBe(a.id);
+    expect(again.details.replayed).toBe(true);
+    // Two at once with one key: one sandbox.
+    const [x, y] = await Promise.all([alice.create({}, {}, { idempotencyKey: "k2" }), alice.create({}, {}, { idempotencyKey: "k2" })]);
+    expect(x.id).toBe(y.id);
+    expect(fake.created.length).toBe(2);
+    // The same key with a different request is refused; another caller's key is separate.
+    await expect(alice.create({ vcpu: 4 }, {}, { idempotencyKey: "k1" })).rejects.toMatchObject({ status: 422 });
+    const bob = await new Client({ baseUrl: base, apiKey: "bob" }).create({}, {}, { idempotencyKey: "k1" });
+    expect(bob.id).not.toBe(a.id);
+    // No key: every create is new.
+    expect((await alice.create()).id).not.toBe((await alice.create()).id);
+  });
+
+  it("doesn't remember a failed create, so retrying it runs again", async () => {
+    const fake = new FakeProvider("maritime", { fail: "busy", failStatus: 503 });
+    const base = await start(new Router({ providers: [fake], ledger: false }), "tok");
+    const sr = new Client({ baseUrl: base, apiKey: "tok" });
+    await expect(sr.create({}, {}, { idempotencyKey: "k" })).rejects.toMatchObject({ status: 503 });
+    fake.opts.fail = undefined;
+    expect((await sr.create({}, {}, { idempotencyKey: "k" })).provider).toBe("maritime");
+  });
+
+  it("keeps a sandbox for a retry when a caller with an Idempotency-Key hangs up, and kills it if none comes", async () => {
+    const fake = new FakeProvider("maritime", { createMs: 200 });
+    const killed: string[] = [];
+    const base = await start(new Router({ providers: [fake], ledger: false }), undefined, [], {
+      authorize: async () => "x",
+      afterKill: async (_who, id) => void killed.push(id),
+      orphanGraceMs: 300,
+    });
+    const hangUp = async (key: string) => {
+      const ac = new AbortController();
+      const req = fetch(`${base}/v1/sandboxes`, { method: "POST", body: "{}", headers: { "Idempotency-Key": key }, signal: ac.signal }).catch(() => "aborted");
+      setTimeout(() => ac.abort(), 50);
+      expect(await req).toBe("aborted");
+      await new Promise((r) => setTimeout(r, 250));
+    };
+    // Retried in time: the retry gets the same sandbox, and it isn't killed.
+    await hangUp("kept");
+    const retry = await new Client({ baseUrl: base }).create({}, {}, { idempotencyKey: "kept" });
+    await new Promise((r) => setTimeout(r, 400));
+    expect(killed).toEqual([]);
+    expect(fake.live.get(retry.id.split(":")[1])!.killed).toBe(false);
+    // Never retried: killed after the grace period.
+    await hangUp("dropped");
+    await new Promise((r) => setTimeout(r, 400));
+    expect(killed.length).toBe(1);
+  });
+
+  it("puts computers through owns and the computer hooks when they're on for a multi-user server", async () => {
+    const { COMPUTER_ENTRIES } = await import("../src/computers.js");
+    const owner = new Map<string, string>();
+    let refused = 0;
+    const desk = {
+      id: "deskco",
+      computerOs: ["linux" as const],
+      configured: () => true,
+      async createComputer() {
+        return {
+          nativeId: `pc-${owner.size + 1}`,
+          info: async () => ({ id: "x", os: "linux" as const, status: "ready" }),
+          act: async () => ({ action: "x", ok: true }),
+          actBatch: async () => [],
+          screenshot: async () => new Uint8Array(),
+          exec: async () => ({ exitCode: 0, stdout: "", stderr: "" }),
+          readFile: async () => new Uint8Array(),
+          writeFile: async () => {},
+          delete: async () => {},
+        };
+      },
+      async connectComputer(nativeId: string) {
+        return { ...(await this.createComputer()), nativeId };
+      },
+    };
+    COMPUTER_ENTRIES.push({ id: "deskco", name: "deskco", os: { linux: 0.5 }, source: "https://example.com", checked: "2026-11-12", takeover: false, size: "", credentials: [], docs: "" });
+    try {
+      const base = await start(new Router({ providers: [], computers: [desk], ledger: false }), undefined, [], {
+        authorize: async (req) => req.headers.authorization ?? null,
+        computers: true,
+        owns: async (who, id) => owner.get(id) === who,
+        beforeCreateComputer: async (who) => {
+          if (who === "Bearer broke") {
+            refused++;
+            throw new HttpError(402, "out of credit");
+          }
+        },
+        afterCreateComputer: async (who, pc) => {
+          owner.set(pc.id, who as string);
+          return { hourlyUsd: 0.53 };
+        },
+      });
+      const post = (who: string) => fetch(`${base}/v1/computers`, { method: "POST", headers: { Authorization: who }, body: "{}" });
+      const made = await (await post("Bearer a")).json();
+      expect(made).toMatchObject({ provider: "deskco", hourlyUsd: 0.53, estimatedHourlyUsd: 0.5 });
+      expect((await fetch(`${base}/v1/computers/${made.id}`, { headers: { Authorization: "Bearer b" } })).status).toBe(404);
+      expect((await fetch(`${base}/v1/computers/${made.id}`, { headers: { Authorization: "Bearer a" } })).status).toBe(200);
+      expect((await post("Bearer broke")).status).toBe(402);
+      expect(refused).toBe(1);
+      expect((await fetch(`${base}/v1/computers`, { method: "POST", headers: { Authorization: "Bearer a" }, body: JSON.stringify({ os: "beos" }) })).status).toBe(400);
+    } finally {
+      COMPUTER_ENTRIES.pop();
+    }
+  });
+
   it("kills the sandbox when afterCreate fails", async () => {
     const fake = new FakeProvider("maritime");
     const base = await start(new Router({ providers: [fake] }), undefined, [], {

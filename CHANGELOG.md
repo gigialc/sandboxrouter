@@ -2,6 +2,16 @@
 
 All notable changes. Versions follow [semver](https://semver.org/); while the version is 0.x, a minor bump can change the API.
 
+## 0.6.0 (2026-11-12)
+
+### Added
+- **`Idempotency-Key` on `POST /v1/sandboxes` and `/v1/computers`.** A create retried with the same key, from the same caller, returns the first one's answer for 24 hours instead of starting (and on a billing server, charging for) a second sandbox. A retry that arrives while the first is still starting waits for it, and the same key with a different body is refused (422). A failed create isn't remembered, so retrying it runs it again. With a key, a sandbox whose caller hung up mid-create is kept for 2 minutes (`ServerHooks.orphanGraceMs`) for the retry to collect, then killed. `Client.create(spec, route, { idempotencyKey })`, Python `create(idempotency_key=...)`; `RemoteSandbox.details.replayed` says whether the answer was a replay.
+
+### Changed
+- **Computers follow the sandbox rules.** `router.computer(spec, route)` takes `fallback`, `createTimeoutSeconds` (default 120) and `deadlineSeconds` (default 240). A setup error (400/401/403/404/422) stops instead of falling back, a computer that turns up after its provider timed out is deleted, and `RoutedComputer.attempts` lists every try. Errors are RouterErrors with codes. Computers go in the ledger (`kind: "computer"`, no lifetime), so `ls` shows them and `gc --all` deletes them; plain `gc` leaves them, since the same `externalUserId` is meant to get the same desktop back. `RoutedComputer` has `kill()` (same as `delete()`), `await using`, `estimatedHourlyUsd`, and `exec(command, { timeoutSeconds })` (a bare number still works).
+- **`/v1/computers` on a multi-user server** (`authorize` set and `computers: true`) checks `owns` for computer ids and runs new hooks: `beforeCreateComputer`, `afterCreateComputer` (may add fields to the answer; throwing deletes the computer) and `afterDeleteComputer` (with `{ error }` when the provider's delete failed). The request body is checked like a sandbox's (`splitComputerRequest`), and unknown fields are refused.
+- `Attempt.provider` and `LedgerEntry.provider` accept computer-only provider ids.
+
 ## 0.5.0 (2026-11-12)
 
 A design pass after an outside review of the library and the hosted service.
