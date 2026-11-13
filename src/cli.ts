@@ -4,7 +4,7 @@ import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { platform, arch } from "node:os";
 import { bench, benchMarkdown } from "./bench.js";
 import { costMarkdown, costRun, settle, type CostRun } from "./cost.js";
-import { checkProvider } from "./check.js";
+import { checkProvider, type CheckReport } from "./check.js";
 import { gc, listOpen } from "./gc.js";
 import { contributor, publishableCheck } from "./results.js";
 import { loadReports, makeReport, renderLeaderboard } from "./leaderboard.js";
@@ -19,10 +19,12 @@ Usage:
   sandboxrouter providers [--vcpu N] [--memory GB]   price table + which keys are set
   sandboxrouter route     [spec flags] [route flags] dry run: the order providers would be tried
   sandboxrouter run "<cmd>" [spec flags] [route flags] [--keep]
-  sandboxrouter check     --provider ID[,ID] | --all [--json] [--save [dir]] [--by GITHUB_USER]
+  sandboxrouter check     --provider ID[,ID] | --all [--json] [--save [dir]] [--retry] [--out FILE] [--by GITHUB_USER]
                           test providers for real: exec, env, UTF-8, streaming, files, timeout, pause,
                           kill; exits 1 if any step fails. --all = every configured provider;
-                          --save writes results/conformance/<id>.json for the compatibility table
+                          --save writes results/conformance/<id>.json for the compatibility table;
+                          --retry runs a failed provider once more and keeps that result;
+                          --out writes every report as JSON (with the first try's failure, if retried)
   sandboxrouter ls        [--json]                       sandboxes this machine started that weren't killed
   sandboxrouter gc        [--all | --older-than MIN] [--dry-run]
                           kill leaked sandboxes: by default those past their lifetime
@@ -75,6 +77,7 @@ const { values, positionals } = parseArgs({
     label: { type: "string" },
     all: { type: "boolean" },
     save: { type: "boolean" },
+    retry: { type: "boolean" },
     "older-than": { type: "string" },
     "dry-run": { type: "boolean" },
     minutes: { type: "string" },
@@ -209,15 +212,22 @@ async function main() {
     const version = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8")).version;
     const saveDir = values.save ? (rest[0] ?? "results/conformance") : undefined;
     const mark = { pass: "ok  ", fail: "FAIL", skip: "skip", info: "note" } as const;
-    const reports = [];
-    for (const p of ids) {
-      if (!values.json) console.log(`\n${p}`);
-      const report = await checkProvider(router, p, {
+    const reports: (CheckReport & { firstTry?: string })[] = [];
+    const run = (p: ProviderId) =>
+      checkProvider(router, p, {
         spec,
         onStep: (r) => {
           if (!values.json) console.log(`  ${mark[r.status]}  ${r.step.padEnd(32)} ${String(r.ms).padStart(6)} ms  ${r.detail ?? ""}`);
         },
       });
+    for (const p of ids) {
+      if (!values.json) console.log(`\n${p}`);
+      let report: CheckReport & { firstTry?: string } = await run(p);
+      if (values.retry && !report.ok && !report.inconclusive) {
+        const failed = report.results.find((r) => r.status === "fail");
+        if (!values.json) console.log(`  failed; trying ${p} once more`);
+        report = { ...(await run(p)), firstTry: failed ? `${failed.step}: ${failed.detail ?? "failed"}` : "failed" };
+      }
       reports.push(report);
       if (report.inconclusive) {
         if (!values.json) console.log(`  not saved: ${report.inconclusive}; ${p} keeps its last saved result`);
@@ -225,10 +235,12 @@ async function main() {
       }
       if (saveDir) {
         mkdirSync(saveDir, { recursive: true });
-        const saved = publishableCheck({ tool: "sandboxrouter-check", version, date: new Date().toISOString(), platform: `${platform()}-${arch()}`, ...(by ? { by } : {}), ...report });
+        const { firstTry: _, ...result } = report;
+        const saved = publishableCheck({ tool: "sandboxrouter-check", version, date: new Date().toISOString(), platform: `${platform()}-${arch()}`, ...(by ? { by } : {}), ...result });
         writeFileSync(`${saveDir}/${p}.json`, JSON.stringify(saved, null, 2) + "\n");
       }
     }
+    if (values.out) writeFileSync(values.out, JSON.stringify(reports, null, 2) + "\n");
     if (values.json) console.log(JSON.stringify(reports, null, 2));
     else {
       const unpaid = reports.filter((r) => r.inconclusive).length;

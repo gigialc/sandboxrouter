@@ -90,6 +90,10 @@ const c = await router.create({}, { provider: ["e2b", "daytona"], fallback: fals
 // needed). A setup error (400, 401, 403, 404, 422: a bad key, a bad image or request) stops instead,
 // so a mistake isn't hidden by a pricier provider. Every failed attempt is on sbx.attempts.
 // fallback: "any" falls back on every error. deadlineSeconds (default 240) bounds the whole create.
+// Once the router knows a provider's usual start time (3 of its own creates, or your bench file), it
+// moves on sooner when a create runs far past it: 5x the usual time, at least 10 s, and never for the
+// last provider left or when you set createTimeoutSeconds. new Router({ quickFallback: false }) turns
+// that off; { factor, minSeconds } tunes it.
 const e = await router.create({}, { fallback: "any", createTimeoutSeconds: 300, deadlineSeconds: 600 });
 
 // Per-provider images: each provider names its templates differently

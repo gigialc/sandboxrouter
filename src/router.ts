@@ -136,6 +136,15 @@ export interface RouterOptions {
   requireVerified?: boolean;
   /** Billed / list-price ratio per provider, behind `estimatedHourlyUsd`. Default: the ratios in `BILLED_VS_LIST`, from saved cost runs. */
   billedVsList?: Partial<Record<ProviderId, number>>;
+  /**
+   * When a create runs well past a provider's usual start time, try the next provider sooner than
+   * `createTimeoutSeconds`. The wait becomes `factor` x the provider's median start time (or 1.5x the
+   * slowest of its recent starts, if longer), at least `minSeconds`. It applies only when the caller
+   * didn't set `createTimeoutSeconds`, the router has a start time for the provider (3 of its own creates,
+   * or the bench file), and another provider is left to try. Default `{ factor: 5, minSeconds: 10 }`;
+   * `false` always waits the full `createTimeoutSeconds`.
+   */
+  quickFallback?: false | { factor?: number; minSeconds?: number };
 }
 
 /** Desktop-only providers. Filled in as adapters are added. */
@@ -192,6 +201,7 @@ export class Router {
   /** Create times this router measured, most recent last. */
   private readonly live = new Map<ProviderId, number[]>();
   private computerOnly: ComputerProvider[];
+  private readonly quick: false | { factor: number; minSeconds: number };
   /** The local record of sandboxes this router created, or undefined when turned off. */
   readonly ledger?: Ledger;
 
@@ -206,6 +216,7 @@ export class Router {
     this.billed =
       opts.billedVsList ?? Object.fromEntries(Object.entries(BILLED_VS_LIST).map(([id, b]) => [id, b!.ratio]));
     this.computerOnly = opts.computers ?? (opts.providers ? [] : defaultComputerProviders());
+    this.quick = opts.quickFallback === false ? false : { factor: 5, minSeconds: 10, ...opts.quickFallback };
   }
 
   /** Registered and has credentials. False for providers this router doesn't know. */
@@ -328,9 +339,8 @@ export class Router {
 
     const attempts: Attempt[] = [];
     const tries = route.fallback === false ? usable.slice(0, 1) : usable;
-    const limitS = route.createTimeoutSeconds ?? DEFAULT_CREATE_TIMEOUT_S;
     const deadline = Date.now() + (route.deadlineSeconds ?? DEFAULT_CREATE_DEADLINE_S) * 1000;
-    for (const c of tries) {
+    for (const [i, c] of tries.entries()) {
       const left = deadline - Date.now();
       if (left <= 0) {
         throw new RouterError(
@@ -341,13 +351,15 @@ export class Router {
       }
       const t0 = Date.now();
       const pending = this.provider(c.provider).create(spec);
+      const { limitS, typicalMs } = this.waitFor(c.provider, route, i === tries.length - 1);
       const waitS = Math.min(limitS, left / 1000);
       const price: SandboxPrice = { estimatedHourlyUsd: c.estimatedHourlyUsd, listHourlyUsd: c.listHourlyUsd, size: c.size };
       let timedOut = false;
       try {
         const box = await withDeadline(pending, waitS * 1000, () => {
           timedOut = true;
-          return new ProviderError(c.provider, `create timed out after ${Number(waitS.toFixed(1))}s`);
+          const usual = typicalMs !== undefined && waitS < (route.createTimeoutSeconds ?? DEFAULT_CREATE_TIMEOUT_S) ? `; it usually starts in ${Number((typicalMs / 1000).toFixed(1))}s` : "";
+          return new ProviderError(c.provider, `create timed out after ${Number(waitS.toFixed(1))}s${usual}`);
         });
         attempts.push({ provider: c.provider, ok: true, ms: Date.now() - t0 });
         this.observe(c.provider, Date.now() - t0);
@@ -377,6 +389,21 @@ export class Router {
       attempts,
       "all_failed",
     );
+  }
+
+  /**
+   * Seconds to wait for this provider's create: the caller's `createTimeoutSeconds`, or (see
+   * `quickFallback`) a few times its usual start time when another provider is left to try.
+   */
+  private waitFor(id: ProviderId, route: RouteOptions, last: boolean): { limitS: number; typicalMs?: number } {
+    const full = route.createTimeoutSeconds ?? DEFAULT_CREATE_TIMEOUT_S;
+    if (!this.quick || last || route.createTimeoutSeconds !== undefined) return { limitS: full };
+    const live = this.live.get(id);
+    const samples = live && live.length >= LIVE_MIN_SAMPLES ? live : loadBench(this.benchFile)[id]?.createMs;
+    const typicalMs = median(samples);
+    if (typicalMs === undefined || !samples?.length) return { limitS: full };
+    const s = Math.max(this.quick.factor * typicalMs, 1.5 * Math.max(...samples)) / 1000;
+    return { limitS: Math.min(full, Math.max(this.quick.minSeconds, s)), typicalMs };
   }
 
   /** Remember a successful create's time, for the speed tie-break and strategy "fastest". */
