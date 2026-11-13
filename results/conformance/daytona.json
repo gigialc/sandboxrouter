@@ -1,16 +1,84 @@
 {
   "tool": "sandboxrouter-check",
-  "version": "0.6.0",
-  "date": "2026-11-13T14:44:16.840Z",
+  "version": "0.7.0",
+  "date": "2026-11-13T22:00:07.101Z",
   "platform": "linux-x64",
   "provider": "daytona",
+  "sandboxId": "daytona:2b196968-2c24-4bba-81f5-6d7afd23d03a",
   "results": [
     {
       "step": "create",
-      "status": "fail",
-      "ms": 65902,
-      "detail": "all providers failed: daytona: Sandbox was modified by another operation"
+      "ms": 633,
+      "status": "pass",
+      "detail": "daytona:2b196968-2c24-4bba-81f5-6d7afd23d03a, ~$0.0666/hr"
+    },
+    {
+      "step": "exec: stdout, stderr, exit code",
+      "ms": 869,
+      "status": "pass"
+    },
+    {
+      "step": "exec: env and cwd",
+      "ms": 497,
+      "status": "pass"
+    },
+    {
+      "step": "exec: UTF-8 output",
+      "ms": 256,
+      "status": "pass"
+    },
+    {
+      "step": "exec: streaming",
+      "ms": 3595,
+      "status": "pass",
+      "detail": "first output after 1250 ms"
+    },
+    {
+      "step": "files: binary round-trip",
+      "ms": 349,
+      "status": "pass"
+    },
+    {
+      "step": "files: 1 MB round-trip",
+      "ms": 1584,
+      "status": "pass"
+    },
+    {
+      "step": "files: missing file is an error",
+      "ms": 123,
+      "status": "pass"
+    },
+    {
+      "step": "files: visible to commands",
+      "ms": 898,
+      "status": "pass"
+    },
+    {
+      "step": "exec: command timeout",
+      "ms": 3126,
+      "status": "pass",
+      "detail": "threw after 3125 ms"
+    },
+    {
+      "step": "exec: timed-out command was stopped",
+      "ms": 6375,
+      "status": "pass"
+    },
+    {
+      "step": "pause and resume",
+      "ms": 2067,
+      "status": "pass"
+    },
+    {
+      "step": "kill",
+      "ms": 61,
+      "status": "pass"
+    },
+    {
+      "step": "killed sandbox is gone",
+      "ms": 40,
+      "status": "pass"
     }
   ],
-  "ok": false
+  "ok": true
 }

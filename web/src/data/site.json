@@ -1,6 +1,6 @@
 {
   "version": "0.7.0",
-  "generatedAt": "2026-11-13T21:18:04.564Z",
+  "generatedAt": "2026-11-13T22:02:10.056Z",
   "shapes": [
     "1x2",
     "2x4",
@@ -206,8 +206,8 @@
       "planLabel": "none",
       "defaultSize": null,
       "check": {
-        "date": "2026-11-13T14:42:22.875Z",
-        "version": "0.6.0",
+        "date": "2026-11-13T21:59:02.158Z",
+        "version": "0.7.0",
         "by": null,
         "passed": 13,
         "failed": [],
@@ -311,8 +311,8 @@
       "planLabel": "none",
       "defaultSize": null,
       "check": {
-        "date": "2026-11-13T14:42:53.823Z",
-        "version": "0.6.0",
+        "date": "2026-11-13T21:59:29.145Z",
+        "version": "0.7.0",
         "by": null,
         "passed": 14,
         "failed": [],
@@ -544,8 +544,8 @@
       "planLabel": "none",
       "defaultSize": null,
       "check": {
-        "date": "2026-11-13T14:43:10.937Z",
-        "version": "0.6.0",
+        "date": "2026-11-13T21:59:46.626Z",
+        "version": "0.7.0",
         "by": null,
         "passed": 13,
         "failed": [],
@@ -869,39 +869,34 @@
         "memoryGb": 1
       },
       "check": {
-        "date": "2026-11-13T14:44:16.840Z",
-        "version": "0.6.0",
+        "date": "2026-11-13T22:00:07.101Z",
+        "version": "0.7.0",
         "by": null,
-        "passed": 0,
-        "failed": [
-          {
-            "step": "create",
-            "detail": "all providers failed: daytona: Sandbox was modified by another operation"
-          }
-        ],
+        "passed": 14,
+        "failed": [],
         "skipped": [],
         "notRun": [],
         "notes": [],
         "steps": {
-          "create": "fail",
-          "exec: stdout, stderr, exit code": "not run",
-          "exec: env and cwd": "not run",
-          "exec: UTF-8 output": "not run",
-          "exec: streaming": "not run",
-          "files: binary round-trip": "not run",
-          "files: 1 MB round-trip": "not run",
-          "files: missing file is an error": "not run",
-          "files: visible to commands": "not run",
-          "exec: command timeout": "not run",
-          "exec: timed-out command was stopped": "not run",
-          "pause and resume": "not run",
-          "kill": "not run",
-          "killed sandbox is gone": "not run"
+          "create": "pass",
+          "exec: stdout, stderr, exit code": "pass",
+          "exec: env and cwd": "pass",
+          "exec: UTF-8 output": "pass",
+          "exec: streaming": "pass",
+          "files: binary round-trip": "pass",
+          "files: 1 MB round-trip": "pass",
+          "files: missing file is an error": "pass",
+          "files: visible to commands": "pass",
+          "exec: command timeout": "pass",
+          "exec: timed-out command was stopped": "pass",
+          "pause and resume": "pass",
+          "kill": "pass",
+          "killed sandbox is gone": "pass"
         }
       },
       "live": {
-        "status": "failing",
-        "label": "failed 1 step (2026-11-13)"
+        "status": "passed",
+        "label": "passed (2026-11-13)"
       },
       "billedVsList": null,
       "computers": [
@@ -1099,8 +1094,8 @@
       "planLabel": "none",
       "defaultSize": null,
       "check": {
-        "date": "2026-11-09T16:33:43.163Z",
-        "version": "0.3.3",
+        "date": "2026-11-13T22:00:24.224Z",
+        "version": "0.7.0",
         "by": null,
         "passed": 14,
         "failed": [],
@@ -1126,7 +1121,7 @@
       },
       "live": {
         "status": "passed",
-        "label": "passed (2026-11-09)"
+        "label": "passed (2026-11-13)"
       },
       "billedVsList": null,
       "computers": [],
@@ -1192,8 +1187,8 @@
         "memoryGb": 0.5
       },
       "check": {
-        "date": "2026-11-13T14:44:30.525Z",
-        "version": "0.6.0",
+        "date": "2026-11-13T22:00:41.598Z",
+        "version": "0.7.0",
         "by": null,
         "passed": 14,
         "failed": [],
@@ -1818,8 +1813,8 @@
       "planLabel": "$20/mo (credited)",
       "defaultSize": null,
       "check": {
-        "date": "2026-11-13T14:44:58.712Z",
-        "version": "0.6.0",
+        "date": "2026-11-13T22:01:06.006Z",
+        "version": "0.7.0",
         "by": null,
         "passed": 14,
         "failed": [],
@@ -2228,8 +2223,8 @@
         "memoryGb": 1
       },
       "check": {
-        "date": "2026-11-13T14:45:19.212Z",
-        "version": "0.6.0",
+        "date": "2026-11-13T22:01:44.283Z",
+        "version": "0.7.0",
         "by": null,
         "passed": 14,
         "failed": [],
@@ -2382,8 +2377,8 @@
       "planLabel": "none",
       "defaultSize": null,
       "check": {
-        "date": "2026-11-13T14:45:38.740Z",
-        "version": "0.6.0",
+        "date": "2026-11-13T22:02:08.430Z",
+        "version": "0.7.0",
         "by": null,
         "passed": 14,
         "failed": [],

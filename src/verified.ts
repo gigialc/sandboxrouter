@@ -9,6 +9,7 @@ export const VERIFIED: Partial<Record<ProviderId, string>> = {
   lambda: "2026-11-13",
   blaxel: "2026-11-13",
   cloudflare: "2026-11-11",
+  daytona: "2026-11-13",
   e2b: "2026-11-13",
   sprites: "2026-11-11",
   freestyle: "2026-11-11",
@@ -23,5 +24,4 @@ export const VERIFIED: Partial<Record<ProviderId, string>> = {
 
 /** Providers whose last saved real-account check failed a step. The default strategy tries them last. */
 export const FAILING: Partial<Record<ProviderId, string>> = {
-  daytona: "2026-11-13",
 };

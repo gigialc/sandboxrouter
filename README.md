@@ -72,10 +72,10 @@ List price while running, 2 vCPU / 4 GB, cheapest first; waitlisted sign-ups fol
 | [LangSmith Sandboxes (sign-up waitlisted)](https://sandboxrouter.vercel.app/providers/langsmith) | $0.189 | none | not run yet | [pricing](https://www.langchain.com/pricing) |
 | [OpenScale Sandboxes](https://sandboxrouter.vercel.app/providers/openscale) | skipped (default image is 2 vCPU / 1 GB; a bigger size needs image.openscale) | none | passed (2026-11-13) | [pricing](https://openscale.so/sandboxes) |
 | [Azure Container Apps dynamic sessions](https://sandboxrouter.vercel.app/providers/azure) | skipped (max 1 vCPU) | none | not run yet | [pricing](https://learn.microsoft.com/en-us/azure/container-apps/billing#dynamic-sessions) |
-| [Daytona](https://sandboxrouter.vercel.app/providers/daytona) | skipped (default image is 1 vCPU / 1 GB; a bigger size needs image.daytona) | none | failed 1 step (2026-11-13) | [pricing](https://www.daytona.io/pricing) |
+| [Daytona](https://sandboxrouter.vercel.app/providers/daytona) | skipped (default image is 1 vCPU / 1 GB; a bigger size needs image.daytona) | none | passed (2026-11-13) | [pricing](https://www.daytona.io/pricing) |
 | [Alibaba Cloud Agent Sandbox](https://sandboxrouter.vercel.app/providers/alibaba) | skipped (max 2 GB memory) | none | not run yet | [pricing](https://www.alibabacloud.com/help/en/agent-sandbox/product-overview/billing-overview) |
 | [E2B](https://sandboxrouter.vercel.app/providers/e2b) | skipped (default image is 2 vCPU / 0.5 GB; a bigger size needs image.e2b) | none | passed (2026-11-13) | [pricing](https://e2b.dev/pricing) |
-| [Docker (local)](https://sandboxrouter.vercel.app/providers/docker) | free | none | passed (2026-11-09) | [pricing](https://docs.docker.com/engine/) |
+| [Docker (local)](https://sandboxrouter.vercel.app/providers/docker) | free | none | passed (2026-11-13) | [pricing](https://docs.docker.com/engine/) |
 
 Checked 2026-11-04 to 2026-11-06.
 
