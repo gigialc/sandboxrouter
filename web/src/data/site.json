@@ -1,6 +1,6 @@
 {
   "version": "0.6.0",
-  "generatedAt": "2026-11-12T00:42:50.233Z",
+  "generatedAt": "2026-11-13T14:45:39.990Z",
   "shapes": [
     "1x2",
     "2x4",
@@ -206,8 +206,8 @@
       "planLabel": "none",
       "defaultSize": null,
       "check": {
-        "date": "2026-11-11T21:21:26.601Z",
-        "version": "0.3.5",
+        "date": "2026-11-13T14:42:22.875Z",
+        "version": "0.6.0",
         "by": null,
         "passed": 13,
         "failed": [],
@@ -240,7 +240,7 @@
       },
       "live": {
         "status": "passed",
-        "label": "passed (2026-11-11)"
+        "label": "passed (2026-11-13)"
       },
       "billedVsList": null,
       "computers": [],
@@ -311,8 +311,8 @@
       "planLabel": "none",
       "defaultSize": null,
       "check": {
-        "date": "2026-11-11T20:06:15.514Z",
-        "version": "0.3.4",
+        "date": "2026-11-13T14:42:53.823Z",
+        "version": "0.6.0",
         "by": null,
         "passed": 14,
         "failed": [],
@@ -338,7 +338,7 @@
       },
       "live": {
         "status": "passed",
-        "label": "passed (2026-11-11)"
+        "label": "passed (2026-11-13)"
       },
       "billedVsList": null,
       "computers": [],
@@ -544,8 +544,8 @@
       "planLabel": "none",
       "defaultSize": null,
       "check": {
-        "date": "2026-11-11T20:06:20.627Z",
-        "version": "0.3.4",
+        "date": "2026-11-13T14:43:10.937Z",
+        "version": "0.6.0",
         "by": null,
         "passed": 13,
         "failed": [],
@@ -573,7 +573,7 @@
       },
       "live": {
         "status": "passed",
-        "label": "passed (2026-11-11)"
+        "label": "passed (2026-11-13)"
       },
       "billedVsList": null,
       "computers": [],
@@ -869,34 +869,39 @@
         "memoryGb": 1
       },
       "check": {
-        "date": "2026-11-11T20:06:14.558Z",
-        "version": "0.3.4",
+        "date": "2026-11-13T14:44:16.840Z",
+        "version": "0.6.0",
         "by": null,
-        "passed": 14,
-        "failed": [],
+        "passed": 0,
+        "failed": [
+          {
+            "step": "create",
+            "detail": "all providers failed: daytona: Sandbox was modified by another operation"
+          }
+        ],
         "skipped": [],
         "notRun": [],
         "notes": [],
         "steps": {
-          "create": "pass",
-          "exec: stdout, stderr, exit code": "pass",
-          "exec: env and cwd": "pass",
-          "exec: UTF-8 output": "pass",
-          "exec: streaming": "pass",
-          "files: binary round-trip": "pass",
-          "files: 1 MB round-trip": "pass",
-          "files: missing file is an error": "pass",
-          "files: visible to commands": "pass",
-          "exec: command timeout": "pass",
-          "exec: timed-out command was stopped": "pass",
-          "pause and resume": "pass",
-          "kill": "pass",
-          "killed sandbox is gone": "pass"
+          "create": "fail",
+          "exec: stdout, stderr, exit code": "not run",
+          "exec: env and cwd": "not run",
+          "exec: UTF-8 output": "not run",
+          "exec: streaming": "not run",
+          "files: binary round-trip": "not run",
+          "files: 1 MB round-trip": "not run",
+          "files: missing file is an error": "not run",
+          "files: visible to commands": "not run",
+          "exec: command timeout": "not run",
+          "exec: timed-out command was stopped": "not run",
+          "pause and resume": "not run",
+          "kill": "not run",
+          "killed sandbox is gone": "not run"
         }
       },
       "live": {
-        "status": "passed",
-        "label": "passed (2026-11-11)"
+        "status": "failing",
+        "label": "failed 1 step (2026-11-13)"
       },
       "billedVsList": null,
       "computers": [
@@ -1187,8 +1192,8 @@
         "memoryGb": 0.5
       },
       "check": {
-        "date": "2026-11-11T20:06:11.817Z",
-        "version": "0.3.4",
+        "date": "2026-11-13T14:44:30.525Z",
+        "version": "0.6.0",
         "by": null,
         "passed": 14,
         "failed": [],
@@ -1214,7 +1219,7 @@
       },
       "live": {
         "status": "passed",
-        "label": "passed (2026-11-11)"
+        "label": "passed (2026-11-13)"
       },
       "billedVsList": null,
       "computers": [
@@ -1813,8 +1818,8 @@
       "planLabel": "$20/mo (credited)",
       "defaultSize": null,
       "check": {
-        "date": "2026-11-11T20:06:14.945Z",
-        "version": "0.3.4",
+        "date": "2026-11-13T14:44:58.712Z",
+        "version": "0.6.0",
         "by": null,
         "passed": 14,
         "failed": [],
@@ -1840,7 +1845,7 @@
       },
       "live": {
         "status": "passed",
-        "label": "passed (2026-11-11)"
+        "label": "passed (2026-11-13)"
       },
       "billedVsList": null,
       "computers": [
@@ -2223,8 +2228,8 @@
         "memoryGb": 1
       },
       "check": {
-        "date": "2026-11-11T20:06:34.296Z",
-        "version": "0.3.4",
+        "date": "2026-11-13T14:45:19.212Z",
+        "version": "0.6.0",
         "by": null,
         "passed": 14,
         "failed": [],
@@ -2250,7 +2255,7 @@
       },
       "live": {
         "status": "passed",
-        "label": "passed (2026-11-11)"
+        "label": "passed (2026-11-13)"
       },
       "billedVsList": null,
       "computers": [],
@@ -2377,8 +2382,8 @@
       "planLabel": "none",
       "defaultSize": null,
       "check": {
-        "date": "2026-11-11T20:06:26.444Z",
-        "version": "0.3.4",
+        "date": "2026-11-13T14:45:38.740Z",
+        "version": "0.6.0",
         "by": null,
         "passed": 14,
         "failed": [],
@@ -2404,7 +2409,7 @@
       },
       "live": {
         "status": "passed",
-        "label": "passed (2026-11-11)"
+        "label": "passed (2026-11-13)"
       },
       "billedVsList": {
         "ratio": 1.458,

@@ -1,82 +1,82 @@
 {
   "tool": "sandboxrouter-check",
-  "version": "0.3.4",
-  "date": "2026-11-11T20:06:11.817Z",
-  "platform": "darwin-arm64",
+  "version": "0.6.0",
+  "date": "2026-11-13T14:44:30.525Z",
+  "platform": "linux-x64",
   "provider": "e2b",
-  "sandboxId": "e2b:iryfdqib0udfz5vhop79c",
+  "sandboxId": "e2b:if918qr9kl60vf7vxttb3",
   "results": [
     {
       "step": "create",
-      "ms": 830,
+      "ms": 473,
       "status": "pass",
-      "detail": "e2b:iryfdqib0udfz5vhop79c, ~$0.1089/hr"
+      "detail": "e2b:if918qr9kl60vf7vxttb3, ~$0.1089/hr"
     },
     {
       "step": "exec: stdout, stderr, exit code",
-      "ms": 480,
-      "status": "pass"
-    },
-    {
-      "step": "exec: env and cwd",
-      "ms": 175,
-      "status": "pass"
-    },
-    {
-      "step": "exec: UTF-8 output",
-      "ms": 177,
-      "status": "pass"
-    },
-    {
-      "step": "exec: streaming",
-      "ms": 3177,
-      "status": "pass",
-      "detail": "first output after 170 ms"
-    },
-    {
-      "step": "files: binary round-trip",
-      "ms": 495,
-      "status": "pass"
-    },
-    {
-      "step": "files: 1 MB round-trip",
-      "ms": 989,
-      "status": "pass"
-    },
-    {
-      "step": "files: missing file is an error",
-      "ms": 167,
-      "status": "pass"
-    },
-    {
-      "step": "files: visible to commands",
-      "ms": 929,
-      "status": "pass"
-    },
-    {
-      "step": "exec: command timeout",
-      "ms": 3249,
-      "status": "pass",
-      "detail": "threw after 3249 ms"
-    },
-    {
-      "step": "exec: timed-out command was stopped",
-      "ms": 6411,
-      "status": "pass"
-    },
-    {
-      "step": "pause and resume",
-      "ms": 809,
-      "status": "pass"
-    },
-    {
-      "step": "kill",
       "ms": 194,
       "status": "pass"
     },
     {
+      "step": "exec: env and cwd",
+      "ms": 32,
+      "status": "pass"
+    },
+    {
+      "step": "exec: UTF-8 output",
+      "ms": 29,
+      "status": "pass"
+    },
+    {
+      "step": "exec: streaming",
+      "ms": 3037,
+      "status": "pass",
+      "detail": "first output after 32 ms"
+    },
+    {
+      "step": "files: binary round-trip",
+      "ms": 125,
+      "status": "pass"
+    },
+    {
+      "step": "files: 1 MB round-trip",
+      "ms": 145,
+      "status": "pass"
+    },
+    {
+      "step": "files: missing file is an error",
+      "ms": 22,
+      "status": "pass"
+    },
+    {
+      "step": "files: visible to commands",
+      "ms": 76,
+      "status": "pass"
+    },
+    {
+      "step": "exec: command timeout",
+      "ms": 3028,
+      "status": "pass",
+      "detail": "threw after 3028 ms"
+    },
+    {
+      "step": "exec: timed-out command was stopped",
+      "ms": 6087,
+      "status": "pass"
+    },
+    {
+      "step": "pause and resume",
+      "ms": 365,
+      "status": "pass"
+    },
+    {
+      "step": "kill",
+      "ms": 47,
+      "status": "pass"
+    },
+    {
       "step": "killed sandbox is gone",
-      "ms": 170,
+      "ms": 24,
       "status": "pass"
     }
   ],

@@ -246,8 +246,8 @@ It prints one line per step and exits 1 if any fails. `checkProvider(router, id)
 |---|---|---|
 | Agent37 | 14/14 passed; note: output arrived only at the end (no live streaming) | 2026-11-11, v0.3.4 |
 | Boat | not run yet | |
-| Maritime | 14/14 passed | 2026-11-11, v0.3.4 |
-| Sailboxes (Sail Research) | 14/14 passed | 2026-11-11, v0.3.4 |
+| Maritime | 14/14 passed | 2026-11-13, v0.6.0 |
+| Sailboxes (Sail Research) | 14/14 passed | 2026-11-13, v0.6.0 |
 | Northflank | not run yet | |
 | Morph Cloud | not run yet | |
 | exe.dev | not run yet | |
@@ -256,15 +256,15 @@ It prints one line per step and exits 1 if any fails. `checkProvider(router, id)
 | Beam | not run yet | |
 | CodeSandbox SDK (Together) | not run yet | |
 | Fly.io Sprites | 13/13 passed; n/a: pause and resume | 2026-11-11, v0.3.5 |
-| Blaxel | 13/13 passed; n/a: pause and resume | 2026-11-11, v0.3.4 |
+| Blaxel | 13/13 passed; n/a: pause and resume | 2026-11-13, v0.6.0 |
 | HOPX | not run yet | |
 | Superserve | 14/14 passed | 2026-11-11, v0.3.4 |
 | Tensorlake | not run yet | |
 | Upstash Box | not run yet | |
 | Cloudflare Sandbox | 13/13 passed; n/a: pause and resume | 2026-11-11, v0.3.4 |
-| Amazon Bedrock AgentCore Code Interpreter | 13/13 passed; n/a: pause and resume; note: output arrived only at the end (no live streaming) | 2026-11-11, v0.3.5 |
+| Amazon Bedrock AgentCore Code Interpreter | 13/13 passed; n/a: pause and resume; note: output arrived only at the end (no live streaming) | 2026-11-13, v0.6.0 |
 | Modal | 13/13 passed; n/a: pause and resume | 2026-11-11, v0.3.5 |
-| AWS Lambda MicroVMs | 14/14 passed | 2026-11-11, v0.3.4 |
+| AWS Lambda MicroVMs | 14/14 passed | 2026-11-13, v0.6.0 |
 | Deno Sandbox | not run yet | |
 | Runloop | not run yet | |
 | Vercel Sandbox | 13/13 passed; n/a: pause and resume | 2026-11-11, v0.3.4 |
@@ -272,11 +272,11 @@ It prints one line per step and exits 1 if any fails. `checkProvider(router, id)
 | Koyeb Sandboxes | not run yet | |
 | Dedalus Machines | not run yet | |
 | LangSmith Sandboxes | not run yet | |
-| OpenScale Sandboxes | 14/14 passed | 2026-11-11, v0.3.4 |
+| OpenScale Sandboxes | 14/14 passed | 2026-11-13, v0.6.0 |
 | Azure Container Apps dynamic sessions | not run yet | |
-| Daytona | 14/14 passed | 2026-11-11, v0.3.4 |
+| Daytona | 0/14 passed; failed: create | 2026-11-13, v0.6.0 |
 | Alibaba Cloud Agent Sandbox | not run yet | |
-| E2B | 14/14 passed | 2026-11-11, v0.3.4 |
+| E2B | 14/14 passed | 2026-11-13, v0.6.0 |
 | Docker (local) | 14/14 passed | 2026-11-09, v0.3.3 |
 
 ## HTTP API
