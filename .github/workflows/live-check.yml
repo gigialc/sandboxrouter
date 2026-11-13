@@ -8,6 +8,7 @@ on:
   workflow_dispatch:
 permissions:
   contents: write
+  issues: write
 concurrency:
   group: live-check
   cancel-in-progress: false
@@ -27,7 +28,8 @@ jobs:
       - id: check
         name: Check every configured provider
         continue-on-error: true
-        run: npx tsx src/cli.ts check --all --save
+        # A provider that fails is run once more; only a second failure counts.
+        run: npx tsx src/cli.ts check --all --save --retry --out check-report.json
         env:
           AGENT37_API_KEY: ${{ secrets.AGENT37_API_KEY }}
           AGENTCORE_CODE_INTERPRETER_ID: ${{ secrets.AGENTCORE_CODE_INTERPRETER_ID }}
@@ -141,6 +143,26 @@ jobs:
           git add results/conformance README.md docs/reference.md src/verified.ts web/src/data/site.json
           git commit -m "live-check: results for $(date -u +%F)"
           git push
-      - name: Fail the run if a provider failed
-        if: steps.check.outcome == 'failure'
-        run: exit 1
+      # The email: a comment on one open "Nightly live check" issue, which GitHub mails to the owner.
+      # Only when something needs a look (or it all passes again after an alarm), so silence means fine.
+      # Its contents are already public in results/conformance; no keys or account details go in it.
+      - name: Email a summary when a provider needs a look
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          OWNER: ${{ github.repository_owner }}
+        run: |
+          [ -f check-report.json ] || { echo "no report"; exit 0; }
+          n=$(gh issue list --label live-check --state open --json number --jq '.[0].number // empty')
+          if [ -n "$n" ]; then export LAST_NOTE="$(gh issue view "$n" --json body,comments --jq '(.comments[-1].body // .body)')"; fi
+          node --import tsx scripts/live-check-email.ts check-report.json "$RUN_URL" > note.md
+          if [ ! -s note.md ]; then echo "nothing needs a look"; exit 0; fi
+          cat note.md
+          if [ -n "$n" ]; then
+            gh issue comment "$n" --body-file note.md
+          else
+            gh label create live-check --color 007f4f --description "Nightly real-account check" --force
+            { printf '@%s: the nightly check posts here when a provider needs a look, so each post reaches you as an email.\n\n' "$OWNER"; cat note.md; } > first.md
+            gh issue create --title "Nightly live check" --label live-check --body-file first.md
+          fi

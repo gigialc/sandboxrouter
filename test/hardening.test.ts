@@ -52,6 +52,43 @@ describe("a provider whose create hangs", () => {
     expect(new Ledger(file).list().map((e) => e.id)).toEqual([`modal:${late.nativeId}`]);
   });
 
+  it("is given up on sooner when it runs far past its usual start time and another provider is left", async () => {
+    const modal = new FakeProvider("modal", { createMs: 20 });
+    const router = new Router({ providers: [modal, new FakeProvider("maritime")], ledger: false, benchFile: join(dir, "none.json"), quickFallback: { minSeconds: 0.05 } });
+    for (let i = 0; i < 3; i++) await (await router.create({}, { provider: ["modal", "maritime"] })).kill();
+    modal.opts.createMs = 2000;
+    const t0 = Date.now();
+    const sbx = await router.create({}, { provider: ["modal", "maritime"] });
+    expect(Date.now() - t0).toBeLessThan(1000);
+    expect(sbx.provider).toBe("maritime");
+    expect(sbx.attempts[0].error).toMatch(/^modal: create timed out after 0\.\d+s; it usually starts in 0s$/);
+  });
+
+  it("waits the full time when it's the last provider, the caller set a limit, or quickFallback is off", async () => {
+    const warm = async (router: Router, modal: FakeProvider) => {
+      for (let i = 0; i < 3; i++) await (await router.create({}, { provider: ["modal", "maritime"] })).kill();
+      modal.opts.createMs = 300;
+    };
+    // Last (only) provider left: the usual-time cut would fail a create that would have worked.
+    let modal = new FakeProvider("modal", { createMs: 20 });
+    let router = new Router({ providers: [modal, new FakeProvider("maritime")], ledger: false, benchFile: join(dir, "none.json"), quickFallback: { minSeconds: 0.05 } });
+    await warm(router, modal);
+    expect((await router.create({}, { provider: "modal", fallback: false })).provider).toBe("modal");
+    // The caller's own createTimeoutSeconds wins.
+    expect((await router.create({}, { provider: ["modal", "maritime"], createTimeoutSeconds: 5 })).provider).toBe("modal");
+    // Turned off.
+    modal = new FakeProvider("modal", { createMs: 20 });
+    router = new Router({ providers: [modal, new FakeProvider("maritime")], ledger: false, benchFile: join(dir, "none.json"), quickFallback: false });
+    await warm(router, modal);
+    expect((await router.create({}, { provider: ["modal", "maritime"] })).provider).toBe("modal");
+  });
+
+  it("waits the full time for a provider it has no start times for", async () => {
+    const modal = new FakeProvider("modal", { createMs: 300 });
+    const router = new Router({ providers: [modal, new FakeProvider("maritime")], ledger: false, benchFile: join(dir, "none.json"), quickFallback: { minSeconds: 0.05 } });
+    expect((await router.create({}, { provider: ["modal", "maritime"] })).provider).toBe("modal");
+  });
+
   it("defaults to a 120 s limit", async () => {
     const { DEFAULT_CREATE_TIMEOUT_S } = await import("../src/router.js");
     expect(DEFAULT_CREATE_TIMEOUT_S).toBe(120);

@@ -2,6 +2,13 @@
 
 All notable changes. Versions follow [semver](https://semver.org/); while the version is 0.x, a minor bump can change the API.
 
+## 0.7.0 (2026-11-13)
+
+### Changed
+- **A provider that hangs is given up on sooner.** Once the router knows a provider's usual start time (3 of its own creates, or the bench file), a create that runs far past it moves to the next provider: after 5x the usual time (or 1.5x the slowest recent start, if longer), at least 10 s, instead of the full 120 s. A Daytona create that hung for 65 s on 13 Nov would have moved on after about 10 s. It never applies to the last provider left, or when the caller sets `createTimeoutSeconds`. `RouterOptions.quickFallback` tunes it (`{ factor, minSeconds }`) or turns it off (`false`). The timeout error says how long the provider usually takes.
+- **`sandboxrouter check --retry`** runs a failed provider once more and keeps that result, so a one-off error doesn't mark a provider failing. **`--out FILE`** writes every report as JSON, with the first try's failure when it was retried.
+- **The nightly check emails a summary when a provider needs a look:** what's broken (failed twice), which accounts are out of credit, and what only passed on the second try. It's a comment on one "Nightly live check" issue, which GitHub mails to the repo owner; nothing is sent on nights when everything passes, except one all-clear after an alarm. The run no longer fails on a provider failure, so there's one email, not two.
+
 ## 0.6.0 (2026-11-12)
 
 ### Added

@@ -9,7 +9,7 @@ let base = "";
 const fakes = ALL.map((id) => new FakeProvider(id, id === "maritime" ? { fail: "429 concurrency_limit" } : {}));
 
 beforeAll(async () => {
-  server = createApp(new Router({ providers: fakes }), "tok");
+  server = createApp(new Router({ failing: [], providers: fakes }), "tok");
   await new Promise<void>((r) => server.listen(0, "127.0.0.1", r));
   base = `http://127.0.0.1:${(server.address() as { port: number }).port}`;
 });
@@ -67,7 +67,7 @@ describe("HTTP API", () => {
   });
 
   it("answers CORS only for allowed origins", async () => {
-    const app = createApp(new Router({ providers: fakes }), "tok", ["https://sandboxrouter.dev"]);
+    const app = createApp(new Router({ failing: [], providers: fakes }), "tok", ["https://sandboxrouter.dev"]);
     await new Promise<void>((r) => app.listen(0, "127.0.0.1", r));
     const url = `http://127.0.0.1:${(app.address() as { port: number }).port}`;
     try {
