@@ -10,7 +10,7 @@ const DESCRIPTION =
   "A free, open-source router for AI agent sandboxes: one API across 30+ providers, priced side by side, tested on real accounts, with automatic fallback.";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://sandboxrouter.vercel.app"),
+  metadataBase: new URL("https://www.sandboxrouter.ai"),
   title: { default: "sandboxrouter: one API for every sandbox", template: "%s · sandboxrouter" },
   description: DESCRIPTION,
   openGraph: { title: "sandboxrouter", description: DESCRIPTION, url: "/", siteName: "sandboxrouter", type: "website" },

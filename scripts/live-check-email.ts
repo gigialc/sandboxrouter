@@ -18,17 +18,18 @@ export function note(reports: (CheckReport & { firstTry?: string })[], runUrl: s
     return f ? `${f.step}: ${clean(r.provider, f.detail ?? "failed")}` : "failed";
   };
   const broken = reports.filter((r) => !r.ok && !r.inconclusive);
-  const unpaid = reports.filter((r) => r.inconclusive);
+  const unpaid = reports.filter((r) => r.inconclusive?.includes("402"));
+  const noPackage = reports.filter((r) => r.inconclusive && !r.inconclusive.includes("402"));
   const flaky = reports.filter((r) => r.ok && r.firstTry);
   const fine = reports.filter((r) => r.ok && !r.firstTry);
   const total = reports.length;
 
-  if (!broken.length && !unpaid.length) {
+  if (!broken.length && !unpaid.length && !noPackage.length) {
     if (!lastNote.includes(PROBLEMS_MARK)) return "";
     return [`**Nightly check, ${day}: all ${total} providers pass again.**`, "", `Details: ${runUrl}`].join("\n") + "\n";
   }
 
-  const need = broken.length + unpaid.length;
+  const need = broken.length + unpaid.length + noPackage.length;
   const lines = [`**Nightly check, ${day}: ${need} of ${total} provider${total === 1 ? "" : "s"} need${need === 1 ? "s" : ""} a look.**`, ""];
   if (broken.length) {
     lines.push("**Broken** (failed twice in a row):");
@@ -41,6 +42,11 @@ export function note(reports: (CheckReport & { firstTry?: string })[], runUrl: s
       const why = r.results.find((x) => x.status === "skip" && x.detail?.includes("402"))?.detail ?? r.inconclusive ?? "";
       lines.push(`- ${r.provider}: ${clean(r.provider, why.replace(/^the account can't pay \(402\), so this run says nothing about \S+: /, ""))}`);
     }
+    lines.push("");
+  }
+  if (noPackage.length) {
+    lines.push("**Not run** (the check's machine is missing the provider's package; a fix in the workflow, not the provider):");
+    for (const r of noPackage) lines.push(`- ${r.provider}: ${r.inconclusive}`);
     lines.push("");
   }
   if (flaky.length) {

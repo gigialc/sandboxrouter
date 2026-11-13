@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Button } from "@/components/chrome";
-import { CodeTabs } from "@/components/code";
+import { CodeBlock, CodeTabs, InstallChip } from "@/components/code";
 import { Feature } from "@/components/Feature";
 import { RouteDemo } from "@/components/RouteDemo";
 import { DEFAULT_SHAPE, HOSTED_FEE_PCT, HOSTED_URL, NPM, REPO, REPO_PUBLIC, site } from "@/lib/site";
@@ -58,9 +58,16 @@ export default function Home() {
           </Button>
           <Button href="/docs">Docs</Button>
         </div>
-        <p className="mt-10 max-w-md text-[15px] leading-7 text-ink-2">
-          Sandboxes for agents, evals and RL rollouts, across {cloud.length} providers. Open source, or one hosted key.
+        <p className="mt-10 max-w-lg text-[15px] leading-7 text-ink-2">
+          {passed.length} providers pass our check on real accounts: start, run, stream, files, timeouts and kill. Your
+          sandboxes go to the cheapest of them that fits, and move on when one fails. Open source, or one hosted key.
         </p>
+        <div className="mt-10 flex w-full max-w-xl flex-col items-center gap-4">
+          <InstallChip cmd={`npm i ${NPM}`} />
+          <div className="w-full text-left">
+            <CodeBlock title="index.ts" code={OWN_KEYS} />
+          </div>
+        </div>
       </section>
 
       <div className="overflow-hidden border-y border-line py-6">

@@ -1,6 +1,6 @@
 {
   "version": "0.7.0",
-  "generatedAt": "2026-11-13T22:02:10.056Z",
+  "generatedAt": "2026-11-13T23:35:31.922Z",
   "shapes": [
     "1x2",
     "2x4",
@@ -33,7 +33,7 @@
         "gbHour": 0.0009589041095890411,
         "note": "whole-minute billing: monthly shape total / 730 / 60; running estimate includes default disk (2 vCPU / 4 GB / 4 GB disk = $4.76/mo); sleeping/stopped disk $0.09/GB-mo; gVisor; $5 minimum top-up, wallet must hold one running day",
         "source": "https://www.agent37.com/docs/agents-api/billing",
-        "checked": "2026-11-05"
+        "checked": "2026-11-13"
       },
       "access": null,
       "billing": "allocated",
@@ -42,8 +42,8 @@
       "planLabel": "none",
       "defaultSize": null,
       "check": {
-        "date": "2026-11-11T20:06:27.451Z",
-        "version": "0.3.4",
+        "date": "2026-11-13T23:31:09.621Z",
+        "version": "0.7.0",
         "by": null,
         "passed": 14,
         "failed": [],
@@ -74,7 +74,7 @@
       },
       "live": {
         "status": "passed",
-        "label": "passed (2026-11-11)"
+        "label": "passed (2026-11-13)"
       },
       "billedVsList": null,
       "computers": [],
@@ -197,7 +197,7 @@
         "gbHour": 0.00945,
         "note": "per second; CPU billed on actual use (I/O wait free), memory on peak; fixed 2 vCPU / 8 GB session, this is the 100%-CPU price",
         "source": "https://aws.amazon.com/bedrock/agentcore/pricing/",
-        "checked": "2026-11-04"
+        "checked": "2026-11-13"
       },
       "access": null,
       "billing": "active-cpu",
@@ -627,7 +627,7 @@
         "gbHour": 0,
         "note": "fixed sizes billed per second ($0.018/h for 2 vCPU / 4 GB up to $0.20/h for 16 / 32); needs a plan from $20/mo, paid back as VM time",
         "source": "https://docs.boat.dev/pricing.md",
-        "checked": "2026-11-04"
+        "checked": "2026-11-13"
       },
       "access": null,
       "billing": "allocated",
@@ -709,8 +709,8 @@
       "planLabel": "$5/mo",
       "defaultSize": null,
       "check": {
-        "date": "2026-11-11T20:06:12.653Z",
-        "version": "0.3.4",
+        "date": "2026-11-13T23:31:27.826Z",
+        "version": "0.7.0",
         "by": null,
         "passed": 13,
         "failed": [],
@@ -738,7 +738,7 @@
       },
       "live": {
         "status": "passed",
-        "label": "passed (2026-11-11)"
+        "label": "passed (2026-11-13)"
       },
       "billedVsList": null,
       "computers": [],
@@ -857,7 +857,7 @@
         "gbHour": 0.0162,
         "note": "per second, plus disk above 5 GiB",
         "source": "https://www.daytona.io/pricing",
-        "checked": "2026-11-04"
+        "checked": "2026-11-13"
       },
       "access": null,
       "billing": "allocated",
@@ -1336,7 +1336,7 @@
         "gbHour": 0.021875,
         "note": "bills actual CPU and memory use; this is the full-use price; storage extra",
         "source": "https://fly.io/sprites",
-        "checked": "2026-11-04"
+        "checked": "2026-11-13"
       },
       "access": null,
       "billing": "active-cpu",
@@ -1345,8 +1345,8 @@
       "planLabel": "none",
       "defaultSize": null,
       "check": {
-        "date": "2026-11-11T21:16:54.556Z",
-        "version": "0.3.5",
+        "date": "2026-11-13T23:32:30.046Z",
+        "version": "0.7.0",
         "by": null,
         "passed": 13,
         "failed": [],
@@ -1374,7 +1374,7 @@
       },
       "live": {
         "status": "passed",
-        "label": "passed (2026-11-11)"
+        "label": "passed (2026-11-13)"
       },
       "billedVsList": null,
       "computers": [],
@@ -1437,8 +1437,8 @@
       "planLabel": "none",
       "defaultSize": null,
       "check": {
-        "date": "2026-11-11T21:25:54.215Z",
-        "version": "0.3.5",
+        "date": "2026-11-13T23:31:50.223Z",
+        "version": "0.7.0",
         "by": null,
         "passed": 14,
         "failed": [],
@@ -1469,7 +1469,7 @@
       },
       "live": {
         "status": "passed",
-        "label": "passed (2026-11-11)"
+        "label": "passed (2026-11-13)"
       },
       "billedVsList": null,
       "computers": [],
@@ -1908,8 +1908,8 @@
       "planLabel": "none",
       "defaultSize": null,
       "check": {
-        "date": "2026-11-11T21:16:54.699Z",
-        "version": "0.3.5",
+        "date": "2026-11-13T23:32:12.745Z",
+        "version": "0.7.0",
         "by": null,
         "passed": 13,
         "failed": [],
@@ -1937,7 +1937,7 @@
       },
       "live": {
         "status": "passed",
-        "label": "passed (2026-11-11)"
+        "label": "passed (2026-11-13)"
       },
       "billedVsList": null,
       "computers": [],
@@ -2056,7 +2056,7 @@
         "gbHour": 0.00833,
         "note": "per second on Northflank Cloud, ephemeral disk included; sandboxes run as deployment services (microVMs)",
         "source": "https://northflank.com/pricing",
-        "checked": "2026-11-04"
+        "checked": "2026-11-13"
       },
       "access": null,
       "billing": "allocated",
@@ -2130,8 +2130,8 @@
       "planLabel": "none",
       "defaultSize": null,
       "check": {
-        "date": "2026-11-11T20:09:14.474Z",
-        "version": "0.3.4",
+        "date": "2026-11-13T23:33:56.411Z",
+        "version": "0.7.0",
         "by": null,
         "passed": 14,
         "failed": [],
@@ -2157,7 +2157,7 @@
       },
       "live": {
         "status": "passed",
-        "label": "passed (2026-11-11)"
+        "label": "passed (2026-11-13)"
       },
       "billedVsList": null,
       "computers": [],
@@ -2355,7 +2355,7 @@
       ],
       "limits": {
         "maxVcpu": 64,
-        "maxMemoryGb": 512
+        "maxMemoryGb": 256
       },
       "credentials": [
         [
@@ -2366,9 +2366,9 @@
       "pricing": {
         "vcpuHour": 0.015,
         "gbHour": 0.008,
-        "note": "per second on what the box uses (CPU time, RAM it holds, disk $0.0007/GiB-h), billed per minute; RAM counts the VM's file cache, up to the 16 GiB minimum limit, so file-heavy work can hold more than you asked for; paused/sleeping free; creation $0.01 at 2-4 vCPU on the free plan ($5/mo credit with a card), waived on Pro $250/mo",
+        "note": "on what the box uses (CPU time, RAM it holds, disk $0.0007/GiB-h), sampled per second and not rounded up; RAM counts the VM's file cache, up to its memory limit (16 GiB at least), so file-heavy work can hold more than you asked for; paused/sleeping free; $0.01 per new Sailbox on the free plan, waived on Pro and Enterprise",
         "source": "https://docs.sailresearch.com/sailboxes-pricing.md",
-        "checked": "2026-11-06"
+        "checked": "2026-11-13"
       },
       "access": null,
       "billing": "active-cpu",
@@ -2476,8 +2476,8 @@
       "planLabel": "maybe $20/mo (credited)",
       "defaultSize": null,
       "check": {
-        "date": "2026-11-11T20:06:10.679Z",
-        "version": "0.3.4",
+        "date": "2026-11-13T23:32:47.953Z",
+        "version": "0.7.0",
         "by": null,
         "passed": 14,
         "failed": [],
@@ -2503,7 +2503,7 @@
       },
       "live": {
         "status": "passed",
-        "label": "passed (2026-11-11)"
+        "label": "passed (2026-11-13)"
       },
       "billedVsList": null,
       "computers": [],
@@ -2695,8 +2695,8 @@
       "planLabel": "none",
       "defaultSize": null,
       "check": {
-        "date": "2026-11-11T20:08:33.499Z",
-        "version": "0.3.4",
+        "date": "2026-11-13T23:33:23.331Z",
+        "version": "0.7.0",
         "by": null,
         "passed": 13,
         "failed": [],
@@ -2724,7 +2724,7 @@
       },
       "live": {
         "status": "passed",
-        "label": "passed (2026-11-11)"
+        "label": "passed (2026-11-13)"
       },
       "billedVsList": null,
       "computers": [],

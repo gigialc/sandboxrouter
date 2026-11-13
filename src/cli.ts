@@ -245,7 +245,7 @@ async function main() {
     else {
       const unpaid = reports.filter((r) => r.inconclusive).length;
       const ran = reports.length - unpaid;
-      console.log(`\n${reports.filter((r) => r.ok).length}/${ran} passed${unpaid ? `; ${unpaid} not run (the account can't pay)` : ""}`);
+      console.log(`\n${reports.filter((r) => r.ok).length}/${ran} passed${unpaid ? `; ${unpaid} not run (the account can't pay, or the provider's package isn't installed)` : ""}`);
     }
     if (reports.some((r) => !r.ok && !r.inconclusive)) process.exitCode = 1;
     return;
