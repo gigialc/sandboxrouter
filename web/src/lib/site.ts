@@ -100,7 +100,7 @@ export const REPO = "https://github.com/gigialc/sandboxrouter";
 /** The repo is public (since 2026-11-07). Set to false to hide GitHub links and "open a PR" wording, e.g. while a repo is private. */
 export const REPO_PUBLIC = true;
 /** The hosted key: one sandboxrouter API key, prepaid credit, sandboxes on sandboxrouter's own provider accounts. */
-export const HOSTED_URL = "https://sandboxrouter-hosted.onrender.com";
+export const HOSTED_URL = "https://api.sandboxrouter.ai";
 export const HOSTED_FEE_PCT = 5.5;
 export const NPM_URL = "https://www.npmjs.com/package/@sandboxrouter/sdk";
 export const NPM = "@sandboxrouter/sdk";
