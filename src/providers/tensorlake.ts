@@ -29,6 +29,7 @@ export class TensorlakeProvider implements Provider {
     try {
       sbx = await Sandbox.create({
         apiKey: this.apiKey,
+        name: `sbr-${randomUUID()}`,
         image,
         cpus: spec.vcpu ?? DEFAULT_VCPU,
         memoryMb: Math.round((spec.memoryGb ?? DEFAULT_MEMORY_GB) * 1024),
@@ -157,14 +158,9 @@ class TensorlakeBox implements ProviderSandbox {
     }
   }
 
-  /**
-   * Suspend, keeping memory and disk. Only named sandboxes can suspend, so an unnamed one is
-   * named first. router.get() resumes it.
-   */
+  /** Suspend, keeping memory and disk. Names are assigned at creation and are immutable. */
   async pause(): Promise<void> {
     try {
-      const info = await this.sbx.info();
-      if (!info.name) await this.sbx.update({ name: `sbr-${randomUUID()}` });
       await this.sbx.suspend();
     } catch (err) {
       throw fail(err);
