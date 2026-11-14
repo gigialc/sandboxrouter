@@ -8,8 +8,20 @@ import { langsmithSize } from "./providers/langsmith.js";
 export interface ProviderInfo {
   id: ProviderId;
   name: string;
-  /** List price while running, USD. */
-  pricing: { vcpuHour: number; gbHour: number; note?: string; source: string; checked: string };
+  /** List price while running, USD, and the rules that turn running time into a bill. */
+  pricing: {
+    vcpuHour: number;
+    gbHour: number;
+    /** Each sandbox is billed for at least this many seconds of running time. Default: no minimum. */
+    minSeconds?: number;
+    /** Running time is rounded up to a multiple of this many seconds. Default 1 (per second). */
+    incrementSeconds?: number;
+    /** A fixed charge per sandbox created, USD, on top of running time. */
+    perSandboxUsd?: number;
+    note?: string;
+    source: string;
+    checked: string;
+  };
   /** Capabilities this adapter actually implements, not everything the provider markets. */
   capabilities: Capability[];
   limits: { maxVcpu: number; maxMemoryGb: number };
@@ -169,6 +181,7 @@ const ENTRIES: Omit<ProviderInfo, "billing" | "plan">[] = [
     id: "vercel",
     name: "Vercel Sandbox",
     pricing: {
+      minSeconds: 60,
       vcpuHour: 0.128,
       gbHour: 0.0212,
       note: "iad1; active CPU, provisioned RAM in minimum 1-minute increments (2 GB/vCPU); full-CPU estimate; Hobby free within quotas, Pro $20/mo usage credit; creations $0.60/million and retained snapshots $0.08/GB-month extra",
@@ -368,6 +381,8 @@ ENTRIES.push(
     id: "azure",
     name: "Azure Container Apps dynamic sessions",
     pricing: {
+      minSeconds: 3600,
+      incrementSeconds: 3600,
       vcpuHour: 0.03,
       gbHour: 0,
       note: "flat $0.03 per session-hour (built-in Shell pools), billed per allocated session in 1-hour increments, East US; needs a session pool you create once",
@@ -405,6 +420,8 @@ ENTRIES.push(
     id: "agent37",
     name: "Agent37",
     pricing: {
+      minSeconds: 60,
+      incrementSeconds: 60,
       vcpuHour: 0.8 / 730,
       gbHour: 0.7 / 730,
       note: "whole-minute billing: monthly shape total / 730 / 60; running estimate includes default disk (2 vCPU / 4 GB / 4 GB disk = $4.76/mo); sleeping/stopped disk $0.09/GB-mo; gVisor; $5 minimum top-up, wallet must hold one running day",
@@ -452,6 +469,8 @@ ENTRIES.push(
     id: "codesandbox",
     name: "CodeSandbox SDK (Together)",
     pricing: {
+      minSeconds: 60,
+      incrementSeconds: 60,
       vcpuHour: 0.0743,
       gbHour: 0,
       note: "fixed tiers: Pico 2 vCPU / 1 GB $0.0743/h, Nano 2 / 4 $0.1486/h, up to 64 / 128 $4.7552/h; credits $0.01486, billed per started minute; Build free, 10 concurrent; Scale $170/mo incl. 1,100 credits",
@@ -482,6 +501,7 @@ ENTRIES.push(
     id: "sail",
     name: "Sailboxes (Sail Research)",
     pricing: {
+      perSandboxUsd: 0.01,
       vcpuHour: 0.015,
       gbHour: 0.008,
       note: "on what the box uses (CPU time, RAM it holds, disk $0.0007/GiB-h), sampled per second and not rounded up; RAM counts the VM's file cache, up to its memory limit (16 GiB at least), so file-heavy work can hold more than you asked for; paused/sleeping free; $0.01 per new Sailbox on the free plan, waived on Pro and Enterprise",
@@ -746,6 +766,22 @@ export const BOAT_SIZES = [
 
 export function cloudflareInstance(vcpu: number, memoryGb: number) {
   return CLOUDFLARE_INSTANCES.find((t) => t.vcpu >= vcpu && t.memoryGb >= memoryGb) ?? CLOUDFLARE_INSTANCES[CLOUDFLARE_INSTANCES.length - 1];
+}
+
+/** How a provider turns running time into a bill: minimum, rounding and fixed per-sandbox charge. */
+export function billingRules(id: ProviderId): { minSeconds: number; incrementSeconds: number; perSandboxUsd: number } {
+  const p = CATALOG.find((c) => c.id === id)?.pricing;
+  return { minSeconds: p?.minSeconds ?? 0, incrementSeconds: p?.incrementSeconds ?? 1, perSandboxUsd: p?.perSandboxUsd ?? 0 };
+}
+
+/**
+ * What a provider bills for one sandbox that ran `seconds` at `hourlyUsd`: running time rounded up to
+ * the provider's increment, at least its minimum, plus any fixed per-sandbox charge.
+ */
+export function billedUsd(id: ProviderId, hourlyUsd: number, seconds: number): number {
+  const r = billingRules(id);
+  const billed = Math.max(r.minSeconds, Math.ceil(Math.max(0, seconds) / r.incrementSeconds) * r.incrementSeconds);
+  return (hourlyUsd * billed) / 3600 + r.perSandboxUsd;
 }
 
 export function info(id: ProviderId): ProviderInfo {

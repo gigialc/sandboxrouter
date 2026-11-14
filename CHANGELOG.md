@@ -2,6 +2,19 @@
 
 All notable changes. Versions follow [semver](https://semver.org/); while the version is 0.x, a minor bump can change the API.
 
+## 0.8.0 (2026-11-14)
+
+### Fixed
+- **Sail's per-sandbox charge was counted as an hourly markup.** Its saved 10-minute cost run billed $0.0151: $0.0100 creation charge plus $0.0051 of running time. The router turned the total into "bills 46% over list" (`BILLED_VS_LIST` 1.458), so every hour of a Sail sandbox was estimated at $0.0904 for 2 vCPU / 4 GB. The fixed charge now comes out before the ratio is measured: Sail is $0.0307/h (0.495 of list: it bills the CPU and memory a box uses) plus $0.01 per sandbox.
+
+### Added
+- **Billing rules in the catalog.** `pricing.minSeconds`, `incrementSeconds` and `perSandboxUsd`: Agent37 and CodeSandbox bill whole minutes (at least one), Vercel at least a minute, Azure whole hours, Sail $0.01 per sandbox on its free plan. `billingRules(provider)` and `billedUsd(provider, hourlyUsd, seconds)` expose them. Measured on Agent37 on 14 Nov: a 16 s sandbox was billed 60 s; a 10-minute one exactly its list price.
+- `Candidate.perSandboxUsd`. Ranking spreads it over the sandbox's lifetime (`timeoutMinutes`, default 30), so a provider with a fixed charge drops on short sandboxes; `sandboxrouter route` shows it (`+ $0.01/sandbox`).
+- `sandboxrouter cost settle` reads Agent37's real bill (`/v1/usage`).
+
+### Changed
+- The homepage leads with the real-account check and shows `npm i` and an example; links use sandboxrouter.ai and api.sandboxrouter.ai. A provider whose SDK isn't installed where `check` runs is "not run", not a failure.
+
 ## 0.7.0 (2026-11-13)
 
 ### Changed

@@ -171,7 +171,8 @@ async function main() {
       const list = c.listHourlyUsd !== c.estimatedHourlyUsd ? ` (list $${c.listHourlyUsd.toFixed(4)})` : "";
       const size = `${c.size.vcpu} vCPU / ${c.size.memoryGb} GB`;
       const speed = c.medianCreateMs !== undefined ? `${c.medianCreateMs} ms` : "";
-      const cols = [`$${c.estimatedHourlyUsd.toFixed(4)}/hr${list}`, size, speed, tested].filter(Boolean).join("  ");
+      const fee = c.perSandboxUsd ? ` + $${c.perSandboxUsd}/sandbox` : "";
+      const cols = [`$${c.estimatedHourlyUsd.toFixed(4)}/hr${list}${fee}`, size, speed, tested].filter(Boolean).join("  ");
       console.log(`${mark} ${c.provider.padEnd(11)} ${cols}${c.skip ? `  (skipped: ${c.skip})` : ""}`);
     }
     return;

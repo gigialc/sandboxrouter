@@ -1,6 +1,6 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { benchmarksPublishable, fittingSpec, hourlyCost } from "./catalog.js";
+import { benchmarksPublishable, billingRules, fittingSpec, hourlyCost } from "./catalog.js";
 import { Router } from "./router.js";
 import type { ProviderId, SandboxSpec } from "./types.js";
 
@@ -192,6 +192,21 @@ export const BILL_READERS: Partial<Record<ProviderId, Reader>> = {
     };
   },
 
+  async agent37(e) {
+    const h = { Authorization: `Bearer ${process.env.AGENT37_API_KEY}` };
+    const api = process.env.AGENT37_API_URL ?? "https://api.agent37.com";
+    const q = new URLSearchParams({ from: e.startedAt!.slice(0, 10), to: e.endedAt!.slice(0, 10) });
+    const j = await getJson(`${api}/v1/usage?${q}`, h);
+    const id = e.sandboxId!.replace(/^agent37:/, "");
+    const row = (j.instances ?? []).find((i: any) => i.id === id);
+    if (!row) return { source: "agent37 /v1/usage: not posted yet" };
+    return {
+      usd: round((row.total_micros ?? 0) / 1e6),
+      seconds: (row.awake_minutes ?? 0) * 60,
+      source: `agent37 /v1/usage total_micros (billed in whole minutes: ${row.awake_minutes ?? 0} awake)`,
+    };
+  },
+
   async e2b() {
     return { source: "no billing API: compare the console usage tab (console.e2b.dev, Usage)" };
   },
@@ -264,10 +279,14 @@ export function billedVsList(dir = "results/cost"): { provider: ProviderId; rati
       const usd = e.bill?.usd;
       const predicted = e.predictedUsd;
       if (!usd || !predicted || usd <= 0 || predicted <= 0 || !benchmarksPublishable(e.provider)) continue;
+      // A fixed per-sandbox charge (Sail's $0.01) isn't an hourly rate: take it out, or a 10-minute run
+      // turns it into "bills 46% over list" for every hour after.
+      const running = usd - billingRules(e.provider).perSandboxUsd;
+      if (running <= 0) continue;
       if (/integer cents/i.test(e.bill!.source) && predicted < 1) continue;
       const date = run.date.slice(0, 10);
       const prev = latest.get(e.provider);
-      if (!prev || date >= prev.date) latest.set(e.provider, { ratio: Math.round((usd / predicted) * 1000) / 1000, date });
+      if (!prev || date >= prev.date) latest.set(e.provider, { ratio: Math.round((running / predicted) * 1000) / 1000, date });
     }
   }
   return [...latest].map(([provider, v]) => ({ provider, ...v })).sort((a, b) => a.provider.localeCompare(b.provider));
