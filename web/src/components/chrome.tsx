@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { MobileNav } from "@/components/MobileNav";
-import { HOSTED_URL, NPM_URL, REPO, REPO_PUBLIC, site } from "@/lib/site";
+import { HOSTED_PUBLIC, HOSTED_URL, NPM_URL, REPO, REPO_PUBLIC, site } from "@/lib/site";
 
 export function Logo({ className = "" }: { className?: string }) {
   return (
@@ -19,7 +19,7 @@ export function Logo({ className = "" }: { className?: string }) {
 const NAV = [
   { href: "/providers", label: "Providers" },
   { href: "/docs", label: "Docs" },
-  { href: "/#hosted", label: "Pricing" },
+  ...(HOSTED_PUBLIC ? [{ href: "/#hosted", label: "Pricing" }] : []),
   ...(REPO_PUBLIC ? [{ href: REPO, label: "GitHub" }] : []),
 ];
 
@@ -37,9 +37,15 @@ export function Nav() {
             </Link>
           ))}
           <MobileNav links={NAV} />
-          <a href={`${HOSTED_URL}/dashboard`} className="rounded-full bg-ink px-4 py-1.5 text-[13px] font-medium text-bg hover:bg-ink-2">
-            Get a key
-          </a>
+          {HOSTED_PUBLIC ? (
+            <a href={`${HOSTED_URL}/dashboard`} className="rounded-full bg-ink px-4 py-1.5 text-[13px] font-medium text-bg hover:bg-ink-2">
+              Get a key
+            </a>
+          ) : (
+            <Link href="/docs#quickstart" className="rounded-full bg-ink px-4 py-1.5 text-[13px] font-medium text-bg hover:bg-ink-2">
+              Quickstart
+            </Link>
+          )}
         </nav>
       </div>
     </header>
@@ -51,16 +57,20 @@ export function Footer() {
     <footer className="mt-32 border-t border-line">
       <div className="flex flex-col gap-4 px-5 sm:px-10 py-10 text-[13px] text-muted sm:flex-row sm:items-center">
         <Logo className="text-ink-2" />
-        <span>Open source, MIT. v{site.version}. Hosted keys by AlgiAI, Corp.</span>
+        <span>Open source, MIT. v{site.version}.{HOSTED_PUBLIC && " Hosted keys by AlgiAI, Corp."}</span>
         <div className="flex flex-wrap gap-x-6 gap-y-3 sm:ml-auto">
           <Link href="/benchmarks" className="hover:text-ink">Benchmarks</Link>
           <Link href="/docs" className="hover:text-ink">Docs</Link>
           <Link href="/playground" className="hover:text-ink">Playground</Link>
           {REPO_PUBLIC && <a href={REPO} className="hover:text-ink">GitHub</a>}
           <a href={NPM_URL} className="hover:text-ink">npm</a>
-          <a href={`${HOSTED_URL}/dashboard`} className="hover:text-ink">Dashboard</a>
-          <a href={`${HOSTED_URL}/terms`} className="hover:text-ink">Terms</a>
-          <a href={`${HOSTED_URL}/privacy`} className="hover:text-ink">Privacy</a>
+          {HOSTED_PUBLIC && (
+            <>
+              <a href={`${HOSTED_URL}/dashboard`} className="hover:text-ink">Dashboard</a>
+              <a href={`${HOSTED_URL}/terms`} className="hover:text-ink">Terms</a>
+              <a href={`${HOSTED_URL}/privacy`} className="hover:text-ink">Privacy</a>
+            </>
+          )}
         </div>
       </div>
     </footer>

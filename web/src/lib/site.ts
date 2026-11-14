@@ -102,6 +102,8 @@ export const REPO_PUBLIC = true;
 /** The hosted key: one sandboxrouter API key, prepaid credit, sandboxes on sandboxrouter's own provider accounts. */
 export const HOSTED_URL = "https://api.sandboxrouter.ai";
 export const HOSTED_FEE_PCT = 5.5;
+/** Whether the site shows the hosted key (Get a key, pricing, dashboard, docs). Off until providers' accounts have auto-recharge. */
+export const HOSTED_PUBLIC = false;
 export const NPM_URL = "https://www.npmjs.com/package/@sandboxrouter/sdk";
 export const NPM = "@sandboxrouter/sdk";
 export const DEFAULT_SHAPE: Shape = "2x4";

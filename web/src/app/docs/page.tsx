@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { TableScroll } from "@/components/chrome";
 import { CodeBlock } from "@/components/code";
-import { HOSTED_FEE_PCT, HOSTED_URL, REPO, REPO_PUBLIC, site } from "@/lib/site";
+import { HOSTED_FEE_PCT, HOSTED_PUBLIC, HOSTED_URL, REPO, REPO_PUBLIC, site } from "@/lib/site";
 
 export const metadata: Metadata = { title: "Docs" };
 
@@ -16,7 +16,7 @@ const SECTIONS = [
   ["pause", "Pause and resume"],
   ["computers", "Desktops and phones"],
   ["server", "HTTP server"],
-  ["hosted", "Hosted key"],
+  ...(HOSTED_PUBLIC ? ([["hosted", "Hosted key"]] as const) : []),
   ["python", "Python"],
   ["bench", "Bench and leaderboard"],
   ["providers", "Adding a provider"],
@@ -286,6 +286,8 @@ SANDBOXROUTER_TOKEN=secret npx @sandboxrouter/sdk serve --cors https://your-site
           <code>stderr</code> events carry JSON string chunks, then one <code>result</code> event.
         </p>
 
+        {HOSTED_PUBLIC && (
+        <>
         <h2 id="hosted">Hosted key</h2>
         <p>
           The hosted service runs the same HTTP API on sandboxrouter&apos;s own provider accounts, so one key replaces all the provider
@@ -307,6 +309,8 @@ await sbx.kill();`}
           desktops are off for now, and accounts run up to 5 sandboxes at once for up to 4 hours each. See the{" "}
           <a href={`${HOSTED_URL}/terms`}>terms</a> and <a href={`${HOSTED_URL}/refunds`}>refund policy</a>.
         </p>
+        </>
+        )}
 
         <h2 id="python">Python</h2>
         <p>
