@@ -9,7 +9,7 @@ import { gc, listOpen } from "./gc.js";
 import { contributor, publishableCheck } from "./results.js";
 import { loadReports, makeReport, renderLeaderboard } from "./leaderboard.js";
 import { CATALOG, DEFAULT_MEMORY_GB, DEFAULT_VCPU, accessLabel, benchmarksPublishable, hourlyCost, listingOrder, planLabel, unfit } from "./catalog.js";
-import { Router } from "./router.js";
+import { Router, rankUsd, runHours } from "./router.js";
 import { createApp } from "./server.js";
 import { RouterError, type Capability, type ProviderId, type RouteOptions, type SandboxSpec, type Strategy } from "./types.js";
 
@@ -41,7 +41,7 @@ Usage:
   sandboxrouter screenshot <provider:id> [--out screen.png]
   sandboxrouter serve     [--port 8787] [--host 127.0.0.1] [--cors https://site.example,http://localhost:3000]
 
-Spec flags:   --vcpu N  --memory GB  --gpu T4  --timeout MIN
+Spec flags:   --vcpu N  --memory GB  --gpu T4  --timeout MIN  --expect SEC (how long you'll use it; ranks by the real bill)
 Route flags:  --provider e2b[,modal,...]  --strategy balanced|verified|cheapest|fastest (default balanced: cheapest real cost, speed breaks near-ties)
               --no-fallback  --fallback-any (also on setup errors like a bad key)
               --create-timeout SEC (per provider, default 120)  --require gpu,custom-image
@@ -56,6 +56,7 @@ const { values, positionals } = parseArgs({
     memory: { type: "string" },
     gpu: { type: "string" },
     timeout: { type: "string" },
+    expect: { type: "string" },
     provider: { type: "string" },
     strategy: { type: "string" },
     "no-fallback": { type: "boolean" },
@@ -101,6 +102,7 @@ const spec: SandboxSpec = {
   memoryGb: num(values.memory),
   gpu: values.gpu,
   timeoutMinutes: num(values.timeout),
+  expectedSeconds: num(values.expect),
 };
 const providers = list(values.provider) as ProviderId[] | undefined;
 const by = (() => {
@@ -172,7 +174,10 @@ async function main() {
       const size = `${c.size.vcpu} vCPU / ${c.size.memoryGb} GB`;
       const speed = c.medianCreateMs !== undefined ? `${c.medianCreateMs} ms` : "";
       const fee = c.perSandboxUsd ? ` + $${c.perSandboxUsd}/sandbox` : "";
-      const cols = [`$${c.estimatedHourlyUsd.toFixed(4)}/hr${list}${fee}`, size, speed, tested].filter(Boolean).join("  ");
+      // With --expect, what that run would be billed (minimum charge and fee included): what it's ranked by.
+      const hours = runHours(spec);
+      const run = spec.expectedSeconds ? `  ≈ $${(rankUsd(c, hours) * hours).toFixed(6)} for ${Math.round(hours * 3600)} s` : "";
+      const cols = [`$${c.estimatedHourlyUsd.toFixed(4)}/hr${list}${fee}${run}`, size, speed, tested].filter(Boolean).join("  ");
       console.log(`${mark} ${c.provider.padEnd(11)} ${cols}${c.skip ? `  (skipped: ${c.skip})` : ""}`);
     }
     return;

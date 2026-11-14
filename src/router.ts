@@ -98,7 +98,7 @@ export interface Candidate {
   failing: boolean;
   /**
    * A fixed charge per sandbox, USD, on top of `estimatedHourlyUsd` (Sail's free plan: $0.01). Ranking
-   * spreads it over the sandbox's lifetime (`timeoutMinutes`, default 30), so it weighs more on short ones.
+   * spreads it over the run (`expectedSeconds`, else `timeoutMinutes`, default 30), so it weighs more on short ones.
    */
   perSandboxUsd?: number;
   /** Why this provider won't be tried, if it won't. */
@@ -287,7 +287,7 @@ export class Router {
     // depends on who the provider is, only on its price, what it really billed, how fast it started for
     // this router and whether its last real-account check failed. An explicit list keeps the caller's order.
     if (!explicit) {
-      const hours = (spec.timeoutMinutes ?? 30) / 60;
+      const hours = runHours(spec);
       const byCost = (a: Candidate, b: Candidate) => rankUsd(a, hours) - rankUsd(b, hours) || a.provider.localeCompare(b.provider);
       const byList = (a: Candidate, b: Candidate) => a.listHourlyUsd - b.listHourlyUsd || a.provider.localeCompare(b.provider);
       if (strategy === "fastest") {
@@ -578,8 +578,8 @@ function round(n: number) {
  * The default order. Providers whose last real-account check failed go last. The rest go cheapest
  * first by effective price (list price x what the provider really billed, where measured), except that
  * providers within PRICE_TIE of the cheapest remaining one count as a tie and go fastest first (by
- * median create time; unknown speed after known), then cheapest, then alphabetical. A fixed
- * per-sandbox charge counts as spread over `lifetimeHours` (the sandbox's timeoutMinutes).
+ * median create time; unknown speed after known), then cheapest, then alphabetical. Price is what a run
+ * of `lifetimeHours` would be billed (`rankUsd`), as USD per hour.
  */
 export function balanced(list: Candidate[], lifetimeHours = 0.5): Candidate[] {
   const cost = (c: Candidate) => rankUsd(c, lifetimeHours);
@@ -601,9 +601,22 @@ export function balanced(list: Candidate[], lifetimeHours = 0.5): Candidate[] {
   return [...order(list.filter((c) => !c.failing)), ...order(list.filter((c) => c.failing))];
 }
 
-/** USD per hour a candidate is ranked by: its hourly estimate plus any per-sandbox charge spread over the lifetime. */
-function rankUsd(c: Candidate, lifetimeHours: number): number {
-  return c.estimatedHourlyUsd + (c.perSandboxUsd ?? 0) / Math.max(lifetimeHours, 1 / 60);
+/** Hours ranking assumes a sandbox runs: `expectedSeconds` (no longer than the lifetime), else `timeoutMinutes` (default 30). */
+export function runHours(spec: SandboxSpec): number {
+  const lifetime = (spec.timeoutMinutes ?? 30) * 60;
+  return Math.min(spec.expectedSeconds ?? lifetime, lifetime) / 3600;
+}
+
+/**
+ * USD per hour a candidate is ranked by: what a run of `hours` would be billed, divided by `hours`. The
+ * run is rounded up to the provider's minimum and billing increment (`billingRules`), and its
+ * per-sandbox charge is added, so short runs favor providers that bill by the second without a fee.
+ */
+export function rankUsd(c: Candidate, hours: number): number {
+  const { minSeconds, incrementSeconds } = billingRules(c.provider);
+  const seconds = hours * 3600;
+  const billed = Math.max(minSeconds, Math.ceil(seconds / incrementSeconds - 1e-9) * incrementSeconds);
+  return (c.estimatedHourlyUsd * billed) / Math.max(seconds, 1) + (c.perSandboxUsd ?? 0) / Math.max(hours, 1 / 3600);
 }
 
 /** Seconds to wait for one provider's create before trying the next (RouteOptions.createTimeoutSeconds). */

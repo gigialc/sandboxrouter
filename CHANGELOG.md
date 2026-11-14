@@ -2,6 +2,14 @@
 
 All notable changes. Versions follow [semver](https://semver.org/); while the version is 0.x, a minor bump can change the API.
 
+## 0.8.2 (2026-11-14)
+
+### Added
+- **`expectedSeconds`** on the spec (`--expect SEC` in the CLI, `expected_seconds` in Python): how long you expect to use the sandbox. Ranking then uses what that run would really be billed: the provider's minimum charge and billing increment, plus any per-sandbox fee. Agent37 is cheapest per hour but bills at least a minute, so for runs under about 18 s at 2 vCPU / 4 GB, Maritime (per second, no minimum) now goes first. It's only a hint: the sandbox still lives until you kill it or `timeoutMinutes` runs out. `sandboxrouter route --expect 10` shows each provider's cost for the run.
+
+### Changed
+- Ranking without `expectedSeconds` also rounds the lifetime up to each provider's minimum and increment. That changes nothing at the default 30 minutes, except Azure (billed by the hour), which now counts as a full hour on lifetimes under 60 minutes.
+
 ## 0.8.1 (2026-11-14)
 
 ### Fixed

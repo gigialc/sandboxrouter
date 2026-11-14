@@ -262,7 +262,7 @@ SANDBOXROUTER_TOKEN=secret npx @sandboxrouter/sdk serve --cors https://your-site
               {[
                 ["GET /v1/providers", ""],
                 ["POST /v1/route", "same as create; returns the candidate order"],
-                ["POST /v1/sandboxes", "{ vcpu, memoryGb, gpu, env, timeoutMinutes, image, provider, strategy, fallback, createTimeoutSeconds, require }"],
+                ["POST /v1/sandboxes", "{ vcpu, memoryGb, gpu, env, timeoutMinutes, expectedSeconds, image, provider, strategy, fallback, createTimeoutSeconds, require }"],
                 ["POST /v1/sandboxes/:id/exec", "{ cmd, cwd, env, timeoutSeconds, stream }"],
                 ["PUT /v1/sandboxes/:id/files?path=", "raw bytes"],
                 ["GET /v1/sandboxes/:id/files?path=", ""],
