@@ -45,7 +45,7 @@ List price while running, 2 vCPU / 4 GB, cheapest first; waitlisted sign-ups fol
 | [Agent37](https://sandboxrouter.ai/providers/agent37) | $0.007 | none | passed (2026-11-13) | [pricing](https://www.agent37.com/docs/agents-api/billing) |
 | [Boat](https://sandboxrouter.ai/providers/boat) | $0.018 | $20/mo (credited) | not run yet | [pricing](https://docs.boat.dev/pricing.md) |
 | [Maritime](https://sandboxrouter.ai/providers/maritime) | $0.022 | $20/mo (credited) | passed (2026-11-13) | [pricing](https://maritime.sh/pricing) |
-| [Sailboxes (Sail Research)](https://sandboxrouter.ai/providers/sail) | up to $0.062 | none | passed (2026-11-13) | [pricing](https://docs.sailresearch.com/sailboxes-pricing.md) |
+| [Sailboxes (Sail Research)](https://sandboxrouter.ai/providers/sail) | up to $0.062 | none | passed (2026-11-14) | [pricing](https://docs.sailresearch.com/sailboxes-pricing.md) |
 | [Northflank](https://sandboxrouter.ai/providers/northflank) | $0.067 | none | not run yet | [pricing](https://northflank.com/pricing) |
 | [Morph Cloud](https://sandboxrouter.ai/providers/morph) | $0.100 | none | not run yet | [pricing](https://cloud.morph.so/web/pricing) |
 | [exe.dev](https://sandboxrouter.ai/providers/exedev) | $0.105 | $15/mo | not run yet | [pricing](https://exe.dev/docs/standalone-vms.md) |
@@ -57,7 +57,7 @@ List price while running, 2 vCPU / 4 GB, cheapest first; waitlisted sign-ups fol
 | [Blaxel](https://sandboxrouter.ai/providers/blaxel) | $0.166 | none | passed (2026-11-13) | [pricing](https://blaxel.ai/pricing) |
 | [HOPX](https://sandboxrouter.ai/providers/hopx) | $0.166 | none | not run yet | [pricing](https://hopx.ai/pricing) |
 | [Superserve](https://sandboxrouter.ai/providers/superserve) | $0.166 | maybe $20/mo (credited) | passed (2026-11-13) | [pricing](https://superserve.ai/pricing) |
-| [Tensorlake](https://sandboxrouter.ai/providers/tensorlake) | up to $0.200 | none | not run yet | [pricing](https://www.tensorlake.ai/pricing) |
+| [Tensorlake](https://sandboxrouter.ai/providers/tensorlake) | up to $0.200 | none | passed (2026-11-14) | [pricing](https://www.tensorlake.ai/pricing) |
 | [Upstash Box](https://sandboxrouter.ai/providers/upstash) | up to $0.200 | none | not run yet | [pricing](https://upstash.com/pricing/box) |
 | [Cloudflare Sandbox](https://sandboxrouter.ai/providers/cloudflare) | up to $0.216 | $5/mo | passed (2026-11-13) | [pricing](https://developers.cloudflare.com/containers/platform/pricing/) |
 | [Amazon Bedrock AgentCore Code Interpreter](https://sandboxrouter.ai/providers/agentcore) | up to $0.217 | none | passed (2026-11-13) | [pricing](https://aws.amazon.com/bedrock/agentcore/pricing/) |

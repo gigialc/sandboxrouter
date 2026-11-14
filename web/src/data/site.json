@@ -1,6 +1,6 @@
 {
-  "version": "0.8.0",
-  "generatedAt": "2026-11-14T18:44:05.227Z",
+  "version": "0.8.1",
+  "generatedAt": "2026-11-14T19:25:03.600Z",
   "shapes": [
     "1x2",
     "2x4",
@@ -2387,8 +2387,8 @@
       "planLabel": "none",
       "defaultSize": null,
       "check": {
-        "date": "2026-11-13T22:02:08.430Z",
-        "version": "0.7.0",
+        "date": "2026-11-14T19:24:49.636Z",
+        "version": "0.8.0",
         "by": null,
         "passed": 14,
         "failed": [],
@@ -2414,7 +2414,7 @@
       },
       "live": {
         "status": "passed",
-        "label": "passed (2026-11-13)"
+        "label": "passed (2026-11-14)"
       },
       "billedVsList": {
         "ratio": 0.495,
@@ -2575,10 +2575,35 @@
       "noBenchmarks": null,
       "planLabel": "none",
       "defaultSize": null,
-      "check": null,
+      "check": {
+        "date": "2026-11-14T19:24:00.451Z",
+        "version": "0.8.0",
+        "by": null,
+        "passed": 14,
+        "failed": [],
+        "skipped": [],
+        "notRun": [],
+        "notes": [],
+        "steps": {
+          "create": "pass",
+          "exec: stdout, stderr, exit code": "pass",
+          "exec: env and cwd": "pass",
+          "exec: UTF-8 output": "pass",
+          "exec: streaming": "pass",
+          "files: binary round-trip": "pass",
+          "files: 1 MB round-trip": "pass",
+          "files: missing file is an error": "pass",
+          "files: visible to commands": "pass",
+          "exec: command timeout": "pass",
+          "exec: timed-out command was stopped": "pass",
+          "pause and resume": "pass",
+          "kill": "pass",
+          "killed sandbox is gone": "pass"
+        }
+      },
       "live": {
-        "status": "untested",
-        "label": "not run yet"
+        "status": "passed",
+        "label": "passed (2026-11-14)"
       },
       "billedVsList": null,
       "computers": [],

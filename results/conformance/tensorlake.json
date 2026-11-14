@@ -1,0 +1,84 @@
+{
+  "tool": "sandboxrouter-check",
+  "version": "0.8.0",
+  "date": "2026-11-14T19:24:00.451Z",
+  "platform": "darwin-arm64",
+  "provider": "tensorlake",
+  "sandboxId": "tensorlake:q10ynis442wvffi7b82ic",
+  "results": [
+    {
+      "step": "create",
+      "ms": 1784,
+      "status": "pass",
+      "detail": "tensorlake:q10ynis442wvffi7b82ic, ~$0.2/hr"
+    },
+    {
+      "step": "exec: stdout, stderr, exit code",
+      "ms": 646,
+      "status": "pass"
+    },
+    {
+      "step": "exec: env and cwd",
+      "ms": 156,
+      "status": "pass"
+    },
+    {
+      "step": "exec: UTF-8 output",
+      "ms": 167,
+      "status": "pass"
+    },
+    {
+      "step": "exec: streaming",
+      "ms": 3806,
+      "status": "pass",
+      "detail": "first output after 317 ms"
+    },
+    {
+      "step": "files: binary round-trip",
+      "ms": 316,
+      "status": "pass"
+    },
+    {
+      "step": "files: 1 MB round-trip",
+      "ms": 4685,
+      "status": "pass"
+    },
+    {
+      "step": "files: missing file is an error",
+      "ms": 133,
+      "status": "pass"
+    },
+    {
+      "step": "files: visible to commands",
+      "ms": 474,
+      "status": "pass"
+    },
+    {
+      "step": "exec: command timeout",
+      "ms": 3165,
+      "status": "pass",
+      "detail": "threw after 3165 ms"
+    },
+    {
+      "step": "exec: timed-out command was stopped",
+      "ms": 6365,
+      "status": "pass"
+    },
+    {
+      "step": "pause and resume",
+      "ms": 2658,
+      "status": "pass"
+    },
+    {
+      "step": "kill",
+      "ms": 132,
+      "status": "pass"
+    },
+    {
+      "step": "killed sandbox is gone",
+      "ms": 1312,
+      "status": "pass"
+    }
+  ],
+  "ok": true
+}

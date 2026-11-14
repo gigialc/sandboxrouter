@@ -2,6 +2,14 @@
 
 All notable changes. Versions follow [semver](https://semver.org/); while the version is 0.x, a minor bump can change the API.
 
+## 0.8.1 (2026-11-14)
+
+### Fixed
+- **Tensorlake pause.** Tensorlake made sandbox names immutable, so pausing an unnamed sandbox (which named it first) failed. Sandboxes are now named when they're created. Tensorlake passes all 14 real-account check steps and joins `VERIFIED`: 17 providers.
+
+### Changed
+- The site and README call it sandboxRouter, and the homepage links to the code on GitHub above the headline. Package, CLI and import names are unchanged.
+
 ## 0.8.0 (2026-11-14)
 
 ### Fixed

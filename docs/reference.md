@@ -254,7 +254,7 @@ It prints one line per step and exits 1 if any fails. `checkProvider(router, id)
 | Agent37 | 14/14 passed; note: output arrived only at the end (no live streaming) | 2026-11-13, v0.7.0 |
 | Boat | not run yet | |
 | Maritime | 14/14 passed | 2026-11-13, v0.7.0 |
-| Sailboxes (Sail Research) | 14/14 passed | 2026-11-13, v0.7.0 |
+| Sailboxes (Sail Research) | 14/14 passed | 2026-11-14, v0.8.0 |
 | Northflank | not run yet | |
 | Morph Cloud | not run yet | |
 | exe.dev | not run yet | |
@@ -266,7 +266,7 @@ It prints one line per step and exits 1 if any fails. `checkProvider(router, id)
 | Blaxel | 13/13 passed; n/a: pause and resume | 2026-11-13, v0.7.0 |
 | HOPX | not run yet | |
 | Superserve | 14/14 passed | 2026-11-13, v0.7.0 |
-| Tensorlake | not run yet | |
+| Tensorlake | 14/14 passed | 2026-11-14, v0.8.0 |
 | Upstash Box | not run yet | |
 | Cloudflare Sandbox | 13/13 passed; n/a: pause and resume | 2026-11-13, v0.7.0 |
 | Amazon Bedrock AgentCore Code Interpreter | 13/13 passed; n/a: pause and resume; note: output arrived only at the end (no live streaming) | 2026-11-13, v0.7.0 |

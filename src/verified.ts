@@ -17,8 +17,9 @@ export const VERIFIED: Partial<Record<ProviderId, string>> = {
   modal: "2026-11-13",
   novita: "2026-11-13",
   openscale: "2026-11-13",
-  sail: "2026-11-13",
+  sail: "2026-11-14",
   superserve: "2026-11-13",
+  tensorlake: "2026-11-14",
   vercel: "2026-11-13",
 };
 
