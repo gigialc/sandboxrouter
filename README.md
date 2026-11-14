@@ -43,7 +43,7 @@ List price while running, 2 vCPU / 4 GB, cheapest first; waitlisted sign-ups fol
 | Provider | $/hr | Plan needed | Real-account check | Source |
 |---|---|---|---|---|
 | [Agent37](https://sandboxrouter.ai/providers/agent37) | $0.007 | none | passed (2026-11-13) | [pricing](https://www.agent37.com/docs/agents-api/billing) |
-| [Boat](https://sandboxrouter.ai/providers/boat) | $0.018 | $20/mo (credited) | not run yet | [pricing](https://docs.boat.dev/pricing.md) |
+| [Boat](https://sandboxrouter.ai/providers/boat) | $0.018 | $20/mo (credited) | passed (2026-11-14) | [pricing](https://docs.boat.dev/pricing.md) |
 | [Maritime](https://sandboxrouter.ai/providers/maritime) | $0.022 | $20/mo (credited) | passed (2026-11-13) | [pricing](https://maritime.sh/pricing) |
 | [Sailboxes (Sail Research)](https://sandboxrouter.ai/providers/sail) | up to $0.062 | none | passed (2026-11-14) | [pricing](https://docs.sailresearch.com/sailboxes-pricing.md) |
 | [Northflank](https://sandboxrouter.ai/providers/northflank) | $0.067 | none | not run yet | [pricing](https://northflank.com/pricing) |

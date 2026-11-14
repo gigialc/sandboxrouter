@@ -8,6 +8,7 @@ export const VERIFIED: Partial<Record<ProviderId, string>> = {
   agentcore: "2026-11-13",
   lambda: "2026-11-13",
   blaxel: "2026-11-13",
+  boat: "2026-11-14",
   cloudflare: "2026-11-13",
   daytona: "2026-11-13",
   e2b: "2026-11-13",

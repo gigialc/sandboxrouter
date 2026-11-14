@@ -252,7 +252,7 @@ It prints one line per step and exits 1 if any fails. `checkProvider(router, id)
 | Provider | Real-account check (14 steps) | Result since |
 |---|---|---|
 | Agent37 | 14/14 passed; note: output arrived only at the end (no live streaming) | 2026-11-13, v0.7.0 |
-| Boat | not run yet | |
+| Boat | 14/14 passed | 2026-11-14, v0.8.1 |
 | Maritime | 14/14 passed | 2026-11-13, v0.7.0 |
 | Sailboxes (Sail Research) | 14/14 passed | 2026-11-14, v0.8.0 |
 | Northflank | not run yet | |
