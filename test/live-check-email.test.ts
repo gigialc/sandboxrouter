@@ -45,6 +45,13 @@ describe("the nightly check's email", () => {
     );
   });
 
+  it("tells a missing package apart from an empty account", () => {
+    const noPkg = { provider: "novita", ok: false, inconclusive: `the machine running the check doesn't have the "novita-sandbox" package`, results: [] } as unknown as CheckReport;
+    const text = note([noPkg, pass("e2b")], "https://run", "", day);
+    expect(text).toContain("**Not run** (the check's machine is missing the provider's package; a fix in the workflow, not the provider):\n- novita: the machine running the check doesn't have the \"novita-sandbox\" package");
+    expect(text).not.toContain("Out of credit");
+  });
+
   it("sends an all-clear once after an alarm, then goes quiet", () => {
     const allClear = note([pass("e2b"), pass("daytona")], "https://run", `old alarm\n${PROBLEMS_MARK}\n`, day);
     expect(allClear).toBe("**Nightly check, 13 Nov: all 2 providers pass again.**\n\nDetails: https://run\n");

@@ -24,7 +24,7 @@ for (const c of rows) {
   const tested = live.get(c.id)!.label;
   const gated = accessLabel(c.id);
   const name = gated ? `${c.name} (${gated})` : c.name;
-  prices.push(`| [${name}](https://sandboxrouter.vercel.app/providers/${c.id}) | ${price} | ${plan} | ${tested} | [pricing](${c.pricing.source}) |`);
+  prices.push(`| [${name}](https://sandboxrouter.ai/providers/${c.id}) | ${price} | ${plan} | ${tested} | [pricing](${c.pricing.source}) |`);
 }
 const dates = CATALOG.filter((c) => !c.local).flatMap((c) => [c.pricing.checked, ...(c.plan ? [c.plan.checked] : [])]).sort();
 prices.push("", `Checked ${dates[0] === dates.at(-1) ? dates[0] : `${dates[0]} to ${dates.at(-1)}`}.`);

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { CHECK_STEPS, checkProvider } from "../src/check.js";
 import { Router } from "../src/router.js";
-import { ProviderError, type ExecOptions, type ExecResult, type Provider, type ProviderSandbox } from "../src/types.js";
+import { ProviderError, SetupError, type ExecOptions, type ExecResult, type Provider, type ProviderSandbox } from "../src/types.js";
 
 /** A shell-ish fake that behaves like a correct provider for every step `check` runs. */
 class GoodBox implements ProviderSandbox {
@@ -85,6 +85,16 @@ describe("sandboxrouter check", () => {
     const failed = await checkProvider(new Router({ providers: [p] }), "boat");
     expect(failed.inconclusive).toBeUndefined();
     expect(failed.results[0]).toMatchObject({ step: "create", status: "fail" });
+  });
+
+  it("calls a run inconclusive when the provider's package isn't installed where the check runs", async () => {
+    const p = new GoodProvider();
+    p.create = async () => {
+      throw new SetupError('boat needs the "boat-sdk" package: npm i boat-sdk');
+    };
+    const report = await checkProvider(new Router({ providers: [p] }), "boat");
+    expect(report.inconclusive).toBe(`the machine running the check doesn't have the "boat-sdk" package`);
+    expect(report.results).toEqual([expect.objectContaining({ step: "create", status: "skip" })]);
   });
 
   it("fails when kill doesn't actually stop the sandbox", async () => {

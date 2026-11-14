@@ -4,22 +4,22 @@
 import type { ProviderId } from "./types.js";
 
 export const VERIFIED: Partial<Record<ProviderId, string>> = {
-  agent37: "2026-11-11",
+  agent37: "2026-11-13",
   agentcore: "2026-11-13",
   lambda: "2026-11-13",
   blaxel: "2026-11-13",
-  cloudflare: "2026-11-11",
+  cloudflare: "2026-11-13",
   daytona: "2026-11-13",
   e2b: "2026-11-13",
-  sprites: "2026-11-11",
-  freestyle: "2026-11-11",
+  sprites: "2026-11-13",
+  freestyle: "2026-11-13",
   maritime: "2026-11-13",
-  modal: "2026-11-11",
-  novita: "2026-11-11",
+  modal: "2026-11-13",
+  novita: "2026-11-13",
   openscale: "2026-11-13",
   sail: "2026-11-13",
-  superserve: "2026-11-11",
-  vercel: "2026-11-11",
+  superserve: "2026-11-13",
+  vercel: "2026-11-13",
 };
 
 /** Providers whose last saved real-account check failed a step. The default strategy tries them last. */

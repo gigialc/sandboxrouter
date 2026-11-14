@@ -248,30 +248,30 @@ It prints one line per step and exits 1 if any fails. `checkProvider(router, id)
 
 | Provider | Real-account check (14 steps) | Result since |
 |---|---|---|
-| Agent37 | 14/14 passed; note: output arrived only at the end (no live streaming) | 2026-11-11, v0.3.4 |
+| Agent37 | 14/14 passed; note: output arrived only at the end (no live streaming) | 2026-11-13, v0.7.0 |
 | Boat | not run yet | |
 | Maritime | 14/14 passed | 2026-11-13, v0.7.0 |
 | Sailboxes (Sail Research) | 14/14 passed | 2026-11-13, v0.7.0 |
 | Northflank | not run yet | |
 | Morph Cloud | not run yet | |
 | exe.dev | not run yet | |
-| Novita AI Agent Sandbox | 14/14 passed | 2026-11-11, v0.3.4 |
-| Freestyle | 14/14 passed; note: output arrived only at the end (no live streaming) | 2026-11-11, v0.3.5 |
+| Novita AI Agent Sandbox | 14/14 passed | 2026-11-13, v0.7.0 |
+| Freestyle | 14/14 passed; note: output arrived only at the end (no live streaming) | 2026-11-13, v0.7.0 |
 | Beam | not run yet | |
 | CodeSandbox SDK (Together) | not run yet | |
-| Fly.io Sprites | 13/13 passed; n/a: pause and resume | 2026-11-11, v0.3.5 |
+| Fly.io Sprites | 13/13 passed; n/a: pause and resume | 2026-11-13, v0.7.0 |
 | Blaxel | 13/13 passed; n/a: pause and resume | 2026-11-13, v0.7.0 |
 | HOPX | not run yet | |
-| Superserve | 14/14 passed | 2026-11-11, v0.3.4 |
+| Superserve | 14/14 passed | 2026-11-13, v0.7.0 |
 | Tensorlake | not run yet | |
 | Upstash Box | not run yet | |
-| Cloudflare Sandbox | 13/13 passed; n/a: pause and resume | 2026-11-11, v0.3.4 |
+| Cloudflare Sandbox | 13/13 passed; n/a: pause and resume | 2026-11-13, v0.7.0 |
 | Amazon Bedrock AgentCore Code Interpreter | 13/13 passed; n/a: pause and resume; note: output arrived only at the end (no live streaming) | 2026-11-13, v0.7.0 |
-| Modal | 13/13 passed; n/a: pause and resume | 2026-11-11, v0.3.5 |
+| Modal | 13/13 passed; n/a: pause and resume | 2026-11-13, v0.7.0 |
 | AWS Lambda MicroVMs | 14/14 passed | 2026-11-13, v0.7.0 |
 | Deno Sandbox | not run yet | |
 | Runloop | not run yet | |
-| Vercel Sandbox | 13/13 passed; n/a: pause and resume | 2026-11-11, v0.3.4 |
+| Vercel Sandbox | 13/13 passed; n/a: pause and resume | 2026-11-13, v0.7.0 |
 | InstaBox | not run yet | |
 | Koyeb Sandboxes | not run yet | |
 | Dedalus Machines | not run yet | |
