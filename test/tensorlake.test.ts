@@ -55,7 +55,9 @@ class FakeSandbox {
   constructor(
     readonly sandboxId: string,
     readonly opts: any,
-  ) {}
+  ) {
+    this.name = opts.name ?? null;
+  }
   private live() {
     if (this.state === "terminated") throw apiError(404, `sandbox ${this.sandboxId} not found`);
     if (this.state !== "running") throw apiError(409, `sandbox is ${this.state}`);
@@ -140,7 +142,7 @@ class FakeSandbox {
   }
   async update(o: { name?: string }) {
     updates.push(o);
-    if (o.name) this.name = o.name;
+    if (o.name) throw apiError(400, "Sandbox names are immutable; set name when creating the sandbox");
     return this.info();
   }
   async suspend() {
@@ -201,13 +203,14 @@ describe("TensorlakeProvider", () => {
   it("maps the spec onto Sandbox.create and keeps spec.env in a sourced file", async () => {
     const sbx = await p().create({ vcpu: 4, memoryGb: 8, timeoutMinutes: 20, gpu: "A100", image: { tensorlake: "my-image" }, env: { BASE: "b", OVER: "old" } });
     expect(sbx.nativeId).toMatch(/^sb-\d+$/);
-    expect(creates[0]).toEqual({ apiKey: "tl_test", image: "my-image", cpus: 4, memoryMb: 8192, timeoutSecs: 1200, gpuModel: "A100" });
+    expect(creates[0]).toEqual({ apiKey: "tl_test", name: expect.stringMatching(/^sbr-[0-9a-f-]{36}$/), image: "my-image", cpus: 4, memoryMb: 8192, timeoutSecs: 1200, gpuModel: "A100" });
     expect(readFileSync(vmPath(ENV_FILE), "utf8")).toBe("export BASE='b' && export OVER='old' && {\n:\n}\n");
     const r = await sbx.exec(`echo "$BASE $OVER $(basename "$PWD")"`, { cwd: root, env: { OVER: "new" } });
     expect(r.stdout).toBe(`b new ${root.split("/").pop()}\n`);
     expect(runs[0]).toEqual({ cmd: "/bin/sh", args: ["-c", `[ -f '${ENV_FILE}' ] && . '${ENV_FILE}'; cd '${root}' && export OVER='new' && {\necho "$BASE $OVER $(basename "$PWD")"\n}`], timeout: 60 });
     await p().create({});
-    expect(creates[1]).toEqual({ apiKey: "tl_test", image: undefined, cpus: 2, memoryMb: 4096, timeoutSecs: 1800 });
+    expect(creates[1]).toEqual({ apiKey: "tl_test", name: expect.stringMatching(/^sbr-[0-9a-f-]{36}$/), image: undefined, cpus: 2, memoryMb: 4096, timeoutSecs: 1800 });
+    expect(creates[1].name).not.toBe(creates[0].name);
     expect(sbx.pause).toBeTypeOf("function");
   });
 
@@ -242,20 +245,21 @@ describe("TensorlakeProvider", () => {
     await expect(sbx.readFile(join(root, "missing"))).rejects.toMatchObject({ name: "ProviderError", status: 404 });
   });
 
-  it("names an unnamed sandbox before suspending; connect waits out suspending and resumes; kill terminates", async () => {
+  it("creates a named sandbox and suspends without renaming; connect resumes; kill terminates", async () => {
     const sbx = await p().create({});
     const inst = sandboxes.get(sbx.nativeId)!;
     suspendingPolls = 1;
     await sbx.pause!();
-    expect(updates).toEqual([{ name: expect.stringMatching(/^sbr-[0-9a-f-]{36}$/) }]);
+    expect(inst.name).toMatch(/^sbr-[0-9a-f-]{36}$/);
+    expect(updates).toEqual([]);
     expect(inst.state).toBe("suspending");
     const again = await p().connect(sbx.nativeId);
     expect(connects[0]).toEqual({ sandboxId: sbx.nativeId, apiKey: "tl_test" });
     expect(inst.state).toBe("running");
     expect((await again.exec("echo back")).stdout).toBe("back\n");
-    // Already named: no second rename.
+    // Repeated suspend also leaves the immutable name untouched.
     await again.pause!();
-    expect(updates).toHaveLength(1);
+    expect(updates).toHaveLength(0);
     await (await p().connect(sbx.nativeId)).kill();
     expect(terminated).toEqual([sbx.nativeId]);
     await expect(p().connect(sbx.nativeId)).rejects.toMatchObject({ status: 404 });
