@@ -44,7 +44,7 @@ export default function DocsPage() {
       <article className="prose-sr min-w-0 max-w-3xl">
         <h1 className="text-4xl font-semibold tracking-tight">Docs</h1>
         <p>
-          sandboxrouter gives your agent one API for {site.providers.length} sandbox providers. It picks a provider for each
+          sandboxRouter gives your agent one API for {site.providers.length} sandbox providers. It picks a provider for each
           sandbox, falls back when one fails, and hands you back the same handle whatever ran it.
         </p>
 
@@ -84,7 +84,7 @@ try {
         <h2 id="keys">Provider keys</h2>
         <p>
           Set keys for the providers you use. Providers without keys are skipped. Some adapters call the provider&apos;s HTTP API
-          directly; the rest need the provider&apos;s own package installed next to sandboxrouter (each provider&apos;s page says
+          directly; the rest need the provider&apos;s own package installed next to sandboxRouter (each provider&apos;s page says
           which).
         </p>
         <TableScroll>
@@ -290,7 +290,7 @@ SANDBOXROUTER_TOKEN=secret npx @sandboxrouter/sdk serve --cors https://your-site
         <>
         <h2 id="hosted">Hosted key</h2>
         <p>
-          The hosted service runs the same HTTP API on sandboxrouter&apos;s own provider accounts, so one key replaces all the provider
+          The hosted service runs the same HTTP API on sandboxRouter&apos;s own provider accounts, so one key replaces all the provider
           keys. Sign in at <a href={`${HOSTED_URL}/dashboard`}>the dashboard</a>, add credit by card and create a key. Each sandbox
           is billed by the second at its provider&apos;s list price plus {HOSTED_FEE_PCT}%, and the dashboard shows what each one cost.
         </p>

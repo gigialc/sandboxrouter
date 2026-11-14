@@ -11,7 +11,7 @@ export function Logo({ className = "" }: { className?: string }) {
         <rect x="15" y="8.5" width="5" height="5" className="fill-accent" />
         <rect x="15.5" y="16" width="4" height="4" className="fill-accent" />
       </svg>
-      sandboxrouter
+      sandboxRouter
     </span>
   );
 }
@@ -27,7 +27,7 @@ export function Nav() {
   return (
     <header className="sticky top-0 z-30 border-b border-line bg-bg/90 backdrop-blur-md">
       <div className="flex h-14 items-center px-5 sm:px-10">
-        <Link href="/" aria-label="sandboxrouter home">
+        <Link href="/" aria-label="sandboxRouter home">
           <Logo />
         </Link>
         <nav className="ml-auto flex items-center gap-7 text-[13px] text-ink-2">

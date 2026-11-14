@@ -47,6 +47,20 @@ export default function Home() {
   return (
     <div className="px-5 sm:px-10">
       <section className="flex flex-col items-center pt-24 pb-16 text-center sm:pt-36">
+        {REPO_PUBLIC && (
+          <a
+            href={REPO}
+            className="mb-8 inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-line px-3.5 py-1.5 text-[12.5px] text-ink-2 hover:border-line-2 hover:text-ink"
+          >
+            <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden />
+            Open source, MIT licensed
+            <span className="text-muted">·</span>
+            <span className="text-ink">
+              <span className="sm:hidden">GitHub &rarr;</span>
+              <span className="hidden sm:inline">Read the code on GitHub &rarr;</span>
+            </span>
+          </a>
+        )}
         <h1 className="text-[40px] font-normal leading-[1.08] tracking-[-0.04em] sm:text-[64px]">
           One API for every sandbox.
           <br />
@@ -161,7 +175,7 @@ export default function Home() {
         <Feature
           id="hosted"
           label="Pricing"
-          claim="The same code with your own provider keys, or with one sandboxrouter key."
+          claim="The same code with your own provider keys, or with one sandboxRouter key."
           actions={
             <>
               <Button href={`${HOSTED_URL}/dashboard`} primary>

@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 import { ranked, site, usd } from "@/lib/site";
 
-export const alt = "sandboxrouter: one API for every sandbox";
+export const alt = "sandboxRouter: one API for every sandbox";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -24,7 +24,7 @@ export default function OpengraphImage() {
             <rect x="15" y="8.5" width="5" height="5" fill={ACCENT} />
             <rect x="15.5" y="16" width="4" height="4" fill={ACCENT} />
           </svg>
-          sandboxrouter
+          sandboxRouter
         </div>
         <div style={{ display: "flex", flexDirection: "column", marginTop: 56, fontSize: 76, lineHeight: 1.05, letterSpacing: -3, color: "#000" }}>
           <span>One API for</span>
