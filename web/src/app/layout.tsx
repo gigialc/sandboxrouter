@@ -11,10 +11,10 @@ const DESCRIPTION =
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.sandboxrouter.ai"),
-  title: { default: "sandboxrouter: one API for every sandbox", template: "%s · sandboxrouter" },
+  title: { default: "sandboxRouter: one API for every sandbox", template: "%s · sandboxRouter" },
   description: DESCRIPTION,
-  openGraph: { title: "sandboxrouter", description: DESCRIPTION, url: "/", siteName: "sandboxrouter", type: "website" },
-  twitter: { card: "summary_large_image", title: "sandboxrouter: one API for every sandbox", description: DESCRIPTION },
+  openGraph: { title: "sandboxRouter", description: DESCRIPTION, url: "/", siteName: "sandboxRouter", type: "website" },
+  twitter: { card: "summary_large_image", title: "sandboxRouter: one API for every sandbox", description: DESCRIPTION },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

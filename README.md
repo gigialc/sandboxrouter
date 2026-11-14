@@ -1,4 +1,4 @@
-# sandboxrouter
+# sandboxRouter
 
 **One API for every sandbox.** A free, open-source router for the places an AI agent can run code: Agent37, Alibaba Cloud, AWS (Bedrock AgentCore and Lambda MicroVMs), Azure Container Apps, Beam, Blaxel, Boat, Cloudflare, CodeSandbox, Daytona, Dedalus Machines, Deno, E2B, exe.dev, Fly.io Sprites, Freestyle, HOPX, InstaBox, Koyeb, Maritime, Modal, Morph, Northflank, Novita, OpenScale, Runloop, Sail, Superserve, Tensorlake, Upstash Box and Vercel, plus Docker on your own machine. It picks a provider by price, speed or capability, and falls back to the next one when a provider is down or rate-limited.
 
@@ -27,7 +27,7 @@ Site and docs: [sandboxrouter.ai](https://sandboxrouter.ai) · npm: [`@sandboxro
 
 ## Why
 
-AI agents need a disposable computer to run code a model wrote: install packages, run tests, do an RL rollout. Dozens of providers sell one, each with its own SDK and auth, and the same 2 vCPU / 4 GB sandbox costs from under a cent to over thirty cents an hour. sandboxrouter is one interface over all of them:
+AI agents need a disposable computer to run code a model wrote: install packages, run tests, do an RL rollout. Dozens of providers sell one, each with its own SDK and auth, and the same 2 vCPU / 4 GB sandbox costs from under a cent to over thirty cents an hour. sandboxRouter is one interface over all of them:
 
 - **Same code everywhere.** `create`, `exec` (streamed), `writeFile`, `readFile`, `pause`, `kill`. Switch providers by changing which keys are set.
 - **Cheapest real cost, then speed, with fallback.** Or `cheapest` for list price alone, `fastest` by start times, `verified` for tested providers first, or a list of providers you name. `requireVerified` limits a router to providers that passed the real-account check.
