@@ -7,5 +7,5 @@ import type { ProviderId } from "./types.js";
 
 export const BILLED_VS_LIST: Partial<Record<ProviderId, { ratio: number; date: string }>> = {
   agent37: { ratio: 0.998, date: "2026-11-14" },
-  sail: { ratio: 1.458, date: "2026-11-06" },
+  sail: { ratio: 0.495, date: "2026-11-06" },
 };

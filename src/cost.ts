@@ -1,6 +1,6 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { benchmarksPublishable, fittingSpec, hourlyCost } from "./catalog.js";
+import { benchmarksPublishable, billingRules, fittingSpec, hourlyCost } from "./catalog.js";
 import { Router } from "./router.js";
 import type { ProviderId, SandboxSpec } from "./types.js";
 
@@ -279,10 +279,14 @@ export function billedVsList(dir = "results/cost"): { provider: ProviderId; rati
       const usd = e.bill?.usd;
       const predicted = e.predictedUsd;
       if (!usd || !predicted || usd <= 0 || predicted <= 0 || !benchmarksPublishable(e.provider)) continue;
+      // A fixed per-sandbox charge (Sail's $0.01) isn't an hourly rate: take it out, or a 10-minute run
+      // turns it into "bills 46% over list" for every hour after.
+      const running = usd - billingRules(e.provider).perSandboxUsd;
+      if (running <= 0) continue;
       if (/integer cents/i.test(e.bill!.source) && predicted < 1) continue;
       const date = run.date.slice(0, 10);
       const prev = latest.get(e.provider);
-      if (!prev || date >= prev.date) latest.set(e.provider, { ratio: Math.round((usd / predicted) * 1000) / 1000, date });
+      if (!prev || date >= prev.date) latest.set(e.provider, { ratio: Math.round((running / predicted) * 1000) / 1000, date });
     }
   }
   return [...latest].map(([provider, v]) => ({ provider, ...v })).sort((a, b) => a.provider.localeCompare(b.provider));

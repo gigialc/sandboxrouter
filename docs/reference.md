@@ -128,6 +128,9 @@ With no size, any provider can take the sandbox at the size it starts by default
 | `size` | `Candidate`, `RoutedSandbox`, HTTP create | `{ vcpu, memoryGb }`: the fixed image size, or what you asked for. Some providers round up |
 | `listHourlyUsd` | same | the provider's published price for that size |
 | `estimatedHourlyUsd` | same | what it's expected to cost: list price times what the provider really billed against list, where we measured that (`billedVsList`, from `BILLED_VS_LIST`). This is what the default route ranks by, and what a service reselling sandboxes should charge from |
+| `perSandboxUsd` | `Candidate` | a fixed charge per sandbox on top of running time, where the provider has one (Sail's free plan: $0.01) |
+
+Some providers also round: Agent37 and CodeSandbox bill whole minutes (at least one), Vercel at least a minute, Azure whole hours. `billingRules(provider)` returns `{ minSeconds, incrementSeconds, perSandboxUsd }`, and `billedUsd(provider, hourlyUsd, seconds)` what one sandbox that ran that long costs. A service reselling sandboxes should charge from those, or it pays the difference on short sandboxes.
 
 A handle from `router.get(id)` has these only if this machine's ledger recorded the create.
 
@@ -135,7 +138,7 @@ A handle from `router.get(id)` has these only if this machine's ledger recorded 
 
 `strategy` orders the providers you have keys for:
 
-- `balanced` (default): cheapest `estimatedHourlyUsd`; providers within 10% of each other go fastest first, by this router's own recent create times (after 3), else your `bench` file. Providers whose last real-account check failed (`FAILING`) go last, still as fallback.
+- `balanced` (default): cheapest `estimatedHourlyUsd`, plus any `perSandboxUsd` spread over the sandbox's `timeoutMinutes` (default 30); providers within 10% of each other go fastest first, by this router's own recent create times (after 3), else your `bench` file. Providers whose last real-account check failed (`FAILING`) go last, still as fallback.
 - `cheapest`: lowest list price alone.
 - `fastest`: lowest create time, then cheapest.
 - `verified`: providers that passed the real-account check (`VERIFIED`) first, then the rest, each cheapest first.

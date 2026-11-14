@@ -1,4 +1,4 @@
-import { CATALOG, DEFAULT_MEMORY_GB, DEFAULT_VCPU, accessLabel, fixedSize, hourlyCost, unfit } from "./catalog.js";
+import { CATALOG, DEFAULT_MEMORY_GB, DEFAULT_VCPU, accessLabel, billingRules, fixedSize, hourlyCost, unfit } from "./catalog.js";
 import {
   type ComputerRoute,
   RoutedComputer,
@@ -96,6 +96,11 @@ export interface Candidate {
   verified: boolean;
   /** Failed a step of its last real-account check (as of this release, or `RouterOptions.failing`). */
   failing: boolean;
+  /**
+   * A fixed charge per sandbox, USD, on top of `estimatedHourlyUsd` (Sail's free plan: $0.01). Ranking
+   * spreads it over the sandbox's lifetime (`timeoutMinutes`, default 30), so it weighs more on short ones.
+   */
+  perSandboxUsd?: number;
   /** Why this provider won't be tried, if it won't. */
   skip?: string;
 }
@@ -265,6 +270,8 @@ export class Router {
         verified: this.verified.has(id),
         failing: this.failing.has(id),
       };
+      const fee = billingRules(id).perSandboxUsd;
+      if (fee) c.perSandboxUsd = fee;
       if (!p) c.skip = "no adapter registered";
       else {
         const gated = accessLabel(id);
@@ -280,7 +287,8 @@ export class Router {
     // depends on who the provider is, only on its price, what it really billed, how fast it started for
     // this router and whether its last real-account check failed. An explicit list keeps the caller's order.
     if (!explicit) {
-      const byCost = (a: Candidate, b: Candidate) => a.estimatedHourlyUsd - b.estimatedHourlyUsd || a.provider.localeCompare(b.provider);
+      const hours = (spec.timeoutMinutes ?? 30) / 60;
+      const byCost = (a: Candidate, b: Candidate) => rankUsd(a, hours) - rankUsd(b, hours) || a.provider.localeCompare(b.provider);
       const byList = (a: Candidate, b: Candidate) => a.listHourlyUsd - b.listHourlyUsd || a.provider.localeCompare(b.provider);
       if (strategy === "fastest") {
         list.sort((a, b) => (a.medianCreateMs ?? Infinity) - (b.medianCreateMs ?? Infinity) || byCost(a, b));
@@ -289,7 +297,7 @@ export class Router {
       } else if (strategy === "verified") {
         list.sort((a, b) => Number(b.verified) - Number(a.verified) || byCost(a, b));
       } else {
-        return balanced(list);
+        return balanced(list, hours);
       }
     }
     return list;
@@ -570,25 +578,32 @@ function round(n: number) {
  * The default order. Providers whose last real-account check failed go last. The rest go cheapest
  * first by effective price (list price x what the provider really billed, where measured), except that
  * providers within PRICE_TIE of the cheapest remaining one count as a tie and go fastest first (by
- * median create time; unknown speed after known), then cheapest, then alphabetical.
+ * median create time; unknown speed after known), then cheapest, then alphabetical. A fixed
+ * per-sandbox charge counts as spread over `lifetimeHours` (the sandbox's timeoutMinutes).
  */
-export function balanced(list: Candidate[]): Candidate[] {
-  const byCost = (a: Candidate, b: Candidate) => a.estimatedHourlyUsd - b.estimatedHourlyUsd || a.provider.localeCompare(b.provider);
+export function balanced(list: Candidate[], lifetimeHours = 0.5): Candidate[] {
+  const cost = (c: Candidate) => rankUsd(c, lifetimeHours);
+  const byCost = (a: Candidate, b: Candidate) => cost(a) - cost(b) || a.provider.localeCompare(b.provider);
   const bySpeed = (a: Candidate, b: Candidate) =>
     (a.medianCreateMs ?? Infinity) - (b.medianCreateMs ?? Infinity) || byCost(a, b);
   const order = (group: Candidate[]) => {
     const rest = [...group].sort(byCost);
     const out: Candidate[] = [];
     while (rest.length) {
-      const limit = rest[0].estimatedHourlyUsd * (1 + PRICE_TIE);
+      const limit = cost(rest[0]) * (1 + PRICE_TIE);
       // Always take at least the cheapest, so the loop ends whatever the prices are.
-      const tie = rest.filter((c, i) => i === 0 || c.estimatedHourlyUsd <= limit);
+      const tie = rest.filter((c, i) => i === 0 || cost(c) <= limit);
       out.push(...tie.sort(bySpeed));
       rest.splice(0, tie.length);
     }
     return out;
   };
   return [...order(list.filter((c) => !c.failing)), ...order(list.filter((c) => c.failing))];
+}
+
+/** USD per hour a candidate is ranked by: its hourly estimate plus any per-sandbox charge spread over the lifetime. */
+function rankUsd(c: Candidate, lifetimeHours: number): number {
+  return c.estimatedHourlyUsd + (c.perSandboxUsd ?? 0) / Math.max(lifetimeHours, 1 / 60);
 }
 
 /** Seconds to wait for one provider's create before trying the next (RouteOptions.createTimeoutSeconds). */
