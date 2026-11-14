@@ -3,7 +3,7 @@ import { Button } from "@/components/chrome";
 import { CodeBlock, CodeTabs, InstallChip } from "@/components/code";
 import { Feature } from "@/components/Feature";
 import { RouteDemo } from "@/components/RouteDemo";
-import { DEFAULT_SHAPE, HOSTED_FEE_PCT, HOSTED_URL, NPM, REPO, REPO_PUBLIC, site } from "@/lib/site";
+import { DEFAULT_SHAPE, HOSTED_FEE_PCT, HOSTED_PUBLIC, HOSTED_URL, NPM, REPO, REPO_PUBLIC, site } from "@/lib/site";
 
 const OWN_KEYS = `import { Router } from "${NPM}";
 
@@ -53,14 +53,20 @@ export default function Home() {
           <span className="text-muted">On the cheapest one that&apos;s up.</span>
         </h1>
         <div className="mt-10 flex flex-wrap justify-center gap-3">
-          <Button href={`${HOSTED_URL}/dashboard`} primary>
-            Get a key
-          </Button>
-          <Button href="/docs">Docs</Button>
+          {HOSTED_PUBLIC ? (
+            <Button href={`${HOSTED_URL}/dashboard`} primary>
+              Get a key
+            </Button>
+          ) : (
+            <Button href="/docs#quickstart" primary>
+              Quickstart
+            </Button>
+          )}
+          {REPO_PUBLIC && !HOSTED_PUBLIC ? <Button href={REPO}>GitHub</Button> : <Button href="/docs">Docs</Button>}
         </div>
         <p className="mt-10 max-w-lg text-[15px] leading-7 text-ink-2">
           {passed.length} providers pass our check on real accounts: start, run, stream, files, timeouts and kill. Your
-          sandboxes go to the cheapest of them that fits, and move on when one fails. Open source, or one hosted key.
+          sandboxes go to the cheapest of them that fits, and move on when one fails. {HOSTED_PUBLIC ? "Open source, or one hosted key." : "Open source, with your own provider keys."}
         </p>
         <div className="mt-10 flex w-full max-w-xl flex-col items-center gap-4">
           <InstallChip cmd={`npm i ${NPM}`} />
@@ -151,6 +157,7 @@ export default function Home() {
           }
         />
 
+        {HOSTED_PUBLIC && (
         <Feature
           id="hosted"
           label="Pricing"
@@ -178,15 +185,22 @@ export default function Home() {
             />
           }
         />
+        )}
       </div>
 
       <section className="mt-40 flex flex-col items-center border-t border-line pt-24 text-center">
         <h2 className="text-[32px] font-normal tracking-[-0.03em] sm:text-[40px]">Start a sandbox in a minute.</h2>
         <div className="mt-8 flex flex-wrap justify-center gap-3">
-          <Button href={`${HOSTED_URL}/dashboard`} primary>
-            Get a key
-          </Button>
-          <Button href="/docs#quickstart">Quickstart</Button>
+          {HOSTED_PUBLIC ? (
+            <Button href={`${HOSTED_URL}/dashboard`} primary>
+              Get a key
+            </Button>
+          ) : (
+            <Button href="/docs#quickstart" primary>
+              Quickstart
+            </Button>
+          )}
+          {HOSTED_PUBLIC ? <Button href="/docs#quickstart">Quickstart</Button> : REPO_PUBLIC && <Button href={REPO}>GitHub</Button>}
         </div>
       </section>
     </div>
