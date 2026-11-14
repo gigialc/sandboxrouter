@@ -115,12 +115,16 @@ router.create(spec, { strategy: "fastest" })       // lowest start time, measure
 router.create(spec, { strategy: "verified" })      // providers that passed the check first
 router.create(spec, { provider: ["e2b", "modal"] }) // try these, in this order
 router.create({ gpu: "A10G" })                      // only GPU-capable providers are tried
-router.create(spec, { require: ["pause"] })         // only providers that can pause`}
+router.create(spec, { require: ["pause"] })         // only providers that can pause
+router.create({ expectedSeconds: 10 })              // rank by what a 10 s run is really billed`}
         />
         <p>
           With no strategy, the router goes cheapest first among providers you have keys for, by list price for the size you asked
           for. Where we measured what a provider really bills (a sandbox run for a fixed time, then the provider&apos;s own bill),
-          its price is corrected by that ratio (<code>BILLED_VS_LIST</code>). Providers within 10% of each other on price go fastest first,
+          its price is corrected by that ratio (<code>BILLED_VS_LIST</code>). Each provider&apos;s minimum charge, billing increment and
+          per-sandbox fee count over the run: the whole <code>timeoutMinutes</code> (default 30), or <code>expectedSeconds</code> if you say how
+          long you&apos;ll use it, so a short run can go to a provider that bills by the second over one that is cheaper per hour but
+          charges a full minute. Providers within 10% of each other on price go fastest first,
           by start times this router measured itself, or from your <code>sandboxrouter bench</code> run until it has some. Speed depends on
           where you run it, so the published benchmarks are never used for routing. Providers whose last 14-step real-account check
           failed go last. Ties break alphabetically, so no provider gets a better slot by who it is. Prices come from each
@@ -262,7 +266,7 @@ SANDBOXROUTER_TOKEN=secret npx @sandboxrouter/sdk serve --cors https://your-site
               {[
                 ["GET /v1/providers", ""],
                 ["POST /v1/route", "same as create; returns the candidate order"],
-                ["POST /v1/sandboxes", "{ vcpu, memoryGb, gpu, env, timeoutMinutes, image, provider, strategy, fallback, createTimeoutSeconds, require }"],
+                ["POST /v1/sandboxes", "{ vcpu, memoryGb, gpu, env, timeoutMinutes, expectedSeconds, image, provider, strategy, fallback, createTimeoutSeconds, require }"],
                 ["POST /v1/sandboxes/:id/exec", "{ cmd, cwd, env, timeoutSeconds, stream }"],
                 ["PUT /v1/sandboxes/:id/files?path=", "raw bytes"],
                 ["GET /v1/sandboxes/:id/files?path=", ""],

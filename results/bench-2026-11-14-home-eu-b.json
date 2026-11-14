@@ -1,0 +1,140 @@
+{
+  "tool": "sandboxrouter",
+  "version": "0.8.1",
+  "date": "2026-11-14T22:49:58.154Z",
+  "label": "home-eu",
+  "runs": 5,
+  "spec": {},
+  "node": "v22.22.0",
+  "platform": "darwin-arm64",
+  "rows": [
+    {
+      "provider": "superserve",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 193,
+      "medianExecMs": 118,
+      "hourlyUsd": 0.1656
+    },
+    {
+      "provider": "e2b",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 351,
+      "medianExecMs": 180,
+      "hourlyUsd": 0.1089
+    },
+    {
+      "provider": "daytona",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 368,
+      "medianExecMs": 433,
+      "hourlyUsd": 0.06659999999999999
+    },
+    {
+      "provider": "novita",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 386,
+      "medianExecMs": 569,
+      "hourlyUsd": 0.11664
+    },
+    {
+      "provider": "openscale",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 402,
+      "medianExecMs": 925,
+      "hourlyUsd": 0.013999999999999999
+    },
+    {
+      "provider": "modal",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 444,
+      "medianExecMs": 766,
+      "hourlyUsd": 0.23796
+    },
+    {
+      "provider": "vercel",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 475,
+      "medianExecMs": 378,
+      "hourlyUsd": 0.3408
+    },
+    {
+      "provider": "cloudflare",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 577,
+      "medianExecMs": 209,
+      "hourlyUsd": 0.21599999999999997
+    },
+    {
+      "provider": "agent37",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 697,
+      "medianExecMs": 463,
+      "hourlyUsd": 0.006520547945205479
+    },
+    {
+      "provider": "freestyle",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 881,
+      "medianExecMs": 204,
+      "hourlyUsd": 0.13362
+    },
+    {
+      "provider": "agentcore",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 904,
+      "medianExecMs": 281,
+      "hourlyUsd": 0.2168
+    },
+    {
+      "provider": "maritime",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 1071,
+      "medianExecMs": 198,
+      "hourlyUsd": 0.022
+    },
+    {
+      "provider": "tensorlake",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 1279,
+      "medianExecMs": 558,
+      "hourlyUsd": 0.2
+    },
+    {
+      "provider": "boat",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 1605,
+      "medianExecMs": 114,
+      "hourlyUsd": 0.018
+    },
+    {
+      "provider": "sail",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 2279,
+      "medianExecMs": 231,
+      "hourlyUsd": 0.062
+    },
+    {
+      "provider": "lambda",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 3378,
+      "medianExecMs": 396,
+      "hourlyUsd": 0.25220016
+    }
+  ]
+}

@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { afterAll, describe, expect, it } from "vitest";
 import { billedUsd, billingRules } from "../src/catalog.js";
 import { billedVsList } from "../src/cost.js";
-import { Router } from "../src/router.js";
+import { Router, runHours } from "../src/router.js";
 import { FakeProvider } from "./fake.js";
 
 const dir = mkdtempSync(join(tmpdir(), "sbr-billing-"));
@@ -52,5 +52,29 @@ describe("ranking with a per-sandbox charge", () => {
     // Over 5 minutes the $0.01 is $0.12/h: Koyeb first.
     expect(router().plan({ vcpu: 2, memoryGb: 4, timeoutMinutes: 5 }).map((c) => c.provider)).toEqual(["koyeb", "sail"]);
     expect(router().plan({ vcpu: 2, memoryGb: 4 }).find((c) => c.provider === "sail")?.perSandboxUsd).toBe(0.01);
+  });
+});
+
+describe("ranking by expectedSeconds", () => {
+  const router = () =>
+    new Router({ providers: [new FakeProvider("agent37"), new FakeProvider("maritime")], ledger: false, verified: [], failing: [], billedVsList: {} });
+  const order = (spec: object) => router().plan({ vcpu: 2, memoryGb: 4, ...spec }).map((c) => c.provider);
+
+  it("ranks by what the run is really billed, so a per-second provider wins short runs", () => {
+    // Agent37 $0.0065/h billed a minute at least; Maritime $0.022/h by the second. Crossover near 18 s.
+    expect(order({})).toEqual(["agent37", "maritime"]);
+    expect(order({ expectedSeconds: 10 })).toEqual(["maritime", "agent37"]);
+    expect(order({ expectedSeconds: 30 })).toEqual(["agent37", "maritime"]);
+    // Agent37 bills whole minutes: 61 s is billed as 120 s, still cheaper than Maritime's 61 s.
+    expect(order({ expectedSeconds: 61 })).toEqual(["agent37", "maritime"]);
+  });
+
+  it("never assumes a run longer than the lifetime", () => {
+    expect(runHours({ expectedSeconds: 7200, timeoutMinutes: 10 })).toBeCloseTo(10 / 60, 9);
+    expect(runHours({})).toBe(0.5);
+  });
+
+  it("refuses an expectedSeconds that isn't a positive number", () => {
+    expect(() => router().plan({ expectedSeconds: 0 })).toThrow(/expectedSeconds must be a positive number/);
   });
 });

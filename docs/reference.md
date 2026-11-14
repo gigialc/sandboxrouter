@@ -138,7 +138,7 @@ A handle from `router.get(id)` has these only if this machine's ledger recorded 
 
 `strategy` orders the providers you have keys for:
 
-- `balanced` (default): cheapest `estimatedHourlyUsd`, plus any `perSandboxUsd` spread over the sandbox's `timeoutMinutes` (default 30); providers within 10% of each other go fastest first, by this router's own recent create times (after 3), else your `bench` file. Providers whose last real-account check failed (`FAILING`) go last, still as fallback.
+- `balanced` (default): cheapest for the run: `estimatedHourlyUsd` over `expectedSeconds` if you give it (else `timeoutMinutes`, default 30), rounded up to the provider's minimum charge and billing increment, plus any `perSandboxUsd`. So `expectedSeconds: 10` favors providers that bill by the second over ones that charge a full minute; providers within 10% of each other go fastest first, by this router's own recent create times (after 3), else your `bench` file. Providers whose last real-account check failed (`FAILING`) go last, still as fallback.
 - `cheapest`: lowest list price alone.
 - `fastest`: lowest create time, then cheapest.
 - `verified`: providers that passed the real-account check (`VERIFIED`) first, then the rest, each cheapest first.
@@ -252,7 +252,7 @@ It prints one line per step and exits 1 if any fails. `checkProvider(router, id)
 | Provider | Real-account check (14 steps) | Result since |
 |---|---|---|
 | Agent37 | 14/14 passed; note: output arrived only at the end (no live streaming) | 2026-11-13, v0.7.0 |
-| Boat | not run yet | |
+| Boat | 14/14 passed | 2026-11-14, v0.8.1 |
 | Maritime | 14/14 passed | 2026-11-13, v0.7.0 |
 | Sailboxes (Sail Research) | 14/14 passed | 2026-11-14, v0.8.0 |
 | Northflank | not run yet | |
@@ -296,7 +296,7 @@ SANDBOXROUTER_TOKEN=secret npx @sandboxrouter/sdk serve
 |---|---|---|
 | `GET` | `/v1/providers` | |
 | `POST` | `/v1/route` | same as create; returns the candidate order |
-| `POST` | `/v1/sandboxes` | `{ vcpu, memoryGb, gpu, env, timeoutMinutes, image, metadata, provider, strategy, fallback, createTimeoutSeconds, deadlineSeconds, require }`. Other fields are refused. Answers `{ id, provider, size, estimatedHourlyUsd, listHourlyUsd, attempts }` |
+| `POST` | `/v1/sandboxes` | `{ vcpu, memoryGb, gpu, env, timeoutMinutes, expectedSeconds, image, metadata, provider, strategy, fallback, createTimeoutSeconds, deadlineSeconds, require }`. Other fields are refused. Answers `{ id, provider, size, estimatedHourlyUsd, listHourlyUsd, attempts }` |
 | `POST` | `/v1/sandboxes/:id/exec` | `{ cmd, cwd, env, timeoutSeconds, stream }`. With `stream: true` the answer is `text/event-stream`: `stdout` and `stderr` events, then `result` |
 | `POST` | `/v1/sandboxes/:id/pause` | |
 | `PUT` | `/v1/sandboxes/:id/files?path=` | raw bytes |

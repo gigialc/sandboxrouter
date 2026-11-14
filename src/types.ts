@@ -58,6 +58,14 @@ export interface SandboxSpec {
   /** Hard lifetime in minutes (default 30). */
   timeoutMinutes?: number;
   /**
+   * How long you expect to use the sandbox, in seconds. Only a ranking hint: the sandbox still lives
+   * until you kill it or `timeoutMinutes` runs out. Without it, ranking assumes the whole lifetime.
+   * With it, providers are ranked by what that run would really be billed, minimum charge, billing
+   * increment and per-sandbox fee included, so a provider that bills per second can beat one that is
+   * cheaper per hour but charges a full minute.
+   */
+  expectedSeconds?: number;
+  /**
    * Provider-specific image/template, keyed by provider, e.g.
    * { maritime: "python", e2b: "code-interpreter-v1", modal: "python:3.13-slim" }.
    */

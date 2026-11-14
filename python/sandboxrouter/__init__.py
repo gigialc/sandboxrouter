@@ -53,6 +53,7 @@ _SPEC_KEYS = {
     "gpu": "gpu",
     "env": "env",
     "timeout_minutes": "timeoutMinutes",
+    "expected_seconds": "expectedSeconds",
     "image": "image",
     "metadata": "metadata",
     "provider": "provider",
@@ -114,7 +115,7 @@ class Client:
         return self._json("POST", "/v1/route", _camel(spec))["candidates"]
 
     def create(self, idempotency_key: Optional[str] = None, **spec: Any) -> "Sandbox":
-        """Start a sandbox. Spec: vcpu, memory_gb, gpu, env, timeout_minutes, image, metadata.
+        """Start a sandbox. Spec: vcpu, memory_gb, gpu, env, timeout_minutes, expected_seconds, image, metadata.
         Routing: provider (str or list), strategy ("balanced" | "verified" | "cheapest" | "fastest"; default
         balanced: cheapest real cost, speed breaks near-ties), fallback (True, False or "any"),
         create_timeout_seconds, deadline_seconds, require.

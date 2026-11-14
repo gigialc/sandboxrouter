@@ -2,7 +2,7 @@ import { CATALOG } from "./catalog.js";
 import { RouterError, type RouteOptions, type SandboxSpec, type Strategy } from "./types.js";
 
 /** Every key a SandboxSpec can have. Anything else in a request is a mistake (e.g. "memory" for "memoryGb"). */
-export const SPEC_KEYS = ["vcpu", "memoryGb", "gpu", "env", "timeoutMinutes", "image", "metadata"] as const;
+export const SPEC_KEYS = ["vcpu", "memoryGb", "gpu", "env", "timeoutMinutes", "expectedSeconds", "image", "metadata"] as const;
 /** Every key RouteOptions can have. */
 export const ROUTE_KEYS = ["provider", "strategy", "fallback", "require", "createTimeoutSeconds", "deadlineSeconds"] as const;
 export const STRATEGIES: readonly Strategy[] = ["default", "balanced", "verified", "cheapest", "fastest"];
@@ -19,7 +19,7 @@ const stringMap = (v: unknown) => typeof v === "object" && v !== null && !Array.
  * Called by `plan()`, so every create, route and CLI command goes through it.
  */
 export function validate(spec: SandboxSpec = {}, route: RouteOptions = {}): void {
-  for (const k of ["vcpu", "memoryGb", "timeoutMinutes"] as const) {
+  for (const k of ["vcpu", "memoryGb", "timeoutMinutes", "expectedSeconds"] as const) {
     if (spec[k] !== undefined && !positive(spec[k])) throw bad(`${k} must be a positive number, got ${show(spec[k])}`);
   }
   if (spec.gpu !== undefined && (typeof spec.gpu !== "string" || !spec.gpu)) throw bad(`gpu must be a GPU type such as "T4", got ${JSON.stringify(spec.gpu)}`);
