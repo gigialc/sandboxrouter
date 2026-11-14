@@ -1,6 +1,6 @@
 {
   "version": "0.7.0",
-  "generatedAt": "2026-11-13T23:35:31.922Z",
+  "generatedAt": "2026-11-14T00:54:07.569Z",
   "shapes": [
     "1x2",
     "2x4",
@@ -76,7 +76,10 @@
         "status": "passed",
         "label": "passed (2026-11-13)"
       },
-      "billedVsList": null,
+      "billedVsList": {
+        "ratio": 0.998,
+        "date": "2026-11-14"
+      },
       "computers": [],
       "prices": {
         "1x2": {
@@ -3107,6 +3110,28 @@
     }
   ],
   "costRuns": [
+    {
+      "provider": "agent37",
+      "name": "Agent37",
+      "date": "2026-11-14T00:53:41.728Z",
+      "minutes": 10,
+      "load": true,
+      "by": null,
+      "requested": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "delivered": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "seconds": 601,
+      "predictedUsd": 0.001089,
+      "billedUsd": 0.001087,
+      "billedSeconds": 600,
+      "billSource": "agent37 /v1/usage total_micros (billed in whole minutes: 10 awake)",
+      "error": null
+    },
     {
       "provider": "sail",
       "name": "Sailboxes (Sail Research)",

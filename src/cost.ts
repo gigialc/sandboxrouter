@@ -192,6 +192,21 @@ export const BILL_READERS: Partial<Record<ProviderId, Reader>> = {
     };
   },
 
+  async agent37(e) {
+    const h = { Authorization: `Bearer ${process.env.AGENT37_API_KEY}` };
+    const api = process.env.AGENT37_API_URL ?? "https://api.agent37.com";
+    const q = new URLSearchParams({ from: e.startedAt!.slice(0, 10), to: e.endedAt!.slice(0, 10) });
+    const j = await getJson(`${api}/v1/usage?${q}`, h);
+    const id = e.sandboxId!.replace(/^agent37:/, "");
+    const row = (j.instances ?? []).find((i: any) => i.id === id);
+    if (!row) return { source: "agent37 /v1/usage: not posted yet" };
+    return {
+      usd: round((row.total_micros ?? 0) / 1e6),
+      seconds: (row.awake_minutes ?? 0) * 60,
+      source: `agent37 /v1/usage total_micros (billed in whole minutes: ${row.awake_minutes ?? 0} awake)`,
+    };
+  },
+
   async e2b() {
     return { source: "no billing API: compare the console usage tab (console.e2b.dev, Usage)" };
   },
