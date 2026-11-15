@@ -1,4 +1,4 @@
-import type { Candidate, Size } from "./router.js";
+import type { Candidate, Quote, Size } from "./router.js";
 import type { Attempt, ExecOptions, ExecResult, RouteOptions, RouterErrorCode, SandboxSpec } from "./types.js";
 
 /**
@@ -57,6 +57,11 @@ export class Client {
   /** Dry run: which providers would be tried, in order, each with its price, size and any reason it's skipped. */
   async route(spec: SandboxSpec = {}, route: RouteOptions = {}): Promise<Candidate[]> {
     return (await this.json<{ candidates: Candidate[] }>("POST", "/v1/route", { ...spec, ...route })).candidates;
+  }
+
+  /** Where a create would land and what the run would cost, without starting anything (a hosted service includes its fee). */
+  async quote(spec: SandboxSpec = {}, route: RouteOptions = {}): Promise<Quote> {
+    return this.json<Quote>("POST", "/v1/quote", { ...spec, ...route });
   }
 
   /**

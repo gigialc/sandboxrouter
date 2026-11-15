@@ -4,7 +4,7 @@ import { RouterError, type RouteOptions, type SandboxSpec, type Strategy } from 
 /** Every key a SandboxSpec can have. Anything else in a request is a mistake (e.g. "memory" for "memoryGb"). */
 export const SPEC_KEYS = ["vcpu", "memoryGb", "gpu", "env", "timeoutMinutes", "expectedSeconds", "image", "metadata"] as const;
 /** Every key RouteOptions can have. */
-export const ROUTE_KEYS = ["provider", "strategy", "fallback", "require", "createTimeoutSeconds", "deadlineSeconds"] as const;
+export const ROUTE_KEYS = ["provider", "strategy", "fallback", "require", "createTimeoutSeconds", "deadlineSeconds", "maxHourlyUsd"] as const;
 export const STRATEGIES: readonly Strategy[] = ["default", "balanced", "verified", "cheapest", "fastest"];
 
 const bad = (msg: string) => new RouterError(msg, [], "bad_request");
@@ -32,7 +32,7 @@ export function validate(spec: SandboxSpec = {}, route: RouteOptions = {}): void
   if (route.fallback !== undefined && route.fallback !== true && route.fallback !== false && route.fallback !== "any") {
     throw bad(`fallback must be true, false or "any", got ${JSON.stringify(route.fallback)}`);
   }
-  for (const k of ["createTimeoutSeconds", "deadlineSeconds"] as const) {
+  for (const k of ["createTimeoutSeconds", "deadlineSeconds", "maxHourlyUsd"] as const) {
     if (route[k] !== undefined && !positive(route[k])) throw bad(`${k} must be a positive number, got ${show(route[k])}`);
   }
   if (route.require !== undefined && (!Array.isArray(route.require) || !route.require.every((r) => typeof r === "string"))) {

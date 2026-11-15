@@ -2,6 +2,18 @@
 
 All notable changes. Versions follow [semver](https://semver.org/); while the version is 0.x, a minor bump can change the API.
 
+## 0.9.0 (2026-11-15)
+
+### Added
+- **`maxHourlyUsd`**, a price cap (`--max-price` in the CLI, `max_hourly_usd` in Python). A provider is skipped when this run would cost more per hour there, counting its minimum charge, billing increment and per-sandbox charge over `expectedSeconds`, so Agent37's one-minute minimum puts it over a $0.03/h cap for a 10-second run though its hourly price is $0.0065. When the cap leaves nothing, the error names the cheapest provider and its price for the run.
+- **`router.quote(spec, route)`**, `POST /v1/quote`, `client.quote()`, `sandboxrouter quote`: the provider a create would use, its price, and the run's estimated cost (minimum charge, increments and per-sandbox charge included), without starting anything.
+- **`providerWithKey(id, key)`** and `KEYED_PROVIDERS`: an adapter that uses the key it is given and never one from the environment, for Agent37, Boat, Daytona, E2B, Freestyle, Maritime, Novita, OpenScale, Sail, Sprites, Superserve and Tensorlake. A test catches every request each makes (fetch, vendor SDKs with their own HTTP clients) and fails if any carries the environment's key. For services that let users bring their own keys.
+- **`ServerHooks.routerFor(caller)`**: a router per caller for route, quote, create and every call on a sandbox.
+
+### Changed
+- **`strategy: "cheapest"` ranks by what the run costs**, not the hourly price alone: the same price the default ranks by (minimum charge, billing increment, per-sandbox charge over `expectedSeconds`), strictly by price. With `expectedSeconds: 10` it no longer puts Agent37, which bills a full minute, ahead of providers that bill by the second.
+- `OPENSCALE_API_URL` overrides OpenScale's API address (for a proxy or a test server).
+
 ## 0.8.3 (2026-11-15)
 
 ### Added

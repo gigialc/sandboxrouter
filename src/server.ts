@@ -49,6 +49,11 @@ export interface ServerHooks {
   orphanGraceMs?: number;
   /** false turns off pause. */
   pause?: boolean;
+  /**
+   * The router for this caller's requests (route, quote, create and every call on a sandbox), e.g. one
+   * with the caller's own provider keys. Default: the router passed to createApp.
+   */
+  routerFor?(caller: unknown): Router | Promise<Router>;
 }
 
 /**
@@ -57,6 +62,7 @@ export interface ServerHooks {
  *
  *   GET    /v1/providers
  *   POST   /v1/route                      dry run: which providers would be tried, in order
+ *   POST   /v1/quote                      where a create would land and what the run would cost
  *   POST   /v1/sandboxes                  { vcpu, memoryGb, ..., provider, strategy, fallback, require, createTimeoutSeconds }
  *   POST   /v1/sandboxes/:id/exec         { cmd, cwd, env, timeoutSeconds, stream }
  *          stream: true answers text/event-stream: `stdout`/`stderr` events (JSON string chunks),
@@ -78,7 +84,7 @@ export interface ServerHooks {
  *   DELETE /v1/computers/:id
  */
 export function createApp(
-  router = new Router(),
+  defaultRouter = new Router(),
   token = process.env.SANDBOXROUTER_TOKEN,
   /** Browser origins allowed to call this server (e.g. the website's Playground). Off by default. */
   corsOrigins: string[] = (process.env.SANDBOXROUTER_CORS ?? "").split(",").map((s) => s.trim()).filter(Boolean),
@@ -183,6 +189,7 @@ export function createApp(
       if (caller === null) return json(res, 401, { error: "unauthorized" });
     } else if (!authorized(req)) return json(res, 401, { error: "unauthorized" });
     if (parts[0] !== "v1") return json(res, 404, { error: "not found" });
+    const router = hooks.routerFor ? await hooks.routerFor(caller) : defaultRouter;
 
     const box = async (id: string) => {
       if (hooks.owns && !(await hooks.owns(caller, id))) throw new HttpError(404, "no such sandbox");
@@ -203,6 +210,12 @@ export function createApp(
     if (req.method === "POST" && parts[1] === "route" && parts.length === 2) {
       const { spec, route } = splitRequest(await readJson(req));
       return json(res, 200, { candidates: router.plan(spec, route) });
+    }
+
+    // POST /v1/quote
+    if (req.method === "POST" && parts[1] === "quote" && parts.length === 2) {
+      const { spec, route } = splitRequest(await readJson(req));
+      return json(res, 200, router.quote(spec, route));
     }
 
     if (parts[1] === "computers") {
@@ -335,7 +348,7 @@ export function createApp(
       const { spec, route } = splitComputerRequest(body);
       return once(req, res, body, async () => {
         await hooks.beforeCreateComputer?.(caller, spec);
-        const c = await router.computer(spec, route);
+        const c = await defaultRouter.computer(spec, route);
         let extra: Record<string, unknown> | void;
         try {
           extra = await hooks.afterCreateComputer?.(caller, c);
@@ -352,7 +365,7 @@ export function createApp(
     const id = parts[2] ? decodeURIComponent(parts[2]) : "";
     if (!id) return json(res, 404, { error: "not found" });
     if (hooks.owns && !(await hooks.owns(caller, id))) throw new HttpError(404, "no such computer");
-    const c = await router.getComputer(id);
+    const c = await defaultRouter.getComputer(id);
     const sub = parts[3];
 
     if (req.method === "GET" && !sub) return json(res, 200, { ...(await c.info()), id, nativeId: c.nativeId });

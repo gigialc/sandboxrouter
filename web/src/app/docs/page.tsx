@@ -110,13 +110,15 @@ try {
         <p>The second argument to <code>create</code> decides where a sandbox goes.</p>
         <CodeBlock
           code={`router.create(spec)                                // cheapest real cost; speed breaks near-ties
-router.create(spec, { strategy: "cheapest" })      // lowest list price alone
+router.create(spec, { strategy: "cheapest" })      // lowest cost for the run, strictly by price
 router.create(spec, { strategy: "fastest" })       // lowest start time, measured where you run it
 router.create(spec, { strategy: "verified" })      // providers that passed the check first
 router.create(spec, { provider: ["e2b", "modal"] }) // try these, in this order
 router.create({ gpu: "A10G" })                      // only GPU-capable providers are tried
 router.create(spec, { require: ["pause"] })         // only providers that can pause
-router.create({ expectedSeconds: 10 })              // rank by what a 10 s run is really billed`}
+router.create({ expectedSeconds: 10 })              // rank by what a 10 s run is really billed
+router.create(spec, { maxHourlyUsd: 0.03 })        // skip providers that would cost more per hour for this run
+router.quote({ expectedSeconds: 10 })               // where it would land and what the run would cost, without starting it`}
         />
         <p>
           With no strategy, the router goes cheapest first among providers you have keys for, by list price for the size you asked
@@ -132,7 +134,10 @@ router.create({ expectedSeconds: 10 })              // rank by what a 10 s run i
           create its router with <code>{`new Router({ requireVerified: true })`}</code> to use only providers that passed the check. Docker is never picked automatically; name it
           with <code>{`{ provider: "docker" }`}</code>. To see what would happen without starting anything, call{" "}
           <code>router.plan(spec, route)</code> or run <code>npx @sandboxrouter/sdk route</code>. Every skipped provider comes with
-          a reason, like <code>not configured</code> or <code>max 16 vCPU</code>.
+          a reason, like <code>not configured</code> or <code>max 16 vCPU</code>. <code>router.quote(spec, route)</code> (<code>POST /v1/quote</code>,{" "}
+          <code>npx @sandboxrouter/sdk quote</code>) gives the one answer: the provider, its price and the run&apos;s estimated cost.
+          <code>maxHourlyUsd</code> is a price cap, priced the same way as ranking, so a provider that charges a full minute is over a
+          cap for a 10-second run even when its hourly price is under it.
         </p>
 
         <h2 id="price-table">Reading the price table</h2>
@@ -266,7 +271,8 @@ SANDBOXROUTER_TOKEN=secret npx @sandboxrouter/sdk serve --cors https://your-site
               {[
                 ["GET /v1/providers", ""],
                 ["POST /v1/route", "same as create; returns the candidate order"],
-                ["POST /v1/sandboxes", "{ vcpu, memoryGb, gpu, env, timeoutMinutes, expectedSeconds, image, provider, strategy, fallback, createTimeoutSeconds, require }"],
+                ["POST /v1/sandboxes", "{ vcpu, memoryGb, gpu, env, timeoutMinutes, expectedSeconds, image, provider, strategy, fallback, createTimeoutSeconds, require, maxHourlyUsd }"],
+                ["POST /v1/quote", "same body as create: the provider it would use and the run's estimated cost, nothing started"],
                 ["POST /v1/sandboxes/:id/exec", "{ cmd, cwd, env, timeoutSeconds, stream }"],
                 ["PUT /v1/sandboxes/:id/files?path=", "raw bytes"],
                 ["GET /v1/sandboxes/:id/files?path=", ""],

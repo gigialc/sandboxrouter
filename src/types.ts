@@ -81,7 +81,9 @@ export interface SandboxSpec {
  * whose last real-account check failed (`FAILING`) go last.
  * "verified": providers that passed the real-account check first (`VERIFIED`), then the rest; cheapest
  * list price first within each.
- * "cheapest": lowest list price for the spec, tested or not, ties alphabetical.
+ * "cheapest": lowest cost for the run (priced as in "balanced": minimum charge, billing increment and
+ * per-sandbox charge over `expectedSeconds`), strictly by price: no speed tie-break, and providers whose
+ * last check failed aren't moved last. Ties alphabetical.
  * "fastest": lowest median create time (this router's own, else your `bench` file), then cheapest.
  */
 export type Strategy = "default" | "balanced" | "verified" | "cheapest" | "fastest";
@@ -110,6 +112,13 @@ export interface RouteOptions {
   createTimeoutSeconds?: number;
   /** Capabilities every candidate must have. */
   require?: Capability[];
+  /**
+   * The most this sandbox may cost, in USD per hour. A provider is skipped when this run would cost more
+   * there, priced the way ranking prices it: hourly price, minimum charge and billing increment over
+   * `expectedSeconds` (else `timeoutMinutes`, default 30), plus any per-sandbox charge, divided by the
+   * run's hours. Omit for no cap.
+   */
+  maxHourlyUsd?: number;
 }
 
 export interface ExecOptions {

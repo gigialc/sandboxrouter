@@ -18,6 +18,7 @@ const HELP = `sandboxrouter: one API for every sandbox provider
 Usage:
   sandboxrouter providers [--vcpu N] [--memory GB]   price table + which keys are set
   sandboxrouter route     [spec flags] [route flags] dry run: the order providers would be tried
+  sandboxrouter quote     [spec/route flags] [--json]  where a create would land and what the run would cost
   sandboxrouter run "<cmd>" [spec flags] [route flags] [--keep]
   sandboxrouter check     --provider ID[,ID] | --all [--json] [--save [dir]] [--retry] [--out FILE] [--by GITHUB_USER]
                           test providers for real: exec, env, UTF-8, streaming, files, timeout, pause,
@@ -43,6 +44,7 @@ Usage:
 
 Spec flags:   --vcpu N  --memory GB  --gpu T4  --timeout MIN  --expect SEC (how long you'll use it; ranks by the real bill)
 Route flags:  --provider e2b[,modal,...]  --strategy balanced|verified|cheapest|fastest (default balanced: cheapest real cost, speed breaks near-ties)
+              --max-price USD (per hour, for this run: skip providers that would cost more)
               --no-fallback  --fallback-any (also on setup errors like a bad key)
               --create-timeout SEC (per provider, default 120)  --require gpu,custom-image
 
@@ -59,6 +61,7 @@ const { values, positionals } = parseArgs({
     expect: { type: "string" },
     provider: { type: "string" },
     strategy: { type: "string" },
+    "max-price": { type: "string" },
     "no-fallback": { type: "boolean" },
     "fallback-any": { type: "boolean" },
     "create-timeout": { type: "string" },
@@ -119,6 +122,7 @@ const route: RouteOptions = {
   fallback: values["no-fallback"] ? false : values["fallback-any"] ? "any" : undefined,
   createTimeoutSeconds: num(values["create-timeout"]),
   require: list(values.require) as Capability[] | undefined,
+  maxHourlyUsd: num(values["max-price"]),
 };
 
 async function main() {
@@ -159,6 +163,22 @@ async function main() {
         "         a create() that names no size, at that image's size.",
       ].join("\n"),
     );
+    return;
+  }
+
+  if (cmd === "quote") {
+    const q = router.quote(spec, route);
+    if (values.json) return console.log(JSON.stringify({ ...q, candidates: undefined }, null, 2));
+    const rules = [
+      q.minimumSeconds ? `at least ${q.minimumSeconds} s billed` : "",
+      q.billedInSecondsOf ? `billed in steps of ${q.billedInSecondsOf} s` : "",
+      q.perSandboxUsd ? `$${q.perSandboxUsd} per sandbox` : "",
+    ].filter(Boolean);
+    console.log(`${q.provider}, ${q.size.vcpu} vCPU / ${q.size.memoryGb} GB`);
+    console.log(`price     $${q.hourlyUsd.toFixed(4)}/hr${rules.length ? ` (${rules.join(", ")})` : ""}`);
+    console.log(`this run  ${q.runSeconds} s ≈ $${q.estimatedUsd.toFixed(6)} ($${q.runHourlyUsd.toFixed(4)}/hr)`);
+    const next = q.candidates.filter((c) => !c.skip && c.provider !== q.provider).slice(0, 3).map((c) => c.provider);
+    if (next.length) console.log(`fallback  ${next.join(" → ")}`);
     return;
   }
 
