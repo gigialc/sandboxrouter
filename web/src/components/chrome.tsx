@@ -22,7 +22,6 @@ const NAV = [
   { href: "/use-cases", label: "Rankings" },
   { href: "/benchmarks", label: "Benchmarks" },
   { href: "/docs", label: "Docs" },
-  ...(HOSTED_PUBLIC ? [{ href: "/#hosted", label: "Pricing" }] : []),
   ...(REPO_PUBLIC ? [{ href: REPO, label: "GitHub" }] : []),
 ];
 
