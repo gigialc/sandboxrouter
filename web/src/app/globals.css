@@ -20,6 +20,89 @@
   --bar: var(--accent);
 }
 
+/* Dark: the same system on near-black, with a brighter jade so it keeps its contrast. Follows the OS
+   unless the header toggle picked one (data-theme on <html>, set before paint in layout.tsx). */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0b0c0c;
+  --panel: #151717;
+  --panel-2: #1d2020;
+  --ink: #f2f2f2;
+  --ink-2: #d0d0d0;
+  --muted: #9a9a9a;
+  --line: #262929;
+  --line-2: #363a3a;
+  --bad: #f07171;
+  --accent: #2fbf7f;
+  --accent-ink: #5fd6a0;
+  --accent-soft: #10291f;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #0b0c0c;
+    --panel: #151717;
+    --panel-2: #1d2020;
+    --ink: #f2f2f2;
+    --ink-2: #d0d0d0;
+    --muted: #9a9a9a;
+    --line: #262929;
+    --line-2: #363a3a;
+    --bad: #f07171;
+    --accent: #2fbf7f;
+    --accent-ink: #5fd6a0;
+    --accent-soft: #10291f;
+  }
+}
+
+/* Data tables (rankings, benchmarks): a hairline frame, a quiet header band, row hover, and the
+   winner row tinted. Cells keep their own padding; the frame adds a little at the edges. */
+.sr-table {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.sr-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.sr-table thead tr {
+  background: var(--panel);
+}
+.sr-table th:first-child,
+.sr-table td:first-child {
+  padding-left: 16px;
+}
+.sr-table th:last-child,
+.sr-table td:last-child {
+  padding-right: 16px;
+}
+.sr-table tbody tr {
+  transition: background-color 120ms;
+}
+.sr-table tbody tr:hover {
+  background: var(--panel);
+}
+.sr-table tbody tr.sr-best {
+  background: var(--accent-soft);
+}
+.sr-rank {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  font-size: 11px;
+  color: var(--muted);
+  border: 1px solid var(--line-2);
+}
+.sr-best .sr-rank {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--bg);
+}
+
 @theme inline {
   --color-bg: var(--bg);
   --color-panel: var(--panel);

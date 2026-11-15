@@ -17,9 +17,15 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", title: "sandboxRouter: one API for every sandbox", description: DESCRIPTION },
 };
 
+/** Apply a theme picked with the header toggle before first paint, so a dark choice doesn't flash light. */
+const THEME_SCRIPT = `try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.dataset.theme=t}catch(e){}`;
+
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+      </head>
       <body className="flex min-h-full flex-col">
         <Nav />
         <main className="flex-1">{children}</main>

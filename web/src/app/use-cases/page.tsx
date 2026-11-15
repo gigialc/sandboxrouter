@@ -38,10 +38,11 @@ export default function RankingsPage() {
               {u.spec.vcpu} vCPU / {u.spec.memoryGb} GB · {runLength(u.runSeconds)}
               {u.require.length ? ` · needs ${u.require.join(", ")}` : ""}
             </p>
-            <table className="mt-4 w-full text-[14px]">
+            <div className="sr-table mt-4">
+            <table className="text-[14px]">
               <thead>
                 <tr className="text-left text-[11px] uppercase tracking-[0.12em] text-muted">
-                  <th className="w-8 py-2 pr-2 font-normal">#</th>
+                  <th className="w-10 py-2.5 pr-2 font-normal">#</th>
                   <th className="py-2 pr-4 font-normal">Provider</th>
                   <th className="py-2 pr-4 text-right font-normal">This run</th>
                   <th className="hidden py-2 text-right font-normal sm:table-cell">Per hour, this run</th>
@@ -54,8 +55,8 @@ export default function RankingsPage() {
                     r.perSandboxUsd ? `+${fee(r.perSandboxUsd)} per sandbox` : "",
                   ].filter(Boolean);
                   return (
-                    <tr key={r.provider} className="border-t border-line">
-                      <td className="py-2.5 pr-2 font-mono text-[12px] text-muted">{i + 1}</td>
+                    <tr key={r.provider} className={`border-t border-line ${i === 0 ? "sr-best" : ""}`}>
+                      <td className="py-2.5 pr-2 font-mono"><span className="sr-rank">{i + 1}</span></td>
                       <td className="py-2.5 pr-4">
                         <Link href={`/providers/${r.provider}`} className="text-ink hover:underline underline-offset-4 decoration-line-2">
                           {r.name}
@@ -69,6 +70,7 @@ export default function RankingsPage() {
                 })}
               </tbody>
             </table>
+            </div>
           </section>
         ))}
 
@@ -77,10 +79,11 @@ export default function RankingsPage() {
             <h2 className="text-xl font-normal tracking-[-0.02em]">Fastest start</h2>
             <p className="mt-1 text-[14px] text-ink-2">When the wait matters more than the price: median cold start in our benchmark.</p>
             <p className="mt-1 font-mono text-[11px] text-muted">from a laptop in Europe · see dates</p>
-            <table className="mt-4 w-full text-[14px]">
+            <div className="sr-table mt-4">
+            <table className="text-[14px]">
               <thead>
                 <tr className="text-left text-[11px] uppercase tracking-[0.12em] text-muted">
-                  <th className="w-8 py-2 pr-2 font-normal">#</th>
+                  <th className="w-10 py-2.5 pr-2 font-normal">#</th>
                   <th className="py-2 pr-4 font-normal">Provider</th>
                   <th className="py-2 pr-4 text-right font-normal">Cold start</th>
                   <th className="hidden py-2 text-right font-normal sm:table-cell">Measured</th>
@@ -88,8 +91,8 @@ export default function RankingsPage() {
               </thead>
               <tbody>
                 {fastest.map((r, i) => (
-                  <tr key={r.provider} className="border-t border-line">
-                    <td className="py-2.5 pr-2 font-mono text-[12px] text-muted">{i + 1}</td>
+                  <tr key={r.provider} className={`border-t border-line ${i === 0 ? "sr-best" : ""}`}>
+                    <td className="py-2.5 pr-2 font-mono"><span className="sr-rank">{i + 1}</span></td>
                     <td className="py-2.5 pr-4">
                       <Link href={`/providers/${r.provider}`} className="text-ink hover:underline underline-offset-4 decoration-line-2">
                         {r.name}
@@ -101,6 +104,7 @@ export default function RankingsPage() {
                 ))}
               </tbody>
             </table>
+            </div>
           </section>
         )}
       </div>
