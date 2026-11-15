@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { CodeBlock } from "@/components/code";
-import { NPM, REPO_PUBLIC, site, usd } from "@/lib/site";
+import { UseCaseTable } from "@/components/UseCaseTable";
+import { HOSTED_FEE_PCT, NPM, REPO_PUBLIC, site, usd } from "@/lib/site";
 
 export const metadata: Metadata = { title: "Benchmarks" };
 
@@ -22,15 +23,34 @@ export default function BenchmarksPage() {
     <div className="px-5 sm:px-10 pt-14">
       <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted">Benchmarks</p>
       <h1 className="mt-5 max-w-2xl text-4xl font-normal leading-[1.08] tracking-[-0.035em] sm:text-[44px]">
-        How fast each sandbox starts
+        What each sandbox costs, and how fast it starts
       </h1>
       <p className="mt-5 max-w-2xl text-[15px] leading-7 text-ink-2">
-        Real sandboxes on real accounts, started, used once and killed. {rows.length} providers so far,{" "}
-        {totalRuns} sandboxes in total{subs[0] ? `, last run ${day(subs[0].date)}` : ""}. Providers without an account behind
-        them aren&apos;t here yet; they get added as soon as someone runs them.
+        <a href="#cost" className="underline underline-offset-4 decoration-line-2">Cost</a> is what a job would really be billed on
+        each provider, the way the router ranks them. <a href="#speed" className="underline underline-offset-4 decoration-line-2">Speed</a>{" "}
+        is measured: real sandboxes on real accounts, started, used once and killed.
       </p>
 
-      <table className="mt-10 w-full text-[14px]">
+      <section id="cost" className="mt-14 scroll-mt-20">
+        <h2 className="text-2xl font-normal tracking-[-0.025em] sm:text-[28px]">Cost for the job</h2>
+        <p className="mt-3 mb-6 max-w-2xl text-[14px] leading-6 text-ink-2">
+          The cheapest provider depends on how long you use it: one that charges a full minute loses on a 10-second job and wins on a
+          30-minute one. Pick a job to rank the providers that passed the real-account check by what that run would be billed:
+          list price, corrected by measured bills, plus each provider&apos;s minimum charge, billing steps and per-sandbox fee.
+          Fixed-size providers (E2B, OpenScale, Daytona) can&apos;t give these sizes. On the hosted key, add {HOSTED_FEE_PCT}% where
+          you don&apos;t use your own key.
+        </p>
+        <UseCaseTable />
+      </section>
+
+      <section id="speed" className="mt-20 scroll-mt-20">
+      <h2 className="text-2xl font-normal tracking-[-0.025em] sm:text-[28px]">Speed</h2>
+      <p className="mt-3 max-w-2xl text-[14px] leading-6 text-ink-2">
+        {rows.length} providers so far, {totalRuns} sandboxes in total{subs[0] ? `, last run ${day(subs[0].date)}` : ""}.
+        Providers without an account behind them aren&apos;t here yet; they get added as soon as someone runs them.
+      </p>
+
+      <table className="mt-6 w-full text-[14px]">
         <thead>
           <tr className="text-left text-[11px] uppercase tracking-[0.12em] text-muted">
             <th className="py-3 pr-4 font-normal">Provider</th>
@@ -76,6 +96,7 @@ export default function BenchmarksPage() {
           ))}
         </tbody>
       </table>
+      </section>
 
       {costs.length > 0 && (
         <section id="real-cost" className="mt-20 scroll-mt-20">
