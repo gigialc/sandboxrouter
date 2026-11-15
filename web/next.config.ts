@@ -6,7 +6,7 @@ const nextConfig: NextConfig = {
     return [
       { source: "/sandboxes", destination: "/#providers", permanent: true },
       { source: "/sandboxes/:id", destination: "/providers/:id", permanent: true },
-      { source: "/rankings", destination: "/#providers", permanent: true },
+      { source: "/rankings", destination: "/use-cases", permanent: true },
     ];
   },
   cacheComponents: true,

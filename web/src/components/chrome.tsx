@@ -18,6 +18,7 @@ export function Logo({ className = "" }: { className?: string }) {
 
 const NAV = [
   { href: "/providers", label: "Providers" },
+  { href: "/use-cases", label: "Rankings" },
   { href: "/benchmarks", label: "Benchmarks" },
   { href: "/docs", label: "Docs" },
   ...(HOSTED_PUBLIC ? [{ href: "/#hosted", label: "Pricing" }] : []),

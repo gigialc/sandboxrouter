@@ -54,6 +54,16 @@ export interface LeaderRow {
   measuredAt: string;
 }
 
+export interface UseCase {
+  id: string;
+  title: string;
+  blurb: string;
+  spec: { vcpu?: number; memoryGb?: number; expectedSeconds?: number; timeoutMinutes?: number };
+  require: string[];
+  runSeconds: number;
+  top: { provider: string; name: string; runUsd: number; runHourlyUsd: number; hourlyUsd: number; perSandboxUsd: number; minimumSeconds: number }[];
+}
+
 export interface CostRow {
   provider: string;
   name: string;
@@ -93,6 +103,7 @@ export const site = data as unknown as {
   checkSteps: string[];
   desktops: SiteDesktop[];
   leaderboard: LeaderRow[];
+  useCases: UseCase[];
   costRuns: CostRow[];
   submissions: { date: string; label: string | null; by: string | null; platform: string; runs: number; providers: number; ids: string[] }[];
 };
