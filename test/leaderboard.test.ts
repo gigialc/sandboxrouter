@@ -13,10 +13,10 @@ const row = (provider: BenchRow["provider"], create: number, failures = 0): Benc
   medianExecMs: 40,
   hourlyUsd: 0,
 });
-const report = (rows: BenchRow[], label?: string): BenchReport => ({
+const report = (rows: BenchRow[], label?: string, date = "2026-11-04T12:00:00.000Z"): BenchReport => ({
   tool: "sandboxrouter",
   version: "0.1.0",
-  date: "2026-11-04T12:00:00.000Z",
+  date,
   label,
   runs: 3,
   spec: { vcpu: 2, memoryGb: 4 },
@@ -26,11 +26,11 @@ const report = (rows: BenchRow[], label?: string): BenchReport => ({
 });
 
 describe("leaderboard", () => {
-  it("takes the median of each submission's medians and sorts by cold start", () => {
+  it("takes the median across locations and sorts by cold start", () => {
     const rows = aggregate([
-      report([row("maritime", 900), row("e2b", 300)]),
-      report([row("maritime", 1100), row("e2b", 500, 3)]),
-      report([row("maritime", 1000)]),
+      report([row("maritime", 900), row("e2b", 300)], "a"),
+      report([row("maritime", 1100), row("e2b", 500, 3)], "b"),
+      report([row("maritime", 1000)], "c"),
     ]);
     expect(rows.map((r) => [r.provider, r.medianCreateMs, r.submissions])).toEqual([
       ["e2b", 400, 2],
@@ -38,6 +38,19 @@ describe("leaderboard", () => {
     ]);
     expect(rows[0].successRate).toBeCloseTo(0.5);
     expect(rows[1].hourlyUsd).toBeCloseTo(0.022, 4);
+  });
+
+  it("uses only the latest run from each location", () => {
+    const rows = aggregate([
+      report([row("sprites", 300), row("e2b", 900)], "home", "2026-11-11T00:00:00.000Z"),
+      report([row("e2b", 400, 1)], "home", "2026-11-14T00:00:00.000Z"),
+    ]);
+    // E2B's newer run replaces the older one; Sprites keeps its only run, dated.
+    expect(rows.map((r) => [r.provider, r.medianCreateMs, r.measuredAt.slice(0, 10)])).toEqual([
+      ["sprites", 300, "2026-11-11"],
+      ["e2b", 400, "2026-11-14"],
+    ]);
+    expect(rows[1].successRate).toBeCloseTo(2 / 3);
   });
 
   it("escapes submitter-controlled text", () => {

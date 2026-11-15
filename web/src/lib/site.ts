@@ -51,6 +51,7 @@ export interface LeaderRow {
   successRate: number;
   hourlyUsd: number;
   size: { vcpu: number; memoryGb: number };
+  measuredAt: string;
 }
 
 export interface CostRow {

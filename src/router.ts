@@ -150,6 +150,15 @@ export interface RouterOptions {
    * `false` always waits the full `createTimeoutSeconds`.
    */
   quickFallback?: false | { factor?: number; minSeconds?: number };
+  /**
+   * What a provider's 401 or 403 (or a missing provider package) does to a create. "stop" (default):
+   * the create fails, because with your own keys that is a key or setup you need to fix, and moving the
+   * work elsewhere would hide it. "fallback": try the next provider. For services that run sandboxes on
+   * their own accounts, where a revoked key, a frozen workspace or a provider's creation cap is the
+   * service's problem, not the caller's. 400, 404 and 422 still stop: those are usually the request.
+   * Either way the failed try is in `attempts`.
+   */
+  accountErrors?: "stop" | "fallback";
 }
 
 /** Desktop-only providers. Filled in as adapters are added. */
@@ -207,6 +216,7 @@ export class Router {
   private readonly live = new Map<ProviderId, number[]>();
   private computerOnly: ComputerProvider[];
   private readonly quick: false | { factor: number; minSeconds: number };
+  private readonly accountErrors: "stop" | "fallback";
   /** The local record of sandboxes this router created, or undefined when turned off. */
   readonly ledger?: Ledger;
 
@@ -222,6 +232,7 @@ export class Router {
       opts.billedVsList ?? Object.fromEntries(Object.entries(BILLED_VS_LIST).map(([id, b]) => [id, b!.ratio]));
     this.computerOnly = opts.computers ?? (opts.providers ? [] : defaultComputerProviders());
     this.quick = opts.quickFallback === false ? false : { factor: 5, minSeconds: 10, ...opts.quickFallback };
+    this.accountErrors = opts.accountErrors ?? "stop";
   }
 
   /** Registered and has credentials. False for providers this router doesn't know. */
@@ -381,7 +392,9 @@ export class Router {
         const status = errorStatus(err);
         attempts.push({ provider: c.provider, ok: false, ms: Date.now() - t0, error: (err as Error).message, ...(status ? { status } : {}) });
         const setup = err instanceof SetupError || (status !== undefined && SETUP_ERRORS.has(status));
-        if (route.fallback !== "any" && setup) {
+        // On the router's own accounts, a key, permission or install problem is ours: move on.
+        const account = err instanceof SetupError || status === 401 || status === 403;
+        if (route.fallback !== "any" && setup && !(this.accountErrors === "fallback" && account)) {
           const msg = (err as Error).message.replace(/[.\s]+$/, "");
           throw new RouterError(
             `${msg.startsWith(c.provider) ? msg : `${c.provider}: ${msg}`}. This looks like a setup problem with ${c.provider} (key, image, request or a missing package), ` +

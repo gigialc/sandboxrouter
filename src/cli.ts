@@ -297,7 +297,7 @@ async function main() {
     for (const r of rows.filter((r) => r.lastError)) console.error(`\n${r.provider} last error: ${r.lastError}`);
     if (values.share) {
       const version = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8")).version;
-      const report = makeReport(rows, { version, runs: rows[0].runs, spec, label: values.label, by });
+      const report = makeReport(rows, { version, runs: rows[0].runs, spec: { ...spec, vcpu: spec.vcpu ?? DEFAULT_VCPU, memoryGb: spec.memoryGb ?? DEFAULT_MEMORY_GB }, label: values.label, by });
       const left = rows.filter((r) => !benchmarksPublishable(r.provider)).map((r) => r.provider);
       if (left.length) console.log(`\nleft out of the shared report: ${left.join(", ")} (their terms don't allow publishing benchmarks)`);
       const file = values.out ?? `sandboxrouter-bench-${report.date.slice(0, 10)}-${Math.random().toString(36).slice(2, 8)}.json`;

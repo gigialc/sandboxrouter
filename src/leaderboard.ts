@@ -72,15 +72,30 @@ export interface LeaderRow {
   hourlyUsd: number;
   /** The size bench runs: 2 vCPU / 4 GB, or the provider's fixed default size. */
   size: { vcpu: number; memoryGb: number };
+  /** Date (ISO) of the newest run behind this row. */
+  measuredAt: string;
 }
 
 const KNOWN = new Set(CATALOG.map((c) => c.id));
 
-/** Median of each submission's medians, so one heavy submitter can't skew a provider. */
+/**
+ * Each provider's latest run from each location (report label), then the median across locations, so
+ * an old run can't outvote a newer one and one heavy submitter can't skew a provider.
+ */
 export function aggregate(reports: BenchReport[]): LeaderRow[] {
-  const by = new Map<ProviderId, BenchRow[]>();
-  for (const rep of reports) for (const r of rep.rows) if (KNOWN.has(r.provider)) by.set(r.provider, [...(by.get(r.provider) ?? []), r]);
-  const rows: LeaderRow[] = [...by.entries()].map(([id, rs]) => {
+  const latest = new Map<string, { row: BenchRow; date: string }>();
+  for (const rep of reports) {
+    for (const r of rep.rows) {
+      if (!KNOWN.has(r.provider)) continue;
+      const key = `${r.provider}\u0000${rep.label ?? ""}`;
+      const seen = latest.get(key);
+      if (!seen || rep.date > seen.date) latest.set(key, { row: r, date: rep.date });
+    }
+  }
+  const by = new Map<ProviderId, { row: BenchRow; date: string }[]>();
+  for (const x of latest.values()) by.set(x.row.provider, [...(by.get(x.row.provider) ?? []), x]);
+  const rows: LeaderRow[] = [...by.entries()].map(([id, xs]) => {
+    const rs = xs.map((x) => x.row);
     const runs = rs.reduce((n, r) => n + r.runs, 0);
     const ok = rs.reduce((n, r) => n + (r.runs - r.failures), 0);
     return {
@@ -92,6 +107,7 @@ export function aggregate(reports: BenchReport[]): LeaderRow[] {
       successRate: runs ? ok / runs : 0,
       hourlyUsd: hourlyCost(id, fittingSpec(id)),
       size: fittingSpec(id),
+      measuredAt: xs.map((x) => x.date).sort().at(-1)!,
     };
   });
   return rows.sort((a, b) => (a.medianCreateMs ?? Infinity) - (b.medianCreateMs ?? Infinity));

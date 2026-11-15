@@ -196,7 +196,8 @@ export class ProviderError extends Error {
 
 /**
  * A problem with local setup, such as a provider SDK that isn't installed or a missing setting:
- * something to fix here, not a provider being down. The router stops on it instead of falling back.
+ * something to fix here, not a provider being down. The router stops on it instead of falling back, unless it
+ * was made with `accountErrors: "fallback"`.
  */
 export class SetupError extends Error {
   constructor(message: string) {
