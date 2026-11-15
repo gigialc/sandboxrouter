@@ -369,7 +369,8 @@ export class Router {
     if (over.length && over.length === keyed.length) {
       const hours = runHours(spec);
       const best = over.sort((a, b) => rankUsd(a, hours) - rankUsd(b, hours))[0];
-      return `every provider you have keys for is over your price cap (maxHourlyUsd); the cheapest for this run is ${best.provider} at ${usdPerHour(rankUsd(best, hours))}`;
+      // The skip's own words, so a service that prices the cap its own way (a fee) shows its price.
+      return `every provider you have keys for is over your price cap (maxHourlyUsd). Cheapest: ${best.provider}, ${best.skip!.slice(OVER_CAP.length + 2)}`;
     }
     const rest = plan.length - keyed.length;
     const small = keyed.filter((c) => c.skip?.startsWith("default image"));

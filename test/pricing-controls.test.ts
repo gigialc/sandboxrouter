@@ -35,7 +35,7 @@ describe("maxHourlyUsd", () => {
 
   it("says which provider is cheapest when the cap leaves nothing", async () => {
     await expect(router().create({ ...spec, expectedSeconds: 10 }, { maxHourlyUsd: 0.001 })).rejects.toThrow(
-      /every provider you have keys for is over your price cap.*cheapest for this run is maritime at \$0\.022\/h/,
+      /every provider you have keys for is over your price cap \(maxHourlyUsd\)\. Cheapest: maritime, \$0\.022\/h for this run, cap \$0\.001\/h/,
     );
   });
 
