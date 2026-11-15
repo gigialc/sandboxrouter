@@ -1,13 +1,16 @@
 // Generates web/src/data/site.json from the library itself, so the website can't drift from the code.
 // Run from the repo root: node --import tsx scripts/site-data.ts
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
-import { benchmarksPublishable, CATALOG, hourlyCost, planLabel, unfit } from "../src/catalog.js";
+import { benchmarksPublishable, billingRules, CATALOG, hourlyCost, planLabel, unfit } from "../src/catalog.js";
 import { aggregate, loadReports } from "../src/leaderboard.js";
 import { computerCatalog } from "../src/computers.js";
 import { CHECK_STEPS } from "../src/check.js";
 import { conformanceTable, liveStatus } from "../src/conformance.js";
 import { BILLED_VS_LIST } from "../src/billing.js";
 import type { CostRun } from "../src/cost.js";
+import { Router, rankUsd, runHours } from "../src/router.js";
+import { VERIFIED } from "../src/verified.js";
+import type { Capability, Provider, ProviderId, SandboxSpec } from "../src/types.js";
 
 const SHAPES = [
   { vcpu: 1, memoryGb: 2 },
@@ -49,6 +52,45 @@ const costRows = costRuns.flatMap((run) =>
   })),
 );
 
+/**
+ * The best providers for common jobs, ranked the way the router ranks them: what that run would really be
+ * billed (minimum charge, billing increment, per-sandbox charge), list price corrected by measured bills.
+ * Only providers that passed the real-account check. No speed tie-break: that depends on where you run.
+ */
+const USE_CASES: { id: string; title: string; blurb: string; spec: SandboxSpec; require?: Capability[] }[] = [
+  { id: "quick", title: "Quick tool calls", blurb: "Run a snippet and throw the sandbox away: about 10 seconds.", spec: { vcpu: 2, memoryGb: 4, expectedSeconds: 10 } },
+  { id: "session", title: "Agent sessions", blurb: "A coding agent working for about 30 minutes.", spec: { vcpu: 2, memoryGb: 4, timeoutMinutes: 30 } },
+  { id: "long", title: "Long jobs", blurb: "Evals, crawls or builds that run for 4 hours.", spec: { vcpu: 2, memoryGb: 4, timeoutMinutes: 240 } },
+  { id: "big", title: "Big machines", blurb: "8 vCPU / 16 GB for an hour: heavy builds and test suites.", spec: { vcpu: 8, memoryGb: 16, timeoutMinutes: 60 } },
+  { id: "pause", title: "Pause and resume", blurb: "Keep the disk, stop paying for CPU, pick it up later (30 minutes running).", spec: { vcpu: 2, memoryGb: 4, timeoutMinutes: 30 }, require: ["pause"] },
+  { id: "image", title: "Your own image", blurb: "Start from your own container image (30 minutes).", spec: { vcpu: 2, memoryGb: 4, timeoutMinutes: 30 }, require: ["custom-image"] },
+];
+// Stand-ins with every key "set": ranking reads only the catalog, never a provider.
+const stub = (id: ProviderId): Provider => ({
+  id,
+  configured: () => true,
+  create: () => Promise.reject(new Error("site data never starts sandboxes")),
+  connect: () => Promise.reject(new Error("site data never starts sandboxes")),
+});
+const ranker = new Router({ providers: Object.keys(VERIFIED).map((id) => stub(id as ProviderId)), ledger: false, requireVerified: true });
+const useCases = USE_CASES.map((u) => {
+  const hours = runHours(u.spec);
+  const top = ranker
+    .plan(u.spec, { strategy: "cheapest", require: u.require })
+    .filter((c) => !c.skip)
+    .slice(0, 5)
+    .map((c) => ({
+      provider: c.provider,
+      name: names.get(c.provider) ?? c.provider,
+      runUsd: rankUsd(c, hours) * hours,
+      runHourlyUsd: rankUsd(c, hours),
+      hourlyUsd: c.estimatedHourlyUsd,
+      perSandboxUsd: c.perSandboxUsd ?? 0,
+      minimumSeconds: billingRules(c.provider).minSeconds,
+    }));
+  return { id: u.id, title: u.title, blurb: u.blurb, spec: u.spec, require: u.require ?? [], runSeconds: Math.round(hours * 3600), top };
+});
+
 const data = {
   version: pkg.version,
   generatedAt: new Date().toISOString(),
@@ -79,6 +121,7 @@ const data = {
   checkSteps: CHECK_STEPS,
   desktops: computerCatalog(),
   leaderboard: aggregate(reports),
+  useCases,
   costRuns: costRows,
   submissions: reports.map((r) => ({
     date: r.date,

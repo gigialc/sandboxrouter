@@ -1,6 +1,6 @@
 {
   "version": "0.9.0",
-  "generatedAt": "2026-11-15T21:53:04.913Z",
+  "generatedAt": "2026-11-15T22:29:42.723Z",
   "shapes": [
     "1x2",
     "2x4",
@@ -3208,6 +3208,366 @@
         "memoryGb": 4
       },
       "measuredAt": "2026-11-15T00:24:25.502Z"
+    }
+  ],
+  "useCases": [
+    {
+      "id": "quick",
+      "title": "Quick tool calls",
+      "blurb": "Run a snippet and throw the sandbox away: about 10 seconds.",
+      "spec": {
+        "vcpu": 2,
+        "memoryGb": 4,
+        "expectedSeconds": 10
+      },
+      "require": [],
+      "runSeconds": 10,
+      "top": [
+        {
+          "provider": "boat",
+          "name": "Boat",
+          "runUsd": 0.000049999999999999996,
+          "runHourlyUsd": 0.018,
+          "hourlyUsd": 0.018,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0
+        },
+        {
+          "provider": "maritime",
+          "name": "Maritime",
+          "runUsd": 0.00006111111111111111,
+          "runHourlyUsd": 0.022,
+          "hourlyUsd": 0.022,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0
+        },
+        {
+          "provider": "agent37",
+          "name": "Agent37",
+          "runUsd": 0.00010833333333333331,
+          "runHourlyUsd": 0.03899999999999999,
+          "hourlyUsd": 0.0065,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 60
+        },
+        {
+          "provider": "novita",
+          "name": "Novita AI Agent Sandbox",
+          "runUsd": 0.0003238888888888889,
+          "runHourlyUsd": 0.1166,
+          "hourlyUsd": 0.1166,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0
+        },
+        {
+          "provider": "freestyle",
+          "name": "Freestyle",
+          "runUsd": 0.0003711111111111111,
+          "runHourlyUsd": 0.1336,
+          "hourlyUsd": 0.1336,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0
+        }
+      ]
+    },
+    {
+      "id": "session",
+      "title": "Agent sessions",
+      "blurb": "A coding agent working for about 30 minutes.",
+      "spec": {
+        "vcpu": 2,
+        "memoryGb": 4,
+        "timeoutMinutes": 30
+      },
+      "require": [],
+      "runSeconds": 1800,
+      "top": [
+        {
+          "provider": "agent37",
+          "name": "Agent37",
+          "runUsd": 0.00325,
+          "runHourlyUsd": 0.0065,
+          "hourlyUsd": 0.0065,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 60
+        },
+        {
+          "provider": "boat",
+          "name": "Boat",
+          "runUsd": 0.009,
+          "runHourlyUsd": 0.018,
+          "hourlyUsd": 0.018,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0
+        },
+        {
+          "provider": "maritime",
+          "name": "Maritime",
+          "runUsd": 0.010999999999999998,
+          "runHourlyUsd": 0.021999999999999995,
+          "hourlyUsd": 0.022,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0
+        },
+        {
+          "provider": "sail",
+          "name": "Sailboxes (Sail Research)",
+          "runUsd": 0.02535,
+          "runHourlyUsd": 0.0507,
+          "hourlyUsd": 0.0307,
+          "perSandboxUsd": 0.01,
+          "minimumSeconds": 0
+        },
+        {
+          "provider": "novita",
+          "name": "Novita AI Agent Sandbox",
+          "runUsd": 0.0583,
+          "runHourlyUsd": 0.1166,
+          "hourlyUsd": 0.1166,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0
+        }
+      ]
+    },
+    {
+      "id": "long",
+      "title": "Long jobs",
+      "blurb": "Evals, crawls or builds that run for 4 hours.",
+      "spec": {
+        "vcpu": 2,
+        "memoryGb": 4,
+        "timeoutMinutes": 240
+      },
+      "require": [],
+      "runSeconds": 14400,
+      "top": [
+        {
+          "provider": "agent37",
+          "name": "Agent37",
+          "runUsd": 0.026,
+          "runHourlyUsd": 0.0065,
+          "hourlyUsd": 0.0065,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 60
+        },
+        {
+          "provider": "boat",
+          "name": "Boat",
+          "runUsd": 0.072,
+          "runHourlyUsd": 0.018,
+          "hourlyUsd": 0.018,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0
+        },
+        {
+          "provider": "maritime",
+          "name": "Maritime",
+          "runUsd": 0.08799999999999998,
+          "runHourlyUsd": 0.021999999999999995,
+          "hourlyUsd": 0.022,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0
+        },
+        {
+          "provider": "sail",
+          "name": "Sailboxes (Sail Research)",
+          "runUsd": 0.1328,
+          "runHourlyUsd": 0.0332,
+          "hourlyUsd": 0.0307,
+          "perSandboxUsd": 0.01,
+          "minimumSeconds": 0
+        },
+        {
+          "provider": "novita",
+          "name": "Novita AI Agent Sandbox",
+          "runUsd": 0.4664,
+          "runHourlyUsd": 0.1166,
+          "hourlyUsd": 0.1166,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0
+        }
+      ]
+    },
+    {
+      "id": "big",
+      "title": "Big machines",
+      "blurb": "8 vCPU / 16 GB for an hour: heavy builds and test suites.",
+      "spec": {
+        "vcpu": 8,
+        "memoryGb": 16,
+        "timeoutMinutes": 60
+      },
+      "require": [],
+      "runSeconds": 3600,
+      "top": [
+        {
+          "provider": "boat",
+          "name": "Boat",
+          "runUsd": 0.072,
+          "runHourlyUsd": 0.072,
+          "hourlyUsd": 0.072,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0
+        },
+        {
+          "provider": "maritime",
+          "name": "Maritime",
+          "runUsd": 0.08799999999999998,
+          "runHourlyUsd": 0.08799999999999998,
+          "hourlyUsd": 0.088,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0
+        },
+        {
+          "provider": "sail",
+          "name": "Sailboxes (Sail Research)",
+          "runUsd": 0.1328,
+          "runHourlyUsd": 0.1328,
+          "hourlyUsd": 0.1228,
+          "perSandboxUsd": 0.01,
+          "minimumSeconds": 0
+        },
+        {
+          "provider": "freestyle",
+          "name": "Freestyle",
+          "runUsd": 0.5345,
+          "runHourlyUsd": 0.5345,
+          "hourlyUsd": 0.5345,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0
+        },
+        {
+          "provider": "blaxel",
+          "name": "Blaxel",
+          "runUsd": 0.6624,
+          "runHourlyUsd": 0.6624,
+          "hourlyUsd": 0.6624,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0
+        }
+      ]
+    },
+    {
+      "id": "pause",
+      "title": "Pause and resume",
+      "blurb": "Keep the disk, stop paying for CPU, pick it up later (30 minutes running).",
+      "spec": {
+        "vcpu": 2,
+        "memoryGb": 4,
+        "timeoutMinutes": 30
+      },
+      "require": [
+        "pause"
+      ],
+      "runSeconds": 1800,
+      "top": [
+        {
+          "provider": "agent37",
+          "name": "Agent37",
+          "runUsd": 0.00325,
+          "runHourlyUsd": 0.0065,
+          "hourlyUsd": 0.0065,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 60
+        },
+        {
+          "provider": "boat",
+          "name": "Boat",
+          "runUsd": 0.009,
+          "runHourlyUsd": 0.018,
+          "hourlyUsd": 0.018,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0
+        },
+        {
+          "provider": "maritime",
+          "name": "Maritime",
+          "runUsd": 0.010999999999999998,
+          "runHourlyUsd": 0.021999999999999995,
+          "hourlyUsd": 0.022,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0
+        },
+        {
+          "provider": "sail",
+          "name": "Sailboxes (Sail Research)",
+          "runUsd": 0.02535,
+          "runHourlyUsd": 0.0507,
+          "hourlyUsd": 0.0307,
+          "perSandboxUsd": 0.01,
+          "minimumSeconds": 0
+        },
+        {
+          "provider": "novita",
+          "name": "Novita AI Agent Sandbox",
+          "runUsd": 0.0583,
+          "runHourlyUsd": 0.1166,
+          "hourlyUsd": 0.1166,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0
+        }
+      ]
+    },
+    {
+      "id": "image",
+      "title": "Your own image",
+      "blurb": "Start from your own container image (30 minutes).",
+      "spec": {
+        "vcpu": 2,
+        "memoryGb": 4,
+        "timeoutMinutes": 30
+      },
+      "require": [
+        "custom-image"
+      ],
+      "runSeconds": 1800,
+      "top": [
+        {
+          "provider": "agent37",
+          "name": "Agent37",
+          "runUsd": 0.00325,
+          "runHourlyUsd": 0.0065,
+          "hourlyUsd": 0.0065,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 60
+        },
+        {
+          "provider": "boat",
+          "name": "Boat",
+          "runUsd": 0.009,
+          "runHourlyUsd": 0.018,
+          "hourlyUsd": 0.018,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0
+        },
+        {
+          "provider": "maritime",
+          "name": "Maritime",
+          "runUsd": 0.010999999999999998,
+          "runHourlyUsd": 0.021999999999999995,
+          "hourlyUsd": 0.022,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0
+        },
+        {
+          "provider": "novita",
+          "name": "Novita AI Agent Sandbox",
+          "runUsd": 0.0583,
+          "runHourlyUsd": 0.1166,
+          "hourlyUsd": 0.1166,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0
+        },
+        {
+          "provider": "freestyle",
+          "name": "Freestyle",
+          "runUsd": 0.0668,
+          "runHourlyUsd": 0.1336,
+          "hourlyUsd": 0.1336,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0
+        }
+      ]
     }
   ],
   "costRuns": [
