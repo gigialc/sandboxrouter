@@ -78,7 +78,7 @@ const useCases = USE_CASES.map((u) => {
   const top = ranker
     .plan(u.spec, { strategy: "cheapest", require: u.require })
     .filter((c) => !c.skip)
-    .slice(0, 5)
+    .slice(0, 8)
     .map((c) => ({
       provider: c.provider,
       name: names.get(c.provider) ?? c.provider,

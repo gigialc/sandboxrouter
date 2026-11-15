@@ -1,6 +1,6 @@
 {
   "version": "0.9.0",
-  "generatedAt": "2026-11-15T22:29:42.723Z",
+  "generatedAt": "2026-11-15T22:59:17.871Z",
   "shapes": [
     "1x2",
     "2x4",
@@ -3267,6 +3267,33 @@
           "hourlyUsd": 0.1336,
           "perSandboxUsd": 0,
           "minimumSeconds": 0
+        },
+        {
+          "provider": "sprites",
+          "name": "Fly.io Sprites",
+          "runUsd": 0.0004569444444444445,
+          "runHourlyUsd": 0.1645,
+          "hourlyUsd": 0.1645,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0
+        },
+        {
+          "provider": "blaxel",
+          "name": "Blaxel",
+          "runUsd": 0.00046,
+          "runHourlyUsd": 0.1656,
+          "hourlyUsd": 0.1656,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0
+        },
+        {
+          "provider": "superserve",
+          "name": "Superserve",
+          "runUsd": 0.00046,
+          "runHourlyUsd": 0.1656,
+          "hourlyUsd": 0.1656,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0
         }
       ]
     },
@@ -3324,6 +3351,33 @@
           "runUsd": 0.0583,
           "runHourlyUsd": 0.1166,
           "hourlyUsd": 0.1166,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0
+        },
+        {
+          "provider": "freestyle",
+          "name": "Freestyle",
+          "runUsd": 0.0668,
+          "runHourlyUsd": 0.1336,
+          "hourlyUsd": 0.1336,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0
+        },
+        {
+          "provider": "sprites",
+          "name": "Fly.io Sprites",
+          "runUsd": 0.08225,
+          "runHourlyUsd": 0.1645,
+          "hourlyUsd": 0.1645,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0
+        },
+        {
+          "provider": "blaxel",
+          "name": "Blaxel",
+          "runUsd": 0.0828,
+          "runHourlyUsd": 0.1656,
+          "hourlyUsd": 0.1656,
           "perSandboxUsd": 0,
           "minimumSeconds": 0
         }
@@ -3385,6 +3439,33 @@
           "hourlyUsd": 0.1166,
           "perSandboxUsd": 0,
           "minimumSeconds": 0
+        },
+        {
+          "provider": "freestyle",
+          "name": "Freestyle",
+          "runUsd": 0.5344,
+          "runHourlyUsd": 0.1336,
+          "hourlyUsd": 0.1336,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0
+        },
+        {
+          "provider": "sprites",
+          "name": "Fly.io Sprites",
+          "runUsd": 0.658,
+          "runHourlyUsd": 0.1645,
+          "hourlyUsd": 0.1645,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0
+        },
+        {
+          "provider": "blaxel",
+          "name": "Blaxel",
+          "runUsd": 0.6624,
+          "runHourlyUsd": 0.1656,
+          "hourlyUsd": 0.1656,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0
         }
       ]
     },
@@ -3444,6 +3525,24 @@
           "hourlyUsd": 0.6624,
           "perSandboxUsd": 0,
           "minimumSeconds": 0
+        },
+        {
+          "provider": "modal",
+          "name": "Modal",
+          "runUsd": 0.9518,
+          "runHourlyUsd": 0.9518,
+          "hourlyUsd": 0.9518,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0
+        },
+        {
+          "provider": "vercel",
+          "name": "Vercel Sandbox",
+          "runUsd": 1.3632,
+          "runHourlyUsd": 1.3632,
+          "hourlyUsd": 1.3632,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 60
         }
       ]
     },
@@ -3505,6 +3604,33 @@
           "hourlyUsd": 0.1166,
           "perSandboxUsd": 0,
           "minimumSeconds": 0
+        },
+        {
+          "provider": "freestyle",
+          "name": "Freestyle",
+          "runUsd": 0.0668,
+          "runHourlyUsd": 0.1336,
+          "hourlyUsd": 0.1336,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0
+        },
+        {
+          "provider": "superserve",
+          "name": "Superserve",
+          "runUsd": 0.0828,
+          "runHourlyUsd": 0.1656,
+          "hourlyUsd": 0.1656,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0
+        },
+        {
+          "provider": "tensorlake",
+          "name": "Tensorlake",
+          "runUsd": 0.1,
+          "runHourlyUsd": 0.2,
+          "hourlyUsd": 0.2,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0
         }
       ]
     },
@@ -3564,6 +3690,33 @@
           "runUsd": 0.0668,
           "runHourlyUsd": 0.1336,
           "hourlyUsd": 0.1336,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0
+        },
+        {
+          "provider": "blaxel",
+          "name": "Blaxel",
+          "runUsd": 0.0828,
+          "runHourlyUsd": 0.1656,
+          "hourlyUsd": 0.1656,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0
+        },
+        {
+          "provider": "superserve",
+          "name": "Superserve",
+          "runUsd": 0.0828,
+          "runHourlyUsd": 0.1656,
+          "hourlyUsd": 0.1656,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0
+        },
+        {
+          "provider": "tensorlake",
+          "name": "Tensorlake",
+          "runUsd": 0.1,
+          "runHourlyUsd": 0.2,
+          "hourlyUsd": 0.2,
           "perSandboxUsd": 0,
           "minimumSeconds": 0
         }

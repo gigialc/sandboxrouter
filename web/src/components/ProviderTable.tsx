@@ -19,7 +19,7 @@ export function ProviderTable() {
   const cloud = rows.filter((r) => !r.local && !r.prices[shape].unfit);
   const max = Math.max(0.0001, ...cloud.map((r) => r.prices[shape].usd));
 
-  const chip = (on: boolean) => `rounded-full px-2.5 py-1 text-[12px] tnum ${on ? "bg-accent text-white" : "text-ink-2 hover:bg-accent-soft hover:text-ink"}`;
+  const chip = (on: boolean) => `rounded-full px-2.5 py-1 text-[12px] tnum ${on ? "bg-accent text-bg" : "text-ink-2 hover:bg-accent-soft hover:text-ink"}`;
 
   return (
     <div>

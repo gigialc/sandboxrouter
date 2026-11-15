@@ -30,8 +30,7 @@ export default function BenchmarksPage() {
         them aren&apos;t here yet; they get added as soon as someone runs them.
       </p>
 
-      <div className="sr-table mt-10">
-      <table className="text-[14px]">
+      <table className="mt-10 w-full text-[14px]">
         <thead>
           <tr className="text-left text-[11px] uppercase tracking-[0.12em] text-muted">
             <th className="py-3 pr-4 font-normal">Provider</th>
@@ -77,7 +76,6 @@ export default function BenchmarksPage() {
           ))}
         </tbody>
       </table>
-      </div>
 
       {costs.length > 0 && (
         <section id="real-cost" className="mt-20 scroll-mt-20">
@@ -87,8 +85,8 @@ export default function BenchmarksPage() {
             We ran a sandbox for a fixed time, then read the bill back from the provider&apos;s own billing API. Only providers
             whose bill we could read are listed.
           </p>
-          <div className="sr-table mt-6 overflow-x-auto">
-            <table className="min-w-[560px] text-[14px]">
+          <div className="mt-6 overflow-x-auto">
+            <table className="w-full min-w-[560px] text-[14px]">
               <thead>
                 <tr className="text-left text-[11px] uppercase tracking-[0.12em] text-muted">
                   <th className="py-3 pr-4 font-normal">Provider</th>

@@ -55,33 +55,6 @@
   }
 }
 
-/* Data tables (rankings, benchmarks): a hairline frame, a quiet header band and row hover. Cells
-   keep their own padding; the frame adds a little at the edges. */
-.sr-table {
-  border: 1px solid var(--line);
-}
-.sr-table table {
-  width: 100%;
-  border-collapse: collapse;
-}
-.sr-table thead tr {
-  background: var(--panel);
-}
-.sr-table th:first-child,
-.sr-table td:first-child {
-  padding-left: 16px;
-}
-.sr-table th:last-child,
-.sr-table td:last-child {
-  padding-right: 16px;
-}
-.sr-table tbody tr {
-  transition: background-color 120ms;
-}
-.sr-table tbody tr:hover {
-  background: var(--panel);
-}
-
 @theme inline {
   --color-bg: var(--bg);
   --color-panel: var(--panel);
