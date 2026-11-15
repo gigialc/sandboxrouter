@@ -423,19 +423,22 @@ export class Router {
     const attempts: Attempt[] = [];
     const tries = route.fallback === false ? usable.slice(0, 1) : usable;
     const deadline = Date.now() + (route.deadlineSeconds ?? DEFAULT_CREATE_DEADLINE_S) * 1000;
+    const outOfTime = () =>
+      new RouterError(
+        `create ran out of time (deadlineSeconds) after trying ${attempts.map((a) => a.provider).join(", ")}: ${attempts.map((a) => `${a.provider}: ${a.error}`).join(" | ")}`,
+        attempts,
+        "timeout",
+      );
     for (const [i, c] of tries.entries()) {
       const left = deadline - Date.now();
-      if (left <= 0) {
-        throw new RouterError(
-          `create ran out of time (deadlineSeconds) after trying ${attempts.map((a) => a.provider).join(", ")}: ${attempts.map((a) => `${a.provider}: ${a.error}`).join(" | ")}`,
-          attempts,
-          "timeout",
-        );
-      }
+      if (left <= 0) throw outOfTime();
       const t0 = Date.now();
       const pending = this.provider(c.provider).create(spec);
       const { limitS, typicalMs } = this.waitFor(c.provider, route, i === tries.length - 1);
       const waitS = Math.min(limitS, left / 1000);
+      // This try's wait is what's left of the deadline: if it times out, the deadline is spent. Decided here,
+      // not by reading the clock again, since a timer can fire a millisecond early and let one more try start.
+      const lastChance = left / 1000 <= limitS;
       const price: SandboxPrice = { estimatedHourlyUsd: c.estimatedHourlyUsd, listHourlyUsd: c.listHourlyUsd, size: c.size };
       let timedOut = false;
       try {
@@ -455,6 +458,7 @@ export class Router {
         if (timedOut) pending.then((late) => this.discard(c.provider, late, price, spec.timeoutMinutes), () => {});
         const status = errorStatus(err);
         attempts.push({ provider: c.provider, ok: false, ms: Date.now() - t0, error: (err as Error).message, ...(status ? { status } : {}) });
+        if (timedOut && lastChance) throw outOfTime();
         const setup = err instanceof SetupError || (status !== undefined && SETUP_ERRORS.has(status));
         // On the router's own accounts, a key, permission or install problem is ours: move on.
         const account = err instanceof SetupError || status === 401 || status === 403;
