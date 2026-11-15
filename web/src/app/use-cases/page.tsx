@@ -55,8 +55,8 @@ export default function RankingsPage() {
                     r.perSandboxUsd ? `+${fee(r.perSandboxUsd)} per sandbox` : "",
                   ].filter(Boolean);
                   return (
-                    <tr key={r.provider} className={`border-t border-line ${i === 0 ? "sr-best" : ""}`}>
-                      <td className="py-2.5 pr-2 font-mono"><span className="sr-rank">{i + 1}</span></td>
+                    <tr key={r.provider} className="border-t border-line">
+                      <td className="py-2.5 pr-2 font-mono text-[12px] text-muted">{i + 1}</td>
                       <td className="py-2.5 pr-4">
                         <Link href={`/providers/${r.provider}`} className="text-ink hover:underline underline-offset-4 decoration-line-2">
                           {r.name}
@@ -91,8 +91,8 @@ export default function RankingsPage() {
               </thead>
               <tbody>
                 {fastest.map((r, i) => (
-                  <tr key={r.provider} className={`border-t border-line ${i === 0 ? "sr-best" : ""}`}>
-                    <td className="py-2.5 pr-2 font-mono"><span className="sr-rank">{i + 1}</span></td>
+                  <tr key={r.provider} className="border-t border-line">
+                    <td className="py-2.5 pr-2 font-mono text-[12px] text-muted">{i + 1}</td>
                     <td className="py-2.5 pr-4">
                       <Link href={`/providers/${r.provider}`} className="text-ink hover:underline underline-offset-4 decoration-line-2">
                         {r.name}

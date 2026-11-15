@@ -55,12 +55,10 @@
   }
 }
 
-/* Data tables (rankings, benchmarks): a hairline frame, a quiet header band, row hover, and the
-   winner row tinted. Cells keep their own padding; the frame adds a little at the edges. */
+/* Data tables (rankings, benchmarks): a hairline frame, a quiet header band and row hover. Cells
+   keep their own padding; the frame adds a little at the edges. */
 .sr-table {
   border: 1px solid var(--line);
-  border-radius: 10px;
-  overflow: hidden;
 }
 .sr-table table {
   width: 100%;
@@ -82,25 +80,6 @@
 }
 .sr-table tbody tr:hover {
   background: var(--panel);
-}
-.sr-table tbody tr.sr-best {
-  background: var(--accent-soft);
-}
-.sr-rank {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  border-radius: 999px;
-  font-size: 11px;
-  color: var(--muted);
-  border: 1px solid var(--line-2);
-}
-.sr-best .sr-rank {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--bg);
 }
 
 @theme inline {
