@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ThemeToggle } from "./ThemeToggle";
 import { MobileNav } from "@/components/MobileNav";
 import { HOSTED_PUBLIC, HOSTED_URL, NPM_URL, REPO, REPO_PUBLIC, site } from "@/lib/site";
 
@@ -39,6 +40,7 @@ export function Nav() {
             </Link>
           ))}
           <MobileNav links={NAV} />
+          <ThemeToggle />
           {HOSTED_PUBLIC ? (
             <>
               {/* GitHub sign-in opens the account the first time, so both go there; Sign up shows what you get first. */}
