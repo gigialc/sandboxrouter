@@ -177,6 +177,23 @@ describe("fallback", () => {
     expect(sbx.provider).toBe("maritime");
     expect(sbx.attempts[0]).toMatchObject({ provider: "modal", ok: false, error: "modal: invalid API key" });
   });
+
+  it('moves on from 401, 403 and a missing package with accountErrors: "fallback", but not from a bad request', async () => {
+    const own = (first: FakeProvider) => new Router({ providers: [first, new FakeProvider("maritime")], ledger: false, accountErrors: "fallback" });
+    for (const status of [401, 403]) {
+      const sbx = await own(new FakeProvider("modal", { fail: "creation limit reached", failStatus: status })).create({}, route);
+      expect(sbx.provider).toBe("maritime");
+      expect(sbx.attempts[0]).toMatchObject({ provider: "modal", ok: false, status });
+    }
+    const missing = await own(new FakeProvider("modal", { failWith: new SetupError('modal needs the "modal" package') })).create({}, route);
+    expect(missing.provider).toBe("maritime");
+    // A 400 or 422 is usually the request itself: it still stops.
+    for (const status of [400, 422]) {
+      await expect(own(new FakeProvider("modal", { fail: "bad image", failStatus: status })).create({}, route)).rejects.toMatchObject({ code: "setup" });
+    }
+    // An explicit fallback: false still tries only the first provider.
+    await expect(own(new FakeProvider("modal", { fail: "no", failStatus: 403 })).create({}, { ...route, fallback: false })).rejects.toThrow();
+  });
 });
 
 describe("HTTP server auth", () => {

@@ -143,7 +143,7 @@ A handle from `router.get(id)` has these only if this machine's ledger recorded 
 - `fastest`: lowest create time, then cheapest.
 - `verified`: providers that passed the real-account check (`VERIFIED`) first, then the rest, each cheapest first.
 
-`new Router({ requireVerified: true })` uses only providers that passed the check: for a service that runs sandboxes on its own accounts. `verified`, `failing` and `billedVsList` replace the shipped lists.
+`new Router({ requireVerified: true })` uses only providers that passed the check: for a service that runs sandboxes on its own accounts. Such a service should also pass `accountErrors: "fallback"`, so a provider's 401 or 403 (a revoked key, a frozen workspace, a creation cap) moves the work to the next provider instead of failing the request; by default those stop, since with your own keys they are a key to fix. `verified`, `failing` and `billedVsList` replace the shipped lists.
 
 ### Errors
 
