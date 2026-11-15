@@ -105,6 +105,34 @@ export interface Candidate {
   skip?: string;
 }
 
+/** What `router.quote()` answers: the provider a create would start on first, and what the run would cost there. */
+export interface Quote {
+  provider: ProviderId;
+  size: { vcpu: number; memoryGb: number };
+  /** The provider's price per hour for this size: list price, corrected by what it really bills where measured. */
+  hourlyUsd: number;
+  listHourlyUsd: number;
+  /** The run the estimate is for: `expectedSeconds`, else `timeoutMinutes` (default 30). */
+  runSeconds: number;
+  /** What the run costs per hour once minimum charge, billing increment and per-sandbox charge are counted. */
+  runHourlyUsd: number;
+  /** What the run costs in all. */
+  estimatedUsd: number;
+  /** The provider bills at least this many seconds per sandbox. */
+  minimumSeconds?: number;
+  /** The provider bills in whole steps of this many seconds. */
+  billedInSecondsOf?: number;
+  /** A fixed charge per sandbox started, included in `estimatedUsd`. */
+  perSandboxUsd?: number;
+  /** The whole plan: every provider, in the order a create would try them, with why any are skipped. */
+  candidates: Candidate[];
+}
+
+/** How a candidate over `maxHourlyUsd` is marked (its `skip` starts with this). */
+const OVER_CAP = "over your price cap";
+/** "$0.0123/h": enough digits to tell cheap providers apart. */
+export const usdPerHour = (n: number) => `$${n >= 1 ? n.toFixed(2) : Number(n.toPrecision(3))}/h`;
+
 /** Providers within this share of the cheapest remaining price count as a tie, broken by speed. */
 export const PRICE_TIE = 0.1;
 /** Creates this router must have seen for a provider before its own timings replace the bench file's. */
@@ -291,6 +319,10 @@ export class Router {
           (p.configured() ? undefined : gated ? `not configured; ${gated}` : "not configured") ??
           (this.requireVerified && !c.verified ? "not tested (this router only uses providers that passed the real-account check)" : undefined);
       }
+      if (!c.skip && route.maxHourlyUsd !== undefined) {
+        const rate = rankUsd(c, runHours(spec));
+        if (rate > route.maxHourlyUsd) c.skip = `${OVER_CAP}: ${usdPerHour(rate)} for this run, cap ${usdPerHour(route.maxHourlyUsd)}`;
+      }
       return c;
     });
 
@@ -300,11 +332,10 @@ export class Router {
     if (!explicit) {
       const hours = runHours(spec);
       const byCost = (a: Candidate, b: Candidate) => rankUsd(a, hours) - rankUsd(b, hours) || a.provider.localeCompare(b.provider);
-      const byList = (a: Candidate, b: Candidate) => a.listHourlyUsd - b.listHourlyUsd || a.provider.localeCompare(b.provider);
       if (strategy === "fastest") {
         list.sort((a, b) => (a.medianCreateMs ?? Infinity) - (b.medianCreateMs ?? Infinity) || byCost(a, b));
       } else if (strategy === "cheapest") {
-        list.sort(byList);
+        list.sort(byCost);
       } else if (strategy === "verified") {
         list.sort((a, b) => Number(b.verified) - Number(a.verified) || byCost(a, b));
       } else {
@@ -318,7 +349,7 @@ export class Router {
    * Why a create has nowhere to go, leading with what the caller can fix: no keys at all, or why the
    * providers they do have keys for were skipped.
    */
-  private whyNone(plan: Candidate[], explicit: boolean): string {
+  private whyNone(plan: Candidate[], explicit: boolean, spec: SandboxSpec = {}): string {
     if (plan.length === 0) return "no provider can take this sandbox: none registered";
     // Providers the caller named: say what each one needs.
     if (explicit) {
@@ -334,6 +365,12 @@ export class Router {
         "no provider keys found: set the API key for at least one provider (the README's Env table lists each provider's variables); " +
         "`npx @sandboxrouter/sdk providers` shows which are set"
       );
+    const over = keyed.filter((c) => c.skip?.startsWith(OVER_CAP));
+    if (over.length && over.length === keyed.length) {
+      const hours = runHours(spec);
+      const best = over.sort((a, b) => rankUsd(a, hours) - rankUsd(b, hours))[0];
+      return `every provider you have keys for is over your price cap (maxHourlyUsd); the cheapest for this run is ${best.provider} at ${usdPerHour(rankUsd(best, hours))}`;
+    }
     const rest = plan.length - keyed.length;
     const small = keyed.filter((c) => c.skip?.startsWith("default image"));
     return (
@@ -346,11 +383,37 @@ export class Router {
     );
   }
 
+  /**
+   * Where a create would land and what the run would cost there, without starting anything. Throws
+   * RouterError("no_provider") when nothing can take it, with the same reason create would give.
+   */
+  quote(spec: SandboxSpec = {}, route: RouteOptions = {}): Quote {
+    const candidates = this.plan(spec, route);
+    const first = candidates.find((c) => !c.skip);
+    if (!first) throw new RouterError(this.whyNone(candidates, !!route.provider, spec), [], "no_provider");
+    const hours = runHours(spec);
+    const rules = billingRules(first.provider);
+    const runHourlyUsd = rankUsd(first, hours);
+    return {
+      provider: first.provider,
+      size: first.size,
+      hourlyUsd: first.estimatedHourlyUsd,
+      listHourlyUsd: first.listHourlyUsd,
+      runSeconds: Math.round(hours * 3600),
+      runHourlyUsd,
+      estimatedUsd: runHourlyUsd * hours,
+      ...(rules.minSeconds > 1 ? { minimumSeconds: rules.minSeconds } : {}),
+      ...(rules.incrementSeconds > 1 ? { billedInSecondsOf: rules.incrementSeconds } : {}),
+      ...(first.perSandboxUsd ? { perSandboxUsd: first.perSandboxUsd } : {}),
+      candidates,
+    };
+  }
+
   /** Start a sandbox on the best available provider, falling back down the list on failure. */
   async create(spec: SandboxSpec = {}, route: RouteOptions = {}): Promise<RoutedSandbox> {
     const plan = this.plan(spec, route);
     const usable = plan.filter((c) => !c.skip);
-    if (usable.length === 0) throw new RouterError(this.whyNone(plan, !!route.provider), [], "no_provider");
+    if (usable.length === 0) throw new RouterError(this.whyNone(plan, !!route.provider, spec), [], "no_provider");
     // Pinned with no fallback: the first provider named, or nothing. Never a different one.
     if (route.provider && route.fallback === false && plan[0].skip) {
       throw new RouterError(`${plan[0].provider} can't take this sandbox: ${plan[0].skip}`, [], "no_provider");

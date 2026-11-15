@@ -43,7 +43,11 @@ const DEFAULT_TEMPLATE = "base";
 export class OpenScaleProvider implements Provider {
   readonly id = ID;
 
-  constructor(private apiKey = process.env.OPENSCALE_API_KEY) {}
+  constructor(
+    private apiKey = process.env.OPENSCALE_API_KEY,
+    /** The API's address; set OPENSCALE_API_URL only for a proxy or a test server. */
+    private apiUrl = process.env.OPENSCALE_API_URL || `https://api.${OPENSCALE_DOMAIN}`,
+  ) {}
 
   configured(): boolean {
     return !!this.apiKey;
@@ -52,7 +56,7 @@ export class OpenScaleProvider implements Provider {
   /** @internal Connection options for the e2b SDK. */
   conn(): { apiKey: string; domain: string; apiUrl: string } {
     if (!this.apiKey) throw new ProviderError(ID, "OPENSCALE_API_KEY is not set");
-    return { apiKey: this.apiKey, domain: OPENSCALE_DOMAIN, apiUrl: `https://api.${OPENSCALE_DOMAIN}` };
+    return { apiKey: this.apiKey, domain: OPENSCALE_DOMAIN, apiUrl: this.apiUrl };
   }
 
   async create(spec: SandboxSpec): Promise<ProviderSandbox> {

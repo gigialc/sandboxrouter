@@ -30,7 +30,7 @@ Site and docs: [sandboxrouter.ai](https://sandboxrouter.ai) · npm: [`@sandboxro
 AI agents need a disposable computer to run code a model wrote: install packages, run tests, do an RL rollout. Dozens of providers sell one, each with its own SDK and auth, and the same 2 vCPU / 4 GB sandbox costs from under a cent to over thirty cents an hour. sandboxRouter is one interface over all of them:
 
 - **Same code everywhere.** `create`, `exec` (streamed), `writeFile`, `readFile`, `pause`, `kill`. Switch providers by changing which keys are set.
-- **Cheapest real cost, then speed, with fallback.** Or `cheapest` for list price alone, `fastest` by start times, `verified` for tested providers first, or a list of providers you name. `requireVerified` limits a router to providers that passed the real-account check.
+- **Cheapest real cost, then speed, with fallback.** A `maxHourlyUsd` price cap and `quote()` to see where a sandbox would land and what the run costs before starting it. Or `cheapest` for strictly lowest cost for the run, `fastest` by start times, `verified` for tested providers first, or a list of providers you name. `requireVerified` limits a router to providers that passed the real-account check.
 - **Errors you can act on.** Every failure has a `code` (`no_provider`, `setup`, `all_failed`, `timeout`, ...), an HTTP status, and the list of providers tried.
 - **Your keys.** Your accounts and your bills; nothing is proxied through anyone else.
 - **Cleanup.** A local ledger of every sandbox started, so `sandboxrouter gc` kills what a crashed script left behind.

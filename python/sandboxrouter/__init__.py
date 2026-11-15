@@ -62,6 +62,7 @@ _SPEC_KEYS = {
     "create_timeout_seconds": "createTimeoutSeconds",
     "deadline_seconds": "deadlineSeconds",
     "require": "require",
+    "max_hourly_usd": "maxHourlyUsd",
 }
 
 
@@ -114,11 +115,16 @@ class Client:
     def route(self, **spec: Any) -> list:
         return self._json("POST", "/v1/route", _camel(spec))["candidates"]
 
+    def quote(self, **spec: Any) -> dict:
+        """Where a create would land and what the run would cost (provider, hourlyUsd, runSeconds, estimatedUsd, ...),
+        without starting anything. Takes the same arguments as create."""
+        return self._json("POST", "/v1/quote", _camel(spec))
+
     def create(self, idempotency_key: Optional[str] = None, **spec: Any) -> "Sandbox":
         """Start a sandbox. Spec: vcpu, memory_gb, gpu, env, timeout_minutes, expected_seconds, image, metadata.
         Routing: provider (str or list), strategy ("balanced" | "verified" | "cheapest" | "fastest"; default
         balanced: cheapest real cost, speed breaks near-ties), fallback (True, False or "any"),
-        create_timeout_seconds, deadline_seconds, require.
+        create_timeout_seconds, deadline_seconds, require, max_hourly_usd (skip providers that would cost more per hour for this run).
         The sandbox's `details` is the server's whole answer (a hosted service adds what it charges).
         With `idempotency_key`, sending the same create again returns the same sandbox, not a second one."""
         d = self._json("POST", "/v1/sandboxes", _camel(spec), {"Idempotency-Key": idempotency_key} if idempotency_key else None)

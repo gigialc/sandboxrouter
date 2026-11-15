@@ -13,12 +13,17 @@ export {
   PRICE_TIE,
   DEFAULT_CREATE_TIMEOUT_S,
   DEFAULT_CREATE_DEADLINE_S,
+  rankUsd,
+  runHours,
+  usdPerHour,
   type Candidate,
+  type Quote,
   type RouterOptions,
   type SandboxPrice,
   type Size,
 } from "./router.js";
 export { VERIFIED, FAILING } from "./verified.js";
+export { KEYED_PROVIDERS, providerWithKey } from "./keyed.js";
 export { BILLED_VS_LIST } from "./billing.js";
 export { validate, splitRequest, SPEC_KEYS, ROUTE_KEYS, STRATEGIES } from "./validate.js";
 export { CATALOG, hourlyCost, unfit, info, billingRules, billedUsd, type ProviderInfo } from "./catalog.js";

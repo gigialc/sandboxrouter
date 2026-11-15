@@ -76,7 +76,7 @@ Set the keys for the providers you want. Providers without keys are skipped.
 const router = new Router();
 
 // Cheapest provider that can do 8 vCPU / 16 GB, falling back on failure
-const a = await router.create({ vcpu: 8, memoryGb: 16 }, { strategy: "cheapest" }); // list price alone; the default also uses measured bills and speed
+const a = await router.create({ vcpu: 8, memoryGb: 16 }, { strategy: "cheapest" }); // lowest cost for the run, strictly by price; the default also breaks near-ties by speed
 
 // GPU: only GPU-capable providers are tried (Modal today)
 const b = await router.create({ gpu: "A10G", image: { modal: "pytorch/pytorch:latest" } });
@@ -139,9 +139,17 @@ A handle from `router.get(id)` has these only if this machine's ledger recorded 
 `strategy` orders the providers you have keys for:
 
 - `balanced` (default): cheapest for the run: `estimatedHourlyUsd` over `expectedSeconds` if you give it (else `timeoutMinutes`, default 30), rounded up to the provider's minimum charge and billing increment, plus any `perSandboxUsd`. So `expectedSeconds: 10` favors providers that bill by the second over ones that charge a full minute; providers within 10% of each other go fastest first, by this router's own recent create times (after 3), else your `bench` file. Providers whose last real-account check failed (`FAILING`) go last, still as fallback.
-- `cheapest`: lowest list price alone.
+- `cheapest`: lowest cost for the run, priced as in `balanced` (minimum charge, billing increment, per-sandbox charge), strictly by price: no speed tie-break, and providers whose last check failed aren't moved last.
 - `fastest`: lowest create time, then cheapest.
 - `verified`: providers that passed the real-account check (`VERIFIED`) first, then the rest, each cheapest first.
+
+`maxHourlyUsd` caps the price: a provider is skipped (`skip: "over your price cap: …"`) when this run would cost more per hour there, priced the same way as ranking, so a provider that bills a full minute is over a cap that its hourly price alone would pass when `expectedSeconds` is short. When the cap leaves nothing, the error names the cheapest provider and its price for the run.
+
+```ts
+await router.create({ vcpu: 2, memoryGb: 4, expectedSeconds: 10 }, { maxHourlyUsd: 0.03 });
+```
+
+`router.quote(spec, route)` says where a create would land and what the run would cost, without starting anything: `{ provider, size, hourlyUsd, listHourlyUsd, runSeconds, runHourlyUsd, estimatedUsd, minimumSeconds?, billedInSecondsOf?, perSandboxUsd?, candidates }`. `sandboxrouter quote --expect 10` prints it.
 
 `new Router({ requireVerified: true })` uses only providers that passed the check: for a service that runs sandboxes on its own accounts. Such a service should also pass `accountErrors: "fallback"`, so a provider's 401 or 403 (a revoked key, a frozen workspace, a creation cap) moves the work to the next provider instead of failing the request; by default those stop, since with your own keys they are a key to fix. `verified`, `failing` and `billedVsList` replace the shipped lists.
 
@@ -296,7 +304,8 @@ SANDBOXROUTER_TOKEN=secret npx @sandboxrouter/sdk serve
 |---|---|---|
 | `GET` | `/v1/providers` | |
 | `POST` | `/v1/route` | same as create; returns the candidate order |
-| `POST` | `/v1/sandboxes` | `{ vcpu, memoryGb, gpu, env, timeoutMinutes, expectedSeconds, image, metadata, provider, strategy, fallback, createTimeoutSeconds, deadlineSeconds, require }`. Other fields are refused. Answers `{ id, provider, size, estimatedHourlyUsd, listHourlyUsd, attempts }` |
+| `POST` | `/v1/quote` | same as create; returns `router.quote()`: the provider a create would use and the run's estimated cost |
+| `POST` | `/v1/sandboxes` | `{ vcpu, memoryGb, gpu, env, timeoutMinutes, expectedSeconds, image, metadata, provider, strategy, fallback, createTimeoutSeconds, deadlineSeconds, require, maxHourlyUsd }`. Other fields are refused. Answers `{ id, provider, size, estimatedHourlyUsd, listHourlyUsd, attempts }` |
 | `POST` | `/v1/sandboxes/:id/exec` | `{ cmd, cwd, env, timeoutSeconds, stream }`. With `stream: true` the answer is `text/event-stream`: `stdout` and `stderr` events, then `result` |
 | `POST` | `/v1/sandboxes/:id/pause` | |
 | `PUT` | `/v1/sandboxes/:id/files?path=` | raw bytes |
@@ -332,7 +341,7 @@ await sbx.exec("npm test", { onStdout: (c) => process.stdout.write(c) });
 await sbx.kill();
 ```
 
-`createApp(router, token, cors, hooks)` takes `ServerHooks` (per-caller auth, checks before a create, ownership) for running it for many users.
+`createApp(router, token, cors, hooks)` takes `ServerHooks` (per-caller auth, checks before a create, ownership) for running it for many users. `routerFor(caller)` gives each caller their own router, e.g. one that also holds the caller's own provider keys: `providerWithKey(id, key)` builds an adapter that uses that key and never a key from the server's environment, for the providers in `KEYED_PROVIDERS` (a test checks every request each one makes). `client.quote(spec, route)` calls `/v1/quote`.
 
 ### Python
 
@@ -344,6 +353,8 @@ from sandboxrouter import Client
 sr = Client("http://127.0.0.1:8787", token="secret")
 with sr.create(strategy="cheapest") as sbx:
     sbx.exec("pip install rich && python -c 'import rich'", on_stdout=lambda c: print(c, end=""))
+
+print(sr.quote(vcpu=2, memory_gb=4, expected_seconds=10, max_hourly_usd=0.03))
 ```
 
 ## How each adapter maps the spec
