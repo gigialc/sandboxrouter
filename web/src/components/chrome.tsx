@@ -39,9 +39,15 @@ export function Nav() {
           ))}
           <MobileNav links={NAV} />
           {HOSTED_PUBLIC ? (
-            <a href={`${HOSTED_URL}/dashboard`} className="rounded-full bg-ink px-4 py-1.5 text-[13px] font-medium text-bg hover:bg-ink-2">
-              Get a key
-            </a>
+            <>
+              {/* GitHub sign-in opens the account the first time, so both go there; Sign up shows what you get first. */}
+              <a href={`${HOSTED_URL}/auth/github`} className="hidden hover:text-ink sm:block">
+                Sign in
+              </a>
+              <a href={`${HOSTED_URL}/dashboard`} className="rounded-full bg-ink px-4 py-1.5 text-[13px] font-medium text-bg hover:bg-ink-2">
+                Sign up
+              </a>
+            </>
           ) : (
             <Link href="/docs#quickstart" className="rounded-full bg-ink px-4 py-1.5 text-[13px] font-medium text-bg hover:bg-ink-2">
               Quickstart
