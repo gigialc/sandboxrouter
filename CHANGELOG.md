@@ -7,6 +7,10 @@ All notable changes. Versions follow [semver](https://semver.org/); while the ve
 ### Added
 - **`accountErrors: "fallback"`** on `RouterOptions`, for services that run sandboxes on their own provider accounts. A provider's 401 or 403, or a missing provider package, now moves the create to the next provider instead of failing it: a revoked key, a frozen workspace or a provider's creation cap is the service's problem, not the caller's. 400, 404 and 422 still stop, since those are usually the request. The default stays `"stop"`, because with your own keys a 401 is a key to fix, not something to hide. Found live: Fly.io Sprites answers 403 once a token reaches its creation cap, and the default router ended the request there even with other providers left to try.
 
+### Fixed
+- **`bench` asks every provider for the same size.** It said 2 vCPU / 4 GB but sent no size, so each provider started at its own default. It now asks for 2 vCPU / 4 GB (or `--vcpu`/`--memory`), except providers whose default image fixes the size (E2B, OpenScale, Daytona), which run at that size, and the shared report records the size.
+- **The leaderboard uses each provider's latest run from each location**, not the median over every run ever submitted, so an old run can't outvote a newer one. Each row says when it was measured. Older runs stay listed on the benchmarks page.
+
 ## 0.8.2 (2026-11-14)
 
 ### Added

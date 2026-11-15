@@ -17,6 +17,7 @@ function billFrom(r: CostRow) {
   return "not posted yet";
 }
 
+const shortDay = (iso: string) => new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
 const day = (iso: string) => new Date(iso).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric", timeZone: "UTC" });
 
 export default function BenchmarksPage() {
@@ -47,6 +48,7 @@ export default function BenchmarksPage() {
             <th className="hidden py-3 pr-4 font-normal sm:table-cell">Command round trip</th>
             <th className="hidden py-3 pr-4 font-normal md:table-cell">Succeeded</th>
             <th className="hidden py-3 pr-4 font-normal md:table-cell">Size</th>
+            <th className="hidden py-3 pr-4 font-normal lg:table-cell">Measured</th>
             <th className="py-3 font-normal">List price</th>
           </tr>
         </thead>
@@ -78,6 +80,7 @@ export default function BenchmarksPage() {
               <td className="hidden py-3 pr-4 font-mono tnum text-ink-2 md:table-cell">
                 {r.size.vcpu} vCPU / {r.size.memoryGb} GB
               </td>
+              <td className="hidden py-3 pr-4 tnum text-ink-2 lg:table-cell">{shortDay(r.measuredAt)}</td>
               <td className="py-3 font-mono tnum text-ink-2">{usd(r.hourlyUsd)}/hr</td>
             </tr>
           ))}
@@ -153,8 +156,10 @@ export default function BenchmarksPage() {
           </p>
           <p>
             The numbers include the network between the machine running the test and each provider, so where it ran matters as
-            much as who ran it. Each location is listed below. With several locations, a provider&apos;s number is the median of
-            each location&apos;s median, so one heavy submitter can&apos;t move it.
+            much as who ran it. Each location is listed below. Each row uses the provider&apos;s latest run from each location
+            (the Measured column says when); with several locations, it is the median across them, so one heavy submitter
+            can&apos;t move it. Older runs stay in the list below but don&apos;t count once a newer one exists. Each run starts 5
+            sandboxes per provider, one after another, from a single machine: a snapshot, not an average over days.
           </p>
           <p>
             Prices are each provider&apos;s public list price for the size, not a bill. Disk, network, monthly plans and minimum

@@ -1,6 +1,6 @@
 {
   "version": "0.8.3",
-  "generatedAt": "2026-11-15T00:19:04.373Z",
+  "generatedAt": "2026-11-15T00:28:31.430Z",
   "shapes": [
     "1x2",
     "2x4",
@@ -2982,215 +2982,232 @@
       "size": {
         "vcpu": 2,
         "memoryGb": 4
-      }
+      },
+      "measuredAt": "2026-11-11T21:29:12.572Z"
     },
     {
       "provider": "novita",
       "name": "Novita AI Agent Sandbox",
-      "submissions": 3,
-      "medianCreateMs": 344,
-      "medianExecMs": 590,
+      "submissions": 1,
+      "medianCreateMs": 317,
+      "medianExecMs": 588,
       "successRate": 1,
       "hourlyUsd": 0.11664,
       "size": {
         "vcpu": 2,
         "memoryGb": 4
-      }
-    },
-    {
-      "provider": "e2b",
-      "name": "E2B",
-      "submissions": 4,
-      "medianCreateMs": 381,
-      "medianExecMs": 204,
-      "successRate": 1,
-      "hourlyUsd": 0.1089,
-      "size": {
-        "vcpu": 2,
-        "memoryGb": 0.5
-      }
+      },
+      "measuredAt": "2026-11-15T00:24:25.502Z"
     },
     {
       "provider": "openscale",
       "name": "OpenScale Sandboxes",
-      "submissions": 4,
-      "medianCreateMs": 392,
-      "medianExecMs": 1074,
+      "submissions": 2,
+      "medianCreateMs": 340,
+      "medianExecMs": 996,
       "successRate": 1,
       "hourlyUsd": 0.013999999999999999,
       "size": {
         "vcpu": 2,
         "memoryGb": 1
-      }
+      },
+      "measuredAt": "2026-11-15T00:24:25.502Z"
     },
     {
-      "provider": "superserve",
-      "name": "Superserve",
-      "submissions": 3,
-      "medianCreateMs": 414,
-      "medianExecMs": 160,
-      "successRate": 0.9333333333333333,
-      "hourlyUsd": 0.1656,
+      "provider": "e2b",
+      "name": "E2B",
+      "submissions": 2,
+      "medianCreateMs": 343,
+      "medianExecMs": 178,
+      "successRate": 1,
+      "hourlyUsd": 0.1089,
       "size": {
         "vcpu": 2,
-        "memoryGb": 4
-      }
-    },
-    {
-      "provider": "daytona",
-      "name": "Daytona",
-      "submissions": 4,
-      "medianCreateMs": 415,
-      "medianExecMs": 450,
-      "successRate": 1,
-      "hourlyUsd": 0.06659999999999999,
-      "size": {
-        "vcpu": 1,
-        "memoryGb": 1
-      }
+        "memoryGb": 0.5
+      },
+      "measuredAt": "2026-11-15T00:24:25.502Z"
     },
     {
       "provider": "vercel",
       "name": "Vercel Sandbox",
-      "submissions": 3,
-      "medianCreateMs": 443,
-      "medianExecMs": 344,
+      "submissions": 1,
+      "medianCreateMs": 357,
+      "medianExecMs": 205,
       "successRate": 1,
       "hourlyUsd": 0.3408,
       "size": {
         "vcpu": 2,
         "memoryGb": 4
-      }
+      },
+      "measuredAt": "2026-11-15T00:24:25.502Z"
+    },
+    {
+      "provider": "daytona",
+      "name": "Daytona",
+      "submissions": 2,
+      "medianCreateMs": 366,
+      "medianExecMs": 436,
+      "successRate": 1,
+      "hourlyUsd": 0.06659999999999999,
+      "size": {
+        "vcpu": 1,
+        "memoryGb": 1
+      },
+      "measuredAt": "2026-11-15T00:24:25.502Z"
+    },
+    {
+      "provider": "superserve",
+      "name": "Superserve",
+      "submissions": 1,
+      "medianCreateMs": 372,
+      "medianExecMs": 388,
+      "successRate": 1,
+      "hourlyUsd": 0.1656,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "measuredAt": "2026-11-15T00:24:25.502Z"
     },
     {
       "provider": "modal",
       "name": "Modal",
-      "submissions": 3,
-      "medianCreateMs": 554,
-      "medianExecMs": 1073,
+      "submissions": 1,
+      "medianCreateMs": 476,
+      "medianExecMs": 875,
       "successRate": 1,
       "hourlyUsd": 0.23796,
       "size": {
         "vcpu": 2,
         "memoryGb": 4
-      }
+      },
+      "measuredAt": "2026-11-15T00:24:25.502Z"
     },
     {
       "provider": "cloudflare",
       "name": "Cloudflare Sandbox",
-      "submissions": 3,
-      "medianCreateMs": 598,
-      "medianExecMs": 245,
-      "successRate": 0.9333333333333333,
+      "submissions": 1,
+      "medianCreateMs": 539,
+      "medianExecMs": 199,
+      "successRate": 1,
       "hourlyUsd": 0.21599999999999997,
       "size": {
         "vcpu": 2,
         "memoryGb": 4
-      }
-    },
-    {
-      "provider": "agent37",
-      "name": "Agent37",
-      "submissions": 3,
-      "medianCreateMs": 759,
-      "medianExecMs": 463,
-      "successRate": 1,
-      "hourlyUsd": 0.006520547945205479,
-      "size": {
-        "vcpu": 2,
-        "memoryGb": 4
-      }
+      },
+      "measuredAt": "2026-11-15T00:24:25.502Z"
     },
     {
       "provider": "freestyle",
       "name": "Freestyle",
-      "submissions": 3,
-      "medianCreateMs": 881,
-      "medianExecMs": 229,
+      "submissions": 1,
+      "medianCreateMs": 779,
+      "medianExecMs": 183,
       "successRate": 1,
       "hourlyUsd": 0.13362,
       "size": {
         "vcpu": 2,
         "memoryGb": 4
-      }
+      },
+      "measuredAt": "2026-11-15T00:24:25.502Z"
+    },
+    {
+      "provider": "agent37",
+      "name": "Agent37",
+      "submissions": 1,
+      "medianCreateMs": 798,
+      "medianExecMs": 558,
+      "successRate": 1,
+      "hourlyUsd": 0.006520547945205479,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "measuredAt": "2026-11-15T00:24:25.502Z"
     },
     {
       "provider": "agentcore",
       "name": "Amazon Bedrock AgentCore Code Interpreter",
-      "submissions": 3,
-      "medianCreateMs": 930,
-      "medianExecMs": 309,
+      "submissions": 1,
+      "medianCreateMs": 949,
+      "medianExecMs": 297,
       "successRate": 1,
       "hourlyUsd": 0.2168,
       "size": {
         "vcpu": 2,
         "memoryGb": 4
-      }
+      },
+      "measuredAt": "2026-11-15T00:24:25.502Z"
     },
     {
       "provider": "maritime",
       "name": "Maritime",
-      "submissions": 4,
-      "medianCreateMs": 1199,
-      "medianExecMs": 371,
+      "submissions": 2,
+      "medianCreateMs": 1147,
+      "medianExecMs": 180,
       "successRate": 1,
       "hourlyUsd": 0.022,
       "size": {
         "vcpu": 2,
         "memoryGb": 4
-      }
-    },
-    {
-      "provider": "boat",
-      "name": "Boat",
-      "submissions": 1,
-      "medianCreateMs": 1605,
-      "medianExecMs": 114,
-      "successRate": 1,
-      "hourlyUsd": 0.018,
-      "size": {
-        "vcpu": 2,
-        "memoryGb": 4
-      }
+      },
+      "measuredAt": "2026-11-15T00:24:25.502Z"
     },
     {
       "provider": "tensorlake",
       "name": "Tensorlake",
-      "submissions": 2,
-      "medianCreateMs": 1948,
-      "medianExecMs": 1878,
+      "submissions": 1,
+      "medianCreateMs": 1409,
+      "medianExecMs": 534,
       "successRate": 1,
       "hourlyUsd": 0.2,
       "size": {
         "vcpu": 2,
         "memoryGb": 4
-      }
+      },
+      "measuredAt": "2026-11-15T00:24:25.502Z"
+    },
+    {
+      "provider": "boat",
+      "name": "Boat",
+      "submissions": 1,
+      "medianCreateMs": 1553,
+      "medianExecMs": 125,
+      "successRate": 1,
+      "hourlyUsd": 0.018,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "measuredAt": "2026-11-15T00:24:25.502Z"
     },
     {
       "provider": "sail",
       "name": "Sailboxes (Sail Research)",
-      "submissions": 3,
-      "medianCreateMs": 2899,
-      "medianExecMs": 299,
+      "submissions": 1,
+      "medianCreateMs": 2262,
+      "medianExecMs": 243,
       "successRate": 1,
       "hourlyUsd": 0.062,
       "size": {
         "vcpu": 2,
         "memoryGb": 4
-      }
+      },
+      "measuredAt": "2026-11-15T00:24:25.502Z"
     },
     {
       "provider": "lambda",
       "name": "AWS Lambda MicroVMs",
-      "submissions": 3,
-      "medianCreateMs": 3378,
-      "medianExecMs": 606,
+      "submissions": 1,
+      "medianCreateMs": 3336,
+      "medianExecMs": 401,
       "successRate": 1,
       "hourlyUsd": 0.25220016,
       "size": {
         "vcpu": 2,
         "memoryGb": 4
-      }
+      },
+      "measuredAt": "2026-11-15T00:24:25.502Z"
     }
   ],
   "costRuns": [
@@ -3423,6 +3440,32 @@
         "tensorlake",
         "lambda",
         "sail"
+      ]
+    },
+    {
+      "date": "2026-11-15T00:24:25.502Z",
+      "label": "home-eu",
+      "by": null,
+      "platform": "darwin-arm64",
+      "runs": 5,
+      "providers": 16,
+      "ids": [
+        "novita",
+        "openscale",
+        "e2b",
+        "vercel",
+        "daytona",
+        "superserve",
+        "modal",
+        "cloudflare",
+        "freestyle",
+        "agent37",
+        "agentcore",
+        "maritime",
+        "tensorlake",
+        "boat",
+        "sail",
+        "lambda"
       ]
     }
   ]

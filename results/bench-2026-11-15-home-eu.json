@@ -1,0 +1,143 @@
+{
+  "tool": "sandboxrouter",
+  "version": "0.8.3",
+  "date": "2026-11-15T00:24:25.502Z",
+  "label": "home-eu",
+  "runs": 5,
+  "spec": {
+    "vcpu": 2,
+    "memoryGb": 4
+  },
+  "node": "v22.22.0",
+  "platform": "darwin-arm64",
+  "rows": [
+    {
+      "provider": "novita",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 317,
+      "medianExecMs": 588,
+      "hourlyUsd": 0.11664
+    },
+    {
+      "provider": "openscale",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 329,
+      "medianExecMs": 999,
+      "hourlyUsd": 0.013999999999999999
+    },
+    {
+      "provider": "e2b",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 354,
+      "medianExecMs": 187,
+      "hourlyUsd": 0.1089
+    },
+    {
+      "provider": "vercel",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 357,
+      "medianExecMs": 205,
+      "hourlyUsd": 0.3408
+    },
+    {
+      "provider": "daytona",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 369,
+      "medianExecMs": 468,
+      "hourlyUsd": 0.06659999999999999
+    },
+    {
+      "provider": "superserve",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 372,
+      "medianExecMs": 388,
+      "hourlyUsd": 0.1656
+    },
+    {
+      "provider": "modal",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 476,
+      "medianExecMs": 875,
+      "hourlyUsd": 0.23796
+    },
+    {
+      "provider": "cloudflare",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 539,
+      "medianExecMs": 199,
+      "hourlyUsd": 0.21599999999999997
+    },
+    {
+      "provider": "freestyle",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 779,
+      "medianExecMs": 183,
+      "hourlyUsd": 0.13362
+    },
+    {
+      "provider": "agent37",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 798,
+      "medianExecMs": 558,
+      "hourlyUsd": 0.006520547945205479
+    },
+    {
+      "provider": "agentcore",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 949,
+      "medianExecMs": 297,
+      "hourlyUsd": 0.2168
+    },
+    {
+      "provider": "maritime",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 1062,
+      "medianExecMs": 171,
+      "hourlyUsd": 0.022
+    },
+    {
+      "provider": "tensorlake",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 1409,
+      "medianExecMs": 534,
+      "hourlyUsd": 0.2
+    },
+    {
+      "provider": "boat",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 1553,
+      "medianExecMs": 125,
+      "hourlyUsd": 0.018
+    },
+    {
+      "provider": "sail",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 2262,
+      "medianExecMs": 243,
+      "hourlyUsd": 0.062
+    },
+    {
+      "provider": "lambda",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 3336,
+      "medianExecMs": 401,
+      "hourlyUsd": 0.25220016
+    }
+  ]
+}
