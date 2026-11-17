@@ -49,6 +49,7 @@ export interface LeaderRow {
   medianCreateMs?: number;
   medianExecMs?: number;
   successRate: number;
+  runs: number;
   hourlyUsd: number;
   size: { vcpu: number; memoryGb: number };
   measuredAt: string;
@@ -64,6 +65,7 @@ export interface TaskRow {
   hourlyUsd: number;
   taskUsd: number;
   reusedUsd: number;
+  runs: number;
   cpuMs?: number;
   activeCpu: boolean;
   minimumSeconds: number;
@@ -161,7 +163,7 @@ export const site = data as unknown as {
   checkSteps: string[];
   desktops: SiteDesktop[];
   leaderboard: LeaderRow[];
-  load: { id: string; title: string; blurb: string; rows: LoadRow[] }[];
+  load: { id: string; n: number; job: string; title: string; blurb: string; rows: LoadRow[] }[];
   agent: AgentRow[];
   priceIndex: { lines: IndexLine[]; history: { date: string; lines: Record<string, { median: number; cheapest: number; provider: string }> }[] };
   tasks: { kinds: { id: string; title: string; blurb: string; version: string; repeat: number; phases: { id: string; label: string }[]; rows: TaskRow[]; couldNot: string[] }[] };

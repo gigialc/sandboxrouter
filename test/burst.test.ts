@@ -67,4 +67,9 @@ describe("burst reports", () => {
     expect(rows[0].ok).toBe(100);
     expect(burstTable([report({ task: "python-v1" })], "python-v1")).toHaveLength(1);
   });
+  it("keeps each burst size apart and leaves out providers where nothing started", () => {
+    const ten = report({ n: 10, rows: [{ provider: "maritime", n: 10, ok: 10, limited: 0, p50Ms: 700, wallMs: 900 }, { provider: "boat", n: 10, ok: 0, limited: 10, wallMs: 1 }] });
+    expect(burstTable([report(), ten], undefined, 10)).toEqual([expect.objectContaining({ provider: "maritime", n: 10, ok: 10 })]);
+    expect(burstTable([report(), ten], undefined, 100)).toEqual([expect.objectContaining({ provider: "maritime", n: 100 })]);
+  });
 });

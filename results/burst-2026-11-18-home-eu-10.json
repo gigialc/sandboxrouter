@@ -1,0 +1,169 @@
+{
+  "tool": "sandboxrouter-burst",
+  "version": "0.10.0",
+  "date": "2026-11-17T18:33:05.397Z",
+  "label": "home-eu",
+  "by": "gigialc",
+  "n": 10,
+  "node": "v22.22.0",
+  "platform": "darwin-arm64",
+  "rows": [
+    {
+      "provider": "cloudflare",
+      "n": 10,
+      "ok": 10,
+      "limited": 0,
+      "p50Ms": 993,
+      "p95Ms": 1372,
+      "p99Ms": 1372,
+      "wallMs": 1372,
+      "usd": 0.00072
+    },
+    {
+      "provider": "daytona",
+      "n": 10,
+      "ok": 10,
+      "limited": 0,
+      "p50Ms": 1479,
+      "p95Ms": 1590,
+      "p99Ms": 1590,
+      "wallMs": 1590,
+      "usd": 0.000185
+    },
+    {
+      "provider": "vercel",
+      "n": 10,
+      "ok": 10,
+      "limited": 0,
+      "p50Ms": 1482,
+      "p95Ms": 1666,
+      "p99Ms": 1666,
+      "wallMs": 1666,
+      "usd": 0.0568
+    },
+    {
+      "provider": "agentcore",
+      "n": 10,
+      "ok": 10,
+      "limited": 0,
+      "p50Ms": 1549,
+      "p95Ms": 2311,
+      "p99Ms": 2311,
+      "wallMs": 2311,
+      "usd": 0.001265
+    },
+    {
+      "provider": "agent37",
+      "n": 10,
+      "ok": 10,
+      "limited": 0,
+      "p50Ms": 1834,
+      "p95Ms": 3535,
+      "p99Ms": 3535,
+      "wallMs": 3535,
+      "usd": 0.001085
+    },
+    {
+      "provider": "maritime",
+      "n": 10,
+      "ok": 10,
+      "limited": 0,
+      "p50Ms": 2073,
+      "p95Ms": 3086,
+      "p99Ms": 3086,
+      "wallMs": 3086,
+      "usd": 0.000134
+    },
+    {
+      "provider": "e2b",
+      "n": 10,
+      "ok": 10,
+      "limited": 0,
+      "p50Ms": 2103,
+      "p95Ms": 2119,
+      "p99Ms": 2119,
+      "wallMs": 2119,
+      "usd": 0.000363
+    },
+    {
+      "provider": "tensorlake",
+      "n": 10,
+      "ok": 10,
+      "limited": 0,
+      "p50Ms": 2265,
+      "p95Ms": 3639,
+      "p99Ms": 3639,
+      "wallMs": 3639,
+      "usd": 0.001111
+    },
+    {
+      "provider": "freestyle",
+      "n": 10,
+      "ok": 10,
+      "limited": 0,
+      "p50Ms": 2964,
+      "p95Ms": 3874,
+      "p99Ms": 3874,
+      "wallMs": 3874,
+      "usd": 0.001114
+    },
+    {
+      "provider": "sail",
+      "n": 10,
+      "ok": 10,
+      "limited": 0,
+      "p50Ms": 4036,
+      "p95Ms": 4332,
+      "p99Ms": 4332,
+      "wallMs": 4332,
+      "usd": 0.100341
+    },
+    {
+      "provider": "openscale",
+      "n": 10,
+      "ok": 10,
+      "limited": 0,
+      "p50Ms": 18892,
+      "p95Ms": 19600,
+      "p99Ms": 19600,
+      "wallMs": 19600,
+      "usd": 0.000696
+    },
+    {
+      "provider": "modal",
+      "n": 10,
+      "ok": 8,
+      "limited": 0,
+      "p50Ms": 2669,
+      "p95Ms": 4339,
+      "p99Ms": 4339,
+      "wallMs": 12345,
+      "usd": 0.001124
+    },
+    {
+      "provider": "lambda",
+      "n": 10,
+      "ok": 2,
+      "limited": 8,
+      "p50Ms": 3077,
+      "p95Ms": 4545,
+      "p99Ms": 4545,
+      "wallMs": 4545,
+      "usd": 0.00056
+    },
+    {
+      "provider": "boat",
+      "n": 10,
+      "ok": 0,
+      "limited": 10,
+      "wallMs": 1694
+    },
+    {
+      "provider": "superserve",
+      "n": 10,
+      "ok": 0,
+      "limited": 10,
+      "wallMs": 3573
+    }
+  ]
+}
