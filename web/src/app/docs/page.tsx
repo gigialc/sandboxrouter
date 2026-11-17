@@ -14,6 +14,7 @@ const SECTIONS = [
   ["streaming", "Streaming output"],
   ["files", "Files"],
   ["pause", "Pause and resume"],
+  ["native", "Using a provider's own features"],
   ["computers", "Desktops and phones"],
   ["server", "HTTP server"],
   ...(HOSTED_PUBLIC ? ([["hosted", "Hosted key"]] as const) : []),
@@ -229,6 +230,42 @@ await sbx.pause();
 // later, in any process:
 const again = await router.get(sbx.id);   // e.g. "e2b:iz5sb5a4bt3pmjx7c5ms2"`}
         />
+
+        <h2 id="native">Using a provider&apos;s own features</h2>
+        <p>
+          The router covers what every provider has: commands, files, pause, kill. For anything else (a public URL for a port,
+          background processes, snapshots, volumes), <code>sbx.native</code> is the provider SDK&apos;s own sandbox object,
+          already connected. There&apos;s no second login and no reconnecting by id.
+        </p>
+        <CodeBlock
+          code={`const sbx = await router.create();
+await sbx.exec("nohup npm run dev > /tmp/dev.log 2>&1 &");
+
+if (sbx.provider === "e2b") {
+  const e2b = sbx.native as import("e2b").Sandbox;   // the provider's own type
+  console.log("https://" + e2b.getHost(3000));
+}`}
+        />
+        <ul>
+          <li>
+            <b>Which providers.</b> Those the router drives through their own SDK: Beam, Blaxel, Daytona, Deno, E2B, Fly.io
+            Sprites, HOPX, LangSmith, Modal, Morph, Runloop, Tensorlake and Vercel. For the rest, which are plain HTTP,{" "}
+            <code>sbx.native</code> is undefined: use <code>sbx.nativeId</code> with their API.
+          </li>
+          <li>
+            <b>It ties that code to one provider.</b> Name the providers you&apos;ve written it for with{" "}
+            <code>{`{ provider: ["e2b"] }`}</code>, or branch on <code>sbx.provider</code>. Fallback still works among the ones
+            you name.
+          </li>
+          <li>
+            <b>The router doesn&apos;t see it.</b> Calls made through <code>sbx.native</code> aren&apos;t routed, priced or
+            tracked. Still end with <code>sbx.kill()</code>.
+          </li>
+          <li>
+            <b>Your own keys only.</b> With the hosted key the sandbox lives on our server, so there is no provider object to
+            hand over.
+          </li>
+        </ul>
 
         <h2 id="computers">Desktops and phones</h2>
         <p>

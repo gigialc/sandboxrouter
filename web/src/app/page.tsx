@@ -121,6 +121,7 @@ export default function Home() {
           points={[
             { title: "Fallback on every failure", body: "Out of credit, rate-limited or down: the next provider takes the sandbox, and every attempt is on sbx.attempts." },
             { title: "One handle, whatever ran it", body: "Run commands, stream output, move files and pause the same way on every provider." },
+            { title: "The provider's own SDK is still there", body: "sbx.native is the provider's own sandbox object, already connected, for ports, snapshots and anything the router doesn't cover." },
             { title: "Nothing left running", body: "If a script crashes, sandboxrouter gc kills the sandboxes it left behind." },
           ]}
           visual={<RouteDemo />}
