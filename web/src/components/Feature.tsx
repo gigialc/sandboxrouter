@@ -25,7 +25,10 @@ export function Feature({
 }) {
   const [open, setOpen] = useState(0);
   return (
-    <section id={id} className="grid scroll-mt-20 items-center gap-10 lg:grid-cols-[1fr_1.25fr] lg:gap-20">
+    <section
+      id={id}
+      className={`grid scroll-mt-20 items-center gap-10 lg:gap-20 ${flip ? "lg:grid-cols-[minmax(0,1fr)_minmax(0,28rem)]" : "lg:grid-cols-[minmax(0,28rem)_minmax(0,1fr)]"}`}
+    >
       <div className={flip ? "lg:order-2" : ""}>
         <p className="text-[13px] text-muted">{label}</p>
         <h2 className="mt-3 max-w-md text-[26px] font-normal leading-[1.2] tracking-[-0.025em]">{claim}</h2>

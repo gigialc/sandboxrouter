@@ -32,7 +32,7 @@ AI agents need a disposable computer to run code a model wrote: install packages
 - **Same code everywhere.** `create`, `exec` (streamed), `writeFile`, `readFile`, `pause`, `kill`. Switch providers by changing which keys are set.
 - **Cheapest real cost, then speed, with fallback.** A `maxHourlyUsd` price cap and `quote()` to see where a sandbox would land and what the run costs before starting it. Or `cheapest` for strictly lowest cost for the run, `fastest` by start times, `verified` for tested providers first, or a list of providers you name. `requireVerified` limits a router to providers that passed the real-account check.
 - **Errors you can act on.** Every failure has a `code` (`no_provider`, `setup`, `all_failed`, `timeout`, ...), an HTTP status, and the list of providers tried.
-- **Your keys.** Your accounts and your bills; nothing is proxied through anyone else.
+- **Your keys, or one hosted key.** With your own provider keys, sandboxes run on your accounts and nothing passes through anyone else. The optional hosted key (api.sandboxrouter.ai) runs them on sandboxRouter's provider accounts instead, so its requests go through that server; see [Security](https://www.sandboxrouter.ai/security).
 - **Cleanup.** A local ledger of every sandbox started, so `sandboxrouter gc` kills what a crashed script left behind.
 - **TypeScript, Python, HTTP and a CLI.** Plus desktops and phones for computer-use models.
 

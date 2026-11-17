@@ -1,13 +1,16 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Footer, Nav } from "@/components/chrome";
+import { site } from "@/lib/site";
 import "./globals.css";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
-const DESCRIPTION =
-  "A free, open-source router for AI agent sandboxes: one API across 30+ providers, priced side by side, tested on real accounts, with automatic fallback.";
+const CLOUD = site.providers.filter((p) => !p.local);
+const DESCRIPTION = `A free, open-source router for AI agent sandboxes: one API across ${CLOUD.length} providers, priced side by side, ${
+  CLOUD.filter((p) => p.live.status === "passed").length
+} of them tested on real accounts, with automatic fallback.`;
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.sandboxrouter.ai"),

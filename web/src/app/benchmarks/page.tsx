@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { PageHeader } from "@/components/chrome";
 import Link from "next/link";
 import { TaskTable } from "@/components/TaskTable";
 import { UseCaseTable } from "@/components/UseCaseTable";
@@ -18,16 +19,16 @@ export default function BenchmarksPage() {
   const maxCreate = Math.max(1, ...rows.map((r) => r.medianCreateMs ?? 0));
   const maxExec = Math.max(1, ...rows.map((r) => r.medianExecMs ?? 0));
   const costs = site.costRuns.filter((r) => !r.error && r.billedUsd !== null && r.billedUsd > 0);
+  // A fixed charge per sandbox isn't running time: shown apart, and taken out of the ratio the router uses.
+  const feeOf = (id: string) => site.providers.find((p) => p.id === id)?.pricing.perSandboxUsd ?? 0;
+  const vsList = (r: (typeof costs)[number]) =>
+    r.predictedUsd ? `${Math.round((((r.billedUsd ?? 0) - feeOf(r.provider)) / r.predictedUsd) * 100)}%` : "n/a";
 
   return (
     <div className="px-5 sm:px-10 pt-14">
-      <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted">Benchmarks</p>
-      <h1 className="mt-5 max-w-2xl text-4xl font-normal leading-[1.08] tracking-[-0.035em] sm:text-[44px]">
-        What each sandbox costs, and how fast it starts
-      </h1>
-      <p className="mt-5 max-w-2xl text-[15px] leading-7 text-ink-2">
+      <PageHeader kicker="Benchmarks" title="What each sandbox costs, and how fast it starts">
         Real sandboxes on real accounts, started, used and killed. <Link href="/methodology#pricing" className="text-ink underline underline-offset-4 decoration-line-2 hover:decoration-ink">How the numbers are made</Link>.
-      </p>
+      </PageHeader>
 
       <section id="cost" className="mt-14 scroll-mt-20">
         <h2 className="text-2xl font-normal tracking-[-0.025em] sm:text-[28px]">Cost for the job</h2>
@@ -117,6 +118,7 @@ export default function BenchmarksPage() {
                   <th className="py-3 pr-4 font-normal">Ran</th>
                   <th className="py-3 pr-4 font-normal">List price said</th>
                   <th className="py-3 pr-4 font-normal">Billed</th>
+                  <th className="py-3 pr-4 font-normal">Running time vs list</th>
                   <th className="py-3 font-normal">Measured</th>
                 </tr>
               </thead>
@@ -130,7 +132,11 @@ export default function BenchmarksPage() {
                     </td>
                     <td className="py-3 pr-4 font-mono tnum text-ink-2">{r.seconds === null ? "n/a" : `${Math.round(r.seconds / 60)} min`}</td>
                     <td className="py-3 pr-4 font-mono tnum text-ink-2">{cents(r.predictedUsd)}</td>
-                    <td className="py-3 pr-4 font-mono tnum text-ink">{cents(r.billedUsd)}</td>
+                    <td className="py-3 pr-4 font-mono tnum text-ink">
+                      {cents(r.billedUsd)}
+                      {feeOf(r.provider) ? <span className="ml-1 text-[11px] text-muted">incl. {cents(feeOf(r.provider))} start fee</span> : null}
+                    </td>
+                    <td className="py-3 pr-4 font-mono tnum text-ink-2">{vsList(r)}</td>
                     <td className="py-3 tnum text-ink-2">{shortDay(r.date)}</td>
                   </tr>
                 ))}

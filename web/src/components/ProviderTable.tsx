@@ -81,7 +81,9 @@ export function ProviderTable() {
                       title={`${p.name}'s default image is ${fixed.size} whatever size you ask for; a bigger size needs a custom image (image.${p.id}). This is its price at ${fixed.size}.`}
                     >
                       <span className="w-20 font-mono tnum text-ink-2">{usd(fixed.usd)}</span>
-                      <span className="text-[12px] text-muted">at {fixed.size} only</span>
+                      <span className="text-[12px] text-muted" title="The size of its default template; a bigger size needs your own template">
+                        default template {fixed.size}
+                      </span>
                     </div>
                   ) : price.unfit ? (
                     <span className="text-muted">{price.unfit}</span>

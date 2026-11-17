@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { TableScroll } from "@/components/chrome";
+import { PageHeader, TableScroll } from "@/components/chrome";
 import { CodeBlock } from "@/components/code";
 import { HOSTED_FEE_PCT, HOSTED_PUBLIC, HOSTED_URL, REPO, REPO_PUBLIC, site } from "@/lib/site";
 
@@ -29,10 +29,14 @@ export default function DocsPage() {
     .map((p) => `${p.name} ${p.defaultSize!.vcpu} vCPU / ${p.defaultSize!.memoryGb} GB`)
     .join(", ");
   return (
-    <div className="grid gap-10 px-5 sm:px-10 pt-14 lg:grid-cols-[13rem_1fr] xl:gap-16">
+    <div className="px-5 pt-14 sm:px-10">
+      <PageHeader kicker="Docs" title="Use sandboxRouter">
+        One API for {site.providers.filter((p) => !p.local).length} sandbox providers. It picks a provider for each sandbox, falls back when
+        one fails, and hands you back the same handle whatever ran it.
+      </PageHeader>
+    <div className="mt-12 grid gap-10 lg:grid-cols-[13rem_1fr] xl:gap-16">
       <aside className="hidden lg:block">
         <nav className="sticky top-24 space-y-1 text-sm">
-          <p className="mb-3 font-mono text-xs uppercase tracking-widest text-muted">Docs</p>
           {SECTIONS.map(([id, label]) => (
             <a key={id} href={`#${id}`} className="block px-2 py-1 text-ink-2 hover:bg-panel-2 hover:text-ink">
               {label}
@@ -42,12 +46,6 @@ export default function DocsPage() {
       </aside>
 
       <article className="prose-sr min-w-0 max-w-3xl">
-        <h1 className="text-4xl font-semibold tracking-tight">Docs</h1>
-        <p>
-          sandboxRouter gives your agent one API for {site.providers.length} sandbox providers. It picks a provider for each
-          sandbox, falls back when one fails, and hands you back the same handle whatever ran it.
-        </p>
-
         <h2 id="quickstart">Quickstart</h2>
         <CodeBlock title="terminal" code={`npm i @sandboxrouter/sdk\nexport E2B_API_KEY=...   # any one provider's key is enough to start`} />
         <div className="h-3" />
@@ -363,6 +361,7 @@ with sr.create(strategy="cheapest") as sbx:
           )}
         </p>
       </article>
+    </div>
     </div>
   );
 }
