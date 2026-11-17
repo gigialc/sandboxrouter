@@ -18,6 +18,8 @@ export interface ProviderInfo {
     incrementSeconds?: number;
     /** A fixed charge per sandbox created, USD, on top of running time. */
     perSandboxUsd?: number;
+    /** Start fees above a provider's included allowance. Estimates exclude these account-specific charges. */
+    conditionalStartFee?: { minUsd: number; maxUsd: number; source: string };
     /**
      * Active-CPU billing only: the share of the allocated CPU billed even when idle (Tensorlake bills at
      * least 20%). Default 0.
@@ -312,8 +314,9 @@ ENTRIES.push(
       vcpuHour: 0.009,
       gbHour: 0,
       note: "fixed sizes billed per second ($0.018/h for 2 vCPU / 4 GB up to $0.20/h for 16 / 32); needs a plan from $20/mo, paid back as VM time",
+      conditionalStartFee: { minUsd: 0.03, maxUsd: 0.07, source: "https://docs.boat.dev/limits.md#extra-starts" },
       source: "https://docs.boat.dev/pricing.md",
-      checked: "2026-11-13",
+      checked: "2026-11-17",
     },
     // "pause" here is Boat's stop: the disk is kept, running processes end.
     capabilities: ["pause", "custom-image"],

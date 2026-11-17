@@ -2,6 +2,7 @@
 // Run from the repo root: node --import tsx scripts/site-data.ts
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { benchmarksPublishable, billingRules, CATALOG, hourlyCost, planLabel, unfit } from "../src/catalog.js";
+import type { SpreadResult } from "../src/burst.js";
 import { agentTable, aggregate, burstTable, loadAgentReports, loadBursts, loadReports, taskTable } from "../src/leaderboard.js";
 import { TASKS } from "../src/task.js";
 import { priceIndex } from "../src/price-index.js";
@@ -100,28 +101,28 @@ const useCases = USE_CASES.map((u) => {
 });
 
 // The at-scale proof on the homepage: the newest spread report (N at once over several providers, with spillover),
-// against the most any single provider started in a burst of the same size.
+// compared with the recorded standalone tests in the same location at the same burst size.
 const scale = (() => {
   const spreads = readdirSync("results")
     .filter((f) => f.endsWith(".json"))
     .map((f) => JSON.parse(readFileSync(`results/${f}`, "utf8")))
     .filter((j) => j?.tool === "sandboxrouter-spread")
     .sort((a, b) => String(b.date).localeCompare(String(a.date)));
-  const s = spreads[0];
+  const s: (SpreadResult & { date: string; label?: string }) | undefined = spreads[0];
   if (!s) return null;
   const singles = loadBursts("results")
-    .filter((b) => b.n === s.n && !b.task)
+    .filter((b) => b.n === s.n && !b.task && b.label === s.label)
     .flatMap((b) => b.rows.map((r) => ({ provider: r.provider, ok: r.ok })))
     .sort((a, b) => b.ok - a.ok);
   const best = singles[0];
   return {
-    date: s.date as string,
-    n: s.n as number,
-    ok: s.ok as number,
-    providers: (s.byProvider as unknown[]).length,
-    /** Providers that hit a limit during the burst and handed the rest of their share on. */
-    saturated: (s.saturated as unknown[] | undefined)?.length ?? 0,
-    byProvider: (s.byProvider as { provider: string; ok: number; spilledIn: number }[])
+    date: s.date,
+    n: s.n,
+    ok: s.ok,
+    poolSize: s.byProvider.length,
+    wallMs: s.wallMs,
+    standaloneProviders: new Set(singles.map((r) => r.provider)).size,
+    byProvider: s.byProvider
       .filter((b) => b.ok > 0)
       .map((b) => ({ provider: b.provider, name: CATALOG.find((c) => c.id === b.provider)?.name ?? b.provider, ok: b.ok, spilledIn: b.spilledIn })),
     bestSingle: best ? { provider: best.provider, name: CATALOG.find((c) => c.id === best.provider)?.name ?? best.provider, ok: best.ok } : null,
@@ -244,6 +245,9 @@ const seen = <T extends { measuredAt: string }>(x: T) => (dates.push(x.measuredA
 const published: PublishedData = {
   schema: 1,
   dataThrough: "",
+  conditionalStartFees: Object.fromEntries(CATALOG.flatMap((c) =>
+    c.pricing.conditionalStartFee ? [[c.id, c.pricing.conditionalStartFee]] : [],
+  )),
   start: Object.fromEntries(
     data.leaderboard
       .filter((r) => r.medianCreateMs !== undefined)

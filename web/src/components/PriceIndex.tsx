@@ -1,3 +1,4 @@
+import { ConditionalStartFeeNote } from "@/components/ConditionalStartFeeNote";
 import Link from "next/link";
 import { site } from "@/lib/site";
 
@@ -71,7 +72,8 @@ export function PriceIndex({ dark = false }: { dark?: boolean }) {
         );
       })}
       <p className={`mt-3 text-[11px] leading-5 ${muted}`}>
-        Median across providers that passed our real-account check, priced for the whole run{first ? `; recorded since ${day(first)}` : ""}.{" "}
+        Estimated direct-provider costs, recorded {first ? `since ${day(first)}` : "when prices change"}.{" "}
+        <ConditionalStartFeeNote id="boat" />{" "}
         <Link href="/methodology#index" className="underline underline-offset-2">
           How it&apos;s made
         </Link>

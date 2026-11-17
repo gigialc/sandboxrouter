@@ -62,6 +62,8 @@ export interface PublishedData {
   start: Record<string, PublishedStart>;
   jobs: Partial<Record<Exclude<RecJob, "start">, Record<string, PublishedJob>>>;
   load: PublishedLoad[];
+  /** Start fees above included allowances. The benchmark estimates exclude these charges. */
+  conditionalStartFees?: Record<string, { minUsd: number; maxUsd: number; source: string }>;
 }
 
 export interface RecommendOptions {
@@ -180,6 +182,8 @@ export function recommend(data: PublishedData, opts: RecommendOptions = {}): Rec
 
   const mostRuns = Math.max(1, ...raw.map((r) => r.runs));
   for (const r of raw) {
+    const fee = data.conditionalStartFees?.[r.provider];
+    if (!reuse && fee) r.notes.push(`excludes $${fee.minUsd}–$${fee.maxUsd} per start above allowance`);
     if (r.runs < mostRuns / 2) r.notes.push(`only ${r.runs} runs`);
     if (r.successRate < 1) r.notes.push(`${Math.round(r.successRate * 100)}% of runs worked`);
     if (!load) continue;

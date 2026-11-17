@@ -63,7 +63,7 @@ export default function BenchmarksPage() {
             id: "cost",
             label: "Prices",
             content: (
-      <Section id="cost" title="Cost for the job" how="pricing" line="The cheapest provider depends on how long you use it: tested providers, ranked by what each job would be billed.">
+      <Section id="cost" title="Cost for the job" how="pricing" line="The cheapest provider depends on how long you use it: tested providers, ranked by estimated cost before account-specific fees.">
         <div className="mt-6">
           <UseCaseTable />
         </div>
@@ -77,7 +77,7 @@ export default function BenchmarksPage() {
                   id: "task",
                   label: "Real jobs",
                   content: (
-        <Section id="task" title="Real work" how="jobs" line="The same job on every provider, from a short burst of CPU to installing a real repo, priced by how long it really took.">
+        <Section id="task" title="Real work" how="jobs" line="The same job across tested providers, from a short burst of CPU to installing a real repo, with costs estimated from measured times.">
           <TaskTable />
         </Section>
                   ),

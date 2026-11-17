@@ -57,6 +57,14 @@ describe("quote", () => {
     expect(s.estimatedUsd).toBeCloseTo(0.01 + (0.062 * 10) / 3600, 6);
   });
 
+  it("reports Boat's account-dependent start fee separately from its estimate", () => {
+    const boat = new Router({ providers: [new FakeProvider("boat")], ledger: false });
+    const quote = boat.quote({ ...spec, expectedSeconds: 10 }, { provider: "boat", maxHourlyUsd: 0.02 });
+    expect(quote.estimatedUsd).toBeCloseTo(0.00005, 9);
+    expect(quote.perSandboxUsd).toBeUndefined();
+    expect(quote.conditionalStartFee).toMatchObject({ minUsd: 0.03, maxUsd: 0.07 });
+  });
+
   it("throws the create's reason when nothing fits", () => {
     expect(() => router().quote(spec, { maxHourlyUsd: 0.001 })).toThrow(RouterError);
   });

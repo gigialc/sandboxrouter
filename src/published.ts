@@ -6,6 +6,13 @@ import type { PublishedData } from "./recommend.js";
 export const PUBLISHED: PublishedData = {
   "schema": 1,
   "dataThrough": "2026-11-17T18:50:42.003Z",
+  "conditionalStartFees": {
+    "boat": {
+      "minUsd": 0.03,
+      "maxUsd": 0.07,
+      "source": "https://docs.boat.dev/limits.md#extra-starts"
+    }
+  },
   "start": {
     "superserve": {
       "name": "Superserve",

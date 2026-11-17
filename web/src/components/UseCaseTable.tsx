@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { BarNum, Num, ResultRow, ResultTable, Segmented, Toolbar, barMax, money, perHour } from "@/components/results";
+import { ConditionalStartFeeNote } from "@/components/ConditionalStartFeeNote";
+import { BarNum, Footnote, Num, ResultRow, ResultTable, Segmented, Toolbar, barMax, money, perHour } from "@/components/results";
 import { site } from "@/lib/site";
 
 const plural = (n: number, unit: string) => `${n} ${unit}${n === 1 ? "" : "s"}`;
 const runLength = (s: number) => (s < 60 ? plural(s, "second") : s < 3600 ? plural(Math.round(s / 60), "minute") : plural(Math.round(s / 3600), "hour"));
 
-/** What each kind of run would be billed, cheapest first: list prices with every billing rule applied. */
+/** Estimated cost for each kind of run before account-specific fees. */
 export function UseCaseTable() {
   const [id, setId] = useState(site.useCases[0]?.id);
   const u = site.useCases.find((x) => x.id === id) ?? site.useCases[0];
@@ -25,7 +26,7 @@ export function UseCaseTable() {
       <Toolbar note={`${u.blurb} ${spec.join(" · ")}.`}>
         <Segmented label="Job" options={site.useCases.map((x) => [x.id, x.title] as const)} value={u.id} onChange={setId} />
       </Toolbar>
-      <ResultTable cols={[{ label: "1,000 runs" }, { label: "Per hour", className: "hidden sm:table-cell" }]}>
+      <ResultTable cols={[{ label: "Est. / 1,000 runs" }, { label: "Per hour", className: "hidden sm:table-cell" }]}>
         {u.top.map((r, i) => (
           <ResultRow
             key={r.provider}
@@ -44,6 +45,9 @@ export function UseCaseTable() {
           </ResultRow>
         ))}
       </ResultTable>
+      {u.top.some((r) => r.provider === "boat") && (
+        <Footnote><ConditionalStartFeeNote id="boat" /></Footnote>
+      )}
     </div>
   );
 }

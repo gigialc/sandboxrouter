@@ -41,8 +41,9 @@
     "date": "2026-11-17T20:41:56.179Z",
     "n": 1000,
     "ok": 1000,
-    "providers": 12,
-    "saturated": 8,
+    "poolSize": 12,
+    "wallMs": 63772,
+    "standaloneProviders": 2,
     "byProvider": [
       {
         "provider": "cloudflare",
@@ -118,7 +119,7 @@
     }
   },
   "version": "0.12.0",
-  "generatedAt": "2026-11-17T21:34:51.405Z",
+  "generatedAt": "2026-11-17T22:21:15.967Z",
   "shapes": [
     "1x2",
     "2x4",
@@ -751,8 +752,13 @@
         "vcpuHour": 0.009,
         "gbHour": 0,
         "note": "fixed sizes billed per second ($0.018/h for 2 vCPU / 4 GB up to $0.20/h for 16 / 32); needs a plan from $20/mo, paid back as VM time",
+        "conditionalStartFee": {
+          "minUsd": 0.03,
+          "maxUsd": 0.07,
+          "source": "https://docs.boat.dev/limits.md#extra-starts"
+        },
         "source": "https://docs.boat.dev/pricing.md",
-        "checked": "2026-11-13"
+        "checked": "2026-11-17"
       },
       "access": null,
       "billing": "allocated",

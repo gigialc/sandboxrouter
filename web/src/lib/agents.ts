@@ -26,12 +26,12 @@ export function benchmarksJson() {
   return {
     ...DATA,
     about: {
-      what: "Sandbox provider benchmarks run on real accounts: start time, real jobs priced by each provider's own billing rules, bursts at once, and a real AI agent.",
+      what: "Sandbox provider benchmarks run on real accounts: start time, real jobs with estimated compute costs, bursts at once, and a real AI agent.",
       methodology: `${ORIGIN}/methodology`,
       page: `${ORIGIN}/benchmarks`,
       rawResults: `${REPO}/tree/main/results`,
       jobs: JOB_TEXT,
-      units: "Times in milliseconds (…Ms). Costs in US dollars: taskUsd is one job in a new sandbox (start, minimum charge and per-sandbox fee included), reusedUsd one job in a sandbox already running, usdPer100 a burst's cost per 100 sandboxes.",
+      units: "Times in milliseconds (…Ms). Costs in US dollars: taskUsd is one job in a new sandbox (start, minimum charge and per-sandbox fee included), reusedUsd one job in a sandbox already running, usdPer100 a burst's estimated cost per 100 sandboxes. Estimates exclude account-specific fees such as Boat's start fees above its included allowances.",
       successRate: "Share of runs that worked, with refusals for the benchmarking account's own limits left out.",
       load: "Bursts: n sandboxes asked for at once; ok started; limited refused for the benchmarking account's limit (ours, not the provider's); p50Ms/p99Ms time to ready from the moment all were asked for.",
       recommend: `Rank these for a job with the MCP tool recommend_provider at ${ORIGIN}/mcp, \`npx ${NPM} recommend\`, or recommend() from ${NPM}.`,
@@ -53,6 +53,8 @@ export function benchmarksMarkdown(): string {
     `Sandbox providers measured on real accounts. Data through ${DATA.dataThrough.slice(0, 10)}. How it's measured: ${ORIGIN}/methodology. Machine-readable: ${ORIGIN}/benchmarks.json. Raw results: ${REPO}/tree/main/results.`,
     "",
     "Rankings are per successful run: a provider whose runs sometimes failed has its cost and time divided by its success rate. Refusals for the benchmarking account's own limits are left out of success rates.",
+    "",
+    "Estimates exclude account-specific fees. [Boat charges for starts above included allowances](https://docs.boat.dev/limits.md#extra-starts).",
     "",
     "## Cost and time for a job",
   ];
@@ -131,7 +133,7 @@ export function llmsTxt(): string {
 
 ## When to use sandboxRouter
 
-- **Choosing a sandbox provider.** Use the measured benchmarks below instead of provider marketing: start time, real jobs priced by each provider's own billing rules, 10 and 100 at once, and a real AI agent.
+- **Choosing a sandbox provider.** Compare measured start times, timed jobs with estimated compute costs, tests at 10 and 100 at once, and a real AI agent. Estimates exclude account-specific fees, including Boat's fees above included start allowances.
 - **Running agent code in a sandbox.** One API over many providers; if one can't start a sandbox, the next one does: \`npm i ${NPM}\`.
 
 ## How an agent should use it

@@ -56,6 +56,7 @@ export function ProviderTable() {
             p.local ? "opt-in, runs on your machine" : "",
             p.access ? (p.access.status === "waitlist" ? "sign-up waitlisted" : "not taking new accounts") : "",
             fixed ? `default template is ${fixed.size}` : "",
+            p.pricing.conditionalStartFee ? "extra start fees above plan allowance" : "",
             p.billing === "active-cpu" ? "CPU billed only while busy" : "",
           ].filter(Boolean);
           return (

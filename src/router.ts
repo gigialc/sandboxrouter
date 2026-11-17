@@ -1,4 +1,4 @@
-import { accessLabel, billedCpuShare, billingRules, CATALOG, cpuHourlyAtFull, DEFAULT_MEMORY_GB, DEFAULT_VCPU, fixedSize, hourlyCost, unfit } from "./catalog.js";
+import { accessLabel, billedCpuShare, billingRules, CATALOG, cpuHourlyAtFull, DEFAULT_MEMORY_GB, DEFAULT_VCPU, fixedSize, hourlyCost, info, unfit, type ProviderInfo } from "./catalog.js";
 import {
   type ComputerRoute,
   RoutedComputer,
@@ -96,7 +96,7 @@ export interface Candidate {
    * asked for (2 vCPU / 4 GB when nothing was). Some providers round up to their next size.
    */
   size: Size;
-  /** Median create time: this router's own recent creates when it has a few, else your `bench` file. */
+  /** Median create time from this router, your `bench` file or the published benchmarks, in that order. */
   medianCreateMs?: number;
   /** Passed the real-account check (as of this release, or `RouterOptions.verified`). */
   verified: boolean;
@@ -107,6 +107,8 @@ export interface Candidate {
    * spreads it over the run (`expectedSeconds`, else `timeoutMinutes`, default 30), so it weighs more on short ones.
    */
   perSandboxUsd?: number;
+  /** Account-specific start fees that the estimate and price cap exclude. */
+  conditionalStartFee?: ProviderInfo["pricing"]["conditionalStartFee"];
   /** Why this provider won't be tried, if it won't. */
   skip?: string;
   /** Set while the provider is at the back of the line after a limit or repeated failures (see `cooldown`). */
@@ -124,7 +126,7 @@ export interface Quote {
   runSeconds: number;
   /** What the run costs per hour once minimum charge, billing increment and per-sandbox charge are counted. */
   runHourlyUsd: number;
-  /** What the run costs in all. */
+  /** Estimated charge for this run, excluding account-specific fees. */
   estimatedUsd: number;
   /** The provider bills at least this many seconds per sandbox. */
   minimumSeconds?: number;
@@ -132,6 +134,8 @@ export interface Quote {
   billedInSecondsOf?: number;
   /** A fixed charge per sandbox started, included in `estimatedUsd`. */
   perSandboxUsd?: number;
+  /** Account-specific start fees that the estimate excludes. */
+  conditionalStartFee?: Candidate["conditionalStartFee"];
   /** The whole plan: every provider, in the order a create would try them, with why any are skipped. */
   candidates: Candidate[];
 }
@@ -345,6 +349,8 @@ export class Router {
       };
       const fee = billingRules(id).perSandboxUsd;
       if (fee) c.perSandboxUsd = fee;
+      const conditionalStartFee = info(id).pricing.conditionalStartFee;
+      if (conditionalStartFee) c.conditionalStartFee = { ...conditionalStartFee };
       if (!p) c.skip = "no adapter registered";
       else {
         const gated = accessLabel(id);
@@ -482,6 +488,7 @@ export class Router {
       ...(rules.minSeconds > 1 ? { minimumSeconds: rules.minSeconds } : {}),
       ...(rules.incrementSeconds > 1 ? { billedInSecondsOf: rules.incrementSeconds } : {}),
       ...(first.perSandboxUsd ? { perSandboxUsd: first.perSandboxUsd } : {}),
+      ...(first.conditionalStartFee ? { conditionalStartFee: first.conditionalStartFee } : {}),
       candidates,
     };
   }

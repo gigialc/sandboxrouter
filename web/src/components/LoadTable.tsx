@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ConditionalStartFeeNote } from "@/components/ConditionalStartFeeNote";
 import { BarNum, Footnote, Num, ResultRow, ResultTable, Segmented, Toolbar, barMax, money, time } from "@/components/results";
 import { site, type LoadRow } from "@/lib/site";
 
@@ -35,7 +36,7 @@ export function LoadTable() {
           { label: "Ready, median" },
           { label: "Slowest 1%", className: "hidden sm:table-cell" },
           { label: "All done", className: "hidden md:table-cell" },
-          { label: "Per 100" },
+          { label: "Est. / 100" },
         ]}
       >
         {full.map((r, i) => (
@@ -54,6 +55,7 @@ export function LoadTable() {
           ? `Not measured at ${k.n} yet: ${partial.map((r) => r.name).join(", ")}. Our test account's limit stopped these, not the provider. `
           : ""}
         Cost per 100 is scaled from the sandboxes that ran.
+        {full.some((r) => r.provider === "boat") && <> <ConditionalStartFeeNote id="boat" /></>}
       </Footnote>
     </div>
   );
