@@ -23,6 +23,16 @@ export {
   type Size,
 } from "./router.js";
 export { VERIFIED, FAILING } from "./verified.js";
+export { PUBLISHED } from "./published.js";
+export {
+  recommend,
+  type RecJob,
+  type RecPriority,
+  type RecommendOptions,
+  type Recommendation,
+  type RecommendResult,
+  type PublishedData,
+} from "./recommend.js";
 export { KEYED_PROVIDERS, providerWithKey } from "./keyed.js";
 export { BILLED_VS_LIST } from "./billing.js";
 export { validate, splitRequest, SPEC_KEYS, ROUTE_KEYS, STRATEGIES } from "./validate.js";

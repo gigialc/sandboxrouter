@@ -47,6 +47,13 @@ export default function BenchmarksPage() {
     <div className="px-5 sm:px-10 pt-14">
       <PageHeader kicker="Benchmarks" title="What each sandbox costs, and how it performs">
         Real sandboxes on real accounts, started, used and killed: {totalRuns.toLocaleString("en-US")} so far.
+        <span className="mt-3 block text-[13px] text-muted">
+          For agents:{" "}
+          <a href="/benchmarks.json" className="underline underline-offset-4 decoration-line-2 hover:text-ink">JSON</a> ·{" "}
+          <a href="/benchmarks.md" className="underline underline-offset-4 decoration-line-2 hover:text-ink">Markdown</a> ·{" "}
+          <a href="/llms.txt" className="underline underline-offset-4 decoration-line-2 hover:text-ink">llms.txt</a> · MCP at{" "}
+          <code className="font-mono text-[12px]">sandboxrouter.ai/mcp</code>
+        </span>
       </PageHeader>
 
       {/* One line of links to every section, so the page reads as a list of answers. */}

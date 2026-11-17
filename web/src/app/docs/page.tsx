@@ -20,6 +20,7 @@ const SECTIONS = [
   ...(HOSTED_PUBLIC ? ([["hosted", "Hosted key"]] as const) : []),
   ["python", "Python"],
   ["bench", "Bench and leaderboard"],
+  ["agents", "For agents"],
   ["providers", "Adding a provider"],
 ] as const;
 
@@ -385,6 +386,28 @@ with sr.create(strategy="cheapest") as sbx:
           The label says where you ran it, because the network between you and each provider is part of the number. Use a city or
           cloud region, not an address.
         </p>
+
+        <h2 id="agents">For agents: which provider for a job</h2>
+        <p>
+          The published benchmarks ship with the SDK. <code>recommend</code> ranks providers for a job from them, per successful
+          run, using start times measured that many at once when you ask for 10 or more. Routing uses the same start times when
+          you haven&apos;t benchmarked yourself (<code>published: false</code> turns that off).
+        </p>
+        <CodeBlock
+          title="terminal"
+          code={`npx @sandboxrouter/sdk recommend --job python --count 100 --priority value\nnpx @sandboxrouter/sdk recommend --job repo --priority cost --provider e2b,modal,daytona --json`}
+        />
+        <CodeBlock
+          title="agent.ts"
+          code={`import { PUBLISHED, recommend } from "@sandboxrouter/sdk";\n\nconst { results } = recommend(PUBLISHED, { job: "agent", count: 50, priority: "value" });\nconsole.log(results[0].provider, results[0].usdTotal);`}
+        />
+        <p>
+          Agents that don&apos;t run code can ask the public MCP server at <code>https://www.sandboxrouter.ai/mcp</code> (Streamable
+          HTTP, no sign-in; tools <code>recommend_provider</code>, <code>get_benchmarks</code>, <code>get_provider</code>,{" "}
+          <code>list_providers</code>), read <a href="/benchmarks.json">/benchmarks.json</a>, or read any page as Markdown with{" "}
+          <code>Accept: text/markdown</code> or a <code>.md</code> path. <a href="/llms.txt">/llms.txt</a> lists it all.
+        </p>
+        <CodeBlock title="terminal" code={`claude mcp add --transport http sandboxrouter https://www.sandboxrouter.ai/mcp`} />
 
         <h2 id="providers">Adding a provider</h2>
         <p>

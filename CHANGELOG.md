@@ -5,6 +5,10 @@ All notable changes. Versions follow [semver](https://semver.org/); while the ve
 ## Unreleased
 
 ### Added
+- **`sandboxrouter recommend`** and **`recommend(PUBLISHED, options)`**: which provider for a job (`--job`, `--count`, `--priority value|cost|speed`), ranked from the published benchmarks that now ship in the package, per successful run, with start times under load for 10 or more at once.
+- **Routing uses the published start times** when neither the router nor your bench file has timed a provider. `new Router({ published: false })` turns that off.
+- **For agents on the website:** `/benchmarks.json`, `/llms.txt`, Markdown for every page (`Accept: text/markdown` or a `.md` path), a sitemap, and a public MCP server at `/mcp` with `recommend_provider`, `get_benchmarks`, `get_provider` and `list_providers`.
+- **Rankings are per successful run:** the website's "Best value", "Cheapest" and "Fastest" orders divide cost and time by the success rate, so failing often costs a provider places. In a new sandbox, "Fastest" now counts the start too.
 - **`sandboxrouter burst --n 100`**: asks one provider for N sandboxes at the same moment and reports how many started (refusals for an account limit counted apart), time to interactive at p50/p95/p99 from the burst's start, time until all finished, and what all of them cost. `--job python` runs a Python step in each (RL rollouts, evals); `--job agent` runs the agent loop in each (parallel agents). Reports are `sandboxrouter-burst` files in results/.
 - **`sandboxrouter agentbench`**: a real model (Gemini, `GEMINI_API_KEY`) does the same task in a sandbox on each provider, with one tool that runs shell commands there; the key stays on the machine running it. Reports how often the task was done right, session time, the share spent waiting on the model, sandbox CPU and the sandbox's cost. Reports are `sandboxrouter-agent` files.
 - **`bench --task --job repo`**: fetch Node 22 and a pinned commit of a real TypeScript project, `npm ci`, typecheck: what a coding agent does first.

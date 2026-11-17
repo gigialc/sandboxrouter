@@ -10,6 +10,7 @@ import {
   type ComputerSpec,
 } from "./computers.js";
 import { loadBench, median } from "./bench-store.js";
+import { PUBLISHED } from "./published.js";
 import { Ledger, defaultLedgerFile } from "./ledger.js";
 import { DEFAULT_EXEC_TIMEOUT_S, SETUP_ERRORS, errorStatus, timeoutError, withDeadline } from "./util.js";
 import { BILLED_VS_LIST } from "./billing.js";
@@ -150,6 +151,11 @@ export interface RouterOptions {
   providers?: Provider[];
   /** Path of the bench results file: start times for the speed tie-break and strategy "fastest". */
   benchFile?: string;
+  /**
+   * When neither this router nor your bench file has timed a provider, use the published start times
+   * (sandboxrouter.ai/benchmarks, carried in the package). Default true; false to rank on your own data only.
+   */
+  published?: boolean;
   /** Desktop-only computer providers (sandbox providers that also sell computers are found automatically). */
   computers?: ComputerProvider[];
   /**
@@ -241,6 +247,7 @@ export function defaultProviders(): Provider[] {
 export class Router {
   private providers: Map<ProviderId, Provider>;
   private benchFile?: string;
+  private readonly published: boolean;
   private readonly verified: Set<ProviderId>;
   private readonly failing: Set<ProviderId>;
   private readonly requireVerified: boolean;
@@ -258,6 +265,7 @@ export class Router {
     if (file) this.ledger = new Ledger(file);
     this.providers = new Map((opts.providers ?? defaultProviders()).map((p) => [p.id, p]));
     this.benchFile = opts.benchFile;
+    this.published = opts.published ?? true;
     this.verified = new Set(opts.verified ?? (Object.keys(VERIFIED) as ProviderId[]));
     this.failing = new Set(opts.failing ?? (Object.keys(FAILING) as ProviderId[]));
     this.requireVerified = opts.requireVerified ?? false;
@@ -311,7 +319,11 @@ export class Router {
         ...(cpuHourlyAtFull(id, spec) > 0 ? { cpuHourlyUsd: round(cpuHourlyAtFull(id, spec) * billedCpuShare(id, spec) * (ratio ?? 1)) } : {}),
         ...(ratio !== undefined ? { billedVsList: ratio } : {}),
         size: sizeOf(id, spec),
-        medianCreateMs: speed ? (live && live.length >= LIVE_MIN_SAMPLES ? median(live) : median(bench[id]?.createMs)) : undefined,
+        medianCreateMs: speed
+          ? live && live.length >= LIVE_MIN_SAMPLES
+            ? median(live)
+            : (median(bench[id]?.createMs) ?? (this.published ? PUBLISHED.start[id]?.medianCreateMs : undefined))
+          : undefined,
         verified: this.verified.has(id),
         failing: this.failing.has(id),
       };

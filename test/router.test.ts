@@ -1,9 +1,10 @@
-import { mkdtempSync, writeFileSync } from "node:fs";
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { CATALOG, fittingSpec, hourlyCost, unfit } from "../src/catalog.js";
 import { EXEC_GRACE_S, Router, parseId } from "../src/router.js";
+import { PUBLISHED } from "../src/published.js";
 import { RouterError } from "../src/types.js";
 import { ALL, FakeProvider } from "./fake.js";
 
@@ -127,11 +128,24 @@ describe("routing", () => {
     const benchFile = join(dir, "bench.json");
     // e2b billed at 0.643 x list ($0.070) is within 10% of daytona ($0.0666): a tie, and the faster one goes first
     writeFileSync(benchFile, JSON.stringify({ e2b: { createMs: [300, 310, 320], execMs: [], failures: 0, at: "x" }, daytona: { createMs: [900], execMs: [], failures: 0, at: "x" } }));
-    const r = new Router({ failing: [], providers: fakes(), benchFile, billedVsList: { e2b: 0.643 } });
+    const r = new Router({ failing: [], providers: fakes(), benchFile, billedVsList: { e2b: 0.643 }, published: false });
     expect(r.plan().map((c) => c.provider)).toEqual(["maritime", "e2b", "daytona", "modal", "vercel"]);
     // a big price gap isn't a tie: a much faster but pricier provider stays behind
     writeFileSync(benchFile, JSON.stringify({ vercel: { createMs: [10], execMs: [], failures: 0, at: "x" } }));
     expect(r.plan().map((c) => c.provider)).toEqual(["maritime", "daytona", "e2b", "modal", "vercel"]);
+  });
+
+  it("falls back to the published start times when nothing else timed a provider", () => {
+    const benchFile = join(mkdtempSync(join(tmpdir(), "sbr-bench-")), "none.json");
+    const plan = new Router({ failing: [], providers: fakes(), benchFile }).plan();
+    for (const c of plan) expect(c.medianCreateMs).toBe(PUBLISHED.start[c.provider]?.medianCreateMs);
+    expect(plan.some((c) => c.medianCreateMs !== undefined)).toBe(true);
+    // Your own bench file wins over the published numbers.
+    writeFileSync(benchFile, JSON.stringify({ e2b: { createMs: [5], execMs: [], failures: 0, at: "x" } }));
+    expect(new Router({ failing: [], providers: fakes(), benchFile }).plan().find((c) => c.provider === "e2b")!.medianCreateMs).toBe(5);
+    // And published: false turns them off.
+    rmSync(benchFile);
+    expect(new Router({ failing: [], providers: fakes(), benchFile, published: false }).plan().every((c) => c.medianCreateMs === undefined)).toBe(true);
   });
 
   it("learns speed from its own creates, which beat the bench file", async () => {
