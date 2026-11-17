@@ -96,6 +96,11 @@ export class DenoProvider implements Provider {
 }
 
 class DenoBox implements ProviderSandbox {
+  /** The provider SDK's own sandbox object, for what the router doesn't cover (RoutedSandbox.native). */
+  get native(): unknown {
+    return this.sbx;
+  }
+
   readonly nativeId: string;
 
   constructor(private sbx: DenoSdkSandbox) {

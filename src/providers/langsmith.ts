@@ -103,6 +103,11 @@ export class LangSmithProvider implements Provider {
 }
 
 class LangSmithBox implements ProviderSandbox {
+  /** The provider SDK's own sandbox object, for what the router doesn't cover (RoutedSandbox.native). */
+  get native(): unknown {
+    return this.sbx;
+  }
+
   constructor(private sbx: LsSandbox) {}
 
   get nativeId(): string {

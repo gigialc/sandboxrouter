@@ -74,6 +74,11 @@ export class RunloopProvider implements Provider {
 }
 
 class RunloopBox implements ProviderSandbox {
+  /** The provider SDK's own sandbox object, for what the router doesn't cover (RoutedSandbox.native). */
+  get native(): unknown {
+    return this.box;
+  }
+
   readonly nativeId: string;
   constructor(private box: RunloopDevbox) {
     this.nativeId = box.id;

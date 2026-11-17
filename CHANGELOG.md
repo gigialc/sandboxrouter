@@ -5,6 +5,14 @@ All notable changes. Versions follow [semver](https://semver.org/); while the ve
 ## Unreleased
 
 ### Added
+- **`sbx.native`**: the provider SDK's own sandbox object (E2B and E2B-compatible providers, Daytona, Modal, Vercel, Blaxel, Beam, Deno, HopX, LangSmith, Morph, Runloop, Sprites, Tensorlake), for what the router doesn't cover: ports, background processes, snapshots. Undefined for providers driven over plain HTTP.
+- **`bench --submit`**: runs the benchmark and opens the pull request with the report through the GitHub CLI, forking the repo if needed. Implies `--share`.
+- **Weekly benchmark from GitHub's runners in the US** (`.github/workflows/bench.yml`), so results come from more than one place.
+
+### Changed
+- **Shared bench reports leave out providers whose every run failed on the runner's own account** (a setup error, payment, a limit), and say so; they'd otherwise be published as the provider failing.
+- **The ledger compacts itself** once it passes 256 KB, so a long-lived server's file stays small, and the bench file is re-read only when it changes.
+
 - **`bench --task --job agent`**: an agent loop with simulated model calls, 10 turns of a 6 s wait (the sandbox idle, as while the model thinks) and a short Python tool call. Its sandboxes start with `cpuUtilization: 0.1`.
 - **Cost per job in one sandbox** (`TaskRow.reusedUsd`, and a switch on the website): the job in a sandbox that's already running, without its start, minimum charge or per-sandbox fee.
 - **Per-core CPU readings**: `bench --task` records the busiest core's time (`medianTaskMaxCoreMs`) alongside the total.

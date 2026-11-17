@@ -147,3 +147,7 @@ export function benchMarkdown(rows: BenchRow[]): string {
   ];
   return lines.join("\n");
 }
+
+/** Errors that are about the account running the benchmark, not the provider: setup problems, payment, limits. */
+export const ACCOUNT_ERROR = /setup problem|Payment Required|\b40[123]\b|creation limit|quota|insufficient (?:credit|balance|funds)/i;
+export const NETWORK_ERROR = /fetch failed|ENOTFOUND|EAI_AGAIN|ENETUNREACH|ECONNRESET|ETIMEDOUT|Name resolution failed|getaddrinfo/i;

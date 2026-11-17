@@ -2,11 +2,11 @@
 import { parseArgs } from "node:util";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { platform, arch } from "node:os";
-import { bench, benchMarkdown } from "./bench.js";
+import { ACCOUNT_ERROR, bench, benchMarkdown, NETWORK_ERROR } from "./bench.js";
 import { TASKS, type TaskKind } from "./task.js";
+import { submitReport } from "./submit.js";
 
 /** Errors that mean the network between here and the provider failed, not the provider. */
-export const NETWORK_ERROR = /fetch failed|ENOTFOUND|EAI_AGAIN|ENETUNREACH|ECONNRESET|ETIMEDOUT|Name resolution failed|getaddrinfo/i;
 import { costMarkdown, costRun, settle, type CostRun } from "./cost.js";
 import { checkProvider, type CheckReport } from "./check.js";
 import { gc, listOpen } from "./gc.js";
@@ -33,7 +33,7 @@ Usage:
   sandboxrouter ls        [--json]                       sandboxes this machine started that weren't killed
   sandboxrouter gc        [--all | --older-than MIN] [--dry-run]
                           kill leaked sandboxes: by default those past their lifetime
-  sandboxrouter bench     [--runs 3] [--provider a,b] [--task [--long]] [--parallel N] [--json] [--share [--label "where you ran it"] [--by GITHUB_USER]]
+  sandboxrouter bench     [--runs 3] [--provider a,b] [--task [--long]] [--parallel N] [--json] [--share [--label "where you ran it"] [--by GITHUB_USER] [--submit]]
                           --task also runs the same fixed job in each sandbox (hash 512 MB on 1 core,
                           then on 2, write 256 MB to disk) and prices it with each provider's billing rules;
                           --long runs that job 40 times in a row (minutes); --job python (a pure-Python script)
@@ -91,6 +91,7 @@ const { values, positionals } = parseArgs({
     control: { type: "boolean" },
     out: { type: "string" },
     share: { type: "boolean" },
+    submit: { type: "boolean" },
     cors: { type: "string" },
     label: { type: "string" },
     all: { type: "boolean" },
@@ -337,17 +338,31 @@ async function main() {
     // Several providers all failing on the network at once is this machine's connection, not theirs: a
     // report from it would mark them down. Refuse to write one.
     const offline = rows.filter((r) => r.failures === r.runs && r.lastError && NETWORK_ERROR.test(r.lastError));
-    if (values.share && offline.length >= 3) {
+    if ((values.share || values.submit) && offline.length >= 3) {
       console.error(`\nnot writing a report: ${offline.length} providers failed with network errors (${offline.map((r) => r.provider).join(", ")}), which looks like this machine lost its connection. Run it again.`);
       process.exitCode = 1;
-    } else if (values.share) {
+    } else if (values.share || values.submit) {
       const version = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8")).version;
-      const report = makeReport(rows, { version, runs: rows[0].runs, spec: { ...spec, vcpu: spec.vcpu ?? DEFAULT_VCPU, memoryGb: spec.memoryGb ?? DEFAULT_MEMORY_GB }, label: values.label, by, task: values.task ? TASKS[job].version : undefined });
+      // A provider whose every run failed on the submitter's own account (bad key, no credit, a limit hit) says
+      // nothing about the provider: leave it out of what's shared, and say so.
+      const account = rows.filter((r) => r.failures === r.runs && r.lastError && ACCOUNT_ERROR.test(r.lastError));
+      if (account.length) console.error(`\nleft out of the shared report, every run failed on your account: ${account.map((r) => r.provider).join(", ")}`);
+      const report = makeReport(rows.filter((r) => !account.includes(r)), { version, runs: rows[0].runs, spec: { ...spec, vcpu: spec.vcpu ?? DEFAULT_VCPU, memoryGb: spec.memoryGb ?? DEFAULT_MEMORY_GB }, label: values.label, by, task: values.task ? TASKS[job].version : undefined });
       const left = rows.filter((r) => !benchmarksPublishable(r.provider)).map((r) => r.provider);
       if (left.length) console.log(`\nleft out of the shared report: ${left.join(", ")} (their terms don't allow publishing benchmarks)`);
       const file = values.out ?? `sandboxrouter-bench-${report.date.slice(0, 10)}-${Math.random().toString(36).slice(2, 8)}.json`;
       writeFileSync(file, JSON.stringify(report, null, 2) + "\n");
-      console.log(`\nwrote ${file}. Add it to results/ in a PR to github.com/gigialc/sandboxrouter to put it on the leaderboard.`);
+      if (values.submit) {
+        const summary = `${report.rows.length} providers, ${report.runs} runs each${report.task ? `, job ${report.task}` : ""}, from ${report.label ?? "an unlabelled location"} (${report.platform}).`;
+        try {
+          console.log(`\nwrote ${file} and opened ${submitReport(file, summary)}`);
+        } catch (err) {
+          console.error(`\nwrote ${file}, but couldn't open the pull request: ${(err as Error).message}`);
+          process.exitCode = 1;
+        }
+      } else {
+        console.log(`\nwrote ${file}. Add it to results/ in a PR to github.com/gigialc/sandboxrouter to put it on the leaderboard, or run again with --submit to open the PR for you.`);
+      }
     }
     return;
   }

@@ -95,6 +95,11 @@ export class MorphProvider implements Provider {
 }
 
 class MorphBox implements ProviderSandbox {
+  /** The provider SDK's own sandbox object, for what the router doesn't cover (RoutedSandbox.native). */
+  get native(): unknown {
+    return this.inst;
+  }
+
   readonly nativeId: string;
   constructor(private inst: MorphInstance) {
     this.nativeId = inst.id;

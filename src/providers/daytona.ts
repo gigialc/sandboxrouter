@@ -136,6 +136,11 @@ export class DaytonaProvider implements Provider, ComputerProvider {
 }
 
 class DaytonaBox implements ProviderSandbox {
+  /** The provider SDK's own sandbox object, for what the router doesn't cover (RoutedSandbox.native). */
+  get native(): unknown {
+    return this.sbx;
+  }
+
   readonly nativeId: string;
   constructor(private sbx: DaytonaSandbox) {
     this.nativeId = sbx.id;

@@ -75,6 +75,11 @@ export class BlaxelProvider implements Provider {
 }
 
 class BlaxelBox implements ProviderSandbox {
+  /** The provider SDK's own sandbox object, for what the router doesn't cover (RoutedSandbox.native). */
+  get native(): unknown {
+    return this.sbx;
+  }
+
   readonly nativeId: string;
   constructor(private sbx: BlaxelSandbox) {
     const name = sbx.metadata.name;

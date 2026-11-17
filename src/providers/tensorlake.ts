@@ -71,6 +71,11 @@ export class TensorlakeProvider implements Provider {
 }
 
 class TensorlakeBox implements ProviderSandbox {
+  /** The provider SDK's own sandbox object, for what the router doesn't cover (RoutedSandbox.native). */
+  get native(): unknown {
+    return this.sbx;
+  }
+
   readonly nativeId: string;
   constructor(private sbx: TensorlakeSandbox) {
     this.nativeId = sbx.sandboxId;

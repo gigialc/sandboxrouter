@@ -1,4 +1,4 @@
-import { appendFileSync, existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
+import { appendFileSync, existsSync, mkdirSync, readFileSync, renameSync, statSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { dirname, join } from "node:path";
 import type { ProviderId } from "./types.js";
@@ -50,7 +50,17 @@ export class Ledger {
 
   close(id: string, why = "killed"): void {
     this.append({ op: "close", id, at: new Date().toISOString(), why });
+    // A long-lived server opens and closes sandboxes all day: once the file is mostly closed entries, rewrite
+    // it with only the open ones, so it stays small and `list()` stays fast.
+    try {
+      if (statSync(this.file).size > Ledger.COMPACT_BYTES) this.compact();
+    } catch {
+      /* no file yet, or unreadable: nothing to compact */
+    }
   }
+
+  /** Size past which a close rewrites the file with only the open entries. */
+  static COMPACT_BYTES = 256 * 1024;
 
   /** Open entries, oldest first. */
   list(): LedgerEntry[] {
