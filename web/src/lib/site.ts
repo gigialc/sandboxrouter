@@ -54,6 +54,20 @@ export interface LeaderRow {
   measuredAt: string;
 }
 
+export interface TaskRow {
+  provider: string;
+  name: string;
+  size: { vcpu: number; memoryGb: number };
+  createMs: number;
+  taskMs: number;
+  phasesMs: Record<string, number>;
+  hourlyUsd: number;
+  taskUsd: number;
+  minimumSeconds: number;
+  perSandboxUsd: number;
+  measuredAt: string;
+}
+
 export interface UseCase {
   id: string;
   title: string;
@@ -103,6 +117,7 @@ export const site = data as unknown as {
   checkSteps: string[];
   desktops: SiteDesktop[];
   leaderboard: LeaderRow[];
+  tasks: { version: string; phases: { id: string; label: string }[]; rows: TaskRow[] };
   useCases: UseCase[];
   costRuns: CostRow[];
   submissions: { date: string; label: string | null; by: string | null; platform: string; runs: number; providers: number; ids: string[] }[];

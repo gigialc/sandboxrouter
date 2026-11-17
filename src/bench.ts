@@ -1,6 +1,7 @@
 import { CATALOG, DEFAULT_MEMORY_GB, DEFAULT_VCPU, fixedSize, hourlyCost } from "./catalog.js";
 import { loadBench, median, saveBench, type BenchData } from "./bench-store.js";
 import { Router } from "./router.js";
+import { runTask, taskMs, taskUsd, TASK_PHASES, type PhaseMs } from "./task.js";
 import type { ProviderId, SandboxSpec } from "./types.js";
 
 export interface BenchRow {
@@ -10,6 +11,9 @@ export interface BenchRow {
   medianCreateMs?: number;
   medianExecMs?: number;
   hourlyUsd: number;
+  /** With `task`: median time of the standard task (src/task.ts), and of each of its phases. */
+  medianTaskMs?: number;
+  taskPhasesMs?: PhaseMs;
   lastError?: string;
 }
 
@@ -25,6 +29,8 @@ export async function bench(opts: {
   runs?: number;
   spec?: SandboxSpec;
   benchFile?: string;
+  /** Also run the standard task (src/task.ts) in each sandbox, to price a fixed piece of work. */
+  task?: boolean;
   onProgress?: (msg: string) => void;
 }): Promise<BenchRow[]> {
   const router = opts.router ?? new Router();
@@ -40,6 +46,7 @@ export async function bench(opts: {
   for (const id of ids) {
     const createMs: number[] = [];
     const execMs: number[] = [];
+    const tasks: PhaseMs[] = [];
     let failures = 0;
     let lastError: string | undefined;
     for (let i = 0; i < runs; i++) {
@@ -53,6 +60,14 @@ export async function bench(opts: {
         const r = await box.exec("echo ok");
         if (r.exitCode !== 0 || r.stdout.trim() !== "ok") throw new Error(`echo returned ${r.exitCode}: ${r.stdout}${r.stderr}`);
         execMs.push(Math.round(performance.now() - t1));
+        if (opts.task) {
+          // A failed task doesn't fail the run: the start time still counts, the task just has no time.
+          try {
+            tasks.push(await runTask(box));
+          } catch (err) {
+            lastError = `task: ${(err as Error).message.slice(0, 180)}`;
+          }
+        }
       } catch (err) {
         failures++;
         lastError = (err as Error).message.slice(0, 200);
@@ -68,11 +83,18 @@ export async function bench(opts: {
       medianCreateMs: median(createMs),
       medianExecMs: median(execMs),
       hourlyUsd: hourlyCost(id, sized(id, spec)),
+      ...(tasks.length ? taskSummary(tasks) : {}),
       lastError,
     });
   }
   saveBench(stored, opts.benchFile);
   return rows.sort((a, b) => (a.medianCreateMs ?? Infinity) - (b.medianCreateMs ?? Infinity));
+}
+
+/** Medians of the task runs that finished: the whole task, and each phase. */
+function taskSummary(tasks: PhaseMs[]): Pick<BenchRow, "medianTaskMs" | "taskPhasesMs"> {
+  const phases = Object.fromEntries(TASK_PHASES.map((p) => [p.id, median(tasks.map((t) => t[p.id]))!])) as PhaseMs;
+  return { medianTaskMs: median(tasks.map(taskMs)), taskPhasesMs: phases };
 }
 
 /** The spec a provider is benched at: the asked size, or its fixed default size if its image has one. */
@@ -83,12 +105,15 @@ function sized(id: ProviderId, spec: SandboxSpec): SandboxSpec {
 export function benchMarkdown(rows: BenchRow[]): string {
   const name = (id: ProviderId) => CATALOG.find((c) => c.id === id)!.name;
   const ms = (n?: number) => (n === undefined ? "n/a" : `${n} ms`);
+  const task = rows.some((r) => r.taskPhasesMs);
+  const cost = (r: BenchRow) =>
+    r.medianTaskMs !== undefined && r.medianCreateMs !== undefined ? `$${taskUsd(r.provider, r.hourlyUsd, r.medianCreateMs, r.medianTaskMs).toFixed(6)}` : "n/a";
   const lines = [
-    "| # | Provider | Cold start (median) | Exec round trip | $/hr (list, size run) | Success |",
-    "|---|---|---|---|---|---|",
+    `| # | Provider | Cold start (median) | Exec round trip |${task ? " Task (median) | Task cost |" : ""} $/hr (list, size run) | Success |`,
+    `|---|---|---|---|${task ? "---|---|" : ""}---|---|`,
     ...rows.map(
       (r, i) =>
-        `| ${i + 1} | ${name(r.provider)} | ${ms(r.medianCreateMs)} | ${ms(r.medianExecMs)} | $${r.hourlyUsd.toFixed(3)} | ${r.runs - r.failures}/${r.runs} |`,
+        `| ${i + 1} | ${name(r.provider)} | ${ms(r.medianCreateMs)} | ${ms(r.medianExecMs)} |${task ? ` ${ms(r.medianTaskMs)} | ${cost(r)} |` : ""} $${r.hourlyUsd.toFixed(3)} | ${r.runs - r.failures}/${r.runs} |`,
     ),
   ];
   return lines.join("\n");
