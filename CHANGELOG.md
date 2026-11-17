@@ -2,12 +2,13 @@
 
 All notable changes. Versions follow [semver](https://semver.org/); while the version is 0.x, a minor bump can change the API.
 
-## Unreleased
+## 0.10.0 (2026-11-17)
 
 ### Fixed
 - **Active-CPU pricing.** Providers that bill CPU only while it's busy (Vercel, Cloudflare, Tensorlake, AgentCore, Sail, Sprites, Deno, Upstash) were always priced as if every core was busy, which overstated what an agent that mostly waits on model calls pays there, by 2–4x at 10% CPU. The new `cpuUtilization` spec field (0 to 1, default 1, so nothing changes unless you set it; `cpu_utilization` in Python) prices them at that share of their CPU plus full memory. Vercel's one-minute minimum now covers memory only, and Tensorlake's 20% CPU floor is respected.
 - **Modal is billed as allocated capacity**, not active CPU: it bills the larger of its reservation and actual use, and the adapter reserves the size you ask for.
 - **`bench --task` measures the CPU time each job used** (from `/proc/stat` inside the sandbox) and prices active-CPU providers by it.
+- **A create that runs out of `deadlineSeconds` always says so.** When the last provider's own timeout fired at the same moment as the deadline, the error could report a provider timeout instead of `code: "timeout"` for the whole create.
 
 ### Added
 - **`bench --task`**: a cost-per-task benchmark. Each sandbox also runs the same fixed job (hash 512 MB of zeros on one core, then 256 MB on each of two cores at once, then write and flush 256 MB to disk), using only tools every Linux image has, and the job is priced by how long it really took with each provider's billing rules (start plus task, minimum charge, billing step, per-sandbox fee). A slower CPU or disk makes the job longer and so costs more, which hourly prices can't show. Reports record `task: "v1"` with `medianTaskMs` and `taskPhasesMs` per provider; `taskTable(reports)` turns them into the table, and the website's Benchmarks page shows it as "Cost of a real task". `--long` runs the same job 40 times in a row (`task: "v1-long"`), for sustained speed and prices once minimum charges stop mattering.
