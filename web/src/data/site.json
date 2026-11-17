@@ -1,6 +1,6 @@
 {
   "version": "0.9.0",
-  "generatedAt": "2026-11-17T11:54:44.156Z",
+  "generatedAt": "2026-11-17T12:17:33.611Z",
   "shapes": [
     "1x2",
     "2x4",
@@ -3217,7 +3217,7 @@
       {
         "id": "short",
         "title": "Short job",
-        "blurb": "Hash 512 MB on one core, then on two, then write 256 MB to disk: a few seconds of work.",
+        "blurb": "Hashing on one and two cores, then a disk write: a few seconds.",
         "version": "v1",
         "repeat": 1,
         "phases": [
@@ -3591,7 +3591,7 @@
       {
         "id": "long",
         "title": "Long job",
-        "blurb": "The short job 40 times in a row: minutes of steady work, where minimum charges stop mattering.",
+        "blurb": "The short job 40 times in a row: minutes of steady work.",
         "version": "v1-long",
         "repeat": 40,
         "phases": [
@@ -3966,7 +3966,7 @@
       {
         "id": "python",
         "title": "Python",
-        "blurb": "A pure-Python script (200,000 records through JSON, a regex and a sort), like a code-interpreter call.",
+        "blurb": "A Python script, like a code-interpreter call.",
         "version": "python-v1",
         "repeat": 1,
         "phases": [
@@ -4301,7 +4301,7 @@
       {
         "id": "download",
         "title": "Download",
-        "blurb": "Download the Node.js release (53 MB) from nodejs.org's CDN: what installing toolchains and packages depends on. A provider with no internet access by default can't run it.",
+        "blurb": "A 53 MB download from nodejs.org.",
         "version": "download-v1",
         "repeat": 1,
         "phases": [
@@ -4707,7 +4707,7 @@
     {
       "id": "session",
       "title": "Agent sessions",
-      "blurb": "A coding agent working for about 30 minutes, mostly waiting on the model: about 10% CPU, which is what providers that bill active CPU charge for.",
+      "blurb": "A coding agent working for 30 minutes, mostly waiting on the model.",
       "spec": {
         "vcpu": 2,
         "memoryGb": 4,
