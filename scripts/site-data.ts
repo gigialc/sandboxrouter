@@ -60,7 +60,12 @@ const costRows = costRuns.flatMap((run) =>
  */
 const USE_CASES: { id: string; title: string; blurb: string; spec: SandboxSpec; require?: Capability[] }[] = [
   { id: "quick", title: "Quick tool calls", blurb: "Run a snippet and throw the sandbox away: about 10 seconds.", spec: { vcpu: 2, memoryGb: 4, expectedSeconds: 10 } },
-  { id: "session", title: "Agent sessions", blurb: "A coding agent working for about 30 minutes.", spec: { vcpu: 2, memoryGb: 4, timeoutMinutes: 30 } },
+  {
+    id: "session",
+    title: "Agent sessions",
+    blurb: "A coding agent working for about 30 minutes, mostly waiting on the model: about 10% CPU, which is what providers that bill active CPU charge for.",
+    spec: { vcpu: 2, memoryGb: 4, timeoutMinutes: 30, cpuUtilization: 0.1 },
+  },
   { id: "long", title: "Long jobs", blurb: "Evals, crawls or builds that run for 4 hours.", spec: { vcpu: 2, memoryGb: 4, timeoutMinutes: 240 } },
   { id: "big", title: "Big machines", blurb: "8 vCPU / 16 GB for an hour: heavy builds and test suites.", spec: { vcpu: 8, memoryGb: 16, timeoutMinutes: 60 } },
   { id: "pause", title: "Pause and resume", blurb: "Keep the disk, stop paying for CPU, pick it up later (30 minutes running).", spec: { vcpu: 2, memoryGb: 4, timeoutMinutes: 30 }, require: ["pause"] },

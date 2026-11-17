@@ -38,6 +38,8 @@ export default function BenchmarksPage() {
           The cheapest provider depends on how long you use it: one that charges a full minute loses on a 10-second job and wins on a
           30-minute one. Pick a job to rank the providers that passed the real-account check by what that run would be billed:
           list price, corrected by measured bills, plus each provider&apos;s minimum charge, billing steps and per-sandbox fee.
+          Providers that bill CPU only while it&apos;s busy (Vercel, Cloudflare, Tensorlake, AgentCore, Sail, Sprites) are priced
+          with every core busy, except for agent sessions, which assume 10% CPU.
           Fixed-size providers (E2B, OpenScale, Daytona) can&apos;t give these sizes. On the hosted key, add {HOSTED_FEE_PCT}% where
           you don&apos;t use your own key.
         </p>
@@ -51,7 +53,8 @@ export default function BenchmarksPage() {
             The table above compares prices. This one adds speed: the same job ran in a sandbox on every provider and was priced
             by how long it really took. A slower CPU, disk or network makes the job longer, and a longer job is billed more. Cost
             counts the start plus the job, with each provider&apos;s minimum charge, billing steps and per-sandbox fee: published
-            prices applied to measured times, not invoices. Measured on real accounts at 2 vCPU / 4 GB, or the provider&apos;s fixed
+            prices applied to measured times, not invoices. Providers that bill CPU only while it&apos;s busy are charged for the CPU
+            time the job really used, read from the sandbox&apos;s own CPU counters, plus their memory for the whole run. Measured on real accounts at 2 vCPU / 4 GB, or the provider&apos;s fixed
             size where it has one; hover a time to see each step. Run it yourself with{" "}
             <code className="font-mono text-[12px]">sandboxrouter bench --task</code> (add <code className="font-mono text-[12px]">--long</code>,{" "}
             <code className="font-mono text-[12px]">--job python</code> or <code className="font-mono text-[12px]">--job download</code> for the

@@ -117,6 +117,7 @@ router.create(spec, { provider: ["e2b", "modal"] }) // try these, in this order
 router.create({ gpu: "A10G" })                      // only GPU-capable providers are tried
 router.create(spec, { require: ["pause"] })         // only providers that can pause
 router.create({ expectedSeconds: 10 })              // rank by what a 10 s run is really billed
+router.create({ cpuUtilization: 0.1 })              // an agent mostly waiting on the model: active-CPU providers cost less
 router.create(spec, { maxHourlyUsd: 0.03 })        // skip providers that would cost more per hour for this run
 router.quote({ expectedSeconds: 10 })               // where it would land and what the run would cost, without starting it`}
         />
@@ -126,7 +127,10 @@ router.quote({ expectedSeconds: 10 })               // where it would land and w
           its price is corrected by that ratio (<code>BILLED_VS_LIST</code>). Each provider&apos;s minimum charge, billing increment and
           per-sandbox fee count over the run: the whole <code>timeoutMinutes</code> (default 30), or <code>expectedSeconds</code> if you say how
           long you&apos;ll use it, so a short run can go to a provider that bills by the second over one that is cheaper per hour but
-          charges a full minute. Providers within 10% of each other on price go fastest first,
+          charges a full minute. Some providers (Vercel, Cloudflare, Tensorlake, AgentCore, Sail, Sprites, Deno, Upstash) bill CPU only
+          while it&apos;s busy. They&apos;re priced with every core busy unless you say otherwise with <code>cpuUtilization</code> (0 to 1):
+          an agent that mostly waits on model calls is about 0.1, a build close to 1. Memory is always billed in full, Vercel&apos;s
+          one-minute minimum applies to its memory only, and Tensorlake bills at least 20% CPU. Providers within 10% of each other on price go fastest first,
           by start times this router measured itself, or from your <code>sandboxrouter bench</code> run until it has some. Speed depends on
           where you run it, so the published benchmarks are never used for routing. Providers whose last 14-step real-account check
           failed go last. Ties break alphabetically, so no provider gets a better slot by who it is. Prices come from each
@@ -271,7 +275,7 @@ SANDBOXROUTER_TOKEN=secret npx @sandboxrouter/sdk serve --cors https://your-site
               {[
                 ["GET /v1/providers", ""],
                 ["POST /v1/route", "same as create; returns the candidate order"],
-                ["POST /v1/sandboxes", "{ vcpu, memoryGb, gpu, env, timeoutMinutes, expectedSeconds, image, provider, strategy, fallback, createTimeoutSeconds, require, maxHourlyUsd }"],
+                ["POST /v1/sandboxes", "{ vcpu, memoryGb, gpu, env, timeoutMinutes, expectedSeconds, cpuUtilization, image, provider, strategy, fallback, createTimeoutSeconds, require, maxHourlyUsd }"],
                 ["POST /v1/quote", "same body as create: the provider it would use and the run's estimated cost, nothing started"],
                 ["POST /v1/sandboxes/:id/exec", "{ cmd, cwd, env, timeoutSeconds, stream }"],
                 ["PUT /v1/sandboxes/:id/files?path=", "raw bytes"],

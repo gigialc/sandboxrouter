@@ -2,7 +2,7 @@ import { CATALOG } from "./catalog.js";
 import { RouterError, type RouteOptions, type SandboxSpec, type Strategy } from "./types.js";
 
 /** Every key a SandboxSpec can have. Anything else in a request is a mistake (e.g. "memory" for "memoryGb"). */
-export const SPEC_KEYS = ["vcpu", "memoryGb", "gpu", "env", "timeoutMinutes", "expectedSeconds", "image", "metadata"] as const;
+export const SPEC_KEYS = ["vcpu", "memoryGb", "gpu", "env", "timeoutMinutes", "expectedSeconds", "cpuUtilization", "image", "metadata"] as const;
 /** Every key RouteOptions can have. */
 export const ROUTE_KEYS = ["provider", "strategy", "fallback", "require", "createTimeoutSeconds", "deadlineSeconds", "maxHourlyUsd"] as const;
 export const STRATEGIES: readonly Strategy[] = ["default", "balanced", "verified", "cheapest", "fastest"];
@@ -21,6 +21,9 @@ const stringMap = (v: unknown) => typeof v === "object" && v !== null && !Array.
 export function validate(spec: SandboxSpec = {}, route: RouteOptions = {}): void {
   for (const k of ["vcpu", "memoryGb", "timeoutMinutes", "expectedSeconds"] as const) {
     if (spec[k] !== undefined && !positive(spec[k])) throw bad(`${k} must be a positive number, got ${show(spec[k])}`);
+  }
+  if (spec.cpuUtilization !== undefined && !(positive(spec.cpuUtilization) && spec.cpuUtilization <= 1)) {
+    throw bad(`cpuUtilization must be more than 0 and at most 1, got ${show(spec.cpuUtilization)}`);
   }
   if (spec.gpu !== undefined && (typeof spec.gpu !== "string" || !spec.gpu)) throw bad(`gpu must be a GPU type such as "T4", got ${JSON.stringify(spec.gpu)}`);
   for (const k of ["env", "image", "metadata"] as const) {

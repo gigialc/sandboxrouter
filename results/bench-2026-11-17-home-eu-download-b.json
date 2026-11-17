@@ -1,0 +1,220 @@
+{
+  "tool": "sandboxrouter",
+  "version": "0.9.0",
+  "date": "2026-11-17T10:52:59.217Z",
+  "label": "home-eu",
+  "by": "gigialc",
+  "runs": 5,
+  "spec": {
+    "vcpu": 2,
+    "memoryGb": 4
+  },
+  "task": "download-v1",
+  "node": "v22.22.0",
+  "platform": "darwin-arm64",
+  "rows": [
+    {
+      "provider": "e2b",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 356,
+      "medianExecMs": 217,
+      "hourlyUsd": 0.1089,
+      "medianTaskMs": 662,
+      "taskPhasesMs": {
+        "download": 662
+      },
+      "medianTaskCpuMs": 230
+    },
+    {
+      "provider": "openscale",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 385,
+      "medianExecMs": 1058,
+      "hourlyUsd": 0.013999999999999999,
+      "medianTaskMs": 551,
+      "taskPhasesMs": {
+        "download": 551
+      },
+      "medianTaskCpuMs": 200
+    },
+    {
+      "provider": "vercel",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 386,
+      "medianExecMs": 288,
+      "hourlyUsd": 0.3408,
+      "medianTaskMs": 222,
+      "taskPhasesMs": {
+        "download": 222
+      },
+      "medianTaskCpuMs": 110
+    },
+    {
+      "provider": "novita",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 428,
+      "medianExecMs": 699,
+      "hourlyUsd": 0.11664,
+      "medianTaskMs": 578,
+      "taskPhasesMs": {
+        "download": 578
+      },
+      "medianTaskCpuMs": 150
+    },
+    {
+      "provider": "daytona",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 452,
+      "medianExecMs": 568,
+      "hourlyUsd": 0.06659999999999999,
+      "medianTaskMs": 362,
+      "taskPhasesMs": {
+        "download": 362
+      },
+      "medianTaskCpuMs": 1760
+    },
+    {
+      "provider": "superserve",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 456,
+      "medianExecMs": 188,
+      "hourlyUsd": 0.1656,
+      "medianTaskMs": 293,
+      "taskPhasesMs": {
+        "download": 293
+      },
+      "medianTaskCpuMs": 150
+    },
+    {
+      "provider": "cloudflare",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 513,
+      "medianExecMs": 274,
+      "hourlyUsd": 0.21599999999999997,
+      "medianTaskMs": 415,
+      "taskPhasesMs": {
+        "download": 415
+      },
+      "medianTaskCpuMs": 190
+    },
+    {
+      "provider": "modal",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 606,
+      "medianExecMs": 1041,
+      "hourlyUsd": 0.23796,
+      "medianTaskMs": 392,
+      "taskPhasesMs": {
+        "download": 392
+      },
+      "medianTaskCpuMs": 340
+    },
+    {
+      "provider": "maritime",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 913,
+      "medianExecMs": 348,
+      "hourlyUsd": 0.022,
+      "medianTaskMs": 795,
+      "taskPhasesMs": {
+        "download": 795
+      },
+      "medianTaskCpuMs": 250
+    },
+    {
+      "provider": "agentcore",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 946,
+      "medianExecMs": 326,
+      "hourlyUsd": 0.2168
+    },
+    {
+      "provider": "agent37",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 1011,
+      "medianExecMs": 587,
+      "hourlyUsd": 0.006520547945205479,
+      "medianTaskMs": 240,
+      "taskPhasesMs": {
+        "download": 240
+      },
+      "medianTaskCpuMs": 130
+    },
+    {
+      "provider": "freestyle",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 1414,
+      "medianExecMs": 294,
+      "hourlyUsd": 0.13362,
+      "medianTaskMs": 795,
+      "taskPhasesMs": {
+        "download": 795
+      },
+      "medianTaskCpuMs": 350
+    },
+    {
+      "provider": "boat",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 1648,
+      "medianExecMs": 175,
+      "hourlyUsd": 0.018,
+      "medianTaskMs": 493,
+      "taskPhasesMs": {
+        "download": 493
+      },
+      "medianTaskCpuMs": 70
+    },
+    {
+      "provider": "tensorlake",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 1693,
+      "medianExecMs": 761,
+      "hourlyUsd": 0.2,
+      "medianTaskMs": 336,
+      "taskPhasesMs": {
+        "download": 336
+      },
+      "medianTaskCpuMs": 140
+    },
+    {
+      "provider": "sail",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 2568,
+      "medianExecMs": 285,
+      "hourlyUsd": 0.062,
+      "medianTaskMs": 769,
+      "taskPhasesMs": {
+        "download": 769
+      },
+      "medianTaskCpuMs": 130
+    },
+    {
+      "provider": "lambda",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 2932,
+      "medianExecMs": 498,
+      "hourlyUsd": 0.25220016,
+      "medianTaskMs": 2301,
+      "taskPhasesMs": {
+        "download": 2301
+      },
+      "medianTaskCpuMs": 140
+    }
+  ]
+}

@@ -12,7 +12,7 @@ afterAll(() => rmSync(dir, { recursive: true, force: true }));
 
 describe("billing rules", () => {
   it("bills Agent37 in whole minutes, at least one", () => {
-    expect(billingRules("agent37")).toEqual({ minSeconds: 60, incrementSeconds: 60, perSandboxUsd: 0 });
+    expect(billingRules("agent37")).toEqual({ minSeconds: 60, incrementSeconds: 60, perSandboxUsd: 0, minimumCovers: "all" });
     // Measured 2026-11-14: a 16 s sandbox at $0.0065/h was billed a full minute.
     expect(billedUsd("agent37", 0.0065, 16)).toBeCloseTo(0.0065 / 60, 9);
     expect(billedUsd("agent37", 0.0065, 61)).toBeCloseTo((0.0065 * 2) / 60, 9);
@@ -24,7 +24,7 @@ describe("billing rules", () => {
   });
 
   it("bills per second with no minimum where the catalog says nothing", () => {
-    expect(billingRules("maritime")).toEqual({ minSeconds: 0, incrementSeconds: 1, perSandboxUsd: 0 });
+    expect(billingRules("maritime")).toEqual({ minSeconds: 0, incrementSeconds: 1, perSandboxUsd: 0, minimumCovers: "all" });
     expect(billedUsd("maritime", 0.036, 10)).toBeCloseTo(0.0001, 9);
   });
 

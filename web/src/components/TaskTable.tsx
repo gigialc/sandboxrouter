@@ -47,8 +47,11 @@ export function TaskTable() {
               r.size.vcpu !== 2 || r.size.memoryGb !== 4 ? `${r.size.vcpu} vCPU / ${r.size.memoryGb} GB` : "",
               r.minimumSeconds > 1 ? `bills at least ${r.minimumSeconds} s` : "",
               r.perSandboxUsd ? `+$${Number(r.perSandboxUsd.toPrecision(2))} per sandbox` : "",
+              r.activeCpu ? (r.cpuMs !== undefined ? "billed for CPU used" : "priced at full CPU") : "",
             ].filter(Boolean);
-            const split = k.phases.map((p) => `${p.label} ${secs(r.phasesMs[p.id])}`).join(", ");
+            const split =
+              k.phases.map((p) => `${p.label} ${secs(r.phasesMs[p.id])}`).join(", ") +
+              (r.cpuMs !== undefined ? `; used ${secs(r.cpuMs)} of CPU across all cores` : "");
             return (
               <tr key={r.provider} className="group border-t border-line">
                 <td className="py-3 pr-2 font-mono text-[12px] text-muted">{i + 1}</td>

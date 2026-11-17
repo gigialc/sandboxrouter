@@ -54,6 +54,7 @@ _SPEC_KEYS = {
     "env": "env",
     "timeout_minutes": "timeoutMinutes",
     "expected_seconds": "expectedSeconds",
+    "cpu_utilization": "cpuUtilization",
     "image": "image",
     "metadata": "metadata",
     "provider": "provider",
