@@ -4,27 +4,25 @@ import Link from "next/link";
 import { AgentTable } from "@/components/AgentTable";
 import { BenchTabs } from "@/components/BenchTabs";
 import { Finder } from "@/components/Finder";
-import { ProviderName } from "@/components/ProviderName";
 import { LoadTable } from "@/components/LoadTable";
 import { TaskTable } from "@/components/TaskTable";
 import { UseCaseTable } from "@/components/UseCaseTable";
-import { site, usd } from "@/lib/site";
+import { BarNum, Num, ResultRow, ResultTable, barMax, perHour, time } from "@/components/results";
+import { site } from "@/lib/site";
 
 export const metadata: Metadata = { title: "Benchmarks" };
 
-const ms = (n?: number) => (n === undefined ? "n/a" : `${n.toLocaleString("en-US")} ms`);
 const cents = (n: number | null) => (n === null ? "n/a" : n === 0 ? "$0" : `$${n < 0.01 ? n.toFixed(4) : n.toFixed(3)}`);
 const shortDay = (iso: string) => new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
 /** One section: its title, one line, a link to how it's measured, then its table. */
 function Section({ id, title, how, children, line }: { id: string; title: string; how: string; line: React.ReactNode; children: React.ReactNode }) {
   return (
     <section aria-label={title} data-section={id} className="mt-8">
-      <p className="max-w-2xl text-[14px] leading-6 text-ink-2">
+      <p className="max-w-3xl text-[15px] leading-6 text-ink">
         {line}{" "}
-        <Link href={`/methodology#${how}`} className="text-ink underline underline-offset-4 decoration-line-2 hover:decoration-ink">
+        <Link href={`/methodology#${how}`} className="text-[13px] text-muted underline underline-offset-4 decoration-line-2 hover:text-ink">
           How it&apos;s measured
         </Link>
-        .
       </p>
       {children}
     </section>
@@ -37,8 +35,7 @@ export default function BenchmarksPage() {
   const rows = site.leaderboard;
   const subs = [...site.submissions].sort((a, b) => b.date.localeCompare(a.date));
   const totalRuns = subs.reduce((n, s) => n + s.runs * s.providers, 0);
-  const maxCreate = Math.max(1, ...rows.map((r) => r.medianCreateMs ?? 0));
-  const maxExec = Math.max(1, ...rows.map((r) => r.medianExecMs ?? 0));
+  const maxCreate = barMax(rows.map((r) => r.medianCreateMs ?? 0));
   const costs = site.costRuns.filter((r) => !r.error && r.billedUsd !== null && r.billedUsd > 0);
   // A fixed charge per sandbox isn't running time: shown apart, and taken out of the ratio the router uses.
   const feeOf = (id: string) => site.providers.find((p) => p.id === id)?.pricing.perSandboxUsd ?? 0;
@@ -127,51 +124,36 @@ export default function BenchmarksPage() {
         line={`${rows.length} providers${subs[0] ? `, last run ${day(subs[0].date)}` : ""}: time to a usable sandbox, one at a time, 100 runs each where our account allowed.`}
       >
 
-      <table className="mt-6 w-full text-[14px]">
-        <thead>
-          <tr className="text-left text-[11px] uppercase tracking-[0.12em] text-muted">
-            <th className="py-3 pr-4 font-normal">Provider</th>
-            <th className="py-3 pr-4 font-normal">Cold start (median)</th>
-            <th className="hidden py-3 pr-4 font-normal sm:table-cell">Command round trip</th>
-            <th className="hidden py-3 pr-4 font-normal md:table-cell">Succeeded</th>
-            <th className="hidden py-3 pr-4 font-normal md:table-cell">Size</th>
-            <th className="hidden py-3 pr-4 font-normal lg:table-cell">Measured</th>
-            <th className="py-3 font-normal">List price</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((r) => (
-            <tr key={r.provider} className="group border-t border-line">
-              <td className="py-3 pr-4">
-                <ProviderName id={r.provider} name={r.name} />
-                {r.runs < 20 ? <span className="ml-2 text-[11px] text-muted">only {r.runs} runs</span> : null}
-              </td>
-              <td className="py-3 pr-4">
-                <div className="flex items-center gap-3" title={`${r.name}: median cold start ${ms(r.medianCreateMs)}, ${r.runs} runs`}>
-                  <span className="w-20 font-mono tnum text-ink">{ms(r.medianCreateMs)}</span>
-                  <span className="hidden h-px w-28 bg-line sm:block">
-                    <span className="block h-px bg-bar" style={{ width: `${((r.medianCreateMs ?? 0) / maxCreate) * 100}%` }} />
-                  </span>
-                </div>
-              </td>
-              <td className="hidden py-3 pr-4 sm:table-cell">
-                <div className="flex items-center gap-3" title={`${r.name}: median command round trip ${ms(r.medianExecMs)}`}>
-                  <span className="w-20 font-mono tnum text-ink-2">{ms(r.medianExecMs)}</span>
-                  <span className="hidden h-px w-20 bg-line lg:block">
-                    <span className="block h-px bg-bar" style={{ width: `${((r.medianExecMs ?? 0) / maxExec) * 100}%` }} />
-                  </span>
-                </div>
-              </td>
-              <td className="hidden py-3 pr-4 font-mono tnum text-ink-2 md:table-cell">{Math.round(r.successRate * 100)}%</td>
-              <td className="hidden py-3 pr-4 font-mono tnum text-ink-2 md:table-cell">
-                {r.size.vcpu} vCPU / {r.size.memoryGb} GB
-              </td>
-              <td className="hidden py-3 pr-4 tnum text-ink-2 lg:table-cell">{shortDay(r.measuredAt)}</td>
-              <td className="py-3 font-mono tnum text-ink-2">{usd(r.hourlyUsd)}/hr</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <ResultTable
+        cols={[
+          { label: "Median start" },
+          { label: "Command", className: "hidden sm:table-cell" },
+          { label: "Worked", className: "hidden md:table-cell" },
+          { label: "Per hour" },
+        ]}
+      >
+        {rows.map((r, i) => (
+          <ResultRow
+            key={r.provider}
+            rank={i + 1}
+            id={r.provider}
+            name={r.name}
+            notes={[
+              r.size.vcpu !== 2 || r.size.memoryGb !== 4 ? `${r.size.vcpu} vCPU / ${r.size.memoryGb} GB` : "",
+              r.runs < 20 ? `only ${r.runs} runs` : "",
+            ].filter(Boolean)}
+          >
+            <BarNum value={r.medianCreateMs ?? 0} max={maxCreate} title={`${r.name}: median start ${time(r.medianCreateMs)} over ${r.runs} runs, measured ${shortDay(r.measuredAt)}`}>
+              {time(r.medianCreateMs)}
+            </BarNum>
+            <Num className="hidden sm:table-cell" title="Median round trip of one command, once started">
+              {time(r.medianExecMs)}
+            </Num>
+            <Num className="hidden md:table-cell">{Math.round(r.successRate * 100)}%</Num>
+            <Num>{perHour(r.hourlyUsd)}</Num>
+          </ResultRow>
+        ))}
+      </ResultTable>
       </Section>
             ),
           },
@@ -183,37 +165,29 @@ export default function BenchmarksPage() {
                   label: "Real bills",
                   content: (
         <Section id="real-cost" title="Bills" how="bills" line="What providers actually billed for a sandbox run for a fixed time, read from their own billing APIs.">
-          <div className="mt-6 overflow-x-auto">
-            <table className="w-full min-w-[560px] text-[14px]">
-              <thead>
-                <tr className="text-left text-[11px] uppercase tracking-[0.12em] text-muted">
-                  <th className="py-3 pr-4 font-normal">Provider</th>
-                  <th className="py-3 pr-4 font-normal">Ran</th>
-                  <th className="py-3 pr-4 font-normal">List price said</th>
-                  <th className="py-3 pr-4 font-normal">Billed</th>
-                  <th className="py-3 pr-4 font-normal">Running time vs list</th>
-                  <th className="py-3 font-normal">Measured</th>
-                </tr>
-              </thead>
-              <tbody>
-                {costs.map((r) => (
-                  <tr key={`${r.date}-${r.provider}`} className="border-t border-line">
-                    <td className="py-3 pr-4">
-                      <ProviderName id={r.provider} name={r.name} />
-                    </td>
-                    <td className="py-3 pr-4 font-mono tnum text-ink-2">{r.seconds === null ? "n/a" : `${Math.round(r.seconds / 60)} min`}</td>
-                    <td className="py-3 pr-4 font-mono tnum text-ink-2">{cents(r.predictedUsd)}</td>
-                    <td className="py-3 pr-4 font-mono tnum text-ink">
-                      {cents(r.billedUsd)}
-                      {feeOf(r.provider) ? <span className="ml-1 text-[11px] text-muted">incl. {cents(feeOf(r.provider))} start fee</span> : null}
-                    </td>
-                    <td className="py-3 pr-4 font-mono tnum text-ink-2">{vsList(r)}</td>
-                    <td className="py-3 tnum text-ink-2">{shortDay(r.date)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <ResultTable
+            ranked={false}
+            cols={[
+              { label: "Ran", className: "hidden sm:table-cell" },
+              { label: "List price said" },
+              { label: "Billed" },
+              { label: "Running time vs list", className: "hidden md:table-cell" },
+            ]}
+          >
+            {costs.map((r) => (
+              <ResultRow
+                key={`${r.date}-${r.provider}`}
+                id={r.provider}
+                name={r.name}
+                notes={[shortDay(r.date), feeOf(r.provider) ? `billed includes a ${cents(feeOf(r.provider))} start fee` : ""].filter(Boolean)}
+              >
+                <Num className="hidden sm:table-cell">{r.seconds === null ? "n/a" : `${Math.round(r.seconds / 60)} min`}</Num>
+                <Num>{cents(r.predictedUsd)}</Num>
+                <Num strong>{cents(r.billedUsd)}</Num>
+                <Num className="hidden md:table-cell">{vsList(r)}</Num>
+              </ResultRow>
+            ))}
+          </ResultTable>
         </Section>
                   ),
                 },
