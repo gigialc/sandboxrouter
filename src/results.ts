@@ -190,6 +190,26 @@ export function validateResult(j: any, now = Date.now()): string[] {
       if (r?.usd !== undefined && !isNum(r.usd, 0, 1000)) out.push(`${r?.provider}: usd is out of range`);
       if (r?.ok > 0 && r?.p50Ms === undefined) out.push(`${r?.provider}: sandboxes started but no p50Ms`);
     }
+  } else if (j.tool === "sandboxrouter-spread") {
+    add(checkDate(j.date, now));
+    add(checkLabel(j.label));
+    add(checkBy(j.by));
+    if (!isNum(j.n, 2, 10_000)) out.push("n must be between 2 and 10000");
+    if (!isNum(j.ok, 0, j.n) || !isNum(j.failed, 0, j.n) || j.ok + j.failed !== j.n) out.push("ok and failed must add up to n");
+    for (const k of ["p50Ms", "p95Ms", "p99Ms"] as const) {
+      if (j[k] !== undefined && !isNum(j[k], 1, 4 * MAX_MS)) out.push(`${k} is out of range`);
+    }
+    if (!isNum(j.wallMs, 1, 4 * MAX_MS)) out.push("wallMs is out of range");
+    if (!isNum(j.usd, 0, 10_000)) out.push("usd is out of range");
+    if (!Array.isArray(j.byProvider) || j.byProvider.length < 2) out.push("byProvider must list at least two providers");
+    let started = 0;
+    for (const b of Array.isArray(j.byProvider) ? j.byProvider : []) {
+      provider(b?.provider, "byProvider provider");
+      if (noBench(b?.provider)) out.push(`${b.provider}: ${NO_BENCH}`);
+      if (!isNum(b?.ok, 0, j.n) || !isNum(b?.spilledIn, 0, j.n) || !isNum(b?.refused, 0, 100 * j.n)) out.push(`${b?.provider}: counts out of range`);
+      started += b?.ok ?? 0;
+    }
+    if (started !== j.ok) out.push("byProvider ok counts must add up to ok");
   } else if (j.tool === "sandboxrouter-cost") {
     add(checkDate(j.date, now));
     add(checkBy(j.by));
@@ -206,7 +226,7 @@ export function validateResult(j: any, now = Date.now()): string[] {
       }
     }
   } else {
-    out.push(`unknown tool "${String(j.tool)}": expected a bench report, a burst report, an agent report, a saved check or a cost run`);
+    out.push(`unknown tool "${String(j.tool)}": expected a bench report, a burst report, a spread report, an agent report, a saved check or a cost run`);
   }
   return out;
 }

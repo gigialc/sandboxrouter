@@ -1,0 +1,23 @@
+{
+  "tool": "sandboxrouter-burst",
+  "version": "0.10.0",
+  "date": "2026-11-17T20:39:36.453Z",
+  "label": "home-eu",
+  "by": "gigialc",
+  "n": 1000,
+  "node": "v22.22.0",
+  "platform": "darwin-arm64",
+  "rows": [
+    {
+      "provider": "agentcore",
+      "n": 1000,
+      "ok": 298,
+      "limited": 702,
+      "p50Ms": 3232,
+      "p95Ms": 4900,
+      "p99Ms": 5959,
+      "wallMs": 9965,
+      "usd": 0.060282
+    }
+  ]
+}

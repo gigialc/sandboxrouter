@@ -48,11 +48,9 @@ export function RouteDemo() {
   const [still, setStill] = useState(true);
 
   useEffect(() => {
-    // Respect reduced motion: show one finished scenario and stop.
+    // The first paint already shows a finished run; then it plays the others. Reduced motion keeps that one.
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     setStill(false);
-    setS(0);
-    setShown(1);
   }, []);
 
   useEffect(() => {

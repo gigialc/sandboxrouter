@@ -70,6 +70,35 @@ describe("spreadBurst", () => {
   });
 });
 
+describe("spread reports", () => {
+  const spread = (over: Record<string, unknown> = {}) => ({
+    tool: "sandboxrouter-spread",
+    version: "0.11.0",
+    date: "2026-11-17T12:00:00Z",
+    label: "home-eu",
+    n: 10,
+    ok: 10,
+    failed: 0,
+    p50Ms: 900,
+    wallMs: 3000,
+    usd: 0.01,
+    byProvider: [
+      { provider: "maritime", ok: 7, spilledIn: 2, refused: 0 },
+      { provider: "boat", ok: 3, spilledIn: 0, refused: 2 },
+    ],
+    saturated: ["boat"],
+    ...over,
+  });
+  it("validates", () => {
+    const now = Date.parse("2026-11-18T00:00:00Z");
+    expect(validateResult(spread(), now)).toEqual([]);
+    expect(validateResult(spread({ ok: 9 }), now)).toContainEqual(expect.stringMatching(/add up to n/));
+    expect(validateResult(spread({ byProvider: [{ provider: "nope", ok: 10, spilledIn: 0, refused: 0 }, { provider: "boat", ok: 0, spilledIn: 0, refused: 0 }] }), now)).toContainEqual(
+      expect.stringMatching(/not in the catalog/),
+    );
+  });
+});
+
 describe("burst reports", () => {
   const report = (over: Partial<BurstReport> = {}): BurstReport => ({
     tool: "sandboxrouter-burst",

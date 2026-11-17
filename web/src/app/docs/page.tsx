@@ -11,6 +11,7 @@ const SECTIONS = [
   ["routing", "Routing"],
   ["price-table", "Reading the price table"],
   ["fallback", "Fallback"],
+  ["cooldowns", "Failover at scale"],
   ["streaming", "Streaming output"],
   ["files", "Files"],
   ["pause", "Pause and resume"],
@@ -198,6 +199,27 @@ router.quote({ expectedSeconds: 10 })               // where it would land and w
           <code>attempts</code>. A sandbox that turns up after its create timed out is killed, or left in the ledger for{" "}
           <code>sandboxrouter gc</code> if that fails. Commands never fall back, because a sandbox&apos;s state lives on one
           provider.
+        </p>
+
+        <h2 id="cooldowns">Failover at scale</h2>
+        <p>
+          Fallback handles one request. Across many, the router also remembers trouble: a provider that refuses for a limit
+          (a 429, a quota, a concurrency cap) goes to the back of the line for 30 seconds, and one that fails 3 creates within a
+          minute goes to the back for 60. Requests stop waiting on it, it&apos;s still tried when nothing else can take the
+          sandbox, and one success brings it back. The hosted key works this way for every request.
+        </p>
+        <CodeBlock
+          code={`router.troubled()
+// [ { provider: "e2b", reason: "hit a limit", untilMs: 1763412345678 } ]
+
+new Router({ cooldown: { limitSeconds: 30, failures: 3, windowSeconds: 60, downSeconds: 60 } });
+new Router({ cooldown: false }); // off`}
+        />
+        <p>
+          Every account has a limit on how many sandboxes run at once. Spread over several providers, a burst can be bigger
+          than any one of them allows: <code>sandboxrouter burst --spread --n 1000</code> asks for that many at once, dealt by
+          each provider&apos;s measured capacity, and moves the share of any provider that hits its limit to the next one with
+          room.
         </p>
 
         <h2 id="streaming">Streaming output</h2>

@@ -2,6 +2,13 @@
 
 All notable changes. Versions follow [semver](https://semver.org/); while the version is 0.x, a minor bump can change the API.
 
+## Unreleased
+
+### Added
+- **Homepage:** a proof strip under the headline (1,000 of 1,000 sandboxes started at once over 12 providers against 637 for the best single provider, providers passing the real-account check, real sandboxes benchmarked), all computed from `results/`; provider logos in the strip; an "At scale" section on spillover and failover with where the 1,000 sandboxes ran; the benchmark card in the site's table style; the routing demo starts with a finished run.
+- **Spread reports in `results/`** (`tool: "sandboxrouter-spread"`, written by `burst --spread --out`), validated by `npm run results:check`, plus the Nov 17 runs and the single-provider bursts of 1,000 they're compared with.
+- **Docs: "Failover at scale"** (`/docs#cooldowns`).
+
 ## 0.11.0 (2026-11-17)
 
 ### Added
