@@ -15,7 +15,7 @@ const shortDay = (iso: string) => new Date(iso).toLocaleDateString("en-US", { mo
 /** One section: its title, one line, a link to how it's measured, then its table. */
 function Section({ id, title, how, children, line }: { id: string; title: string; how: string; line: React.ReactNode; children: React.ReactNode }) {
   return (
-    <section id={id} className="mt-20 scroll-mt-24 first-of-type:mt-12">
+    <section id={id} className="mt-20 scroll-mt-32 first-of-type:mt-12">
       <h2 className="text-2xl font-normal tracking-[-0.025em] sm:text-[28px]">{title}</h2>
       <p className="mt-3 max-w-2xl text-[14px] leading-6 text-ink-2">
         {line}{" "}

@@ -100,6 +100,7 @@ export interface AgentRow {
   provider: string;
   name: string;
   runs: number;
+  limited?: number;
   ok: number;
   medianWallMs?: number;
   medianModelMs?: number;

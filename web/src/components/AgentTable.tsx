@@ -32,6 +32,7 @@ export function AgentTable() {
                 </td>
                 <td className="py-3 pr-4 font-mono tnum text-ink">
                   {r.ok}/{r.runs}
+                  {r.limited ? <span className="ml-2 font-sans text-[11px] text-muted">{r.limited} over our account&apos;s limit</span> : null}
                 </td>
                 <td className="hidden py-3 pr-4 font-mono tnum text-ink-2 sm:table-cell" title={`${r.medianTurns ?? "?"} turns`}>
                   {secs(r.medianWallMs)}

@@ -146,7 +146,7 @@ export default function Home() {
               },
               {
                 title: "Real jobs, real accounts",
-                body: `${short_.rows.length} providers ran the same work on real accounts: hashing, disk, Python and a download.`,
+                body: `${short_.rows.length} providers on real accounts: 100 starts each, 100 sandboxes at once, real jobs from Python to installing a real repo, and a real AI agent doing the same task on each.`,
               },
               {
                 title: "Priced by each provider's billing rules",

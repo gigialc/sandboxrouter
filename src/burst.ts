@@ -29,7 +29,7 @@ export interface BurstRow {
   usd?: number;
 }
 
-const LIMIT = /\b429\b|rate limit|too many|limit|quota|concurren|capacity/i;
+const LIMIT = /\b429\b|\b402\b|rate limit|too many|limit|quota|concurren|capacity|throttl|trial_exhausted|insufficient_credits/i;
 
 /** The value at percentile `p` (0 to 1) of sorted numbers, nearest-rank. */
 export function percentile(sorted: number[], p: number): number | undefined {

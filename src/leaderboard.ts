@@ -84,17 +84,26 @@ export interface LeaderRow {
 const KNOWN = new Set(CATALOG.map((c) => c.id));
 
 /**
- * Each provider's latest run from each location (report label), then the median across locations, so
- * an old run can't outvote a newer one and one heavy submitter can't skew a provider.
+ * Each provider's best-sampled recent run from each location (report label), then the median across
+ * locations, so one heavy submitter can't skew a provider. Within the last 30 days of a location's runs,
+ * the one with the most runs wins (a 100-run start-time benchmark over a 3-run job that also timed starts);
+ * ties go to the newest.
  */
 export function aggregate(reports: BenchReport[]): LeaderRow[] {
   const latest = new Map<string, { row: BenchRow; date: string }>();
+  const newest = new Map<string, string>();
+  for (const rep of reports) for (const r of rep.rows) {
+    const key = `${r.provider}\u0000${rep.label ?? ""}`;
+    if ((newest.get(key) ?? "") < rep.date) newest.set(key, rep.date);
+  }
+  const MONTH = 30 * 86_400_000;
   for (const rep of reports) {
     for (const r of rep.rows) {
       if (!KNOWN.has(r.provider)) continue;
       const key = `${r.provider}\u0000${rep.label ?? ""}`;
+      if (Date.parse(newest.get(key)!) - Date.parse(rep.date) > MONTH) continue;
       const seen = latest.get(key);
-      if (!seen || rep.date > seen.date) latest.set(key, { row: r, date: rep.date });
+      if (!seen || r.runs > seen.row.runs || (r.runs === seen.row.runs && rep.date > seen.date)) latest.set(key, { row: r, date: rep.date });
     }
   }
   const by = new Map<ProviderId, { row: BenchRow; date: string }[]>();

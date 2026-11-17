@@ -1,0 +1,146 @@
+{
+  "tool": "sandboxrouter",
+  "version": "0.10.0",
+  "date": "2026-11-17T16:19:15.367Z",
+  "label": "home-eu",
+  "by": "gigialc",
+  "runs": 100,
+  "spec": {
+    "vcpu": 2,
+    "memoryGb": 4
+  },
+  "node": "v22.22.0",
+  "platform": "darwin-arm64",
+  "rows": [
+    {
+      "provider": "superserve",
+      "runs": 100,
+      "failures": 0,
+      "medianCreateMs": 138,
+      "medianExecMs": 105,
+      "hourlyUsd": 0.1656
+    },
+    {
+      "provider": "novita",
+      "runs": 100,
+      "failures": 0,
+      "medianCreateMs": 298,
+      "medianExecMs": 586,
+      "hourlyUsd": 0.11664
+    },
+    {
+      "provider": "e2b",
+      "runs": 100,
+      "failures": 0,
+      "medianCreateMs": 320,
+      "medianExecMs": 172,
+      "hourlyUsd": 0.1089
+    },
+    {
+      "provider": "openscale",
+      "runs": 100,
+      "failures": 0,
+      "medianCreateMs": 355,
+      "medianExecMs": 1050,
+      "hourlyUsd": 0.013999999999999999
+    },
+    {
+      "provider": "vercel",
+      "runs": 100,
+      "failures": 0,
+      "medianCreateMs": 364,
+      "medianExecMs": 216,
+      "hourlyUsd": 0.3408
+    },
+    {
+      "provider": "daytona",
+      "runs": 100,
+      "failures": 0,
+      "medianCreateMs": 374,
+      "medianExecMs": 407,
+      "hourlyUsd": 0.06659999999999999
+    },
+    {
+      "provider": "cloudflare",
+      "runs": 100,
+      "failures": 0,
+      "medianCreateMs": 417,
+      "medianExecMs": 205,
+      "hourlyUsd": 0.21599999999999997
+    },
+    {
+      "provider": "modal",
+      "runs": 100,
+      "failures": 0,
+      "medianCreateMs": 470,
+      "medianExecMs": 766,
+      "hourlyUsd": 0.23796
+    },
+    {
+      "provider": "agent37",
+      "runs": 100,
+      "failures": 0,
+      "medianCreateMs": 799,
+      "medianExecMs": 588,
+      "hourlyUsd": 0.006520547945205479
+    },
+    {
+      "provider": "agentcore",
+      "runs": 100,
+      "failures": 0,
+      "medianCreateMs": 836,
+      "medianExecMs": 262,
+      "hourlyUsd": 0.2168
+    },
+    {
+      "provider": "maritime",
+      "runs": 100,
+      "failures": 0,
+      "medianCreateMs": 906,
+      "medianExecMs": 239,
+      "hourlyUsd": 0.022
+    },
+    {
+      "provider": "boat",
+      "runs": 100,
+      "failures": 95,
+      "medianCreateMs": 1512,
+      "medianExecMs": 103,
+      "hourlyUsd": 0.018,
+      "limited": 95
+    },
+    {
+      "provider": "tensorlake",
+      "runs": 100,
+      "failures": 0,
+      "medianCreateMs": 1614,
+      "medianExecMs": 598,
+      "hourlyUsd": 0.2
+    },
+    {
+      "provider": "freestyle",
+      "runs": 100,
+      "failures": 0,
+      "medianCreateMs": 1946,
+      "medianExecMs": 269,
+      "hourlyUsd": 0.13362
+    },
+    {
+      "provider": "sail",
+      "runs": 100,
+      "failures": 0,
+      "medianCreateMs": 2543,
+      "medianExecMs": 257,
+      "hourlyUsd": 0.062
+    },
+    {
+      "provider": "lambda",
+      "runs": 100,
+      "failures": 10,
+      "medianCreateMs": 3235,
+      "medianExecMs": 400,
+      "hourlyUsd": 0.25220016,
+      "limited": 10
+    }
+  ]
+}

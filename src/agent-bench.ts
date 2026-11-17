@@ -3,6 +3,7 @@ import { DEFAULT_MEMORY_GB, DEFAULT_VCPU, fittingSpec, fixedSize } from "./catal
 import { median } from "./bench-store.js";
 import { Router } from "./router.js";
 import { busyMs, maxCoreMs, taskUsd } from "./task.js";
+import { LIMITED_ERROR } from "./bench.js";
 import type { ProviderId, SandboxSpec } from "./types.js";
 
 /**
@@ -29,7 +30,10 @@ const STAT = `grep '^cpu' /proc/stat 2> /dev/null | tr '\\n' ';'`;
 
 export interface AgentRow {
   provider: ProviderId;
+  /** Sessions that started (the ones refused for an account limit are counted in `limited` instead). */
   runs: number;
+  /** Sessions the provider refused to start for a limit or quota on the benchmarking account. */
+  limited?: number;
   /** Runs where the task checked out. */
   ok: number;
   medianWallMs?: number;
@@ -117,7 +121,9 @@ async function session(router: Router, id: ProviderId, model: string, apiKey: st
     const sessionMs = performance.now() - s0;
     const b = (await box.exec(STAT)).stdout;
     const verified = (await box.exec(VERIFY, { timeoutSeconds: 120 })).stdout.includes("VERIFIED");
-    return { verified, createMs, sessionMs, modelMs, turns: turns + 1, tokens, cpuMs: busyMs(a, b), coreMs: maxCoreMs(a, b), spec: sized };
+    const cpu = busyMs(a, b);
+    const plausible = cpu !== undefined && cpu <= sized.vcpu! * sessionMs * 1.1;
+    return { verified, createMs, sessionMs, modelMs, turns: turns + 1, tokens, cpuMs: plausible ? cpu : undefined, coreMs: plausible ? maxCoreMs(a, b) : undefined, spec: sized };
   } finally {
     await box.kill().catch(() => {});
   }
@@ -139,6 +145,7 @@ export async function agentBench(opts: {
   const one = async (id: ProviderId) => {
     const done: Awaited<ReturnType<typeof session>>[] = [];
     let failures = 0;
+    let limited = 0;
     for (let i = 0; i < opts.runs; i++) {
       try {
         const s = await session(router, id, opts.model, opts.apiKey, opts.maxTurns ?? 15);
@@ -146,6 +153,7 @@ export async function agentBench(opts: {
         log(`${id} run ${i + 1}/${opts.runs}: ${s.verified ? "done" : "not done"} in ${(s.sessionMs / 1000).toFixed(1)} s, ${s.turns} turns`);
       } catch (err) {
         failures++;
+        if (LIMITED_ERROR.test((err as Error).message)) limited++;
         log(`${id} run ${i + 1}/${opts.runs} failed: ${(err as Error).message.slice(0, 160)}`);
       }
     }
@@ -157,7 +165,8 @@ export async function agentBench(opts: {
     const m = (xs: number[]) => (xs.length ? median(xs.map(Math.round)) : undefined);
     rows.push({
       provider: id,
-      runs: opts.runs,
+      runs: opts.runs - limited,
+      ...(limited ? { limited } : {}),
       ok: ok.length,
       medianWallMs: m(done.map((s) => s.sessionMs)),
       medianModelMs: m(done.map((s) => s.modelMs)),

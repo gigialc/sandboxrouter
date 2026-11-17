@@ -1,0 +1,190 @@
+{
+  "tool": "sandboxrouter-agent",
+  "version": "0.10.0",
+  "date": "2026-11-17T16:40:15.499Z",
+  "label": "home-eu",
+  "by": "gigialc",
+  "task": "gemini-primes-v1",
+  "model": "gemini-3.5-flash",
+  "runs": 5,
+  "node": "v22.22.0",
+  "platform": "darwin-arm64",
+  "rows": [
+    {
+      "provider": "openscale",
+      "runs": 5,
+      "ok": 5,
+      "medianWallMs": 16272,
+      "medianModelMs": 14062,
+      "medianCpuMs": 200,
+      "medianTurns": 6,
+      "medianUsd": 6.6111e-05,
+      "medianTokens": 7614
+    },
+    {
+      "provider": "maritime",
+      "runs": 5,
+      "ok": 5,
+      "medianWallMs": 13114,
+      "medianModelMs": 12491,
+      "medianCpuMs": 590,
+      "medianTurns": 5,
+      "medianUsd": 9.1667e-05,
+      "medianTokens": 5917
+    },
+    {
+      "provider": "agent37",
+      "runs": 5,
+      "ok": 5,
+      "medianWallMs": 31026,
+      "medianModelMs": 28478,
+      "medianCpuMs": 210,
+      "medianTurns": 6,
+      "medianUsd": 0.000108458,
+      "medianTokens": 8027
+    },
+    {
+      "provider": "boat",
+      "runs": 5,
+      "ok": 5,
+      "medianWallMs": 32593,
+      "medianModelMs": 31222,
+      "medianCpuMs": 670,
+      "medianTurns": 6,
+      "medianUsd": 0.000175,
+      "medianTokens": 7792
+    },
+    {
+      "provider": "agentcore",
+      "runs": 5,
+      "ok": 5,
+      "medianWallMs": 27226,
+      "medianModelMs": 25890,
+      "medianCpuMs": 810,
+      "medianTurns": 6,
+      "medianUsd": 0.000324638,
+      "medianTokens": 7646
+    },
+    {
+      "provider": "cloudflare",
+      "runs": 5,
+      "ok": 5,
+      "medianWallMs": 18130,
+      "medianModelMs": 17280,
+      "medianCpuMs": 350,
+      "medianTurns": 7,
+      "medianUsd": 0.000387,
+      "medianTokens": 8157
+    },
+    {
+      "provider": "e2b",
+      "runs": 5,
+      "ok": 5,
+      "medianWallMs": 12887,
+      "medianModelMs": 11882,
+      "medianCpuMs": 230,
+      "medianTurns": 5,
+      "medianUsd": 0.0004235,
+      "medianTokens": 5683
+    },
+    {
+      "provider": "tensorlake",
+      "runs": 5,
+      "ok": 5,
+      "medianWallMs": 15572,
+      "medianModelMs": 14570,
+      "medianCpuMs": 190,
+      "medianTurns": 5,
+      "medianUsd": 0.000432308,
+      "medianTokens": 6660
+    },
+    {
+      "provider": "modal",
+      "runs": 5,
+      "ok": 5,
+      "medianWallMs": 15071,
+      "medianModelMs": 13639,
+      "medianCpuMs": 130,
+      "medianTurns": 6,
+      "medianUsd": 0.000533805,
+      "medianTokens": 7061
+    },
+    {
+      "provider": "daytona",
+      "runs": 5,
+      "ok": 5,
+      "medianWallMs": 30386,
+      "medianModelMs": 29371,
+      "medianTurns": 6,
+      "medianUsd": 0.0005735,
+      "medianTokens": 7207
+    },
+    {
+      "provider": "superserve",
+      "runs": 5,
+      "ok": 5,
+      "medianWallMs": 19381,
+      "medianModelMs": 18156,
+      "medianCpuMs": 130,
+      "medianTurns": 6,
+      "medianUsd": 0.00092,
+      "medianTokens": 7608
+    },
+    {
+      "provider": "novita",
+      "runs": 5,
+      "ok": 5,
+      "medianWallMs": 31578,
+      "medianModelMs": 30509,
+      "medianCpuMs": 390,
+      "medianTurns": 6,
+      "medianUsd": 0.0010368,
+      "medianTokens": 6887
+    },
+    {
+      "provider": "freestyle",
+      "runs": 5,
+      "ok": 5,
+      "medianWallMs": 30900,
+      "medianModelMs": 29006,
+      "medianCpuMs": 1000,
+      "medianTurns": 6,
+      "medianUsd": 0.001261967,
+      "medianTokens": 7251
+    },
+    {
+      "provider": "vercel",
+      "runs": 5,
+      "ok": 5,
+      "medianWallMs": 30035,
+      "medianModelMs": 28645,
+      "medianCpuMs": 810,
+      "medianTurns": 6,
+      "medianUsd": 0.001446044,
+      "medianTokens": 7594
+    },
+    {
+      "provider": "sail",
+      "runs": 5,
+      "ok": 5,
+      "medianWallMs": 35385,
+      "medianModelMs": 31239,
+      "medianCpuMs": 3440,
+      "medianTurns": 7,
+      "medianUsd": 0.010174254,
+      "medianTokens": 9666
+    },
+    {
+      "provider": "lambda",
+      "runs": 2,
+      "ok": 2,
+      "medianWallMs": 22027,
+      "medianModelMs": 20591,
+      "medianCpuMs": 200,
+      "medianTurns": 6,
+      "medianUsd": 0.001821446,
+      "medianTokens": 7442,
+      "limited": 3
+    }
+  ]
+}

@@ -161,4 +161,4 @@ export const ACCOUNT_ERROR = /setup problem|Payment Required|\b40[123]\b|creatio
 export const NETWORK_ERROR = /fetch failed|ENOTFOUND|EAI_AGAIN|ENETUNREACH|ECONNRESET|ETIMEDOUT|Name resolution failed|getaddrinfo/i;
 
 /** A refusal for a limit or quota on the account running the benchmark: rate limits, concurrency and service quotas. */
-export const LIMITED_ERROR = /\b429\b|rate.?limit|ServiceQuotaExceeded|quota|too many|concurrency limit|creation limit/i;
+export const LIMITED_ERROR = /\b429\b|\b402\b|rate.?limit|ServiceQuotaExceeded|quota|too many|concurrency limit|creation limit|trial_exhausted|insufficient_credits|Payment Required|throttl/i;

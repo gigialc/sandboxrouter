@@ -165,6 +165,7 @@ export function validateResult(j: any, now = Date.now()): string[] {
       provider(r?.provider, "row provider");
       if (noBench(r?.provider)) out.push(`${r.provider}: ${NO_BENCH}`);
       if (!isNum(r?.ok, 0, r?.runs ?? 0)) out.push(`${r?.provider}: ok must be between 0 and runs`);
+      if (r?.limited !== undefined && !isNum(r.limited, 0, 1000)) out.push(`${r?.provider}: limited is out of range`);
       for (const k of ["medianWallMs", "medianModelMs", "medianCpuMs"] as const) {
         if (r?.[k] !== undefined && !isNum(r[k], 0, 4 * MAX_MS)) out.push(`${r?.provider}: ${k} is out of range`);
       }
