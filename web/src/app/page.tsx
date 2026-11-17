@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Button } from "@/components/chrome";
+import { ConditionalStartFeeNote } from "@/components/ConditionalStartFeeNote";
 import { CodeBlock, CodeTabs, InstallChip } from "@/components/code";
 import { Feature } from "@/components/Feature";
 import { PriceIndex } from "@/components/PriceIndex";
@@ -43,6 +44,7 @@ export default function Home() {
   const day = (iso: string) => new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
   const fastest = short_ && [...short_.rows].sort((a, b) => a.taskMs - b.taskMs)[0];
   const cheapestTask = short_?.rows[0];
+  const shortRows = short_?.rows.slice(0, 6) ?? [];
 
   return (
     <div className="px-5 sm:px-10">
@@ -64,7 +66,7 @@ export default function Home() {
         <h1 className="text-[40px] font-normal leading-[1.08] tracking-[-0.04em] sm:text-[64px]">
           One API for every sandbox.
           <br />
-          <span className="text-muted">On the cheapest one that&apos;s up.</span>
+          <span className="text-muted">Find a provider that fits.</span>
         </h1>
         <div className="mt-10 flex flex-wrap justify-center gap-3">
           {HOSTED_PUBLIC ? (
@@ -80,7 +82,7 @@ export default function Home() {
         </div>
 
         <p className="mt-12 max-w-lg text-[15px] leading-7 text-ink-2">
-          Each sandbox goes to the cheapest provider that fits. If that one can&apos;t start it, the next one does.{" "}
+          The SDK prioritises providers by estimated cost and can try another if a start fails.{" "}
           {HOSTED_PUBLIC ? "Open source, or one hosted key." : "Open source."}{" "}
           <Link href="/learn" className="text-ink underline underline-offset-4 decoration-line-2 hover:decoration-ink">
             New to sandboxes?
@@ -115,7 +117,7 @@ export default function Home() {
       <div className="mx-auto mt-24 max-w-[1320px] space-y-24 sm:mt-28 sm:space-y-32">
         <Feature
           label="Route"
-          claim="Each sandbox starts on the cheapest provider that fits. If that one can't start it, the next one does."
+          claim="Route by estimated cost, speed or capability."
           actions={
             <>
               <Button href="/docs#routing" primary>
@@ -129,9 +131,9 @@ export default function Home() {
               title: "Fallback when starting",
               body: "Out of credit, rate-limited or down: if a provider can't start your sandbox, the next one does, and every attempt is on sbx.attempts. Once it's running, it stays where it started.",
             },
-            { title: "One handle, whatever ran it", body: "Run commands, stream output, move files and pause the same way on every provider." },
+            { title: "One handle, whatever ran it", body: "Run commands and move files through one API. Stream output or pause where the provider supports it." },
             { title: "The provider's own SDK is still there", body: "sbx.native is the provider's own sandbox object, already connected, for ports, snapshots and anything the router doesn't cover." },
-            { title: "Nothing left running", body: "If a script crashes, sandboxrouter gc kills the sandboxes it left behind." },
+            { title: "Recover after a crash", body: "Run sandboxrouter gc to try to stop expired sandboxes recorded by the SDK. It reports any cleanup failures." },
           ]}
           visual={<RouteDemo />}
         />
@@ -159,17 +161,15 @@ export default function Home() {
             points={[
               {
                 title: "Capacity across providers",
-                body: `Every account has a limit on how many sandboxes run at once. Asked for ${scale.n.toLocaleString("en-US")} at once on ${day(scale.date)}, ${
-                  scale.bestSingle ? `the best single provider started ${scale.bestSingle.ok.toLocaleString("en-US")}` : "single providers stopped short"
-                }; spread over ${scale.providers} providers, ${scale.ok.toLocaleString("en-US")} started, as ${scale.saturated} hit their limit and handed the rest on.`,
+                body: `On ${day(scale.date)}, ${scale.byProvider.length} providers in our ${scale.poolSize}-provider test pool started ${scale.ok.toLocaleString("en-US")} of ${scale.n.toLocaleString("en-US")} requested sandboxes. The test took ${time(scale.wallMs)} using our provider accounts.`,
               },
               {
                 title: "Failover when starting, that remembers",
                 body: `A provider that rate-limits you goes to the back of the line for 30 seconds; one that keeps failing to start sandboxes, for a minute. New sandboxes stop waiting on it, and one success brings it back. A sandbox that's already running stays on its provider; if that provider fails mid-run, the work isn't moved.`,
               },
               {
-                title: "One key, one bill",
-                body: `Every provider behind one sandboxRouter key, billed by the second at list price + ${HOSTED_FEE_PCT}%. Or bring your own provider keys, free.`,
+                title: "Account limits",
+                body: "Capacity varies by provider account and plan. The hosted API has its own per-account concurrency limit.",
               },
             ]}
             visual={<ScaleChart scale={scale} day={day} />}
@@ -179,7 +179,7 @@ export default function Home() {
         {short_ && fastest && cheapestTask && (
           <Feature
             label="Benchmarks"
-            claim="The same job on every provider, timed and priced the way each one bills."
+            claim="Compare the same job across tested providers."
             actions={
               <>
                 <Button href="/benchmarks#task" primary>
@@ -191,30 +191,33 @@ export default function Home() {
             points={[
               {
                 title: "The fastest isn't the cheapest",
-                body: `On the short job, ${cheapestTask.name} cost least: 1,000 runs for $${(cheapestTask.taskUsd * 1000).toFixed(3)}. The fastest, ${fastest.name} (${(fastest.taskMs / 1000).toFixed(1)} s), ranks #${short_.rows.findIndex((r) => r.provider === fastest.provider) + 1} of ${short_.rows.length} on cost.`,
+                body: `On the short job, ${cheapestTask.name} had the lowest estimated cost before account-specific fees, at $${(cheapestTask.taskUsd * 1000).toFixed(3)} per 1,000 runs. ${fastest.name} finished fastest after startup (${time(fastest.taskMs)}) and ranks #${short_.rows.findIndex((r) => r.provider === fastest.provider) + 1} of ${short_.rows.length} on cost.`,
               },
               {
                 title: "Real jobs, real accounts",
-                body: `${short_.rows.length} providers on real accounts: 100 starts each, 100 sandboxes at once, real jobs from Python to installing a real repo, and a real AI agent doing the same task on each.`,
+                body: `We measured the short job on real accounts across ${short_.rows.length} providers. The benchmarks also cover starts under load, Python jobs, repo setup and an agent session.`,
               },
               {
-                title: "Priced by each provider's billing rules",
-                body: "Minimum charges and fees count, and active-CPU providers pay for the CPU the job used.",
+                title: "Estimated costs",
+                body: "Estimates apply modelled minimums and start fees to measured times. Extra fees that depend on your provider account can change the ranking.",
               },
             ]}
             visual={
               <div className="border border-line p-5 sm:p-8">
                 <p className="text-[12px] uppercase tracking-[0.12em] text-muted">Short job · cheapest first</p>
-                <ResultTable cols={[{ label: "1,000 runs" }, { label: "Took", className: "hidden sm:table-cell" }]}>
-                  {short_.rows.slice(0, 6).map((r, k) => (
+                <ResultTable cols={[{ label: "Est. / 1,000 runs" }, { label: "Took", className: "hidden sm:table-cell" }]}>
+                  {shortRows.map((r, k) => (
                     <ResultRow key={r.provider} rank={k + 1} id={r.provider} name={r.name.replace(/ \(.*\)$/, "")}>
-                      <BarNum value={r.taskUsd} max={barMax(short_.rows.slice(0, 6).map((x) => x.taskUsd))}>
+                      <BarNum value={r.taskUsd} max={barMax(shortRows.map((x) => x.taskUsd))}>
                         {money(r.taskUsd * 1000)}
                       </BarNum>
                       <Num className="hidden sm:table-cell">{time(r.taskMs)}</Num>
                     </ResultRow>
                   ))}
                 </ResultTable>
+                {shortRows.some((r) => r.provider === "boat") && (
+                  <p className="mt-3 text-[12px] leading-5 text-muted"><ConditionalStartFeeNote id="boat" /></p>
+                )}
               </div>
             }
           />
@@ -254,12 +257,12 @@ export default function Home() {
               <Button href={`${HOSTED_URL}/dashboard`} primary>
                 Get a key
               </Button>
-              <Button href={REPO_PUBLIC ? REPO : "/docs#quickstart"}>{REPO_PUBLIC ? "GitHub" : "Quickstart"}</Button>
+              <Button href={`${HOSTED_URL}/providers`}>Hosted providers</Button>
             </>
           }
           points={[
             { title: "Your keys: free", body: "MIT licensed. Sandboxes run on your provider accounts and you pay each provider directly." },
-            { title: `One key: list price + ${HOSTED_FEE_PCT}%`, body: "Prepaid credit by card, billed by the second. Sandboxes stop when the credit runs out." },
+            { title: `Hosted rates + ${HOSTED_FEE_PCT}%`, body: "The hosted key uses our configured providers. Charges use estimated provider compute rates, with minimums, billing increments and modelled start fees where applicable. Sandboxes stop when credit runs out." },
             { title: "Agents can sign up themselves", body: "POST /v1/signup returns a key; the agent hands its person a link to pay." },
           ]}
           visual={
@@ -320,15 +323,16 @@ function ScaleChart({ scale, day }: { scale: NonNullable<typeof site.scale>; day
         <span className="font-mono text-ink tnum">
           {scale.ok.toLocaleString("en-US")}/{scale.n.toLocaleString("en-US")}
         </span>{" "}
-        started over {scale.providers} providers.
+        started across {scale.byProvider.length} of {scale.poolSize} providers in our test pool.
         {scale.bestSingle ? (
           <>
             {" "}
-            Alone, the best single provider started <span className="font-mono text-ink tnum">{scale.bestSingle.ok.toLocaleString("en-US")}</span>.
+            In standalone tests at the same burst size, {scale.bestSingle.name} had the most starts
+            ({scale.bestSingle.ok.toLocaleString("en-US")} of {scale.n.toLocaleString("en-US")}, across {scale.standaloneProviders} providers tested).
           </>
         ) : null}{" "}
-        <span className="text-muted">Our accounts, standard limits.</span>
-        <span className="mt-2 block text-muted">A sandbox that&apos;s already running stays on its provider; if that provider fails mid-run, the work isn&apos;t moved.</span>
+        <span className="text-muted">These results reflect the limits of our test accounts.</span>
+        <span className="mt-2 block text-muted">A running sandbox stays on its original provider.</span>
       </figcaption>
     </figure>
   );

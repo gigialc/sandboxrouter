@@ -1,5 +1,6 @@
 "use client";
 
+import { ConditionalStartFeeNote } from "@/components/ConditionalStartFeeNote";
 import { useState } from "react";
 import published from "@/data/published.json";
 import { BarNum, Footnote, Num, ResultRow, ResultTable, Segmented, Toolbar, barMax, money, perHour, time } from "@/components/results";
@@ -86,7 +87,7 @@ export function TaskTable() {
       </Toolbar>
       <ResultTable
         cols={[
-          { label: "1,000 jobs" },
+          { label: "Est. / 1,000 jobs" },
           { label: "Job took" },
           { label: sort === "value" ? "Value" : "Per hour", className: "hidden sm:table-cell" },
         ]}
@@ -115,6 +116,7 @@ export function TaskTable() {
       <Footnote>
         Ranked per successful run: a provider whose runs sometimes failed has its cost and time divided by its success rate.
         {sort === "value" ? " Value is cost times time, each against the median: 1.0 is the median, lower is better." : ""}
+        {mode === "fresh" && rows.some((r) => r.provider === "boat") && <> <ConditionalStartFeeNote id="boat" /></>}
         {k.couldNot.length ? ` Couldn't run this job in its default setup: ${k.couldNot.join(", ")}.` : ""}
       </Footnote>
     </div>

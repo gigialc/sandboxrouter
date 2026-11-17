@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { PageHeader } from "@/components/chrome";
 import Link from "next/link";
+import { ConditionalStartFeeNote } from "@/components/ConditionalStartFeeNote";
 import { CodeBlock } from "@/components/code";
 import { HOSTED_FEE_PCT, NPM, REPO, REPO_PUBLIC, site } from "@/lib/site";
 
@@ -61,24 +62,27 @@ export default function MethodologyPage() {
           </p>
           <p>
             Ranking prices a whole run, not an hour: running time is rounded up to the provider&apos;s billing step and minimum charge,
-            and any per-sandbox fee is added. So a 10-second job can go to a provider that bills by the second over one that is
+            and any modelled per-sandbox fee is added. So a 10-second job can go to a provider that bills by the second over one that is
             cheaper per hour but charges a full minute. The run is <code>expectedSeconds</code> if you give it, else the whole{" "}
             <code>timeoutMinutes</code>.
           </p>
           <p>
             Where we measured what a provider really bills ({billed.map((p) => p.name).join(", ") || "none yet"}), its price is
-            corrected by that ratio. Everywhere else it&apos;s the list price. Disk, network and monthly plans aren&apos;t included. The
-            hosted key adds {HOSTED_FEE_PCT}% on sandboxes that run on our accounts; with your own keys there&apos;s no fee.
+            corrected by that ratio. Everywhere else it uses the list price. Estimates exclude disk, network and monthly plans.
+            {" "}<ConditionalStartFeeNote id="boat" />
+          </p>
+          <p>
+            Hosted charges on our provider accounts use estimated provider compute rates plus {HOSTED_FEE_PCT}% and assume full CPU.
+            The hosted API rejects <code>cpuUtilization</code>. With your own provider keys, you pay the provider directly.
           </p>
 
           <h2 id="index">The price index</h2>
           <p>
             The index puts a number on a few standard pieces of work: a 2 vCPU / 4 GB sandbox for an hour, an agent session for an
-            hour at 10% CPU, and 1,000 tool calls of 10 seconds each in fresh sandboxes. Each line is the median of what the
-            router would charge across the providers that passed the real-account check, priced as above (minimum charges,
-            billing steps, per-sandbox fees and measured bills included), with the cheapest provider beside it. It&apos;s recorded
-            daily when it changes, which happens when a provider changes its price, so the change shown is since the last
-            recorded value.
+            hour at an assumed 10% CPU, and 1,000 tool calls of 10 seconds each in fresh sandboxes. Each line shows the median
+            and lowest estimated direct-provider cost among tested providers that fit the job. It uses the pricing rules above and
+            scales the single-run estimate for 1,000 calls, assuming starts remain within plan allowances. These scenarios use
+            direct provider rates. The change shown is since the last recorded value.
           </p>
 
           <h2 id="active-cpu">Providers that bill active CPU</h2>
@@ -163,8 +167,8 @@ export default function MethodologyPage() {
             Each job is priced two ways: in a <strong>new sandbox</strong> (its start, minimum charge and per-sandbox fee count
             every time) and in <strong>one sandbox for all jobs</strong> (only the job&apos;s own time counts), since agents often
             reuse a sandbox for many calls. Each step is timed from the test machine, minus the sandbox&apos;s own round trip for an empty command, so network
-            distance mostly drops out. The cost is what the provider would bill for the start plus the job, with its minimum
-            charge, billing step and per-sandbox fee. These are published prices applied to measured times, not invoices.
+            distance mostly drops out. We apply published rates and modelled minimums, billing steps and per-sandbox fees
+            to those times. The estimates assume starts remain within included allowances.
           </p>
           <p>
             Providers that bill active CPU are charged for the CPU time the job really used, plus memory for the whole run. It is
@@ -180,7 +184,7 @@ export default function MethodologyPage() {
             the sandbox. The model runs on the test machine and its key never enters the sandbox, so the sandbox waits while the
             model thinks, as it would for any agent. Afterwards the result is checked independently inside the sandbox. Each
             provider runs it five times; the table shows how many were done right, the median session, the share of it the
-            sandbox sat waiting, and what the sandbox was billed (the model&apos;s own cost isn&apos;t included). Its sandboxes start
+            sandbox sat waiting, and the estimated sandbox compute cost (the model&apos;s own cost isn&apos;t included). Its sandboxes start
             with a 10% CPU hint, so providers that bill active CPU or reserve CPU are priced as an agent would use them.
           </p>
 

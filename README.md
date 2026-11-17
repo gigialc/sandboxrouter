@@ -21,7 +21,7 @@ try {
 
 Runs as plain JavaScript on Node 20+. (In TypeScript 5.2+, or Node 24+, `await using sbx = ...` kills the sandbox for you.)
 
-Set the keys of the providers you use. `create()` starts the sandbox on the cheapest one that fits: list price for the size you asked for, corrected where we measured what a provider really bills. Providers within 10% of each other on price go fastest first, by start times measured where you run the router. Providers that failed their last real-account check go last. Ties are alphabetical, and no provider pays for placement. If that provider is down, busy or out of credit, the next one takes it, and every attempt is on `sbx.attempts`. The sandbox stays on that provider until you `kill()` it.
+Set the keys of the providers you use. `create()` starts the sandbox on the cheapest one that fits: list price for the size you asked for, corrected where we measured what a provider really bills. Providers within 10% of each other on estimated price go fastest first. The router uses its own timings, your benchmark file or published timings, in that order. Estimates exclude account-specific charges such as [Boat’s fees above its included start allowance](https://docs.boat.dev/limits.md#extra-starts). Providers that failed their last real-account check go last. Ties are alphabetical, and no provider pays for placement. If that provider is down, busy or out of credit, the next one takes it, and every attempt is on `sbx.attempts`. The sandbox stays on that provider until you `kill()` it.
 
 Site and docs: [sandboxrouter.ai](https://sandboxrouter.ai) · npm: [`@sandboxrouter/sdk`](https://www.npmjs.com/package/@sandboxrouter/sdk)
 

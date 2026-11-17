@@ -6,9 +6,9 @@ import type { Provider, ProviderId, SandboxSpec } from "./types.js";
 
 /**
  * The price index: what a few standard pieces of sandbox work cost today across the providers that passed
- * the real-account check. Each line is the median of what the router would charge on each of them (list
- * price, corrected by measured bills, with minimum charges and per-sandbox fees over the run), plus the
- * cheapest. It moves only when a provider's price in the catalog changes.
+ * the real-account check. Each line shows the median and lowest estimated direct-provider cost (list
+ * price, corrected by measured bills, with minimum charges and modeled per-sandbox fees over the run).
+ * Account-specific fees, such as Boat's allowance overages, are excluded.
  */
 export const INDEX_LINES = [
   { id: "2x4-hour", label: "2 vCPU / 4 GB, one hour", unit: "per hour", spec: { vcpu: 2, memoryGb: 4, timeoutMinutes: 60 }, scale: 1 },

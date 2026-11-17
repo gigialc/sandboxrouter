@@ -264,6 +264,8 @@ async function main() {
     console.log(`${q.provider}, ${q.size.vcpu} vCPU / ${q.size.memoryGb} GB`);
     console.log(`price     $${q.hourlyUsd.toFixed(4)}/hr${rules.length ? ` (${rules.join(", ")})` : ""}`);
     console.log(`this run  ${q.runSeconds} s ≈ $${q.estimatedUsd.toFixed(6)} ($${q.runHourlyUsd.toFixed(4)}/hr)`);
+    const extra = q.conditionalStartFee;
+    if (extra) console.log(`Excludes $${extra.minUsd}–$${extra.maxUsd} per start above your allowance. ${extra.source}`);
     const next = q.candidates.filter((c) => !c.skip && c.provider !== q.provider).slice(0, 3).map((c) => c.provider);
     if (next.length) console.log(`fallback  ${next.join(" → ")}`);
     return;
@@ -284,7 +286,9 @@ async function main() {
       // With --expect, what that run would be billed (minimum charge and fee included): what it's ranked by.
       const hours = runHours(spec);
       const run = spec.expectedSeconds ? `  ≈ $${(rankUsd(c, hours) * hours).toFixed(6)} for ${Math.round(hours * 3600)} s` : "";
-      const cols = [`$${c.estimatedHourlyUsd.toFixed(4)}/hr${list}${fee}${run}`, size, speed, tested].filter(Boolean).join("  ");
+      const extra = c.conditionalStartFee;
+      const feeNote = extra ? `excludes $${extra.minUsd}–$${extra.maxUsd} per start above allowance` : "";
+      const cols = [`$${c.estimatedHourlyUsd.toFixed(4)}/hr${list}${fee}${run}`, size, speed, tested, feeNote].filter(Boolean).join("  ");
       console.log(`${mark} ${c.provider.padEnd(11)} ${cols}${c.skip ? `  (skipped: ${c.skip})` : ""}`);
     }
     return;

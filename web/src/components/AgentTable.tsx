@@ -1,3 +1,4 @@
+import { ConditionalStartFeeNote } from "@/components/ConditionalStartFeeNote";
 import { BarNum, Footnote, Num, ResultRow, ResultTable, barMax, money, time } from "@/components/results";
 import { site } from "@/lib/site";
 
@@ -10,7 +11,7 @@ export function AgentTable() {
     <div className="mt-6">
       <ResultTable
         cols={[
-          { label: "1,000 sessions" },
+          { label: "Est. / 1,000 sessions" },
           { label: "Done right" },
           { label: "Session", className: "hidden sm:table-cell" },
           { label: "Idle", className: "hidden md:table-cell" },
@@ -43,6 +44,7 @@ export function AgentTable() {
       <Footnote>
         {rows[0].model}, the same task each time. The sandbox&apos;s cost only, not the model&apos;s. Idle is the share of the session spent
         waiting on the model.
+        {rows.some((r) => r.provider === "boat") && <> <ConditionalStartFeeNote id="boat" /></>}
       </Footnote>
     </div>
   );

@@ -54,6 +54,16 @@ describe("recommend", () => {
     expect(r.results[0]).toMatchObject({ secondsEach: 4, usdEach: 0.0005 });
   });
 
+  it("warns about conditional start fees only for fresh sandboxes", () => {
+    const opts = { job: "short", count: 1_000, providers: ["boat"] } as const;
+    const fresh = recommend(PUBLISHED, opts).results[0];
+    expect(fresh.usdTotal).toBeCloseTo(0.015, 6);
+    expect(fresh.notes).toContain("excludes $0.03–$0.07 per start above allowance");
+
+    const reused = recommend(PUBLISHED, { ...opts, reuse: true }).results[0];
+    expect(reused.notes.some((note) => note.includes("start above allowance"))).toBe(false);
+  });
+
   it("answers from the data the package carries", () => {
     const r = recommend(PUBLISHED, { job: "repo", count: 1 });
     expect(r.results.length).toBeGreaterThan(5);

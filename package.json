@@ -201,5 +201,19 @@
     "type": "git",
     "url": "git+https://github.com/gigialc/sandboxrouter.git"
   },
-  "homepage": "https://sandboxrouter.ai"
+  "homepage": "https://sandboxrouter.ai",
+  "overrides": {
+    "@hey-api/json-schema-ref-parser": {
+      "js-yaml": "^4.3.2"
+    },
+    "@hopx-ai/sdk": {
+      "glob": "^14.0.2"
+    },
+    "@vercel/cli-config": {
+      "zod": "^4.6.6"
+    },
+    "archiver-utils": {
+      "glob": "^14.0.2"
+    }
+  }
 }

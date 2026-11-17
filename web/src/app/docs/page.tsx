@@ -132,10 +132,10 @@ router.quote({ expectedSeconds: 10 })               // where it would land and w
           charges a full minute. Some providers (Vercel, Cloudflare, Tensorlake, AgentCore, Sail, Sprites, Deno, Upstash) bill CPU only
           while it&apos;s busy. They&apos;re priced with every core busy unless you say otherwise with <code>cpuUtilization</code> (0 to 1):
           an agent that mostly waits on model calls is about 0.1, a build close to 1. Memory is always billed in full, Vercel&apos;s
-          one-minute minimum applies to its memory only, and Tensorlake bills at least 20% CPU. Providers within 10% of each other on price go fastest first,
-          by start times this router measured itself, or from your <code>sandboxrouter bench</code> run until it has some. Speed depends on
-          where you run it, so the published benchmarks are never used for routing. Providers whose last 14-step real-account check
-          failed go last. Ties break alphabetically, so no provider gets a better slot by who it is. Prices come from each
+          one-minute minimum applies to its memory only, and Tensorlake bills at least 20% CPU. Providers within 10% of each other
+          on estimated price go fastest first. For each provider, the router uses its own recent timings when it has enough samples,
+          then your <code>sandboxrouter bench</code> results, then published start times. Set <code>published: false</code> to disable
+          that last fallback. Providers whose last real-account check failed go last. Ties break alphabetically, so no provider gets a better slot by who it is. Prices come from each
           provider&apos;s public pricing page and live in <code>src/catalog.ts</code>. A service that runs sandboxes on its own accounts can
           create its router with <code>{`new Router({ requireVerified: true })`}</code> to use only providers that passed the check. Docker is never picked automatically; name it
           with <code>{`{ provider: "docker" }`}</code>. To see what would happen without starting anything, call{" "}
@@ -143,7 +143,8 @@ router.quote({ expectedSeconds: 10 })               // where it would land and w
           a reason, like <code>not configured</code> or <code>max 16 vCPU</code>. <code>router.quote(spec, route)</code> (<code>POST /v1/quote</code>,{" "}
           <code>npx @sandboxrouter/sdk quote</code>) gives the one answer: the provider, its price and the run&apos;s estimated cost.
           <code>maxHourlyUsd</code> is a price cap, priced the same way as ranking, so a provider that charges a full minute is over a
-          cap for a 10-second run even when its hourly price is under it.
+          cap for a 10-second run even when its hourly price is under it. The quote and cap exclude charges that depend on your
+          account, such as <a href="https://docs.boat.dev/limits.md#extra-starts">Boat’s fees above its included start allowances</a>.
         </p>
 
         <h2 id="price-table">Reading the price table</h2>
@@ -259,7 +260,7 @@ const again = await router.get(sbx.id);   // e.g. "e2b:iz5sb5a4bt3pmjx7c5ms2"`}
 
         <h2 id="native">Using a provider&apos;s own features</h2>
         <p>
-          The router covers what every provider has: commands, files, pause, kill. For anything else (a public URL for a port,
+          The router provides commands, files and cleanup, plus pause where supported. For anything else (a public URL for a port,
           background processes, snapshots, volumes), <code>sbx.native</code> is the provider SDK&apos;s own sandbox object,
           already connected. There&apos;s no second login and no reconnecting by id.
         </p>
@@ -365,9 +366,11 @@ SANDBOXROUTER_TOKEN=secret npx @sandboxrouter/sdk serve --cors https://your-site
         <>
         <h2 id="hosted">Hosted key</h2>
         <p>
-          The hosted service runs the same HTTP API on sandboxRouter&apos;s own provider accounts, so one key replaces all the provider
-          keys. Sign in at <a href={`${HOSTED_URL}/dashboard`}>the dashboard</a>, add credit by card and create a key. Each sandbox
-          is billed by the second at its provider&apos;s list price plus {HOSTED_FEE_PCT}%, and the dashboard shows what each one cost.
+          One hosted key gives you access to the <a href={`${HOSTED_URL}/providers`}>current hosted provider pool</a>. Sign in at{" "}
+          <a href={`${HOSTED_URL}/dashboard`}>the dashboard</a>, add credit by card and create a key. On our provider accounts, charges
+          use estimated provider compute rates plus {HOSTED_FEE_PCT}%. Modelled minimums, billing increments and fixed start fees
+          apply where applicable. The dashboard shows what each sandbox cost. Hosted pricing assumes full CPU and the hosted
+          API rejects <code>cpuUtilization</code>.
         </p>
         <CodeBlock
           title="agent.ts"
@@ -381,7 +384,7 @@ await sbx.kill();`}
         <p>
           An agent can open an account itself: <code>POST /v1/signup</code> returns a key with no credit and a link its person uses to
           pay and claim the account. The steps are in <a href={`${HOSTED_URL}/auth.md`}>/auth.md</a>. On the hosted API, pause and
-          desktops are off for now, and accounts run up to 5 sandboxes at once for up to 4 hours each. See the{" "}
+          desktops are off for now. The default limits are 5 sandboxes at once and up to 4 hours each. See the{" "}
           <a href={`${HOSTED_URL}/terms`}>terms</a> and <a href={`${HOSTED_URL}/refunds`}>refund policy</a>.
         </p>
         </>
