@@ -21,6 +21,7 @@ const SECTIONS = [
   ...(HOSTED_PUBLIC ? ([["hosted", "Hosted key"]] as const) : []),
   ["python", "Python"],
   ["bench", "Bench and leaderboard"],
+  ["compare", "Compare your workload"],
   ["agents", "For agents"],
   ["providers", "Adding a provider"],
 ] as const;
@@ -410,6 +411,18 @@ with sr.create(strategy="cheapest") as sbx:
           The label says where you ran it, because the network between you and each provider is part of the number. Use a city or
           cloud region, not an address.
         </p>
+
+        <h2 id="compare">Compare your own workload</h2>
+        <p>
+          The published benchmarks run standard jobs. <code>compare</code> runs yours: the same setup and command in a new sandbox on
+          each provider, a few times. You get how often it worked, the start, setup and command time, and the estimated cost of one
+          run. Times are measured; costs are estimates from each provider&apos;s billing rules, not bills. Failures are counted and
+          shown with their error, so it also tells you which providers your setup works on.
+        </p>
+        <CodeBlock
+          title="terminal"
+          code={`npx @sandboxrouter/sdk compare "pytest -q" \\\n  --setup "git clone https://github.com/you/repo . && pip install -r requirements.txt" \\\n  --provider e2b,modal,daytona --runs 3`}
+        />
 
         <h2 id="agents">For agents: which provider for a job</h2>
         <p>
