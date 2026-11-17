@@ -251,6 +251,12 @@ A sandbox the provider already stopped is just dropped from the ledger. `sandbox
 
 `--share` writes a JSON report (timings, your label, Node version and platform; never keys, env or error text), and `--by` adds your GitHub username so the website can credit you. Open a PR adding it to [`results/`](../results/); CI checks every result file for keys, addresses and impossible numbers (`npm run results:check`), see [Sending results](../CONTRIBUTING.md#sending-results). `sandboxrouter leaderboard` builds one static HTML page from every report there, taking the median of each submission's medians so one submitter can't dominate. Host the page anywhere static files go.
 
+### Cooldowns
+
+The router remembers trouble between creates. A provider that refuses for a limit (a 429, a quota, a concurrency cap) goes to the back of the line for 30 seconds, and one that fails 3 creates within a minute goes to the back for 60, so one provider's outage or rate limit doesn't slow every request. It's still tried when nothing else can take the sandbox, and one success clears it. `router.troubled()` lists the providers cooling and why; `plan()` entries carry `cooling`. Tune with `new Router({ cooldown: { limitSeconds, failures, windowSeconds, downSeconds } })`, or turn it off with `cooldown: false`.
+
+`burst --spread --n 1000` measures this at scale: N sandboxes at once over all the providers you name, dealt in proportion to each one's capacity measured in the published bursts (`--even` for equal shares), with a provider that hits a limit handing its share to the next one with room.
+
 ### Which provider for a job
 
 `recommend [--job short|long|python|download|agent|repo|start] [--count N] [--priority value|cost|speed] [--reuse] [--provider a,b] [--json]` ranks providers for a job from the published benchmarks, which ship in the package (`PUBLISHED`, generated from `results/` by `scripts/site-data.ts`). Costs and times are per successful run: each is divided by the provider's success rate. With `--count` of 10 or more, start times come from the burst of the largest measured size not above it; providers not measured at that size are listed after the ones that were. `recommend(PUBLISHED, options)` does the same in code, and the router uses the published start times for the speed tie-break and `strategy: "fastest"` when neither it nor your bench file has timed a provider (`new Router({ published: false })` turns that off).

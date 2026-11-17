@@ -12,7 +12,7 @@ import {
 import { loadBench, median } from "./bench-store.js";
 import { PUBLISHED } from "./published.js";
 import { Ledger, defaultLedgerFile } from "./ledger.js";
-import { DEFAULT_EXEC_TIMEOUT_S, SETUP_ERRORS, errorStatus, timeoutError, withDeadline } from "./util.js";
+import { DEFAULT_EXEC_TIMEOUT_S, LIMIT_ERROR, SETUP_ERRORS, errorStatus, timeoutError, withDeadline } from "./util.js";
 import { BILLED_VS_LIST } from "./billing.js";
 import { FAILING, VERIFIED } from "./verified.js";
 import { validate } from "./validate.js";
@@ -109,6 +109,8 @@ export interface Candidate {
   perSandboxUsd?: number;
   /** Why this provider won't be tried, if it won't. */
   skip?: string;
+  /** Set while the provider is at the back of the line after a limit or repeated failures (see `cooldown`). */
+  cooling?: string;
 }
 
 /** What `router.quote()` answers: the provider a create would start on first, and what the run would cost there. */
@@ -190,6 +192,14 @@ export interface RouterOptions {
    */
   quickFallback?: false | { factor?: number; minSeconds?: number };
   /**
+   * Remember trouble between creates, so one provider's outage or limit doesn't slow every request: a provider
+   * that refuses for a limit (429, quota, concurrency cap) goes to the back of the line for `limitSeconds`
+   * (default 30), and one that fails `failures` times (default 3) within `windowSeconds` (default 60) goes to
+   * the back for `downSeconds` (default 60). It's still tried when nothing else can take the sandbox, and one
+   * success clears it. `false` turns this off.
+   */
+  cooldown?: false | { limitSeconds?: number; failures?: number; windowSeconds?: number; downSeconds?: number };
+  /**
    * What a provider's 401 or 403 (or a missing provider package) does to a create. "stop" (default):
    * the create fails, because with your own keys that is a key or setup you need to fix, and moving the
    * work elsewhere would hide it. "fallback": try the next provider. For services that run sandboxes on
@@ -256,6 +266,11 @@ export class Router {
   private readonly live = new Map<ProviderId, number[]>();
   private computerOnly: ComputerProvider[];
   private readonly quick: false | { factor: number; minSeconds: number };
+  private readonly cool: false | { limitSeconds: number; failures: number; windowSeconds: number; downSeconds: number };
+  /** Providers sent to the back of the line, until when and why. */
+  private readonly cooling = new Map<ProviderId, { until: number; reason: string }>();
+  /** Recent failed creates per provider (not limits), for the failure count. */
+  private readonly failures = new Map<ProviderId, number[]>();
   private readonly accountErrors: "stop" | "fallback";
   /** The local record of sandboxes this router created, or undefined when turned off. */
   readonly ledger?: Ledger;
@@ -273,6 +288,7 @@ export class Router {
       opts.billedVsList ?? Object.fromEntries(Object.entries(BILLED_VS_LIST).map(([id, b]) => [id, b!.ratio]));
     this.computerOnly = opts.computers ?? (opts.providers ? [] : defaultComputerProviders());
     this.quick = opts.quickFallback === false ? false : { factor: 5, minSeconds: 10, ...opts.quickFallback };
+    this.cool = opts.cooldown === false ? false : { limitSeconds: 30, failures: 3, windowSeconds: 60, downSeconds: 60, ...opts.cooldown };
     this.accountErrors = opts.accountErrors ?? "stop";
   }
 
@@ -347,6 +363,7 @@ export class Router {
     // Neutral by construction: the same rule for every provider, ties alphabetical by id. Nothing here
     // depends on who the provider is, only on its price, what it really billed, how fast it started for
     // this router and whether its last real-account check failed. An explicit list keeps the caller's order.
+    let ordered = list;
     if (!explicit) {
       const hours = runHours(spec);
       const byCost = (a: Candidate, b: Candidate) => rankUsd(a, hours) - rankUsd(b, hours) || a.provider.localeCompare(b.provider);
@@ -357,10 +374,51 @@ export class Router {
       } else if (strategy === "verified") {
         list.sort((a, b) => Number(b.verified) - Number(a.verified) || byCost(a, b));
       } else {
-        return balanced(list, hours);
+        ordered = balanced(list, hours);
       }
     }
-    return list;
+    // Providers in a cooldown go to the back, in the same order among themselves: still there if nothing else can.
+    const now = Date.now();
+    for (const c of ordered) {
+      const t = this.cooling.get(c.provider);
+      if (t && t.until > now) c.cooling = `${t.reason}; back in line in ${Math.ceil((t.until - now) / 1000)}s`;
+    }
+    return [...ordered.filter((c) => !c.cooling), ...ordered.filter((c) => c.cooling)];
+  }
+
+  /**
+   * Providers currently at the back of the line and why (see `cooldown`). For dashboards and logs.
+   */
+  troubled(): { provider: ProviderId; reason: string; untilMs: number }[] {
+    const now = Date.now();
+    return [...this.cooling]
+      .filter(([, t]) => t.until > now)
+      .map(([provider, t]) => ({ provider, reason: t.reason, untilMs: t.until }));
+  }
+
+  /** After a failed create: a limit cools the provider at once; other failures count toward a cooldown. */
+  private noteFailure(id: ProviderId, err: unknown, status: number | undefined) {
+    const cool = this.cool;
+    if (!cool) return;
+    const now = Date.now();
+    const msg = (err as Error)?.message ?? String(err);
+    if (status === 429 || LIMIT_ERROR.test(msg)) {
+      this.cooling.set(id, { until: now + cool.limitSeconds * 1000, reason: "hit a limit" });
+      return;
+    }
+    const recent = (this.failures.get(id) ?? []).filter((t) => now - t < cool.windowSeconds * 1000);
+    recent.push(now);
+    this.failures.set(id, recent);
+    if (recent.length >= cool.failures) {
+      this.cooling.set(id, { until: now + cool.downSeconds * 1000, reason: `${recent.length} failed creates in ${cool.windowSeconds}s` });
+      this.failures.delete(id);
+    }
+  }
+
+  /** A provider that just worked is back to normal. */
+  private noteSuccess(id: ProviderId) {
+    this.cooling.delete(id);
+    this.failures.delete(id);
   }
 
   /**
@@ -467,6 +525,7 @@ export class Router {
         });
         attempts.push({ provider: c.provider, ok: true, ms: Date.now() - t0 });
         this.observe(c.provider, Date.now() - t0);
+        this.noteSuccess(c.provider);
         const sbx = new RoutedSandbox(c.provider, box, attempts, price, this.ledger);
         this.record(sbx, price, spec.timeoutMinutes);
         return sbx;
@@ -476,6 +535,7 @@ export class Router {
         if (timedOut) pending.then((late) => this.discard(c.provider, late, price, spec.timeoutMinutes), () => {});
         const status = errorStatus(err);
         attempts.push({ provider: c.provider, ok: false, ms: Date.now() - t0, error: (err as Error).message, ...(status ? { status } : {}) });
+        this.noteFailure(c.provider, err, status);
         if (timedOut && lastChance) throw outOfTime();
         const setup = err instanceof SetupError || (status !== undefined && SETUP_ERRORS.has(status));
         // On the router's own accounts, a key, permission or install problem is ours: move on.

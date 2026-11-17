@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { burst, percentile } from "../src/burst.js";
+import { burst, deal, percentile, spreadBurst } from "../src/burst.js";
 import { burstTable, type BurstReport } from "../src/leaderboard.js";
 import { validateResult } from "../src/results.js";
 import { Router } from "../src/router.js";
@@ -40,6 +40,33 @@ describe("burst", () => {
     expect(b).toMatchObject({ n: 10, ok: 3, limited: 7 });
     // Most started first.
     expect(rows[0].provider).toBe("maritime");
+  });
+});
+
+describe("spreadBurst", () => {
+  it("spreads round-robin, and moves sandboxes off a provider that hits its limit", async () => {
+    const router = new Router({ providers: [shell("maritime"), shell("boat", 3)], ledger: false });
+    const r = await spreadBurst({ router, providers: ["maritime", "boat"], n: 20, weights: "even" });
+    expect(r).toMatchObject({ n: 20, ok: 20, failed: 0, saturated: ["boat"] });
+    const boat = r.byProvider.find((b) => b.provider === "boat")!;
+    const maritime = r.byProvider.find((b) => b.provider === "maritime")!;
+    expect(boat.ok).toBe(3);
+    expect(maritime.ok).toBe(17);
+    // The ones boat refused, plus any that skipped it once it was full, moved to maritime.
+    expect(maritime.spilledIn).toBeGreaterThan(0);
+    expect(r.p99Ms).toBeGreaterThanOrEqual(0);
+  });
+
+  it("deals sandboxes in proportion to capacity, interleaved", () => {
+    const d = deal(["maritime", "boat"], 10, { maritime: 4, boat: 1 });
+    expect(d.filter((x) => x === "maritime")).toHaveLength(8);
+    expect(d.slice(0, 5)).toContain("boat");
+  });
+
+  it("counts sandboxes that found no room anywhere", async () => {
+    const router = new Router({ providers: [shell("maritime", 2), shell("boat", 3)], ledger: false });
+    const r = await spreadBurst({ router, providers: ["maritime", "boat"], n: 10, weights: "even" });
+    expect(r).toMatchObject({ ok: 5, failed: 5 });
   });
 });
 
