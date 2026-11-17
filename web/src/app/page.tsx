@@ -2,7 +2,6 @@ import Link from "next/link";
 import { Button } from "@/components/chrome";
 import { CodeBlock, CodeTabs, InstallChip } from "@/components/code";
 import { Feature } from "@/components/Feature";
-import { RaceVideo } from "@/components/RaceVideo";
 import { RouteDemo } from "@/components/RouteDemo";
 import { DEFAULT_SHAPE, HOSTED_FEE_PCT, HOSTED_PUBLIC, HOSTED_URL, NPM, REPO, REPO_PUBLIC, site } from "@/lib/site";
 
@@ -159,7 +158,33 @@ export default function Home() {
                 body: "Minimum charges and fees count, and active-CPU providers pay for the CPU the job used.",
               },
             ]}
-            visual={<RaceVideo />}
+            visual={
+              <div className="bg-[#0c0f0e] p-6 sm:p-10">
+                <p className="mb-4 font-mono text-[11px] uppercase tracking-[0.14em] text-white/55">Short job, cheapest first</p>
+                <table className="w-full text-[14px] text-white">
+                  <thead>
+                    <tr className="text-left text-[11px] uppercase tracking-[0.12em] text-white/45">
+                      <th className="py-2 pr-4 font-normal">Provider</th>
+                      <th className="py-2 pr-4 font-normal">Took</th>
+                      <th className="py-2 font-normal">1,000 runs</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {short_.rows.slice(0, 6).map((r) => (
+                      <tr key={r.provider} className="border-t border-white/10">
+                        <td className="py-2.5 pr-4">
+                          <Link href={`/providers/${r.provider}`} className="hover:underline underline-offset-4">
+                            {r.name.replace(/ \(.*\)$/, "")}
+                          </Link>
+                        </td>
+                        <td className="py-2.5 pr-4 font-mono tnum text-white/70">{(r.taskMs / 1000).toFixed(1)} s</td>
+                        <td className="py-2.5 font-mono tnum">${(r.taskUsd * 1000).toFixed(3)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            }
           />
         )}
 
