@@ -39,8 +39,6 @@ export default function Home() {
     .slice(0, 9);
   // The benchmarks section quotes the short job: who finished first, and who cost least.
   const short_ = site.tasks.kinds.find((k) => k.id === "short");
-  // Real sandboxes behind the benchmarks: the same count as the Benchmarks page.
-  const totalRuns = site.submissions.reduce((n, s) => n + s.runs * s.providers, 0);
   const scale = site.scale;
   const day = (iso: string) => new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
   const fastest = short_ && [...short_.rows].sort((a, b) => a.taskMs - b.taskMs)[0];
@@ -80,29 +78,6 @@ export default function Home() {
           )}
           {REPO_PUBLIC && !HOSTED_PUBLIC ? <Button href={REPO}>GitHub</Button> : <Button href="/docs">Docs</Button>}
         </div>
-
-        {/* Three numbers, each from the published results, each linking to where it comes from. */}
-        <dl className="mt-14 grid w-full max-w-3xl grid-cols-1 border-y border-line text-left sm:grid-cols-3">
-          {[
-            scale && {
-              value: `${scale.ok.toLocaleString("en-US")}/${scale.n.toLocaleString("en-US")}`,
-              label: `sandboxes started at once over ${scale.providers} providers`,
-              note: scale.bestSingle ? `Best single provider: ${scale.bestSingle.ok.toLocaleString("en-US")} · ${day(scale.date)}` : day(scale.date),
-              href: "#scale",
-            },
-            { value: String(passed.length), label: "providers pass our real-account check", note: "Ones that fail are tried last", href: "/providers" },
-            { value: totalRuns.toLocaleString("en-US"), label: "real sandboxes benchmarked", note: "Started, used and killed", href: "/benchmarks" },
-          ]
-            .filter((x): x is { value: string; label: string; note: string; href: string } => !!x)
-            .map((x, i) => (
-              <a key={x.label} href={x.href} className={`group block px-5 py-5 hover:bg-panel ${i ? "border-t border-line sm:border-t-0 sm:border-l" : ""}`}>
-                <dt className="sr-only">{x.label}</dt>
-                <dd className="font-mono text-[26px] tracking-[-0.02em] text-ink tnum">{x.value}</dd>
-                <dd className="mt-1 text-[13px] leading-5 text-ink-2">{x.label}</dd>
-                <dd className="mt-1 text-[12px] text-muted group-hover:text-ink-2">{x.note}</dd>
-              </a>
-            ))}
-        </dl>
 
         <p className="mt-12 max-w-lg text-[15px] leading-7 text-ink-2">
           Each sandbox goes to the cheapest provider that fits. If that one can&apos;t start it, the next one does.{" "}
