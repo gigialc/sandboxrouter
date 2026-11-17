@@ -38,7 +38,7 @@
     "vercel": "/logos/vercel.png"
   },
   "version": "0.10.0",
-  "generatedAt": "2026-11-17T19:44:32.903Z",
+  "generatedAt": "2026-11-17T20:03:52.822Z",
   "shapes": [
     "1x2",
     "2x4",
@@ -170,7 +170,7 @@
         "gbHour": 0.008928,
         "note": "per second; Default QoS, Hong Kong and regions outside mainland China; disk separately $0.00025308/GiB-h; code-interpreter-v1 template is 2 vCPU / 2 GiB with 10 GiB disk (E2B-compatible API)",
         "source": "https://www.alibabacloud.com/help/en/agent-sandbox/product-overview/billing-overview",
-        "checked": "2026-11-05"
+        "checked": "2026-11-17"
       },
       "access": null,
       "billing": "allocated",
@@ -441,7 +441,7 @@
         "gbHour": 0,
         "note": "flat $0.03 per session-hour (built-in Shell pools), billed per allocated session in 1-hour increments, East US; needs a session pool you create once",
         "source": "https://learn.microsoft.com/en-us/azure/container-apps/billing#dynamic-sessions",
-        "checked": "2026-11-04"
+        "checked": "2026-11-17"
       },
       "access": null,
       "billing": "allocated",
@@ -929,7 +929,7 @@
         "gbHour": 0.0162,
         "note": "per second, plus disk above 5 GiB",
         "source": "https://www.daytona.io/pricing",
-        "checked": "2026-11-13"
+        "checked": "2026-11-17"
       },
       "access": null,
       "billing": "allocated",
@@ -1091,7 +1091,7 @@
         "gbHour": 0.025,
         "note": "billed on CPU time, not wall clock (estimate assumes both vCPUs busy); fixed 2 vCPU, 0.75-4 GB, max 30 min lifetime; needs a paid Deno Deploy plan",
         "source": "https://deno.com/sandbox",
-        "checked": "2026-11-04"
+        "checked": "2026-11-17"
       },
       "access": null,
       "billing": "active-cpu",
@@ -1660,7 +1660,7 @@
         "gbHour": 0.00225,
         "note": "per second while running on fixed sizes (2/4, 4/8, 8/16); paused or stopped boxes bill only /data beyond the included disk ($0.00011/GiB-h); Pro $20/mo includes $20 credits; free plan: 1 box at 4/8",
         "source": "https://instabox.sh/docs/pricing.md",
-        "checked": "2026-11-05"
+        "checked": "2026-11-17"
       },
       "access": {
         "status": "waitlist",
@@ -1802,7 +1802,7 @@
         "gbHour": 0.01845,
         "note": "per second; memory must be 2 to 6 GiB per vCPU; storage $0.000123/GiB-h; 8 LSU ($8) of sandbox usage a month included; Developer plan max 10 sandboxes",
         "source": "https://www.langchain.com/pricing",
-        "checked": "2026-11-05"
+        "checked": "2026-11-17"
       },
       "access": {
         "status": "waitlist",
@@ -1973,7 +1973,7 @@
         "gbHour": 0.024012,
         "note": "sandbox rates, per second ($0.00003942 per physical core = 2 vCPUs); GPUs extra; region pinning x1.15-1.75; Starter includes $30/mo credit",
         "source": "https://modal.com/pricing",
-        "checked": "2026-11-05"
+        "checked": "2026-11-17"
       },
       "access": null,
       "billing": "allocated",
@@ -2285,7 +2285,7 @@
         "gbHour": 0.001,
         "note": "per second on allocated size; no platform fee or minimum; paused = free; size comes from the template (E2B-compatible API); Singapore only; needs a pay-as-you-go key",
         "source": "https://openscale.so/sandboxes",
-        "checked": "2026-11-05"
+        "checked": "2026-11-17"
       },
       "access": null,
       "billing": "allocated",
@@ -2718,9 +2718,9 @@
       "pricing": {
         "vcpuHour": 0.1,
         "gbHour": 0,
-        "note": "billed per active CPU core-hour only (memory and idle time free); estimate assumes every core of the box busy; fixed sizes 2/4, 4/8, 8/16",
+        "note": "billed per active CPU core-hour only (memory and idle time free); estimate assumes every core of the box busy at the Small rate; fixed sizes 2/4, 4/8, 8/16, and the pricing page lists $0.20 (4/8) and $0.40 (8/16) per active CPU hour without saying whether that is per core or per box",
         "source": "https://upstash.com/pricing/box",
-        "checked": "2026-11-04"
+        "checked": "2026-11-17"
       },
       "access": null,
       "billing": "active-cpu",

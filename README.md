@@ -78,7 +78,7 @@ List price while running, 2 vCPU / 4 GB, cheapest first; waitlisted sign-ups fol
 | [E2B](https://sandboxrouter.ai/providers/e2b) | skipped (default image is 2 vCPU / 0.5 GB; a bigger size needs image.e2b) | none | passed (2026-11-13) | [pricing](https://e2b.dev/pricing) |
 | [Docker (local)](https://sandboxrouter.ai/providers/docker) | free | none | passed (2026-11-13) | [pricing](https://docs.docker.com/engine/) |
 
-Checked 2026-11-04 to 2026-11-13.
+Checked 2026-11-04 to 2026-11-17.
 
 ## Install
 
