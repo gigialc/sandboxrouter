@@ -18,6 +18,8 @@
   --accent-ink: #00663f;
   --accent-soft: #e6f4ee;
   --bar: var(--accent);
+  /* Chart marks: the accent, stepped into each mode's chart lightness band (checked for contrast and band). */
+  --chart: #007f4f;
 }
 
 /* Dark: the same system on near-black, with a brighter jade so it keeps its contrast. Follows the OS
@@ -36,6 +38,7 @@
   --accent: #2fbf7f;
   --accent-ink: #5fd6a0;
   --accent-soft: #10291f;
+  --chart: #20a068;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
@@ -52,6 +55,7 @@
     --accent: #2fbf7f;
     --accent-ink: #5fd6a0;
     --accent-soft: #10291f;
+    --chart: #20a068;
   }
 }
 
@@ -70,6 +74,7 @@
   --color-accent: var(--accent);
   --color-accent-ink: var(--accent-ink);
   --color-accent-soft: var(--accent-soft);
+  --color-chart: var(--chart);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
