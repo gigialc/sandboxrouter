@@ -94,25 +94,6 @@ body {
   outline-offset: 2px;
 }
 
-/* Show one of two elements by theme (the race video has a light and a dark cut). */
-.dark-only {
-  display: none;
-}
-:root[data-theme="dark"] .dark-only {
-  display: block;
-}
-:root[data-theme="dark"] .light-only {
-  display: none;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .dark-only {
-    display: block;
-  }
-  :root:not([data-theme="light"]) .light-only {
-    display: none;
-  }
-}
-
 .tnum {
   font-variant-numeric: tabular-nums;
 }
