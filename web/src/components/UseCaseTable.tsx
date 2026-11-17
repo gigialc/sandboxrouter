@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { ProviderName } from "@/components/ProviderName";
 import { useState } from "react";
 import { site } from "@/lib/site";
 
@@ -59,9 +60,7 @@ export function UseCaseTable() {
               <tr key={r.provider} className="group border-t border-line">
                 <td className="py-3 pr-2 font-mono text-[12px] text-muted">{i + 1}</td>
                 <td className="py-3 pr-4">
-                  <Link href={`/providers/${r.provider}`} className="text-ink group-hover:underline underline-offset-4 decoration-line-2">
-                    {r.name}
-                  </Link>
+                  <ProviderName id={r.provider} name={r.name} />
                   {why.length ? <span className="ml-2 text-[11px] text-muted">{why.join(", ")}</span> : null}
                 </td>
                 <td className="py-3 pr-4">

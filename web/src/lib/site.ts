@@ -160,6 +160,8 @@ export const site = data as unknown as {
   version: string;
   generatedAt: string;
   shapes: Shape[];
+  /** Provider id -> its icon under /logos/. */
+  logos: Record<string, string>;
   providers: SiteProvider[];
   checkSteps: string[];
   desktops: SiteDesktop[];

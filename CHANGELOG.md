@@ -5,6 +5,8 @@ All notable changes. Versions follow [semver](https://semver.org/); while the ve
 ## Unreleased
 
 ### Added
+- **Website: provider logos** in every table and on each provider page (each provider's own site icon, fetched by `scripts/fetch-logos.py` and served as inert images).
+- **Website: "Find the best provider for your job"** at the top of the Benchmarks page: pick what you're running, how many at once and what matters most, and get the ranking from `recommend()`. The detailed results are now tabs (Prices, Real jobs, Real AI agent, At scale, Start time, Real bills); old `#section` links open the right tab.
 - **`sandboxrouter recommend`** and **`recommend(PUBLISHED, options)`**: which provider for a job (`--job`, `--count`, `--priority value|cost|speed`), ranked from the published benchmarks that now ship in the package, per successful run, with start times under load for 10 or more at once.
 - **Routing uses the published start times** when neither the router nor your bench file has timed a provider. `new Router({ published: false })` turns that off.
 - **For agents on the website:** `/benchmarks.json`, `/llms.txt`, Markdown for every page (`Accept: text/markdown` or a `.md` path), a sitemap, and a public MCP server at `/mcp` with `recommend_provider`, `get_benchmarks`, `get_provider` and `list_providers`.
