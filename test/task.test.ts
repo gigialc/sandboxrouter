@@ -58,9 +58,26 @@ describe("active-CPU pricing", () => {
     expect(hourlyCost("vercel", { ...size, cpuUtilization: 0.1 })).toBeCloseTo(2 * 0.128 * 0.1 + 4 * 0.0212, 9);
     expect(hourlyCost("vercel", size)).toBeCloseTo(2 * 0.128 + 4 * 0.0212, 9);
   });
-  it("leaves providers that bill allocated capacity alone, Modal included (it bills its reservation)", () => {
+  it("leaves providers that bill allocated capacity alone", () => {
     expect(hourlyCost("e2b", { ...size, cpuUtilization: 0.1 })).toBe(hourlyCost("e2b", size));
-    expect(hourlyCost("modal", { ...size, cpuUtilization: 0.1 })).toBe(hourlyCost("modal", size));
+  });
+  it("prices Modal by the CPU share it reserves (at least 1/8), with memory in full", () => {
+    // 2 vCPU at $0.070956 each; at 10% the reservation floor of 12.5% applies; 4 GB at $0.024012.
+    expect(hourlyCost("modal", { ...size, cpuUtilization: 0.1 })).toBeCloseTo(2 * 0.070956 * 0.125 + 4 * 0.024012, 9);
+    expect(hourlyCost("modal", { ...size, cpuUtilization: 0.5 })).toBeCloseTo(2 * 0.070956 * 0.5 + 4 * 0.024012, 9);
+    // Without a hint the adapter reserves the full size: allocated pricing, as before.
+    expect(hourlyCost("modal", size)).toBeCloseTo(2 * 0.070956 + 4 * 0.024012, 9);
+  });
+  it("prices a job in a sandbox that's already running without start, minimum or per-sandbox fee", () => {
+    // Agent37 bills a minute minimum on a fresh sandbox; reused, a 2 s job is 2 s.
+    expect(taskUsd("agent37", size, 1000, 2000, undefined, 1, true)).toBeCloseTo((hourlyCost("agent37", size) * 2) / 3600, 12);
+    expect(taskUsd("sail", size, 1000, 2000, undefined, 1, true)).toBeCloseTo((hourlyCost("sail", size) * 2) / 3600, 12);
+    // Vercel reused: memory for 2 s and the CPU it used, no minute.
+    expect(taskUsd("vercel", size, 1000, 2000, 500, 1, true)).toBeCloseTo((4 * 0.0212 * 2 + 0.128 * 0.5) / 3600, 12);
+  });
+  it("starts the agent loop's sandboxes with a 10% CPU hint", () => {
+    expect(TASKS.agent.cpuUtilization).toBe(0.1);
+    expect(TASKS.agent.phases[0].cmd).toContain("sleep 6");
   });
   it("keeps Tensorlake's 20% CPU floor", () => {
     expect(hourlyCost("tensorlake", { ...size, cpuUtilization: 0.05 })).toBeCloseTo(2 * 0.07 * 0.2 + 4 * 0.015, 9);

@@ -17,10 +17,13 @@ import type { ProviderId, ProviderSandbox } from "./types.js";
  *   provider without it fails the task, which is itself worth knowing.
  * - "download": fetch the 53 MB Node.js release from nodejs.org's CDN, with curl, else wget, else python3:
  *   what installing toolchains and packages depends on.
+ * - "agent": an agent loop with simulated model calls: 10 turns of waiting 6 s (the model thinking; the
+ *   sandbox sits idle) and then a short Python tool call. About a minute, mostly idle, which is where
+ *   providers that bill active CPU differ from ones that bill what you reserve.
  *
  * Changing a phase changes what the numbers mean: bump that task's version, and older reports stop counting.
  */
-export type TaskKind = "short" | "long" | "python" | "download";
+export type TaskKind = "short" | "long" | "python" | "download" | "agent";
 
 export interface TaskPhaseDef {
   id: string;
@@ -52,10 +55,20 @@ const PYTHON = [
 const DOWNLOAD_URL = "https://nodejs.org/dist/v22.11.0/node-v22.11.0-linux-x64.tar.gz";
 const PY_FETCH = `import shutil, urllib.request; shutil.copyfileobj(urllib.request.urlopen('${DOWNLOAD_URL}'), open('/dev/null', 'wb'))`;
 
-export const TASKS: Record<TaskKind, { version: string; repeat: number; phases: TaskPhaseDef[] }> = {
+// One tool call in the agent loop: a little real work, like reading files and running a check.
+const TOOL = "import json, hashlib; d = [{'i': i, 'h': hashlib.sha256(str(i).encode()).hexdigest()} for i in range(40000)]; print(len(json.dumps(d)))";
+
+/** `cpuUtilization`: the hint the job's sandboxes start with (the agent loop is mostly idle), which Modal reserves and pricing uses. */
+export const TASKS: Record<TaskKind, { version: string; repeat: number; phases: TaskPhaseDef[]; cpuUtilization?: number }> = {
   short: { version: "v1", repeat: 1, phases: HASH_DISK },
   long: { version: "v1-long", repeat: 40, phases: HASH_DISK },
   python: { version: "python-v1", repeat: 1, phases: [{ id: "python", label: "Python", cmd: `python3 -c "${PYTHON}"` }] },
+  agent: {
+    version: "agent-v1",
+    repeat: 1,
+    cpuUtilization: 0.1,
+    phases: [{ id: "agent", label: "10 turns", cmd: `n=0; while [ $n -lt 10 ]; do sleep 6; python3 -c "${TOOL}" > /dev/null; n=$((n+1)); done` }],
+  },
   download: {
     version: "download-v1",
     repeat: 1,
@@ -93,24 +106,42 @@ export function phaseCommand(cmd: string, repeat: number): string {
 export interface TaskRun {
   ms: PhaseMs;
   cpuMs?: number;
+  /** The busiest single core's busy time, summed over the phases: what a per-VM CPU meter scales by vCPUs. */
+  maxCoreMs?: number;
 }
 
 // Wraps a phase to read /proc/stat's total CPU line before and after it, so the run also reports the CPU
 // time it really used: what providers that bill active CPU charge for.
 const MARK = "SRCPU";
-const withCpu = (cmd: string) =>
-  `a=$(head -n 1 /proc/stat 2> /dev/null); ${cmd}; rc=$?; b=$(head -n 1 /proc/stat 2> /dev/null); echo "${MARK}|$a|$b"; exit $rc`;
+// Every "cpu" line (the total, then one per core), joined with ";" so the reading stays on one output line.
+const STAT = `grep '^cpu' /proc/stat 2> /dev/null | tr '\\n' ';'`;
+const withCpu = (cmd: string) => `a=$(${STAT}); ${cmd}; rc=$?; b=$(${STAT}); echo "${MARK}|$a|$b"; exit $rc`;
+
+/** Busy ticks on one /proc/stat cpu line: user, nice, system, irq and softirq (not idle, iowait or steal). */
+const lineTicks = (line: string) => {
+  const f = line.trim().split(/\s+/);
+  if (!/^cpu\d*$/.test(f[0] ?? "") || f.length < 8) return undefined;
+  const n = f.slice(1).map(Number);
+  return n[0] + n[1] + n[2] + n[5] + n[6];
+};
+const perCpu = (reading: string) =>
+  new Map(reading.split(";").map((l) => [l.trim().split(/\s+/)[0], lineTicks(l)] as const).filter(([k, v]) => k && v !== undefined));
+
+/** The busiest core's busy milliseconds between two readings, or undefined without per-core lines. */
+export function maxCoreMs(before: string, after: string): number | undefined {
+  const a = perCpu(before);
+  const b = perCpu(after);
+  const cores = [...b.keys()].filter((k) => k !== "cpu" && a.has(k));
+  if (!cores.length) return undefined;
+  const deltas = cores.map((k) => (b.get(k)! - a.get(k)!) * 10);
+  return deltas.some((d) => !(d >= 0)) ? undefined : Math.max(...deltas);
+}
 
 /** Busy CPU milliseconds between two /proc/stat "cpu" lines: user, nice, system, irq and softirq (not idle, iowait or steal), at 100 ticks a second. */
 export function busyMs(before: string, after: string): number | undefined {
-  const ticks = (line: string) => {
-    const f = line.trim().split(/\s+/);
-    if (f[0] !== "cpu" || f.length < 8) return undefined;
-    const n = f.slice(1).map(Number);
-    return n[0] + n[1] + n[2] + n[5] + n[6];
-  };
-  const a = ticks(before);
-  const b = ticks(after);
+  const total = (reading: string) => perCpu(reading).get("cpu");
+  const a = total(before);
+  const b = total(after);
   return a === undefined || b === undefined || !(b >= a) ? undefined : (b - a) * 10;
 }
 
@@ -126,6 +157,7 @@ export async function runTask(box: Pick<ProviderSandbox, "exec">, kind: TaskKind
   const overhead = rtt.sort((a, b) => a - b)[1];
   const out: PhaseMs = {};
   let cpuMs: number | undefined = 0;
+  let coreMs: number | undefined = 0;
   for (const p of phases) {
     const t = performance.now();
     const r = await box.exec(withCpu(phaseCommand(p.cmd, repeat)), { timeoutSeconds: repeat > 1 ? 900 : 300 });
@@ -134,8 +166,10 @@ export async function runTask(box: Pick<ProviderSandbox, "exec">, kind: TaskKind
     const line = r.stdout.split("\n").find((l) => l.startsWith(`${MARK}|`));
     const used = line ? busyMs(line.split("|")[1] ?? "", line.split("|")[2] ?? "") : undefined;
     cpuMs = cpuMs === undefined || used === undefined ? undefined : cpuMs + used;
+    const core = line ? maxCoreMs(line.split("|")[1] ?? "", line.split("|")[2] ?? "") : undefined;
+    coreMs = coreMs === undefined || core === undefined ? undefined : coreMs + core;
   }
-  return { ms: out, ...(cpuMs !== undefined ? { cpuMs } : {}) };
+  return { ms: out, ...(cpuMs !== undefined ? { cpuMs } : {}), ...(cpuMs !== undefined && coreMs !== undefined ? { maxCoreMs: coreMs } : {}) };
 }
 
 /** The whole task's time: the phases added up. */
@@ -153,21 +187,29 @@ export const taskMs = (phases: PhaseMs) => Object.values(phases).reduce((s, ms) 
  */
 export function taskUsd(
   provider: ProviderId,
-  size: { vcpu: number; memoryGb: number },
+  size: { vcpu: number; memoryGb: number; cpuUtilization?: number },
   createMs: number,
   taskMillis: number,
   cpuMillis?: number,
   billedVsList = 1,
+  reused = false,
+  maxCoreMillis?: number,
 ): number {
-  const { minSeconds, incrementSeconds, perSandboxUsd } = billingRules(provider);
-  const seconds = (createMs + taskMillis) / 1000;
-  const billed = Math.max(minSeconds, Math.ceil(seconds / incrementSeconds - 1e-9) * incrementSeconds);
-  const full = hourlyCost(provider, size);
+  const rules = billingRules(provider);
+  // Reused: the job runs in a sandbox that's already up, so there's no start, minimum, step or per-sandbox
+  // fee to pay for it; only its own time.
+  const { minSeconds, incrementSeconds, perSandboxUsd } = reused ? { minSeconds: 0, incrementSeconds: 1e-9, perSandboxUsd: 0 } : rules;
+  const seconds = (reused ? 0 : createMs) / 1000 + taskMillis / 1000;
+  const billed = reused ? seconds : Math.max(minSeconds, Math.ceil(seconds / incrementSeconds - 1e-9) * incrementSeconds);
+  // Every core busy: the CPU part is then charged by what was used (cpuMillis), not by the hint.
+  const full = hourlyCost(provider, { ...size, cpuUtilization: 1 });
   const cpuFull = cpuHourlyAtFull(provider, size);
   if (cpuFull === 0 || cpuMillis === undefined) return (billedVsList * full * billed) / 3600 + perSandboxUsd;
-  const { vcpuHour, cpuFloor = 0 } = info(provider).pricing;
+  const { vcpuHour, cpuFloor = 0, cpuMeteredPerVm } = info(provider).pricing;
   const vcpus = cpuFull / vcpuHour;
-  const cpuSeconds = Math.max(cpuMillis / 1000, cpuFloor * vcpus * seconds);
+  // A per-VM meter counts every vCPU while the busiest core works.
+  const perVm = cpuMeteredPerVm && maxCoreMillis !== undefined ? (vcpus * maxCoreMillis) / 1000 : 0;
+  const cpuSeconds = Math.max(cpuMillis / 1000, cpuFloor * vcpus * seconds, perVm);
   // Memory (and anything else that isn't CPU) is billed for the whole time, minimum included.
   return (billedVsList * ((full - cpuFull) * billed + vcpuHour * cpuSeconds)) / 3600 + perSandboxUsd;
 }

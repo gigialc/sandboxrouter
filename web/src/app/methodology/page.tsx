@@ -76,9 +76,19 @@ export default function MethodologyPage() {
             their CPU plus their full memory. The Agent sessions job on the benchmarks page assumes 10%.
           </p>
           <p>
-            Two details follow each provider&apos;s rules: Vercel&apos;s one-minute minimum covers memory only, and Tensorlake bills at
-            least 20% CPU even when idle. Modal bills the larger of what you reserve and what you use, and the router reserves the
-            size you ask for, so Modal is priced as allocated capacity.
+            Details follow each provider&apos;s rules: Vercel&apos;s one-minute minimum covers memory only, and Tensorlake bills at
+            least 20% CPU even when idle. Modal bills the larger of what you reserve and what you use: with{" "}
+            <code>cpuUtilization</code> below 1 the router reserves only that share of the CPU (at least 1/8 core) and lets the
+            sandbox burst to the full size, so it&apos;s priced like active CPU; without it, Modal reserves the full size and is priced
+            as allocated capacity. Memory is reserved in full either way.
+          </p>
+          <p>
+            <strong>Vercel&apos;s meter, checked.</strong> Vercel reports the active CPU it metered for each sandbox. We compared it
+            with what the sandbox itself counted: waiting was nearly free (3.3 s metered over three idle minutes), and two busy
+            cores matched (24.1 s metered, 23.1 s counted inside). But one busy core on a 2 vCPU sandbox was metered at about
+            twice its time (22.7 s for 11.2 s of work): while any core works, every vCPU counts. Single-threaded work, which most
+            tool calls are, costs about double what a per-core reading suggests, so Vercel&apos;s jobs are priced as its vCPUs times
+            the busiest core&apos;s time.
           </p>
 
           <h2 id="check">The real-account check</h2>
@@ -117,9 +127,16 @@ export default function MethodologyPage() {
             <li>
               <strong>Download</strong>: the 53 MB Node.js release from nodejs.org, like installing a toolchain.
             </li>
+            <li>
+              <strong>Agent loop</strong>: 10 turns of waiting 6 s (the model thinking, a simulated model call; the sandbox sits
+              idle) and then a short Python tool call. About a minute, mostly idle. Its sandboxes start with a 10% CPU hint, as an
+              agent&apos;s would.
+            </li>
           </ul>
           <p>
-            Each step is timed from the test machine, minus the sandbox&apos;s own round trip for an empty command, so network
+            Each job is priced two ways: in a <strong>new sandbox</strong> (its start, minimum charge and per-sandbox fee count
+            every time) and in <strong>one sandbox for all jobs</strong> (only the job&apos;s own time counts), since agents often
+            reuse a sandbox for many calls. Each step is timed from the test machine, minus the sandbox&apos;s own round trip for an empty command, so network
             distance mostly drops out. The cost is what the provider would bill for the start plus the job, with its minimum
             charge, billing step and per-sandbox fee. These are published prices applied to measured times, not invoices.
           </p>

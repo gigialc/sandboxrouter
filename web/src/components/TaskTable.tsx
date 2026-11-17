@@ -13,24 +13,51 @@ const perHour = (n: number) => `$${n >= 1 ? n.toFixed(2) : n >= 0.01 ? n.toFixed
 export function TaskTable() {
   const { kinds } = site.tasks;
   const [id, setId] = useState(kinds[0]?.id);
+  // "fresh": a new sandbox for every job (start, minimum and per-sandbox fee each time). "reused": every job in
+  // one sandbox that's already running, so those are paid once and drop out.
+  const [mode, setMode] = useState<"fresh" | "reused">("fresh");
   const k = kinds.find((x) => x.id === id) ?? kinds[0];
   if (!k) return null;
+  const cost = (r: (typeof k.rows)[number]) => (mode === "fresh" ? r.taskUsd : r.reusedUsd);
+  const rows = [...k.rows].sort((a, b) => cost(a) - cost(b) || a.provider.localeCompare(b.provider));
   const maxTask = Math.max(...k.rows.map((r) => r.taskMs), 1);
   const chip = (on: boolean) => `rounded-full px-2.5 py-1 text-[12px] ${on ? "bg-accent text-bg" : "text-ink-2 hover:bg-accent-soft hover:text-ink"}`;
 
   return (
     <div className="mt-6">
-      {kinds.length > 1 && (
-        <div className="flex flex-wrap items-center gap-1 border-y border-line py-3 text-[12px]">
-          <span className="mr-2 text-muted">Job</span>
-          {kinds.map((x) => (
-            <button key={x.id} aria-pressed={x.id === k.id} onClick={() => setId(x.id)} className={chip(x.id === k.id)}>
-              {x.title}
+      <div className="flex flex-wrap items-center gap-x-6 gap-y-3 border-y border-line py-3 text-[12px]">
+        {kinds.length > 1 && (
+          <div className="flex flex-wrap items-center gap-1">
+            <span className="mr-2 text-muted">Job</span>
+            {kinds.map((x) => (
+              <button key={x.id} aria-pressed={x.id === k.id} onClick={() => setId(x.id)} className={chip(x.id === k.id)}>
+                {x.title}
+              </button>
+            ))}
+          </div>
+        )}
+        <div className="flex flex-wrap items-center gap-1">
+          <span className="mr-2 text-muted">Sandbox</span>
+          {(
+            [
+              ["fresh", "New for each job"],
+              ["reused", "One for all jobs"],
+            ] as const
+          ).map(([m, label]) => (
+            <button key={m} aria-pressed={mode === m} onClick={() => setMode(m)} className={chip(mode === m)}>
+              {label}
             </button>
           ))}
         </div>
-      )}
-      <p className="mt-4 text-[14px] text-ink-2">{k.blurb}</p>
+      </div>
+      <p className="mt-4 text-[14px] text-ink-2">
+        {k.blurb}{" "}
+        <span className="text-muted">
+          {mode === "fresh"
+            ? "Each job starts its own sandbox: its start, minimum charge and per-sandbox fee count every time."
+            : "Every job runs in one sandbox that's already up: only the job's own time counts."}
+        </span>
+      </p>
       <table className="mt-4 w-full text-[14px]">
         <thead>
           <tr className="text-left text-[11px] uppercase tracking-[0.12em] text-muted">
@@ -42,11 +69,11 @@ export function TaskTable() {
           </tr>
         </thead>
         <tbody>
-          {k.rows.map((r, i) => {
+          {rows.map((r, i) => {
             const notes = [
               r.size.vcpu !== 2 || r.size.memoryGb !== 4 ? `${r.size.vcpu} vCPU / ${r.size.memoryGb} GB` : "",
-              r.minimumSeconds > 1 ? `bills at least ${r.minimumSeconds} s` : "",
-              r.perSandboxUsd ? `+$${Number(r.perSandboxUsd.toPrecision(2))} per sandbox` : "",
+              mode === "fresh" && r.minimumSeconds > 1 ? `bills at least ${r.minimumSeconds} s` : "",
+              mode === "fresh" && r.perSandboxUsd ? `+$${Number(r.perSandboxUsd.toPrecision(2))} per sandbox` : "",
               r.activeCpu ? (r.cpuMs !== undefined ? "billed for CPU used" : "priced at full CPU") : "",
             ].filter(Boolean);
             const split =
@@ -69,7 +96,7 @@ export function TaskTable() {
                     </span>
                   </div>
                 </td>
-                <td className="py-3 pr-4 font-mono tnum text-ink">{money(r.taskUsd * 1000)}</td>
+                <td className="py-3 pr-4 font-mono tnum text-ink">{money(cost(r) * 1000)}</td>
                 <td className="hidden py-3 font-mono tnum text-ink-2 sm:table-cell">{perHour(r.hourlyUsd)}</td>
               </tr>
             );

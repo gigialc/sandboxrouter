@@ -2,6 +2,17 @@
 
 All notable changes. Versions follow [semver](https://semver.org/); while the version is 0.x, a minor bump can change the API.
 
+## Unreleased
+
+### Added
+- **`bench --task --job agent`**: an agent loop with simulated model calls, 10 turns of a 6 s wait (the sandbox idle, as while the model thinks) and a short Python tool call. Its sandboxes start with `cpuUtilization: 0.1`.
+- **Cost per job in one sandbox** (`TaskRow.reusedUsd`, and a switch on the website): the job in a sandbox that's already running, without its start, minimum charge or per-sandbox fee.
+- **Per-core CPU readings**: `bench --task` records the busiest core's time (`medianTaskMaxCoreMs`) alongside the total.
+
+### Fixed
+- **Modal with `cpuUtilization`**: the adapter reserves that share of the CPU (at least 1/8 core) and lets the sandbox burst to the full size (`cpuLimit`), and Modal is priced on it (`reservesCpu`, `cpuFloor: 0.125`). Without a hint it reserves the full size as before.
+- **Vercel's active CPU is metered per VM** (`cpuMeteredPerVm`): measured against Vercel's own per-sandbox meter, one busy core on 2 vCPUs is billed about twice its time, so jobs are priced as vCPUs x the busiest core's time.
+
 ## 0.10.0 (2026-11-17)
 
 ### Fixed

@@ -1,0 +1,87 @@
+{
+  "tool": "sandboxrouter",
+  "version": "0.10.0",
+  "date": "2026-11-17T14:18:12.013Z",
+  "label": "home-eu",
+  "by": "gigialc",
+  "runs": 3,
+  "spec": {
+    "vcpu": 2,
+    "memoryGb": 4
+  },
+  "task": "agent-v1",
+  "node": "v22.22.0",
+  "platform": "darwin-arm64",
+  "rows": [
+    {
+      "provider": "agentcore",
+      "runs": 3,
+      "failures": 0,
+      "medianCreateMs": 903,
+      "medianExecMs": 277,
+      "hourlyUsd": 0.0557,
+      "medianTaskMs": 60861,
+      "taskPhasesMs": {
+        "agent": 60861
+      },
+      "medianTaskCpuMs": 1490,
+      "medianTaskMaxCoreMs": 1070
+    },
+    {
+      "provider": "agent37",
+      "runs": 3,
+      "failures": 0,
+      "medianCreateMs": 993,
+      "medianExecMs": 667,
+      "hourlyUsd": 0.006520547945205479,
+      "medianTaskMs": 63239,
+      "taskPhasesMs": {
+        "agent": 63239
+      },
+      "medianTaskCpuMs": 950,
+      "medianTaskMaxCoreMs": 480
+    },
+    {
+      "provider": "boat",
+      "runs": 3,
+      "failures": 0,
+      "medianCreateMs": 1639,
+      "medianExecMs": 110,
+      "hourlyUsd": 0.018,
+      "medianTaskMs": 60616,
+      "taskPhasesMs": {
+        "agent": 60616
+      },
+      "medianTaskCpuMs": 5920,
+      "medianTaskMaxCoreMs": 3310
+    },
+    {
+      "provider": "tensorlake",
+      "runs": 3,
+      "failures": 0,
+      "medianCreateMs": 2101,
+      "medianExecMs": 716,
+      "hourlyUsd": 0.088,
+      "medianTaskMs": 128582,
+      "taskPhasesMs": {
+        "agent": 128582
+      },
+      "medianTaskCpuMs": 1245,
+      "medianTaskMaxCoreMs": 1075
+    },
+    {
+      "provider": "lambda",
+      "runs": 3,
+      "failures": 0,
+      "medianCreateMs": 2930,
+      "medianExecMs": 402,
+      "hourlyUsd": 0.25220016,
+      "medianTaskMs": 64859,
+      "taskPhasesMs": {
+        "agent": 64859
+      },
+      "medianTaskCpuMs": 740,
+      "medianTaskMaxCoreMs": 560
+    }
+  ]
+}

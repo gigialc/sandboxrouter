@@ -1,0 +1,33 @@
+{
+  "tool": "sandboxrouter",
+  "version": "0.10.0",
+  "date": "2026-11-17T14:18:42.548Z",
+  "label": "home-eu",
+  "by": "gigialc",
+  "runs": 3,
+  "spec": {
+    "vcpu": 2,
+    "memoryGb": 4
+  },
+  "task": "v1",
+  "node": "v22.22.0",
+  "platform": "darwin-arm64",
+  "rows": [
+    {
+      "provider": "vercel",
+      "runs": 3,
+      "failures": 0,
+      "medianCreateMs": 451,
+      "medianExecMs": 304,
+      "hourlyUsd": 0.3408,
+      "medianTaskMs": 5242,
+      "taskPhasesMs": {
+        "cpu": 3154,
+        "cores": 1939,
+        "disk": 172
+      },
+      "medianTaskCpuMs": 6690,
+      "medianTaskMaxCoreMs": 3920
+    }
+  ]
+}

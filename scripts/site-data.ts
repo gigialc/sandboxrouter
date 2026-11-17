@@ -134,6 +134,7 @@ const data = {
         ["long", "Long job", "The short job 40 times in a row: minutes of steady work."],
         ["python", "Python", "A Python script, like a code-interpreter call."],
         ["download", "Download", "A 53 MB download from nodejs.org."],
+        ["agent", "Agent loop", "10 turns of a 6 s model wait and a short Python tool call: about a minute, mostly idle."],
       ] as const
     )
       .map(([id, title, blurb]) => ({

@@ -28,6 +28,18 @@ export interface ProviderInfo {
      * on Vercel, where provisioned memory has a one-minute minimum and active CPU has none.
      */
     minimumCovers?: "all" | "memory";
+    /**
+     * Bills the larger of the CPU reserved and the CPU used (Modal). The adapter reserves `cpuUtilization` of
+     * the size you ask for (at least `cpuFloor`) and lets the sandbox burst to the full size, so CPU is
+     * priced like active CPU when `cpuUtilization` is below 1, and like allocated capacity otherwise.
+     */
+    reservesCpu?: boolean;
+    /**
+     * Active CPU is metered for the whole VM: while any core is busy, every vCPU counts (measured on Vercel
+     * 2026-11-17: one busy core for 11 s metered 22.7 s on 2 vCPUs; both busy metered 24.1 s for 23.1 s
+     * seen inside; idle about 2%). Task pricing then charges vCPUs x the busiest core's time.
+     */
+    cpuMeteredPerVm?: boolean;
     note?: string;
     source: string;
     checked: string;
@@ -177,6 +189,8 @@ const ENTRIES: Omit<ProviderInfo, "billing" | "plan">[] = [
     name: "Modal",
     pricing: {
       vcpuHour: 0.070956,
+      reservesCpu: true,
+      cpuFloor: 0.125,
       gbHour: 0.024012,
       note: "sandbox rates, per second ($0.00003942 per physical core = 2 vCPUs); GPUs extra; region pinning x1.15-1.75; Starter includes $30/mo credit",
       source: "https://modal.com/pricing",
@@ -193,6 +207,7 @@ const ENTRIES: Omit<ProviderInfo, "billing" | "plan">[] = [
     pricing: {
       minSeconds: 60,
       minimumCovers: "memory",
+      cpuMeteredPerVm: true,
       vcpuHour: 0.128,
       gbHour: 0.0212,
       note: "iad1; active CPU (I/O wait free), provisioned RAM in minimum 1-minute increments (2 GB/vCPU); listed at full CPU, cpuUtilization lowers it; Hobby free within quotas, Pro $20/mo usage credit; creations $0.60/million and retained snapshots $0.08/GB-month extra",
@@ -892,7 +907,8 @@ export function hourlyCost(id: ProviderId, spec: SandboxSpec = {}): number {
 /** The CPU part of the full-use hourly price for an "active-cpu" provider; 0 for providers that bill allocated capacity. */
 export function cpuHourlyAtFull(id: ProviderId, spec: SandboxSpec = {}): number {
   const p = info(id);
-  if (p.billing !== "active-cpu") return 0;
+  const reserved = p.pricing.reservesCpu && (spec.cpuUtilization ?? 1) < 1;
+  if (p.billing !== "active-cpu" && !reserved) return 0;
   const fixed = fixedSize(id, spec);
   if (fixed) return fixed.vcpu * p.pricing.vcpuHour;
   const vcpu = spec.vcpu ?? DEFAULT_VCPU;

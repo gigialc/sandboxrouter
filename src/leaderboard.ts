@@ -130,6 +130,8 @@ export interface TaskRow {
   hourlyUsd: number;
   /** What one task is billed: start plus task, with the minimum charge, billing step and per-sandbox fee; active-CPU providers by the CPU time it used. */
   taskUsd: number;
+  /** What one job costs in a sandbox that's already running (no start, minimum or per-sandbox fee). */
+  reusedUsd: number;
   /** CPU time the task used across all vCPUs (median), where the sandbox shows /proc/stat. */
   cpuMs?: number;
   /** True when the provider bills CPU only while busy, so `taskUsd` counts `cpuMs` rather than every core. */
@@ -164,15 +166,19 @@ export function taskTable(reports: BenchReport[], version: string = TASK_VERSION
     const createMs = median(rs.map((r) => r.medianCreateMs!))!;
     const taskMillis = median(rs.map((r) => r.medianTaskMs!))!;
     const phasesMs: PhaseMs = Object.fromEntries(def.phases.map((p) => [p.id, median(rs.map((r) => r.taskPhasesMs![p.id]))!]));
-    const size = fittingSpec(id);
+    // The job's own CPU hint (the agent loop's 10%) prices it the way its sandboxes were started.
+    const size = { ...fittingSpec(id), ...(def.cpuUtilization ? { cpuUtilization: def.cpuUtilization } : {}) };
     const ratio = BILLED_VS_LIST[id]?.ratio ?? 1;
-    const hourlyUsd = hourlyCost(id, size) * ratio;
+    const hourlyUsd = hourlyCost(id, fittingSpec(id)) * ratio;
     const rules = billingRules(id);
     const cpus = rs.map((r) => r.medianTaskCpuMs).filter((n): n is number => typeof n === "number");
     // A container can show the whole host's /proc/stat (Daytona does): a reading beyond what the sandbox's
     // own vCPUs could do in that time isn't the sandbox's, so it's dropped and the task is priced at full CPU.
     const read = cpus.length === rs.length ? median(cpus) : undefined;
     const cpuMs = read !== undefined && read <= size.vcpu * taskMillis * 1.1 ? read : undefined;
+    const cores = rs.map((r) => r.medianTaskMaxCoreMs).filter((n): n is number => typeof n === "number");
+    const coreRead = cores.length === rs.length ? median(cores) : undefined;
+    const maxCoreMs = cpuMs !== undefined && coreRead !== undefined && coreRead <= taskMillis * 1.1 ? coreRead : undefined;
     return {
       provider: id,
       name: CATALOG.find((c) => c.id === id)!.name,
@@ -181,7 +187,8 @@ export function taskTable(reports: BenchReport[], version: string = TASK_VERSION
       taskMs: taskMillis,
       phasesMs,
       hourlyUsd,
-      taskUsd: taskUsd(id, size, createMs, taskMillis, cpuMs, ratio),
+      taskUsd: taskUsd(id, size, createMs, taskMillis, cpuMs, ratio, false, maxCoreMs),
+      reusedUsd: taskUsd(id, size, createMs, taskMillis, cpuMs, ratio, true, maxCoreMs),
       ...(cpuMs !== undefined ? { cpuMs } : {}),
       activeCpu: cpuHourlyAtFull(id, size) > 0,
       minimumSeconds: rules.minSeconds,
