@@ -2,8 +2,9 @@ import Link from "next/link";
 import { Button } from "@/components/chrome";
 import { CodeBlock, CodeTabs, InstallChip } from "@/components/code";
 import { Feature } from "@/components/Feature";
+import { PriceIndex } from "@/components/PriceIndex";
 import { RouteDemo } from "@/components/RouteDemo";
-import { DEFAULT_SHAPE, HOSTED_FEE_PCT, HOSTED_PUBLIC, HOSTED_URL, NPM, REPO, REPO_PUBLIC, site } from "@/lib/site";
+import { HOSTED_FEE_PCT, HOSTED_PUBLIC, HOSTED_URL, NPM, REPO, REPO_PUBLIC, site } from "@/lib/site";
 
 const OWN_KEYS = `import { Router } from "${NPM}";
 
@@ -34,15 +35,6 @@ export default function Home() {
   const strip = [...passed, ...cloud.filter((p) => p.live.status !== "passed").sort((a, b) => a.name.localeCompare(b.name))]
     .filter((p) => short(p.name).length <= 14)
     .slice(0, 9);
-  // Ranked like the router: list price x what the provider really billed, where measured.
-  const real = (p: (typeof cloud)[number]) => p.prices[DEFAULT_SHAPE].usd * (p.billedVsList?.ratio ?? 1);
-  const cheapest = cloud
-    .filter((p) => p.prices[DEFAULT_SHAPE] && !p.prices[DEFAULT_SHAPE].unfit)
-    .sort((a, b) => real(a) - real(b))
-    .slice(0, 6);
-  // Highlight the one the router would pick: the cheapest that anyone can sign up for and that didn't fail its check.
-  const pick = cheapest.find((p) => p.live.status !== "failing" && !p.access)?.id;
-  const [vcpu, gb] = DEFAULT_SHAPE.split("x");
   // The benchmarks section quotes the short job: who finished first, and who cost least.
   const short_ = site.tasks.kinds.find((k) => k.id === "short");
   const fastest = short_ && [...short_.rows].sort((a, b) => a.taskMs - b.taskMs)[0];
@@ -210,33 +202,7 @@ export default function Home() {
           ]}
           visual={
             <div className="bg-[#0c0f0e] p-6 sm:p-10">
-              <p className="mb-4 font-mono text-[11px] uppercase tracking-[0.14em] text-white/55">
-                Cheapest at {vcpu} vCPU / {gb} GB
-              </p>
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-                {cheapest.map((p) => (
-                  <Link
-                    key={p.id}
-                    href={`/providers/${p.id}`}
-                    className={`flex aspect-[4/3] flex-col justify-between p-4 ${p.id === pick ? "bg-[#f2f2f2] text-black" : "bg-white/[0.08] text-white hover:bg-white/[0.12]"}`}
-                  >
-                    <span className="text-[15px]">
-                      {short(p.name)}
-                      {p.id === pick && <span className="mt-1 block text-[12px] text-black/55">router&apos;s pick</span>}
-                    </span>
-                    <span className="text-[14px] tnum">
-                      {p.billing === "active-cpu" ? "≤ " : ""}${real(p).toFixed(3)}/hr
-                      {p.live.status === "passed" && <span className={p.id === pick ? "text-accent" : "text-[#2fbf7f]"}> · tested</span>}
-                    </span>
-                  </Link>
-                ))}
-              </div>
-              <p className="mt-4 text-[11px] leading-5 text-white/45">
-                ≤ bills CPU only while busy.{" "}
-                <Link href="/methodology#pricing" className="underline underline-offset-2 hover:text-white/70">
-                  How prices work
-                </Link>
-              </p>
+              <PriceIndex dark />
             </div>
           }
         />

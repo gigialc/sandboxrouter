@@ -1,6 +1,6 @@
 {
   "version": "0.10.0",
-  "generatedAt": "2026-11-17T14:30:33.319Z",
+  "generatedAt": "2026-11-17T14:54:53.098Z",
   "shapes": [
     "1x2",
     "2x4",
@@ -5564,6 +5564,68 @@
       ]
     }
   ],
+  "priceIndex": {
+    "lines": [
+      {
+        "id": "2x4-hour",
+        "label": "2 vCPU / 4 GB, one hour",
+        "unit": "per hour",
+        "median": 0.1656,
+        "cheapest": {
+          "provider": "agent37",
+          "name": "Agent37",
+          "usd": 0.0065
+        },
+        "providers": 15
+      },
+      {
+        "id": "agent-hour",
+        "label": "Agent session, one hour at 10% CPU",
+        "unit": "per hour",
+        "median": 0.0952,
+        "cheapest": {
+          "provider": "agent37",
+          "name": "Agent37",
+          "usd": 0.0065
+        },
+        "providers": 15
+      },
+      {
+        "id": "calls-1000",
+        "label": "1,000 tool calls, 10 s each",
+        "unit": "per 1,000",
+        "median": 0.46,
+        "cheapest": {
+          "provider": "boat",
+          "name": "Boat",
+          "usd": 0.05
+        },
+        "providers": 15
+      }
+    ],
+    "history": [
+      {
+        "date": "2026-11-17",
+        "lines": {
+          "2x4-hour": {
+            "median": 0.1656,
+            "cheapest": 0.0065,
+            "provider": "agent37"
+          },
+          "agent-hour": {
+            "median": 0.0952,
+            "cheapest": 0.0065,
+            "provider": "agent37"
+          },
+          "calls-1000": {
+            "median": 0.46,
+            "cheapest": 0.05,
+            "provider": "boat"
+          }
+        }
+      }
+    ]
+  },
   "costRuns": [
     {
       "provider": "agent37",

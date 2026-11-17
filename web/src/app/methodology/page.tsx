@@ -12,6 +12,7 @@ const day = (iso: string) => new Date(iso).toLocaleDateString("en-US", { year: "
 
 const SECTIONS = [
   ["pricing", "Prices"],
+  ["index", "The price index"],
   ["active-cpu", "Providers that bill active CPU"],
   ["check", "The real-account check"],
   ["speed", "Start time"],
@@ -66,6 +67,16 @@ export default function MethodologyPage() {
             Where we measured what a provider really bills ({billed.map((p) => p.name).join(", ") || "none yet"}), its price is
             corrected by that ratio. Everywhere else it&apos;s the list price. Disk, network and monthly plans aren&apos;t included. The
             hosted key adds {HOSTED_FEE_PCT}% on sandboxes that run on our accounts; with your own keys there&apos;s no fee.
+          </p>
+
+          <h2 id="index">The price index</h2>
+          <p>
+            The index puts a number on a few standard pieces of work: a 2 vCPU / 4 GB sandbox for an hour, an agent session for an
+            hour at 10% CPU, and 1,000 tool calls of 10 seconds each in fresh sandboxes. Each line is the median of what the
+            router would charge across the providers that passed the real-account check, priced as above (minimum charges,
+            billing steps, per-sandbox fees and measured bills included), with the cheapest provider beside it. It&apos;s recorded
+            daily when it changes, which happens when a provider changes its price, so the change shown is since the last
+            recorded value.
           </p>
 
           <h2 id="active-cpu">Providers that bill active CPU</h2>

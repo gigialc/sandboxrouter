@@ -4,6 +4,7 @@ import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { benchmarksPublishable, billingRules, CATALOG, hourlyCost, planLabel, unfit } from "../src/catalog.js";
 import { aggregate, loadReports, taskTable } from "../src/leaderboard.js";
 import { TASKS } from "../src/task.js";
+import { priceIndex } from "../src/price-index.js";
 import { computerCatalog } from "../src/computers.js";
 import { CHECK_STEPS } from "../src/check.js";
 import { conformanceTable, liveStatus } from "../src/conformance.js";
@@ -161,6 +162,11 @@ const data = {
       .filter((k) => k.rows.length),
   },
   useCases,
+  // Today's price index, and how it has moved (scripts/price-index.json, recorded daily when it changes).
+  priceIndex: {
+    lines: priceIndex(),
+    history: existsSync("scripts/price-index.json") ? JSON.parse(readFileSync("scripts/price-index.json", "utf8")) : [],
+  },
   costRuns: costRows,
   submissions: reports.map((r) => ({
     date: r.date,

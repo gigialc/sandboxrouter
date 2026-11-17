@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { SectionTitle } from "@/components/chrome";
 import { DesktopTable } from "@/components/DesktopTable";
+import { PriceIndex } from "@/components/PriceIndex";
 import { ProviderTable } from "@/components/ProviderTable";
 import { Sources } from "@/components/Sources";
 
@@ -12,7 +13,10 @@ export default function ProvidersPage() {
       <SectionTitle id="providers" kicker="Providers">
         What a sandbox costs, everywhere
       </SectionTitle>
-      <div className="mt-6">
+      <div className="mt-8 max-w-3xl">
+        <PriceIndex />
+      </div>
+      <div className="mt-12">
         <ProviderTable />
       </div>
       <div className="mt-12">
