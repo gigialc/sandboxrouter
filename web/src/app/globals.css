@@ -125,6 +125,9 @@ body {
   margin: 3.5rem 0 0.75rem;
   scroll-margin-top: 5rem;
 }
+.prose-sr > h2:first-child {
+  margin-top: 0;
+}
 .prose-sr h3 {
   font-size: 1rem;
   font-weight: 500;

@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { CodeBlock } from "@/components/code";
 import { TaskTable } from "@/components/TaskTable";
 import { UseCaseTable } from "@/components/UseCaseTable";
-import { HOSTED_FEE_PCT, NPM, REPO_PUBLIC, site, usd } from "@/lib/site";
+import { site, usd } from "@/lib/site";
 
 export const metadata: Metadata = { title: "Benchmarks" };
 
@@ -27,21 +26,14 @@ export default function BenchmarksPage() {
         What each sandbox costs, and how fast it starts
       </h1>
       <p className="mt-5 max-w-2xl text-[15px] leading-7 text-ink-2">
-        <a href="#cost" className="underline underline-offset-4 decoration-line-2">Cost</a> is what a job would really be billed on
-        each provider, the way the router ranks them. <a href="#speed" className="underline underline-offset-4 decoration-line-2">Speed</a>{" "}
-        is measured: real sandboxes on real accounts, started, used once and killed.
+        Real sandboxes on real accounts, started, used and killed. <Link href="/methodology#pricing" className="text-ink underline underline-offset-4 decoration-line-2 hover:decoration-ink">How the numbers are made</Link>.
       </p>
 
       <section id="cost" className="mt-14 scroll-mt-20">
         <h2 className="text-2xl font-normal tracking-[-0.025em] sm:text-[28px]">Cost for the job</h2>
         <p className="mt-3 mb-6 max-w-2xl text-[14px] leading-6 text-ink-2">
-          The cheapest provider depends on how long you use it: one that charges a full minute loses on a 10-second job and wins on a
-          30-minute one. Pick a job to rank the providers that passed the real-account check by what that run would be billed:
-          list price, corrected by measured bills, plus each provider&apos;s minimum charge, billing steps and per-sandbox fee.
-          Providers that bill CPU only while it&apos;s busy (Vercel, Cloudflare, Tensorlake, AgentCore, Sail, Sprites) are priced
-          with every core busy, except for agent sessions, which assume 10% CPU.
-          Fixed-size providers (E2B, OpenScale, Daytona) can&apos;t give these sizes. On the hosted key, add {HOSTED_FEE_PCT}% where
-          you don&apos;t use your own key.
+          The cheapest provider depends on how long you use it. Tested providers, ranked by what each job would be billed.{" "}
+          <Link href="/methodology#pricing" className="text-ink underline underline-offset-4 decoration-line-2 hover:decoration-ink">How it&apos;s measured</Link>.
         </p>
         <UseCaseTable />
       </section>
@@ -50,15 +42,7 @@ export default function BenchmarksPage() {
         <section id="task" className="mt-20 scroll-mt-20">
           <h2 className="text-2xl font-normal tracking-[-0.025em] sm:text-[28px]">Cost of a real task</h2>
           <p className="mt-3 max-w-2xl text-[14px] leading-6 text-ink-2">
-            The table above compares prices. This one adds speed: the same job ran in a sandbox on every provider and was priced
-            by how long it really took. A slower CPU, disk or network makes the job longer, and a longer job is billed more. Cost
-            counts the start plus the job, with each provider&apos;s minimum charge, billing steps and per-sandbox fee: published
-            prices applied to measured times, not invoices. Providers that bill CPU only while it&apos;s busy are charged for the CPU
-            time the job really used, read from the sandbox&apos;s own CPU counters, plus their memory for the whole run. Measured on real accounts at 2 vCPU / 4 GB, or the provider&apos;s fixed
-            size where it has one; hover a time to see each step. Run it yourself with{" "}
-            <code className="font-mono text-[12px]">sandboxrouter bench --task</code> (add <code className="font-mono text-[12px]">--long</code>,{" "}
-            <code className="font-mono text-[12px]">--job python</code> or <code className="font-mono text-[12px]">--job download</code> for the
-            others).
+            The same job on every provider, priced by how long it really took. Hover a time for each step. <Link href="/methodology#jobs" className="text-ink underline underline-offset-4 decoration-line-2 hover:decoration-ink">How it&apos;s measured</Link>.
           </p>
           <TaskTable />
         </section>
@@ -67,8 +51,7 @@ export default function BenchmarksPage() {
       <section id="speed" className="mt-20 scroll-mt-20">
       <h2 className="text-2xl font-normal tracking-[-0.025em] sm:text-[28px]">Speed</h2>
       <p className="mt-3 max-w-2xl text-[14px] leading-6 text-ink-2">
-        {rows.length} providers so far, {totalRuns} sandboxes in total{subs[0] ? `, last run ${day(subs[0].date)}` : ""}.
-        Providers without an account behind them aren&apos;t here yet; they get added as soon as someone runs them.
+        {rows.length} providers, {totalRuns} sandboxes{subs[0] ? `, last run ${day(subs[0].date)}` : ""}. <Link href="/methodology#speed" className="text-ink underline underline-offset-4 decoration-line-2 hover:decoration-ink">How it&apos;s measured</Link>.
       </p>
 
       <table className="mt-6 w-full text-[14px]">
@@ -124,8 +107,7 @@ export default function BenchmarksPage() {
           <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-accent">Real cost</p>
           <h2 className="mt-3 text-2xl font-normal tracking-[-0.025em] sm:text-[28px]">What providers actually billed</h2>
           <p className="mt-4 max-w-2xl text-[14px] leading-6 text-ink-2">
-            We ran a sandbox for a fixed time, then read the bill back from the provider&apos;s own billing API. Only providers
-            whose bill we could read are listed.
+            A sandbox ran for a fixed time; the bill came from the provider&apos;s own billing API. <Link href="/methodology#bills" className="text-ink underline underline-offset-4 decoration-line-2 hover:decoration-ink">How it&apos;s measured</Link>.
           </p>
           <div className="mt-6 overflow-x-auto">
             <table className="w-full min-w-[560px] text-[14px]">
@@ -155,53 +137,13 @@ export default function BenchmarksPage() {
               </tbody>
             </table>
           </div>
-          <p className="mt-4 max-w-2xl text-[13px] leading-6 text-ink-2">
-            Sail bills more than its list price because it adds $0.01 for every sandbox started.
-          </p>
+
         </section>
       )}
 
-      <div className="mt-16 grid grid-cols-1 gap-12 border-t border-line pt-10 lg:grid-cols-2">
-        <section className="prose-sr max-w-xl">
-          <h2>What is measured</h2>
-          <p>
-            Each run asks one provider for a 2 vCPU / 4 GB sandbox, or for its default size where the
-            default image fixes the size whatever you ask (E2B, OpenScale and Daytona; the Size column says which), with fallback off, and times how long until it is usable:
-            that&apos;s the <strong>cold start</strong>. Then it runs <code>echo ok</code> and times the answer: the{" "}
-            <strong>command round trip</strong>. Then it kills the sandbox. A run counts as failed if any of that goes wrong.
-          </p>
-          <p>
-            The numbers include the network between the machine running the test and each provider, so where it ran matters as
-            much as who ran it. Each location is listed below. Each row uses the provider&apos;s latest run from each location
-            (the Measured column says when); with several locations, it is the median across them, so one heavy submitter
-            can&apos;t move it. Older runs stay in the list below but don&apos;t count once a newer one exists. Each run starts 5
-            sandboxes per provider, one after another, from a single machine: a snapshot, not an average over days.
-          </p>
-          <p>
-            Prices are each provider&apos;s public list price for the size, not a bill. Disk, network, monthly plans and minimum
-            billing increments are left out; each <Link href="/providers">provider page</Link> has the details and a link to the
-            source.
-          </p>
-        </section>
-
-        <section className="prose-sr max-w-xl">
-          <h2>Where it ran</h2>
-          <ul>
-            {subs.map((s) => (
-              <li key={s.date}>
-                {day(s.date)}: {s.label ?? "unlabelled"} ({s.platform}), {s.runs} runs on each of {s.providers} providers
-                {s.by ? `, by @${s.by}` : ""}
-              </li>
-            ))}
-          </ul>
-          <h2>Add a run</h2>
-          <p>
-            Run it with your own keys{REPO_PUBLIC ? <> and send the report as a pull request to <code>results/</code></> : null}.
-            Label it with a city or cloud region, never an address.
-          </p>
-          <CodeBlock title="terminal" code={`npx ${NPM} bench --runs 5 --share --label "us-east-1, c7g.large" --by YOUR_GITHUB_USERNAME`} />
-        </section>
-      </div>
+      <p className="mt-16 border-t border-line pt-8 text-[14px] text-ink-2">
+        <Link href="/methodology#runs" className="text-ink underline underline-offset-4 decoration-line-2 hover:decoration-ink">Where these ran, and how to add your own run</Link>.
+      </p>
     </div>
   );
 }

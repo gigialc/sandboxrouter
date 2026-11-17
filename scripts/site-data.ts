@@ -63,7 +63,7 @@ const USE_CASES: { id: string; title: string; blurb: string; spec: SandboxSpec; 
   {
     id: "session",
     title: "Agent sessions",
-    blurb: "A coding agent working for about 30 minutes, mostly waiting on the model: about 10% CPU, which is what providers that bill active CPU charge for.",
+    blurb: "A coding agent working for 30 minutes, mostly waiting on the model.",
     spec: { vcpu: 2, memoryGb: 4, timeoutMinutes: 30, cpuUtilization: 0.1 },
   },
   { id: "long", title: "Long jobs", blurb: "Evals, crawls or builds that run for 4 hours.", spec: { vcpu: 2, memoryGb: 4, timeoutMinutes: 240 } },
@@ -130,10 +130,10 @@ const data = {
   tasks: {
     kinds: (
       [
-        ["short", "Short job", "Hash 512 MB on one core, then on two, then write 256 MB to disk: a few seconds of work."],
-        ["long", "Long job", "The short job 40 times in a row: minutes of steady work, where minimum charges stop mattering."],
-        ["python", "Python", "A pure-Python script (200,000 records through JSON, a regex and a sort), like a code-interpreter call."],
-        ["download", "Download", "Download the Node.js release (53 MB) from nodejs.org's CDN: what installing toolchains and packages depends on. A provider with no internet access by default can't run it."],
+        ["short", "Short job", "Hashing on one and two cores, then a disk write: a few seconds."],
+        ["long", "Long job", "The short job 40 times in a row: minutes of steady work."],
+        ["python", "Python", "A Python script, like a code-interpreter call."],
+        ["download", "Download", "A 53 MB download from nodejs.org."],
       ] as const
     )
       .map(([id, title, blurb]) => ({

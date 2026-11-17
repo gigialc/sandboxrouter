@@ -84,8 +84,8 @@ export default function Home() {
           {REPO_PUBLIC && !HOSTED_PUBLIC ? <Button href={REPO}>GitHub</Button> : <Button href="/docs">Docs</Button>}
         </div>
         <p className="mt-10 max-w-lg text-[15px] leading-7 text-ink-2">
-          {passed.length} providers pass our check on real accounts: start, run, stream, files, timeouts and kill. Your
-          sandboxes go to the cheapest of them that fits, and move on when one fails. {HOSTED_PUBLIC ? "Open source, or one hosted key." : "Open source, with your own provider keys."}
+          {passed.length} providers tested on real accounts. Each sandbox goes to the cheapest one that fits, and moves on
+          when one fails. {HOSTED_PUBLIC ? "Open source, or one hosted key." : "Open source."}
         </p>
         <div className="mt-10 flex w-full max-w-xl flex-col items-center gap-4">
           <InstallChip cmd={`npm i ${NPM}`} />
@@ -152,11 +152,11 @@ export default function Home() {
               },
               {
                 title: "Real jobs, real accounts",
-                body: `${short_.rows.length} providers ran the same work: hashing, disk, a Python script and a download, a few seconds or 40 times in a row. Every sandbox was started on a real account and killed after.`,
+                body: `${short_.rows.length} providers ran the same work on real accounts: hashing, disk, Python and a download.`,
               },
               {
                 title: "Priced by what they really bill",
-                body: "Minimum charges, billing steps and per-sandbox fees count. Providers that bill CPU only while it's busy are charged for the CPU the job really used, read inside the sandbox.",
+                body: "Minimum charges and fees count, and active-CPU providers pay for the CPU the job used.",
               },
             ]}
             visual={<RaceVideo />}
@@ -204,7 +204,10 @@ export default function Home() {
                 ))}
               </div>
               <p className="mt-4 text-[11px] leading-5 text-white/45">
-                List price, corrected by measured bills where we have them. ≤ bills CPU only while busy; shown with every core busy.
+                ≤ bills CPU only while busy.{" "}
+                <Link href="/methodology#pricing" className="underline underline-offset-2 hover:text-white/70">
+                  How prices work
+                </Link>
               </p>
             </div>
           }
