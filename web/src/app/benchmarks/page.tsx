@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { PageHeader } from "@/components/chrome";
 import Link from "next/link";
 import { AgentTable } from "@/components/AgentTable";
+import { BenchTabs } from "@/components/BenchTabs";
+import { Finder } from "@/components/Finder";
+import { ProviderName } from "@/components/ProviderName";
 import { LoadTable } from "@/components/LoadTable";
 import { TaskTable } from "@/components/TaskTable";
 import { UseCaseTable } from "@/components/UseCaseTable";
@@ -15,9 +18,8 @@ const shortDay = (iso: string) => new Date(iso).toLocaleDateString("en-US", { mo
 /** One section: its title, one line, a link to how it's measured, then its table. */
 function Section({ id, title, how, children, line }: { id: string; title: string; how: string; line: React.ReactNode; children: React.ReactNode }) {
   return (
-    <section id={id} className="mt-20 scroll-mt-32 first-of-type:mt-12">
-      <h2 className="text-2xl font-normal tracking-[-0.025em] sm:text-[28px]">{title}</h2>
-      <p className="mt-3 max-w-2xl text-[14px] leading-6 text-ink-2">
+    <section aria-label={title} data-section={id} className="mt-8">
+      <p className="max-w-2xl text-[14px] leading-6 text-ink-2">
         {line}{" "}
         <Link href={`/methodology#${how}`} className="text-ink underline underline-offset-4 decoration-line-2 hover:decoration-ink">
           How it&apos;s measured
@@ -56,50 +58,68 @@ export default function BenchmarksPage() {
         </span>
       </PageHeader>
 
-      {/* One line of links to every section, so the page reads as a list of answers. */}
-      <nav aria-label="On this page" className="sticky top-14 z-10 -mx-5 mt-10 border-y border-line bg-bg/95 px-5 py-3 backdrop-blur sm:-mx-10 sm:px-10">
-        <ul className="flex gap-5 overflow-x-auto whitespace-nowrap text-[13px] text-ink-2">
-          {[
-            ["cost", "Cost for the job"],
-            ["task", "Real work"],
-            ...(site.agent.length ? [["agent", "A real agent"]] : []),
-            ...(site.load.length ? [["load", "Under load"]] : []),
-            ["speed", "Start time"],
-            ["real-cost", "Bills"],
-          ].map(([id, label]) => (
-            <li key={id}>
-              <a href={`#${id}`} className="hover:text-ink">
-                {label}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </nav>
+      <Finder />
 
+      <BenchTabs
+        tabs={[
+          {
+            id: "cost",
+            label: "Prices",
+            content: (
       <Section id="cost" title="Cost for the job" how="pricing" line="The cheapest provider depends on how long you use it: tested providers, ranked by what each job would be billed.">
         <div className="mt-6">
           <UseCaseTable />
         </div>
       </Section>
+            ),
+          },
 
-      {site.tasks.kinds.length > 0 && (
+          ...(site.tasks.kinds.length > 0
+            ? [
+                {
+                  id: "task",
+                  label: "Real jobs",
+                  content: (
         <Section id="task" title="Real work" how="jobs" line="The same job on every provider, from a short burst of CPU to installing a real repo, priced by how long it really took.">
           <TaskTable />
         </Section>
-      )}
+                  ),
+                },
+              ]
+            : []),
 
-      {site.agent.length > 0 && (
+          ...(site.agent.length > 0
+            ? [
+                {
+                  id: "agent",
+                  label: "Real AI agent",
+                  content: (
         <Section id="agent" title="A real agent" how="agent" line="A real model does the same task in a sandbox on each provider, with one tool that runs commands there.">
           <AgentTable />
         </Section>
-      )}
+                  ),
+                },
+              ]
+            : []),
 
-      {site.load.length > 0 && (
-        <Section id="load" title="Under load" how="load" line="100 sandboxes asked for at once: how many start, how fast, and what all of them cost.">
+          ...(site.load.length > 0
+            ? [
+                {
+                  id: "load",
+                  label: "At scale",
+                  content: (
+        <Section id="load" title="Under load" how="load" line="10 or 100 sandboxes asked for at once: how fast they're ready, and what all of them cost.">
           <LoadTable />
         </Section>
-      )}
+                  ),
+                },
+              ]
+            : []),
 
+          {
+            id: "speed",
+            label: "Start time",
+            content: (
       <Section
         id="speed"
         title="Start time"
@@ -123,9 +143,7 @@ export default function BenchmarksPage() {
           {rows.map((r) => (
             <tr key={r.provider} className="group border-t border-line">
               <td className="py-3 pr-4">
-                <Link href={`/providers/${r.provider}`} className="text-ink group-hover:underline underline-offset-4 decoration-line-2">
-                  {r.name}
-                </Link>
+                <ProviderName id={r.provider} name={r.name} />
                 {r.runs < 20 ? <span className="ml-2 text-[11px] text-muted">only {r.runs} runs</span> : null}
               </td>
               <td className="py-3 pr-4">
@@ -155,8 +173,15 @@ export default function BenchmarksPage() {
         </tbody>
       </table>
       </Section>
+            ),
+          },
 
-      {costs.length > 0 && (
+          ...(costs.length > 0
+            ? [
+                {
+                  id: "real-cost",
+                  label: "Real bills",
+                  content: (
         <Section id="real-cost" title="Bills" how="bills" line="What providers actually billed for a sandbox run for a fixed time, read from their own billing APIs.">
           <div className="mt-6 overflow-x-auto">
             <table className="w-full min-w-[560px] text-[14px]">
@@ -174,9 +199,7 @@ export default function BenchmarksPage() {
                 {costs.map((r) => (
                   <tr key={`${r.date}-${r.provider}`} className="border-t border-line">
                     <td className="py-3 pr-4">
-                      <Link href={`/providers/${r.provider}`} className="text-ink hover:underline underline-offset-4 decoration-line-2">
-                        {r.name}
-                      </Link>
+                      <ProviderName id={r.provider} name={r.name} />
                     </td>
                     <td className="py-3 pr-4 font-mono tnum text-ink-2">{r.seconds === null ? "n/a" : `${Math.round(r.seconds / 60)} min`}</td>
                     <td className="py-3 pr-4 font-mono tnum text-ink-2">{cents(r.predictedUsd)}</td>
@@ -192,7 +215,12 @@ export default function BenchmarksPage() {
             </table>
           </div>
         </Section>
-      )}
+                  ),
+                },
+              ]
+            : []),
+        ]}
+      />
 
       <p className="mt-16 border-t border-line pt-8 text-[14px] text-ink-2">
         <Link href="/methodology#runs" className="text-ink underline underline-offset-4 decoration-line-2 hover:decoration-ink">Where these ran, and how to add your own run</Link>.

@@ -99,7 +99,13 @@ const useCases = USE_CASES.map((u) => {
   return { id: u.id, title: u.title, blurb: u.blurb, spec: u.spec, require: u.require ?? [], runSeconds: Math.round(hours * 3600), top };
 });
 
+// Provider icons fetched by scripts/fetch-logos.py: id -> file under /logos/.
+const LOGOS: Record<string, string> = Object.fromEntries(
+  (existsSync("web/public/logos") ? readdirSync("web/public/logos") : []).map((f) => [f.replace(/\.[a-z]+$/, ""), `/logos/${f}`]),
+);
+
 const data = {
+  logos: LOGOS,
   version: pkg.version,
   generatedAt: new Date().toISOString(),
   shapes: SHAPES.map((s) => `${s.vcpu}x${s.memoryGb}`),

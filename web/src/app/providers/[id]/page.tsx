@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ProviderLogo } from "@/components/ProviderName";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CodeBlock } from "@/components/code";
@@ -86,7 +87,10 @@ await sbx.kill();`;
       <Link href="/providers" className="text-[13px] text-muted hover:text-ink">
         ← Providers
       </Link>
-      <h1 className="mt-8 text-4xl font-normal tracking-[-0.035em]">{p.name}</h1>
+      <h1 className="mt-8 flex items-center gap-4 text-4xl font-normal tracking-[-0.035em]">
+        <ProviderLogo id={p.id} name={p.name} size={36} />
+        {p.name}
+      </h1>
       <p className="mt-2 font-mono text-[12px] text-muted">provider: &quot;{p.id}&quot;</p>
       {p.access && (
         <p className="mt-5 max-w-2xl border-l-2 border-line-2 pl-3 text-[14px] leading-6 text-ink">

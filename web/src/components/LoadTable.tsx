@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { ProviderName } from "@/components/ProviderName";
 import { useState } from "react";
 import { site, type LoadRow } from "@/lib/site";
 
@@ -32,9 +33,7 @@ export function LoadTable() {
     <tr key={r.provider} className="group border-t border-line">
       <td className="w-10 py-3 pr-2 font-mono text-[12px] text-muted">{i === undefined ? "" : i + 1}</td>
       <td className="py-3 pr-4">
-        <Link href={`/providers/${r.provider}`} className="text-ink group-hover:underline underline-offset-4 decoration-line-2">
-          {r.name}
-        </Link>
+        <ProviderName id={r.provider} name={r.name} />
       </td>
       <td className="py-3 pr-4 font-mono tnum text-ink">{secs(r.p50Ms)}</td>
       <td className="hidden py-3 pr-4 sm:table-cell">

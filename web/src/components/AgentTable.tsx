@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ProviderName } from "@/components/ProviderName";
 import { site } from "@/lib/site";
 
 const secs = (ms?: number) => (ms === undefined ? "n/a" : `${(ms / 1000).toFixed(1)} s`);
@@ -26,9 +27,7 @@ export function AgentTable() {
             return (
               <tr key={r.provider} className="group border-t border-line">
                 <td className="py-3 pr-4">
-                  <Link href={`/providers/${r.provider}`} className="text-ink group-hover:underline underline-offset-4 decoration-line-2">
-                    {r.name}
-                  </Link>
+                  <ProviderName id={r.provider} name={r.name} />
                 </td>
                 <td className="py-3 pr-4 font-mono tnum text-ink">
                   {r.ok}/{r.runs}

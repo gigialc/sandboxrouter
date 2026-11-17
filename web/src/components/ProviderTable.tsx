@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { ProviderName } from "@/components/ProviderName";
 import { useState } from "react";
 import { CAPABILITY_LABEL, DEFAULT_SHAPE, fixedPrice, ranked, shapeLabel, site, usd } from "@/lib/site";
 
@@ -64,9 +65,7 @@ export function ProviderTable() {
             return (
               <tr key={p.id} className="group border-t border-line">
                 <td className="py-3 pr-4">
-                  <Link href={`/providers/${p.id}`} className="text-ink group-hover:underline underline-offset-4 decoration-line-2">
-                    {p.name}
-                  </Link>
+                  <ProviderName id={p.id} name={p.name} />
                   {p.local && <span className="ml-2 text-[11px] text-muted">opt-in</span>}
                   {p.access && (
                     <span className="ml-2 text-[11px] text-muted" title={p.access.note}>

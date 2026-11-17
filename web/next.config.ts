@@ -1,6 +1,19 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Provider icons are third-party files: served as inert images, never as a document that could run script.
+  headers() {
+    return [
+      {
+        source: "/logos/:file*",
+        headers: [
+          { key: "content-security-policy", value: "default-src 'none'; style-src 'unsafe-inline'; sandbox" },
+          { key: "x-content-type-options", value: "nosniff" },
+          { key: "cache-control", value: "public, max-age=604800" },
+        ],
+      },
+    ];
+  },
   // Old routes from the first version of the site.
   redirects() {
     return [
