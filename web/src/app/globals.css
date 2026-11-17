@@ -123,6 +123,11 @@ body {
 .prose-sr p {
   margin: 0.75rem 0;
 }
+.prose-sr ol {
+  list-style: decimal;
+  padding-left: 1.2rem;
+  margin: 0.75rem 0;
+}
 .prose-sr ul {
   list-style: square;
   padding-left: 1.1rem;

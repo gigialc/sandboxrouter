@@ -68,6 +68,7 @@ export function Footer() {
         <span>Open source, MIT. v{site.version}.{HOSTED_PUBLIC && " Hosted keys by AlgiAI, Corp."}</span>
         <div className="flex flex-wrap gap-x-6 gap-y-3 sm:ml-auto">
           <Link href="/benchmarks" className="hover:text-ink">Benchmarks</Link>
+          <Link href="/learn" className="hover:text-ink">Learn</Link>
           <Link href="/methodology" className="hover:text-ink">Methodology</Link>
           <Link href="/docs" className="hover:text-ink">Docs</Link>
           <Link href="/playground" className="hover:text-ink">Playground</Link>

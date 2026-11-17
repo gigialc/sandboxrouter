@@ -84,7 +84,10 @@ export default function Home() {
         </div>
         <p className="mt-10 max-w-lg text-[15px] leading-7 text-ink-2">
           {passed.length} providers tested on real accounts. Each sandbox goes to the cheapest one that fits, and moves on
-          when one fails. {HOSTED_PUBLIC ? "Open source, or one hosted key." : "Open source."}
+          when one fails. {HOSTED_PUBLIC ? "Open source, or one hosted key." : "Open source."}{" "}
+          <Link href="/learn" className="text-ink underline underline-offset-4 decoration-line-2 hover:decoration-ink">
+            New to sandboxes?
+          </Link>
         </p>
         <div className="mt-10 flex w-full max-w-xl flex-col items-center gap-4">
           <InstallChip cmd={`npm i ${NPM}`} />
