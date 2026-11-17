@@ -80,6 +80,37 @@ export interface IndexLine {
   providers: number;
 }
 
+export interface LoadRow {
+  provider: string;
+  name: string;
+  n: number;
+  ok: number;
+  limited: number;
+  p50Ms?: number;
+  p95Ms?: number;
+  p99Ms?: number;
+  wallMs: number;
+  jobP50Ms?: number;
+  usd?: number;
+  measuredAt: string;
+  label: string | null;
+}
+
+export interface AgentRow {
+  provider: string;
+  name: string;
+  runs: number;
+  ok: number;
+  medianWallMs?: number;
+  medianModelMs?: number;
+  medianCpuMs?: number;
+  medianTurns?: number;
+  medianUsd?: number;
+  medianTokens?: number;
+  measuredAt: string;
+  model: string;
+}
+
 export interface UseCase {
   id: string;
   title: string;
@@ -129,6 +160,8 @@ export const site = data as unknown as {
   checkSteps: string[];
   desktops: SiteDesktop[];
   leaderboard: LeaderRow[];
+  load: { id: string; title: string; blurb: string; rows: LoadRow[] }[];
+  agent: AgentRow[];
   priceIndex: { lines: IndexLine[]; history: { date: string; lines: Record<string, { median: number; cheapest: number; provider: string }> }[] };
   tasks: { kinds: { id: string; title: string; blurb: string; version: string; repeat: number; phases: { id: string; label: string }[]; rows: TaskRow[]; couldNot: string[] }[] };
   useCases: UseCase[];

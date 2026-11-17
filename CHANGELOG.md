@@ -5,6 +5,9 @@ All notable changes. Versions follow [semver](https://semver.org/); while the ve
 ## Unreleased
 
 ### Added
+- **`sandboxrouter burst --n 100`**: asks one provider for N sandboxes at the same moment and reports how many started (refusals for an account limit counted apart), time to interactive at p50/p95/p99 from the burst's start, time until all finished, and what all of them cost. `--job python` runs a Python step in each (RL rollouts, evals); `--job agent` runs the agent loop in each (parallel agents). Reports are `sandboxrouter-burst` files in results/.
+- **`sandboxrouter agentbench`**: a real model (Gemini, `GEMINI_API_KEY`) does the same task in a sandbox on each provider, with one tool that runs shell commands there; the key stays on the machine running it. Reports how often the task was done right, session time, the share spent waiting on the model, sandbox CPU and the sandbox's cost. Reports are `sandboxrouter-agent` files.
+- **`bench --task --job repo`**: fetch Node 22 and a pinned commit of a real TypeScript project, `npm ci`, typecheck: what a coding agent does first.
 - **`sbx.native`**: the provider SDK's own sandbox object (E2B and E2B-compatible providers, Daytona, Modal, Vercel, Blaxel, Beam, Deno, HopX, LangSmith, Morph, Runloop, Sprites, Tensorlake), for what the router doesn't cover: ports, background processes, snapshots. Undefined for providers driven over plain HTTP.
 - **`bench --submit`**: runs the benchmark and opens the pull request with the report through the GitHub CLI, forking the repo if needed. Implies `--share`.
 - **Weekly benchmark from GitHub's runners in the US** (`.github/workflows/bench.yml`), so results come from more than one place.

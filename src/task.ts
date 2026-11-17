@@ -17,18 +17,23 @@ import type { ProviderId, ProviderSandbox } from "./types.js";
  *   provider without it fails the task, which is itself worth knowing.
  * - "download": fetch the 53 MB Node.js release from nodejs.org's CDN, with curl, else wget, else python3:
  *   what installing toolchains and packages depends on.
+ * - "repo": what a coding agent does first: fetch Node 22 and a pinned commit of a real TypeScript project
+ *   (sandboxRouter itself, the 0.10.0 release), `npm ci`, then typecheck it. Needs only tar and a way to
+ *   download (curl, wget or python3), so a bare image can run it.
  * - "agent": an agent loop with simulated model calls: 10 turns of waiting 6 s (the model thinking; the
  *   sandbox sits idle) and then a short Python tool call. About a minute, mostly idle, which is where
  *   providers that bill active CPU differ from ones that bill what you reserve.
  *
  * Changing a phase changes what the numbers mean: bump that task's version, and older reports stop counting.
  */
-export type TaskKind = "short" | "long" | "python" | "download" | "agent";
+export type TaskKind = "short" | "long" | "python" | "download" | "agent" | "repo";
 
 export interface TaskPhaseDef {
   id: string;
   label: string;
   cmd: string;
+  /** Seconds the phase may take (default 300, or 900 for a repeated phase). */
+  timeoutSeconds?: number;
 }
 
 const HASH_DISK: TaskPhaseDef[] = [
@@ -55,6 +60,20 @@ const PYTHON = [
 const DOWNLOAD_URL = "https://nodejs.org/dist/v22.11.0/node-v22.11.0-linux-x64.tar.gz";
 const PY_FETCH = `import shutil, urllib.request; shutil.copyfileobj(urllib.request.urlopen('${DOWNLOAD_URL}'), open('/dev/null', 'wb'))`;
 
+// The real-repo job's sources, pinned so every provider does exactly the same work.
+const REPO_TARBALL = "https://codeload.github.com/gigialc/sandboxrouter/tar.gz/ba2b32a1a403a93acad75a707f55a2eac9368f7a";
+const NODE_BASE = "https://nodejs.org/dist/v22.11.0/node-v22.11.0-linux";
+const FETCH = [
+  "set -e",
+  'case "$(uname -m)" in aarch64|arm64) A=arm64 ;; *) A=x64 ;; esac',
+  `get() { if command -v curl > /dev/null; then curl -sSfL -o "$2" "$1"; elif command -v wget > /dev/null; then wget -q -O "$2" "$1"; else python3 -c "import shutil, sys, urllib.request; shutil.copyfileobj(urllib.request.urlopen(sys.argv[1]), open(sys.argv[2], 'wb'))" "$1" "$2"; fi; }`,
+  "rm -rf /tmp/sr-node /tmp/sr-repo && mkdir -p /tmp/sr-node /tmp/sr-repo",
+  `get "${NODE_BASE}-$A.tar.gz" /tmp/sr-node.tgz && tar xzf /tmp/sr-node.tgz -C /tmp/sr-node --strip-components=1`,
+  `get "${REPO_TARBALL}" /tmp/sr-repo.tgz && tar xzf /tmp/sr-repo.tgz -C /tmp/sr-repo --strip-components=1`,
+  "set +e",
+].join("\n");
+const IN_REPO = "cd /tmp/sr-repo && PATH=/tmp/sr-node/bin:$PATH";
+
 // One tool call in the agent loop: a little real work, like reading files and running a check.
 const TOOL = "import json, hashlib; d = [{'i': i, 'h': hashlib.sha256(str(i).encode()).hexdigest()} for i in range(40000)]; print(len(json.dumps(d)))";
 
@@ -63,6 +82,15 @@ export const TASKS: Record<TaskKind, { version: string; repeat: number; phases: 
   short: { version: "v1", repeat: 1, phases: HASH_DISK },
   long: { version: "v1-long", repeat: 40, phases: HASH_DISK },
   python: { version: "python-v1", repeat: 1, phases: [{ id: "python", label: "Python", cmd: `python3 -c "${PYTHON}"` }] },
+  repo: {
+    version: "repo-v1",
+    repeat: 1,
+    phases: [
+      { id: "fetch", label: "fetch Node and the repo", cmd: FETCH, timeoutSeconds: 600 },
+      { id: "install", label: "npm ci", cmd: `${IN_REPO} npm ci --no-audit --no-fund --loglevel=error`, timeoutSeconds: 900 },
+      { id: "typecheck", label: "typecheck", cmd: `${IN_REPO} ./node_modules/.bin/tsc --noEmit -p .`, timeoutSeconds: 600 },
+    ],
+  },
   agent: {
     version: "agent-v1",
     repeat: 1,
@@ -160,7 +188,7 @@ export async function runTask(box: Pick<ProviderSandbox, "exec">, kind: TaskKind
   let coreMs: number | undefined = 0;
   for (const p of phases) {
     const t = performance.now();
-    const r = await box.exec(withCpu(phaseCommand(p.cmd, repeat)), { timeoutSeconds: repeat > 1 ? 900 : 300 });
+    const r = await box.exec(withCpu(phaseCommand(p.cmd, repeat)), { timeoutSeconds: p.timeoutSeconds ?? (repeat > 1 ? 900 : 300) });
     if (r.exitCode !== 0) throw new Error(`task phase ${p.id} exited ${r.exitCode}: ${(r.stderr || r.stdout).slice(0, 120)}`);
     out[p.id] = Math.max(1, Math.round(performance.now() - t - overhead));
     const line = r.stdout.split("\n").find((l) => l.startsWith(`${MARK}|`));

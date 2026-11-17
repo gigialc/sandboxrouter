@@ -3,6 +3,9 @@ import type { Router, RoutedSandbox } from "./router.js";
 import type { Attempt, ProviderId, SandboxSpec } from "./types.js";
 
 /** Every step `check` runs, in order. Each provider's saved report is scored against this list. */
+/** An account that can't start sandboxes at all: no credit, a frozen workspace, or a key or plan without access. */
+export const ACCOUNT_BLOCKED = /insufficient_credits|insufficient credit|workspace has been frozen|spending limit|HTTP 403|\b403\b.*Forbidden|Payment Required/i;
+
 export const CHECK_STEPS = [
   "create",
   "exec: stdout, stderr, exit code",
@@ -82,6 +85,12 @@ export async function checkProvider(
       if ((err as { attempts?: Attempt[] }).attempts?.at(-1)?.status === 402) {
         notRun = "the account running the check can't pay (402)";
         return { status: "skip" as const, detail: `the account can't pay (402), so this run says nothing about ${provider}: ${msg}` };
+      }
+      // The account itself can't start sandboxes (no credit, a frozen workspace, a plan without sandboxes): that's the
+      // account running the check, not the provider.
+      if (ACCOUNT_BLOCKED.test(msg)) {
+        notRun = "the account running the check can't start sandboxes (credit, plan or a frozen workspace)";
+        return { status: "skip" as const, detail: `${notRun}, so this run says nothing about ${provider}: ${msg}` };
       }
       // The provider's SDK isn't installed where the check runs: that says nothing about the provider.
       const pkg = /needs the "([^"]+)" package/.exec(msg)?.[1];

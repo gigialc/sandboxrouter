@@ -5,6 +5,8 @@ import { platform, arch } from "node:os";
 import { ACCOUNT_ERROR, bench, benchMarkdown, NETWORK_ERROR } from "./bench.js";
 import { TASKS, type TaskKind } from "./task.js";
 import { submitReport } from "./submit.js";
+import { burst } from "./burst.js";
+import { agentBench, AGENT_TASK_VERSION } from "./agent-bench.js";
 
 /** Errors that mean the network between here and the provider failed, not the provider. */
 import { costMarkdown, costRun, settle, type CostRun } from "./cost.js";
@@ -38,6 +40,12 @@ Usage:
                           then on 2, write 256 MB to disk) and prices it with each provider's billing rules;
                           --long runs that job 40 times in a row (minutes); --job python (a pure-Python script)
                           or --job download (53 MB over HTTPS) runs another job. --parallel benches N providers at once
+  sandboxrouter burst     [--n 100] [--provider a,b] [--job python|agent] [--parallel 1] [--share [--label PLACE] [--by GITHUB_USER] [--submit]]
+                          start --n sandboxes at once on each provider (time to interactive at p50/p95/p99, how many
+                          started); --job runs a standard job in each: python for RL-style rollouts, agent for parallel agents
+  sandboxrouter agentbench [--runs 5] [--provider a,b] [--model gemini-3.5-flash] [--parallel 4] [--share ...]
+                          a real agent (Gemini, GEMINI_API_KEY) does the same task in a sandbox on each provider;
+                          the key stays here and only its shell commands run in the sandbox
   sandboxrouter cost run  [--provider a,b] [--minutes 10] [--vcpu 2 --memory 4] [--no-load] [--out FILE] [--by GITHUB_USER]
                           start one sandbox per provider for a fixed time with every core busy, record
                           the size it really got and the list-price prediction
@@ -82,6 +90,8 @@ const { values, positionals } = parseArgs({
     long: { type: "boolean" },
     job: { type: "string" },
     parallel: { type: "string" },
+    n: { type: "string" },
+    model: { type: "string" },
     json: { type: "boolean" },
     port: { type: "string" },
     host: { type: "string" },
@@ -315,6 +325,100 @@ async function main() {
     if (!results.length) return console.log("Nothing to clean up.");
     for (const r of results) console.log(`${r.action.padEnd(10)} ${r.id}${r.detail ? `  (${r.detail})` : ""}`);
     if (results.some((r) => r.action === "failed")) process.exitCode = 1;
+    return;
+  }
+
+  if (cmd === "agentbench") {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) return console.error("agentbench needs GEMINI_API_KEY (it stays on this machine; only shell commands reach the sandbox)");
+    const model = values.model ?? "gemini-3.5-flash";
+    const ids = providers ?? router.registered().filter((id) => router.isConfigured(id));
+    const rows = await agentBench({ router, providers: ids, runs: num(values.runs) ?? 5, apiKey, model, parallel: num(values.parallel), onProgress: (m) => console.error(m) });
+    if (values.json) return console.log(JSON.stringify(rows, null, 2));
+    console.log(`\nsandboxrouter agentbench: ${model}, ${num(values.runs) ?? 5} runs each\n`);
+    console.log("| Provider | Done right | Wall | Waiting on model | Sandbox CPU | Turns | Sandbox cost |\n|---|---|---|---|---|---|---|");
+    const s = (v?: number) => (v === undefined ? "n/a" : `${(v / 1000).toFixed(1)} s`);
+    for (const r of rows) console.log(`| ${r.provider} | ${r.ok}/${r.runs} | ${s(r.medianWallMs)} | ${s(r.medianModelMs)} | ${s(r.medianCpuMs)} | ${r.medianTurns ?? "n/a"} | ${r.medianUsd === undefined ? "n/a" : `$${r.medianUsd.toFixed(6)}`} |`);
+    if (values.share || values.submit) {
+      const started = rows.filter((r) => r.medianWallMs !== undefined);
+      if (rows.length - started.length >= 3) {
+        console.error(`\nnot writing a report: ${rows.length - started.length} providers never started a session, which looks like this machine lost its connection. Run it again.`);
+        process.exitCode = 1;
+        return;
+      }
+      const version = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8")).version;
+      const report = {
+        tool: "sandboxrouter-agent",
+        version,
+        date: new Date().toISOString(),
+        ...(values.label ? { label: values.label } : {}),
+        ...(by ? { by } : {}),
+        task: AGENT_TASK_VERSION,
+        model,
+        runs: num(values.runs) ?? 5,
+        node: process.version,
+        platform: `${platform()}-${arch()}`,
+        rows: started.filter((r) => benchmarksPublishable(r.provider)),
+      };
+      const file = values.out ?? `sandboxrouter-agent-${report.date.slice(0, 10)}-${Math.random().toString(36).slice(2, 8)}.json`;
+      writeFileSync(file, JSON.stringify(report, null, 2) + "\n");
+      if (values.submit) {
+        try {
+          console.log(`\nwrote ${file} and opened ${submitReport(file, `Real agent (${model}) on ${report.rows.length} providers, from ${report.label ?? "an unlabelled location"}.`)}`);
+        } catch (err) {
+          console.error(`\nwrote ${file}, but couldn't open the pull request: ${(err as Error).message}`);
+          process.exitCode = 1;
+        }
+      } else console.log(`\nwrote ${file}`);
+    }
+    return;
+  }
+
+  if (cmd === "burst") {
+    const n = num(values.n) ?? 100;
+    const job = values.job as TaskKind | undefined;
+    if (job && !(job in TASKS)) return console.error(`--job must be one of: ${Object.keys(TASKS).join(", ")}`);
+    const ids = providers ?? router.registered().filter((id) => router.isConfigured(id));
+    const rows = await burst({ router, providers: ids, n, task: job, parallel: num(values.parallel), onProgress: (m) => console.error(m) });
+    if (values.json) return console.log(JSON.stringify(rows, null, 2));
+    console.log(`\nsandboxrouter burst: ${n} at once${job ? `, each running the ${job} job` : ""}\n`);
+    console.log("| Provider | Started | p50 | p95 | p99 | All done | Burst cost |\n|---|---|---|---|---|---|---|");
+    for (const r of rows) {
+      const ms = (v?: number) => (v === undefined ? "n/a" : `${v} ms`);
+      console.log(`| ${r.provider} | ${r.ok}/${r.n}${r.limited ? ` (${r.limited} limited)` : ""} | ${ms(r.p50Ms)} | ${ms(r.p95Ms)} | ${ms(r.p99Ms)} | ${(r.wallMs / 1000).toFixed(1)} s | ${r.usd === undefined ? "n/a" : `$${r.usd.toFixed(4)}`} |`);
+    }
+    if (values.share || values.submit) {
+      // As with bench: nothing from a run where this machine lost its connection, and no provider that never answered.
+      const shared = rows.filter((r) => r.ok > 0 || r.limited > 0);
+      const version = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8")).version;
+      const report = {
+        tool: "sandboxrouter-burst",
+        version,
+        date: new Date().toISOString(),
+        ...(values.label ? { label: values.label } : {}),
+        ...(by ? { by } : {}),
+        n,
+        ...(job ? { task: TASKS[job].version } : {}),
+        node: process.version,
+        platform: `${platform()}-${arch()}`,
+        rows: shared.filter((r) => benchmarksPublishable(r.provider)),
+      };
+      if (rows.length - shared.length >= 3) {
+        console.error(`\nnot writing a report: ${rows.length - shared.length} providers started nothing, which looks like this machine lost its connection. Run it again.`);
+        process.exitCode = 1;
+        return;
+      }
+      const file = values.out ?? `sandboxrouter-burst-${report.date.slice(0, 10)}-${Math.random().toString(36).slice(2, 8)}.json`;
+      writeFileSync(file, JSON.stringify(report, null, 2) + "\n");
+      if (values.submit) {
+        try {
+          console.log(`\nwrote ${file} and opened ${submitReport(file, `Burst of ${n}${job ? ` running the ${job} job` : ""} on ${report.rows.length} providers, from ${report.label ?? "an unlabelled location"}.`)}`);
+        } catch (err) {
+          console.error(`\nwrote ${file}, but couldn't open the pull request: ${(err as Error).message}`);
+          process.exitCode = 1;
+        }
+      } else console.log(`\nwrote ${file}`);
+    }
     return;
   }
 

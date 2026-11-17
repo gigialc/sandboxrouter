@@ -2,7 +2,7 @@
 // Run from the repo root: node --import tsx scripts/site-data.ts
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { benchmarksPublishable, billingRules, CATALOG, hourlyCost, planLabel, unfit } from "../src/catalog.js";
-import { aggregate, loadReports, taskTable } from "../src/leaderboard.js";
+import { agentTable, aggregate, burstTable, loadAgentReports, loadBursts, loadReports, taskTable } from "../src/leaderboard.js";
 import { TASKS } from "../src/task.js";
 import { priceIndex } from "../src/price-index.js";
 import { computerCatalog } from "../src/computers.js";
@@ -136,6 +136,7 @@ const data = {
         ["python", "Python", "A Python script, like a code-interpreter call."],
         ["download", "Download", "A 53 MB download from nodejs.org."],
         ["agent", "Agent loop", "10 turns of a 6 s model wait and a short Python tool call: about a minute, mostly idle."],
+        ["repo", "Real repo", "What a coding agent does first: fetch Node and a real TypeScript project, npm ci, typecheck."],
       ] as const
     )
       .map(([id, title, blurb]) => ({
@@ -162,6 +163,17 @@ const data = {
       .filter((k) => k.rows.length),
   },
   useCases,
+  // Under load: N sandboxes at once, alone, each running a Python step (RL rollouts), or the agent loop (parallel agents).
+  load: (() => {
+    const bursts = loadBursts("results");
+    return [
+      { id: "burst", title: "100 at once", blurb: "100 sandboxes asked for at the same moment, each answering one command.", rows: burstTable(bursts) },
+      { id: "rl", title: "RL rollouts", blurb: "100 sandboxes at once, each running a short Python step, like a batch of RL rollouts or evals.", rows: burstTable(bursts, TASKS.python.version) },
+      { id: "agents", title: "Parallel agents", blurb: "100 agent loops at once, each about a minute of mostly waiting on the model.", rows: burstTable(bursts, TASKS.agent.version) },
+    ].filter((k) => k.rows.length);
+  })(),
+  // A real agent (Gemini) doing the same task in a sandbox on each provider.
+  agent: agentTable(loadAgentReports("results")),
   // Today's price index, and how it has moved (scripts/price-index.json, recorded daily when it changes).
   priceIndex: {
     lines: priceIndex(),

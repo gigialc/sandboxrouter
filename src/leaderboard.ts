@@ -103,13 +103,15 @@ export function aggregate(reports: BenchReport[]): LeaderRow[] {
     const rs = xs.map((x) => x.row);
     const runs = rs.reduce((n, r) => n + r.runs, 0);
     const ok = rs.reduce((n, r) => n + (r.runs - r.failures), 0);
+    // Refusals for a limit on the benchmarking account aren't the provider failing: leave them out of the rate.
+    const attempted = runs - rs.reduce((n, r) => n + (r.limited ?? 0), 0);
     return {
       provider: id,
       name: CATALOG.find((c) => c.id === id)!.name,
       submissions: rs.length,
       medianCreateMs: median(rs.map((r) => r.medianCreateMs).filter((n): n is number => typeof n === "number")),
       medianExecMs: median(rs.map((r) => r.medianExecMs).filter((n): n is number => typeof n === "number")),
-      successRate: runs ? ok / runs : 0,
+      successRate: attempted ? ok / attempted : 0,
       hourlyUsd: hourlyCost(id, fittingSpec(id)),
       size: fittingSpec(id),
       measuredAt: xs.map((x) => x.date).sort().at(-1)!,
@@ -327,4 +329,105 @@ ${body || `<tr><td colspan="7" class="muted">No results yet. Run <code>npx @sand
 </body>
 </html>
 `;
+}
+
+
+/** A saved `sandboxrouter burst` report (results/, tool "sandboxrouter-burst"). */
+export interface BurstReport {
+  tool: "sandboxrouter-burst";
+  version: string;
+  date: string;
+  label?: string;
+  by?: string;
+  n: number;
+  /** The job each sandbox ran, if any: a task version (src/task.ts). */
+  task?: string;
+  node: string;
+  platform: string;
+  rows: import("./burst.js").BurstRow[];
+}
+
+export function loadBursts(dir: string): BurstReport[] {
+  let files: string[];
+  try {
+    files = readdirSync(dir).filter((f) => f.endsWith(".json"));
+  } catch {
+    return [];
+  }
+  const out: BurstReport[] = [];
+  for (const f of files.sort()) {
+    try {
+      const r = JSON.parse(readFileSync(join(dir, f), "utf8"));
+      if (r?.tool === "sandboxrouter-burst" && Array.isArray(r.rows)) out.push(r);
+    } catch {
+      /* skip unreadable files */
+    }
+  }
+  return out;
+}
+
+/**
+ * Each provider's latest burst of each kind (plain, or with a job), newest location wins, for the website:
+ * how many started, time to interactive at p50/p95/p99, and what the burst cost. Most started first, then
+ * fastest p50.
+ */
+export function burstTable(reports: BurstReport[], task?: string) {
+  const latest = new Map<string, { row: import("./burst.js").BurstRow; date: string; label?: string }>();
+  for (const rep of reports) {
+    if ((rep.task ?? undefined) !== task) continue;
+    for (const r of rep.rows) {
+      if (!KNOWN.has(r.provider) || !benchmarksPublishable(r.provider)) continue;
+      const seen = latest.get(r.provider);
+      if (!seen || rep.date > seen.date) latest.set(r.provider, { row: r, date: rep.date, label: rep.label });
+    }
+  }
+  return [...latest.values()]
+    .map(({ row, date, label }) => ({ ...row, name: CATALOG.find((c) => c.id === row.provider)!.name, measuredAt: date, label: label ?? null }))
+    .sort((a, b) => b.ok - a.ok || (a.p50Ms ?? Infinity) - (b.p50Ms ?? Infinity));
+}
+
+
+/** A saved `sandboxrouter agentbench` report (results/, tool "sandboxrouter-agent"). */
+export interface AgentReport {
+  tool: "sandboxrouter-agent";
+  date: string;
+  label?: string;
+  task: string;
+  model: string;
+  runs: number;
+  rows: import("./agent-bench.js").AgentRow[];
+}
+
+export function loadAgentReports(dir: string): AgentReport[] {
+  let files: string[];
+  try {
+    files = readdirSync(dir).filter((f) => f.endsWith(".json"));
+  } catch {
+    return [];
+  }
+  const out: AgentReport[] = [];
+  for (const f of files.sort()) {
+    try {
+      const r = JSON.parse(readFileSync(join(dir, f), "utf8"));
+      if (r?.tool === "sandboxrouter-agent" && Array.isArray(r.rows)) out.push(r);
+    } catch {
+      /* skip unreadable files */
+    }
+  }
+  return out;
+}
+
+/** Each provider's latest real-agent result: done right first, then cheapest sandbox per session. */
+export function agentTable(reports: AgentReport[]) {
+  const latest = new Map<string, { row: import("./agent-bench.js").AgentRow; date: string; model: string }>();
+  for (const rep of reports) {
+    for (const r of rep.rows) {
+      if (!KNOWN.has(r.provider) || !benchmarksPublishable(r.provider)) continue;
+      const seen = latest.get(r.provider);
+      if (!seen || rep.date > seen.date) latest.set(r.provider, { row: r, date: rep.date, model: rep.model });
+    }
+  }
+  return [...latest.values()]
+    .map(({ row, date, model }) => ({ ...row, name: CATALOG.find((c) => c.id === row.provider)!.name, measuredAt: date, model }))
+    .sort((a, b) => b.ok / b.runs - a.ok / a.runs || (a.medianUsd ?? Infinity) - (b.medianUsd ?? Infinity));
 }
