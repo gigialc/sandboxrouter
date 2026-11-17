@@ -238,8 +238,8 @@ export default function Home() {
             { title: "Desktops and phones too", body: `Computers your model can see and click, from ${desktops} providers.` },
           ]}
           visual={
-            <div className="bg-[#0c0f0e] p-6 sm:p-10">
-              <PriceIndex dark />
+            <div className="border border-line p-5 sm:p-8">
+              <PriceIndex />
             </div>
           }
         />
