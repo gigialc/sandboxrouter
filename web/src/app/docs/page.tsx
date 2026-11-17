@@ -203,10 +203,12 @@ router.quote({ expectedSeconds: 10 })               // where it would land and w
 
         <h2 id="cooldowns">Failover at scale</h2>
         <p>
-          Fallback handles one request. Across many, the router also remembers trouble: a provider that refuses for a limit
-          (a 429, a quota, a concurrency cap) goes to the back of the line for 30 seconds, and one that fails 3 creates within a
-          minute goes to the back for 60. Requests stop waiting on it, it&apos;s still tried when nothing else can take the
-          sandbox, and one success brings it back. The hosted key works this way for every request.
+          Failover happens when a sandbox is starting: if a provider can&apos;t start it, the next one does. Across many
+          creates, the router also remembers trouble: a provider that refuses for a limit (a 429, a quota, a concurrency cap)
+          goes to the back of the line for 30 seconds, and one that fails 3 creates within a minute goes to the back for 60.
+          New sandboxes stop waiting on it, it&apos;s still tried when nothing else can take the sandbox, and one success
+          brings it back. The hosted key works this way for every create. A sandbox that&apos;s already running stays on its
+          provider; if that provider fails mid-run, the work isn&apos;t moved.
         </p>
         <CodeBlock
           code={`router.troubled()

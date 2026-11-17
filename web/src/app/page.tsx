@@ -105,7 +105,7 @@ export default function Home() {
         </dl>
 
         <p className="mt-12 max-w-lg text-[15px] leading-7 text-ink-2">
-          Each sandbox goes to the cheapest provider that fits, and moves on when one fails.{" "}
+          Each sandbox goes to the cheapest provider that fits. If that one can&apos;t start it, the next one does.{" "}
           {HOSTED_PUBLIC ? "Open source, or one hosted key." : "Open source."}{" "}
           <Link href="/learn" className="text-ink underline underline-offset-4 decoration-line-2 hover:decoration-ink">
             New to sandboxes?
@@ -140,7 +140,7 @@ export default function Home() {
       <div className="mx-auto mt-24 max-w-[1320px] space-y-24 sm:mt-28 sm:space-y-32">
         <Feature
           label="Route"
-          claim="Each sandbox starts on the cheapest provider that fits, and moves on when one fails."
+          claim="Each sandbox starts on the cheapest provider that fits. If that one can't start it, the next one does."
           actions={
             <>
               <Button href="/docs#routing" primary>
@@ -150,7 +150,10 @@ export default function Home() {
             </>
           }
           points={[
-            { title: "Fallback on every failure", body: "Out of credit, rate-limited or down: the next provider takes the sandbox, and every attempt is on sbx.attempts." },
+            {
+              title: "Fallback when starting",
+              body: "Out of credit, rate-limited or down: if a provider can't start your sandbox, the next one does, and every attempt is on sbx.attempts. Once it's running, it stays where it started.",
+            },
             { title: "One handle, whatever ran it", body: "Run commands, stream output, move files and pause the same way on every provider." },
             { title: "The provider's own SDK is still there", body: "sbx.native is the provider's own sandbox object, already connected, for ports, snapshots and anything the router doesn't cover." },
             { title: "Nothing left running", body: "If a script crashes, sandboxrouter gc kills the sandboxes it left behind." },
@@ -163,7 +166,7 @@ export default function Home() {
             id="scale"
             flip
             label="At scale"
-            claim="When one provider says no, the next one takes the sandbox."
+            claim="If a provider can't start your sandbox, the next one does."
             actions={
               <>
                 {HOSTED_PUBLIC ? (
@@ -186,8 +189,8 @@ export default function Home() {
                 }; spread over ${scale.providers} providers, ${scale.ok.toLocaleString("en-US")} started, as ${scale.saturated} hit their limit and handed the rest on.`,
               },
               {
-                title: "Failover that remembers",
-                body: "A provider that rate-limits you goes to the back of the line for 30 seconds; one that keeps failing, for a minute. Requests stop waiting on it, and one success brings it back.",
+                title: "Failover when starting, that remembers",
+                body: `A provider that rate-limits you goes to the back of the line for 30 seconds; one that keeps failing to start sandboxes, for a minute. New sandboxes stop waiting on it, and one success brings it back. A sandbox that's already running stays on its provider; if that provider fails mid-run, the work isn't moved.`,
               },
               {
                 title: "One key, one bill",
@@ -350,6 +353,7 @@ function ScaleChart({ scale, day }: { scale: NonNullable<typeof site.scale>; day
           </>
         ) : null}{" "}
         <span className="text-muted">Our accounts, standard limits.</span>
+        <span className="mt-2 block text-muted">A sandbox that&apos;s already running stays on its provider; if that provider fails mid-run, the work isn&apos;t moved.</span>
       </figcaption>
     </figure>
   );
