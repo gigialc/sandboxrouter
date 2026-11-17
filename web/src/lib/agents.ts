@@ -132,7 +132,7 @@ export function llmsTxt(): string {
 ## When to use sandboxRouter
 
 - **Choosing a sandbox provider.** Use the measured benchmarks below instead of provider marketing: start time, real jobs priced by each provider's own billing rules, 10 and 100 at once, and a real AI agent.
-- **Running agent code in a sandbox.** One API over many providers, with fallback when one fails: \`npm i ${NPM}\`.
+- **Running agent code in a sandbox.** One API over many providers; if one can't start a sandbox, the next one does: \`npm i ${NPM}\`.
 
 ## How an agent should use it
 

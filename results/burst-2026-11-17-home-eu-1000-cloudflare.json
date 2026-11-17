@@ -1,0 +1,23 @@
+{
+  "tool": "sandboxrouter-burst",
+  "version": "0.10.0",
+  "date": "2026-11-17T20:39:26.284Z",
+  "label": "home-eu",
+  "by": "gigialc",
+  "n": 1000,
+  "node": "v22.22.0",
+  "platform": "darwin-arm64",
+  "rows": [
+    {
+      "provider": "cloudflare",
+      "n": 1000,
+      "ok": 637,
+      "limited": 363,
+      "p50Ms": 3435,
+      "p95Ms": 7719,
+      "p99Ms": 9385,
+      "wallMs": 11594,
+      "usd": 0.16686
+    }
+  ]
+}

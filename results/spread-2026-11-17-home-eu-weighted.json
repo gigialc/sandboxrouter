@@ -1,0 +1,99 @@
+{
+  "tool": "sandboxrouter-spread",
+  "version": "0.11.0",
+  "date": "2026-11-17T20:41:56.179Z",
+  "label": "home-eu",
+  "by": "gigialc",
+  "n": 1000,
+  "ok": 1000,
+  "failed": 0,
+  "p50Ms": 7118,
+  "p95Ms": 62780,
+  "p99Ms": 62996,
+  "wallMs": 63772,
+  "usd": 1.474928,
+  "byProvider": [
+    {
+      "provider": "cloudflare",
+      "ok": 334,
+      "spilledIn": 221,
+      "refused": 194
+    },
+    {
+      "provider": "modal",
+      "ok": 306,
+      "spilledIn": 194,
+      "refused": 0
+    },
+    {
+      "provider": "tensorlake",
+      "ok": 100,
+      "spilledIn": 0,
+      "refused": 12
+    },
+    {
+      "provider": "vercel",
+      "ok": 92,
+      "spilledIn": 0,
+      "refused": 1
+    },
+    {
+      "provider": "agentcore",
+      "ok": 80,
+      "spilledIn": 0,
+      "refused": 33
+    },
+    {
+      "provider": "e2b",
+      "ok": 41,
+      "spilledIn": 0,
+      "refused": 18
+    },
+    {
+      "provider": "openscale",
+      "ok": 18,
+      "spilledIn": 0,
+      "refused": 94
+    },
+    {
+      "provider": "agent37",
+      "ok": 12,
+      "spilledIn": 0,
+      "refused": 26
+    },
+    {
+      "provider": "daytona",
+      "ok": 10,
+      "spilledIn": 0,
+      "refused": 1
+    },
+    {
+      "provider": "freestyle",
+      "ok": 5,
+      "spilledIn": 0,
+      "refused": 47
+    },
+    {
+      "provider": "maritime",
+      "ok": 2,
+      "spilledIn": 0,
+      "refused": 71
+    },
+    {
+      "provider": "novita",
+      "ok": 0,
+      "spilledIn": 0,
+      "refused": 112
+    }
+  ],
+  "saturated": [
+    "tensorlake",
+    "agent37",
+    "freestyle",
+    "agentcore",
+    "e2b",
+    "daytona",
+    "maritime",
+    "novita"
+  ]
+}

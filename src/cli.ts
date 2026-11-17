@@ -418,7 +418,7 @@ async function main() {
     if (values.spread) {
       // One burst over all of them: round-robin, and a provider that says no hands its sandboxes to the next.
       const r = await spreadBurst({ router, providers: ids, n, weights: values.even ? "even" : undefined, onProgress: (m) => console.error(m) });
-      if (values.out) writeFileSync(values.out, JSON.stringify({ tool: "sandboxrouter-spread", date: new Date().toISOString(), label: values.label, ...r }, null, 2) + "\n");
+      if (values.out) writeFileSync(values.out, JSON.stringify({ tool: "sandboxrouter-spread", version: JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8")).version, date: new Date().toISOString(), label: values.label, by: values.by, ...r }, null, 2) + "\n");
       if (values.json) return console.log(JSON.stringify(r, null, 2));
       const ms = (v?: number) => (v === undefined ? "n/a" : `${v} ms`);
       console.log(`\nsandboxrouter burst --spread: ${r.ok}/${r.n} started over ${ids.length} providers; p50 ${ms(r.p50Ms)}, p95 ${ms(r.p95Ms)}, p99 ${ms(r.p99Ms)}; all done in ${(r.wallMs / 1000).toFixed(1)} s; $${r.usd.toFixed(4)}`);

@@ -160,6 +160,16 @@ export const site = data as unknown as {
   version: string;
   generatedAt: string;
   shapes: Shape[];
+  /** N sandboxes at once spread over several providers, against the best single provider at the same size. */
+  scale: {
+    date: string;
+    n: number;
+    ok: number;
+    providers: number;
+    saturated: number;
+    byProvider: { provider: string; name: string; ok: number; spilledIn: number }[];
+    bestSingle: { provider: string; name: string; ok: number } | null;
+  } | null;
   /** Provider id -> its icon under /logos/. */
   logos: Record<string, string>;
   providers: SiteProvider[];

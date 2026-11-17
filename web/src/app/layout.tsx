@@ -10,7 +10,7 @@ const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"]
 const CLOUD = site.providers.filter((p) => !p.local);
 const DESCRIPTION = `A free, open-source router for AI agent sandboxes: one API across ${CLOUD.length} providers, priced side by side, ${
   CLOUD.filter((p) => p.live.status === "passed").length
-} of them tested on real accounts, with automatic fallback.`;
+} of them tested on real accounts; if one can't start a sandbox, the next one does.`;
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.sandboxrouter.ai"),

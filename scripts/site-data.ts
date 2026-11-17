@@ -99,6 +99,35 @@ const useCases = USE_CASES.map((u) => {
   return { id: u.id, title: u.title, blurb: u.blurb, spec: u.spec, require: u.require ?? [], runSeconds: Math.round(hours * 3600), top };
 });
 
+// The at-scale proof on the homepage: the newest spread report (N at once over several providers, with spillover),
+// against the most any single provider started in a burst of the same size.
+const scale = (() => {
+  const spreads = readdirSync("results")
+    .filter((f) => f.endsWith(".json"))
+    .map((f) => JSON.parse(readFileSync(`results/${f}`, "utf8")))
+    .filter((j) => j?.tool === "sandboxrouter-spread")
+    .sort((a, b) => String(b.date).localeCompare(String(a.date)));
+  const s = spreads[0];
+  if (!s) return null;
+  const singles = loadBursts("results")
+    .filter((b) => b.n === s.n && !b.task)
+    .flatMap((b) => b.rows.map((r) => ({ provider: r.provider, ok: r.ok })))
+    .sort((a, b) => b.ok - a.ok);
+  const best = singles[0];
+  return {
+    date: s.date as string,
+    n: s.n as number,
+    ok: s.ok as number,
+    providers: (s.byProvider as unknown[]).length,
+    /** Providers that hit a limit during the burst and handed the rest of their share on. */
+    saturated: (s.saturated as unknown[] | undefined)?.length ?? 0,
+    byProvider: (s.byProvider as { provider: string; ok: number; spilledIn: number }[])
+      .filter((b) => b.ok > 0)
+      .map((b) => ({ provider: b.provider, name: CATALOG.find((c) => c.id === b.provider)?.name ?? b.provider, ok: b.ok, spilledIn: b.spilledIn })),
+    bestSingle: best ? { provider: best.provider, name: CATALOG.find((c) => c.id === best.provider)?.name ?? best.provider, ok: best.ok } : null,
+  };
+})();
+
 // Provider icons fetched by scripts/fetch-logos.py: id -> file under /logos/.
 const LOGOS: Record<string, string> = Object.fromEntries(
   (existsSync("web/public/logos") ? readdirSync("web/public/logos") : []).map((f) => [f.replace(/\.[a-z]+$/, ""), `/logos/${f}`]),
@@ -106,6 +135,7 @@ const LOGOS: Record<string, string> = Object.fromEntries(
 
 const data = {
   logos: LOGOS,
+  scale,
   version: pkg.version,
   generatedAt: new Date().toISOString(),
   shapes: SHAPES.map((s) => `${s.vcpu}x${s.memoryGb}`),

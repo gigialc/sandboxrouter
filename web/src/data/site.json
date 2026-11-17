@@ -37,8 +37,88 @@
     "upstash": "/logos/upstash.png",
     "vercel": "/logos/vercel.png"
   },
+  "scale": {
+    "date": "2026-11-17T20:41:56.179Z",
+    "n": 1000,
+    "ok": 1000,
+    "providers": 12,
+    "saturated": 8,
+    "byProvider": [
+      {
+        "provider": "cloudflare",
+        "name": "Cloudflare Sandbox",
+        "ok": 334,
+        "spilledIn": 221
+      },
+      {
+        "provider": "modal",
+        "name": "Modal",
+        "ok": 306,
+        "spilledIn": 194
+      },
+      {
+        "provider": "tensorlake",
+        "name": "Tensorlake",
+        "ok": 100,
+        "spilledIn": 0
+      },
+      {
+        "provider": "vercel",
+        "name": "Vercel Sandbox",
+        "ok": 92,
+        "spilledIn": 0
+      },
+      {
+        "provider": "agentcore",
+        "name": "Amazon Bedrock AgentCore Code Interpreter",
+        "ok": 80,
+        "spilledIn": 0
+      },
+      {
+        "provider": "e2b",
+        "name": "E2B",
+        "ok": 41,
+        "spilledIn": 0
+      },
+      {
+        "provider": "openscale",
+        "name": "OpenScale Sandboxes",
+        "ok": 18,
+        "spilledIn": 0
+      },
+      {
+        "provider": "agent37",
+        "name": "Agent37",
+        "ok": 12,
+        "spilledIn": 0
+      },
+      {
+        "provider": "daytona",
+        "name": "Daytona",
+        "ok": 10,
+        "spilledIn": 0
+      },
+      {
+        "provider": "freestyle",
+        "name": "Freestyle",
+        "ok": 5,
+        "spilledIn": 0
+      },
+      {
+        "provider": "maritime",
+        "name": "Maritime",
+        "ok": 2,
+        "spilledIn": 0
+      }
+    ],
+    "bestSingle": {
+      "provider": "cloudflare",
+      "name": "Cloudflare Sandbox",
+      "ok": 637
+    }
+  },
   "version": "0.11.0",
-  "generatedAt": "2026-11-17T21:00:07.752Z",
+  "generatedAt": "2026-11-17T21:14:57.318Z",
   "shapes": [
     "1x2",
     "2x4",

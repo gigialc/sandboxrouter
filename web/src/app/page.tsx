@@ -3,6 +3,8 @@ import { Button } from "@/components/chrome";
 import { CodeBlock, CodeTabs, InstallChip } from "@/components/code";
 import { Feature } from "@/components/Feature";
 import { PriceIndex } from "@/components/PriceIndex";
+import { ProviderLogo } from "@/components/ProviderName";
+import { BarNum, ResultRow, ResultTable, Num, barMax, money, time } from "@/components/results";
 import { RouteDemo } from "@/components/RouteDemo";
 import { HOSTED_FEE_PCT, HOSTED_PUBLIC, HOSTED_URL, NPM, REPO, REPO_PUBLIC, site } from "@/lib/site";
 
@@ -37,6 +39,10 @@ export default function Home() {
     .slice(0, 9);
   // The benchmarks section quotes the short job: who finished first, and who cost least.
   const short_ = site.tasks.kinds.find((k) => k.id === "short");
+  // Real sandboxes behind the benchmarks: the same count as the Benchmarks page.
+  const totalRuns = site.submissions.reduce((n, s) => n + s.runs * s.providers, 0);
+  const scale = site.scale;
+  const day = (iso: string) => new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
   const fastest = short_ && [...short_.rows].sort((a, b) => a.taskMs - b.taskMs)[0];
   const cheapestTask = short_?.rows[0];
 
@@ -74,9 +80,33 @@ export default function Home() {
           )}
           {REPO_PUBLIC && !HOSTED_PUBLIC ? <Button href={REPO}>GitHub</Button> : <Button href="/docs">Docs</Button>}
         </div>
-        <p className="mt-10 max-w-lg text-[15px] leading-7 text-ink-2">
-          {passed.length} providers tested on real accounts. Each sandbox goes to the cheapest one that fits, and moves on
-          when one fails. {HOSTED_PUBLIC ? "Open source, or one hosted key." : "Open source."}{" "}
+
+        {/* Three numbers, each from the published results, each linking to where it comes from. */}
+        <dl className="mt-14 grid w-full max-w-3xl grid-cols-1 border-y border-line text-left sm:grid-cols-3">
+          {[
+            scale && {
+              value: `${scale.ok.toLocaleString("en-US")}/${scale.n.toLocaleString("en-US")}`,
+              label: `sandboxes started at once over ${scale.providers} providers`,
+              note: scale.bestSingle ? `Best single provider: ${scale.bestSingle.ok.toLocaleString("en-US")} · ${day(scale.date)}` : day(scale.date),
+              href: "#scale",
+            },
+            { value: String(passed.length), label: "providers pass our real-account check", note: "Ones that fail are tried last", href: "/providers" },
+            { value: totalRuns.toLocaleString("en-US"), label: "real sandboxes benchmarked", note: "Started, used and killed", href: "/benchmarks" },
+          ]
+            .filter((x): x is { value: string; label: string; note: string; href: string } => !!x)
+            .map((x, i) => (
+              <a key={x.label} href={x.href} className={`group block px-5 py-5 hover:bg-panel ${i ? "border-t border-line sm:border-t-0 sm:border-l" : ""}`}>
+                <dt className="sr-only">{x.label}</dt>
+                <dd className="font-mono text-[26px] tracking-[-0.02em] text-ink tnum">{x.value}</dd>
+                <dd className="mt-1 text-[13px] leading-5 text-ink-2">{x.label}</dd>
+                <dd className="mt-1 text-[12px] text-muted group-hover:text-ink-2">{x.note}</dd>
+              </a>
+            ))}
+        </dl>
+
+        <p className="mt-12 max-w-lg text-[15px] leading-7 text-ink-2">
+          Each sandbox goes to the cheapest provider that fits. If that one can&apos;t start it, the next one does.{" "}
+          {HOSTED_PUBLIC ? "Open source, or one hosted key." : "Open source."}{" "}
           <Link href="/learn" className="text-ink underline underline-offset-4 decoration-line-2 hover:decoration-ink">
             New to sandboxes?
           </Link>
@@ -90,10 +120,11 @@ export default function Home() {
       </section>
 
       <div className="overflow-hidden border-y border-line py-6">
-        <ul className="flex flex-wrap justify-center gap-x-10 gap-y-3 text-[15px] text-muted">
+        <ul className="flex flex-wrap items-center justify-center gap-x-8 gap-y-4 text-[14px] text-ink-2">
           {strip.map((p) => (
             <li key={p.id}>
-              <Link href={`/providers/${p.id}`} className="hover:text-ink">
+              <Link href={`/providers/${p.id}`} className="inline-flex items-center gap-2 hover:text-ink">
+                <ProviderLogo id={p.id} name={p.name} size={22} />
                 {short(p.name)}
               </Link>
             </li>
@@ -109,7 +140,7 @@ export default function Home() {
       <div className="mx-auto mt-24 max-w-[1320px] space-y-24 sm:mt-28 sm:space-y-32">
         <Feature
           label="Route"
-          claim="Each sandbox starts on the cheapest provider that fits, and moves on when one fails."
+          claim="Each sandbox starts on the cheapest provider that fits. If that one can't start it, the next one does."
           actions={
             <>
               <Button href="/docs#routing" primary>
@@ -119,7 +150,10 @@ export default function Home() {
             </>
           }
           points={[
-            { title: "Fallback on every failure", body: "Out of credit, rate-limited or down: the next provider takes the sandbox, and every attempt is on sbx.attempts." },
+            {
+              title: "Fallback when starting",
+              body: "Out of credit, rate-limited or down: if a provider can't start your sandbox, the next one does, and every attempt is on sbx.attempts. Once it's running, it stays where it started.",
+            },
             { title: "One handle, whatever ran it", body: "Run commands, stream output, move files and pause the same way on every provider." },
             { title: "The provider's own SDK is still there", body: "sbx.native is the provider's own sandbox object, already connected, for ports, snapshots and anything the router doesn't cover." },
             { title: "Nothing left running", body: "If a script crashes, sandboxrouter gc kills the sandboxes it left behind." },
@@ -127,9 +161,48 @@ export default function Home() {
           visual={<RouteDemo />}
         />
 
+        {scale && (
+          <Feature
+            id="scale"
+            flip
+            label="At scale"
+            claim="If a provider can't start your sandbox, the next one does."
+            actions={
+              <>
+                {HOSTED_PUBLIC ? (
+                  <Button href={`${HOSTED_URL}/dashboard`} primary>
+                    Get a key
+                  </Button>
+                ) : (
+                  <Button href="/docs#quickstart" primary>
+                    Quickstart
+                  </Button>
+                )}
+                <Button href="/docs#cooldowns">How failover works</Button>
+              </>
+            }
+            points={[
+              {
+                title: "Capacity across providers",
+                body: `Every account has a limit on how many sandboxes run at once. Asked for ${scale.n.toLocaleString("en-US")} at once on ${day(scale.date)}, ${
+                  scale.bestSingle ? `the best single provider started ${scale.bestSingle.ok.toLocaleString("en-US")}` : "single providers stopped short"
+                }; spread over ${scale.providers} providers, ${scale.ok.toLocaleString("en-US")} started, as ${scale.saturated} hit their limit and handed the rest on.`,
+              },
+              {
+                title: "Failover when starting, that remembers",
+                body: `A provider that rate-limits you goes to the back of the line for 30 seconds; one that keeps failing to start sandboxes, for a minute. New sandboxes stop waiting on it, and one success brings it back. A sandbox that's already running stays on its provider; if that provider fails mid-run, the work isn't moved.`,
+              },
+              {
+                title: "One key, one bill",
+                body: `Every provider behind one sandboxRouter key, billed by the second at list price + ${HOSTED_FEE_PCT}%. Or bring your own provider keys, free.`,
+              },
+            ]}
+            visual={<ScaleChart scale={scale} day={day} />}
+          />
+        )}
+
         {short_ && fastest && cheapestTask && (
           <Feature
-            flip
             label="Benchmarks"
             claim="The same job on every provider, timed and priced the way each one bills."
             actions={
@@ -155,30 +228,18 @@ export default function Home() {
               },
             ]}
             visual={
-              <div className="bg-[#0c0f0e] p-6 sm:p-10">
-                <p className="mb-4 font-mono text-[11px] uppercase tracking-[0.14em] text-white/55">Short job, cheapest first</p>
-                <table className="w-full text-[14px] text-white">
-                  <thead>
-                    <tr className="text-left text-[11px] uppercase tracking-[0.12em] text-white/45">
-                      <th className="py-2 pr-4 font-normal">Provider</th>
-                      <th className="py-2 pr-4 font-normal">Took</th>
-                      <th className="py-2 font-normal">1,000 runs</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {short_.rows.slice(0, 6).map((r) => (
-                      <tr key={r.provider} className="border-t border-white/10">
-                        <td className="py-2.5 pr-4">
-                          <Link href={`/providers/${r.provider}`} className="hover:underline underline-offset-4">
-                            {r.name.replace(/ \(.*\)$/, "")}
-                          </Link>
-                        </td>
-                        <td className="py-2.5 pr-4 font-mono tnum text-white/70">{(r.taskMs / 1000).toFixed(1)} s</td>
-                        <td className="py-2.5 font-mono tnum">${(r.taskUsd * 1000).toFixed(3)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div className="border border-line p-5 sm:p-8">
+                <p className="text-[12px] uppercase tracking-[0.12em] text-muted">Short job · cheapest first</p>
+                <ResultTable cols={[{ label: "1,000 runs" }, { label: "Took", className: "hidden sm:table-cell" }]}>
+                  {short_.rows.slice(0, 6).map((r, k) => (
+                    <ResultRow key={r.provider} rank={k + 1} id={r.provider} name={r.name.replace(/ \(.*\)$/, "")}>
+                      <BarNum value={r.taskUsd} max={barMax(short_.rows.slice(0, 6).map((x) => x.taskUsd))}>
+                        {money(r.taskUsd * 1000)}
+                      </BarNum>
+                      <Num className="hidden sm:table-cell">{time(r.taskMs)}</Num>
+                    </ResultRow>
+                  ))}
+                </ResultTable>
               </div>
             }
           />
@@ -255,5 +316,45 @@ export default function Home() {
         </div>
       </section>
     </div>
+  );
+}
+
+/** Where the sandboxes of the spread burst ran: one bar per provider, out of the whole burst. */
+function ScaleChart({ scale, day }: { scale: NonNullable<typeof site.scale>; day: (iso: string) => string }) {
+  const max = Math.max(...scale.byProvider.map((b) => b.ok), 1);
+  return (
+    <figure className="border border-line p-5 sm:p-8">
+      <p className="text-[12px] uppercase tracking-[0.12em] text-muted">
+        {scale.n.toLocaleString("en-US")} at once, {day(scale.date)} · where they ran
+      </p>
+      <ul className="mt-5 space-y-2.5">
+        {scale.byProvider.map((b) => (
+          <li key={b.provider} className="grid grid-cols-[minmax(0,10rem)_1fr_3.5rem] items-center gap-3 text-[13px]">
+            <span className="flex min-w-0 items-center gap-2 text-ink-2">
+              <ProviderLogo id={b.provider} name={b.name} size={18} />
+              <span className="truncate">{b.name.replace(/ (Sandbox|Sandboxes|AI Agent Sandbox|Code Interpreter)$/, "").replace("Amazon Bedrock ", "")}</span>
+            </span>
+            <span className="h-[6px] bg-line" aria-hidden>
+              <span className="block h-[6px] bg-bar" style={{ width: `${(b.ok / max) * 100}%` }} />
+            </span>
+            <span className="text-right font-mono tnum text-ink">{b.ok}</span>
+          </li>
+        ))}
+      </ul>
+      <figcaption className="mt-5 border-t border-line pt-4 text-[13px] leading-5 text-ink-2">
+        <span className="font-mono text-ink tnum">
+          {scale.ok.toLocaleString("en-US")}/{scale.n.toLocaleString("en-US")}
+        </span>{" "}
+        started over {scale.providers} providers.
+        {scale.bestSingle ? (
+          <>
+            {" "}
+            Alone, the best single provider started <span className="font-mono text-ink tnum">{scale.bestSingle.ok.toLocaleString("en-US")}</span>.
+          </>
+        ) : null}{" "}
+        <span className="text-muted">Our accounts, standard limits.</span>
+        <span className="mt-2 block text-muted">A sandbox that&apos;s already running stays on its provider; if that provider fails mid-run, the work isn&apos;t moved.</span>
+      </figcaption>
+    </figure>
   );
 }
