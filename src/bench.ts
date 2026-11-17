@@ -11,6 +11,11 @@ export interface BenchRow {
   medianCreateMs?: number;
   medianExecMs?: number;
   hourlyUsd: number;
+  /**
+   * Of the failures, how many the provider refused for a limit or quota on the benchmarking account (a rate limit,
+   * a concurrency or service quota): the account's plan, not the provider's reliability. Success rates leave them out.
+   */
+  limited?: number;
   /** With `task`: median time of the standard task (src/task.ts), and of each of its phases. */
   medianTaskMs?: number;
   taskPhasesMs?: Record<string, number>;
@@ -62,6 +67,7 @@ export async function bench(opts: {
     const execMs: number[] = [];
     const tasks: TaskRun[] = [];
     let failures = 0;
+    let limited = 0;
     let lastError: string | undefined;
     for (let i = 0; i < runs; i++) {
       log(`${id} run ${i + 1}/${runs}`);
@@ -85,6 +91,7 @@ export async function bench(opts: {
       } catch (err) {
         failures++;
         lastError = (err as Error).message.slice(0, 200);
+        if (LIMITED_ERROR.test(lastError)) limited++;
       } finally {
         await box?.kill().catch(() => {});
       }
@@ -97,6 +104,7 @@ export async function bench(opts: {
       medianCreateMs: median(createMs),
       medianExecMs: median(execMs),
       hourlyUsd: hourlyCost(id, sized(id, spec)),
+      ...(limited ? { limited } : {}),
       ...(tasks.length ? taskSummary(tasks, kind!) : {}),
       lastError,
     });
@@ -151,3 +159,6 @@ export function benchMarkdown(rows: BenchRow[]): string {
 /** Errors that are about the account running the benchmark, not the provider: setup problems, payment, limits. */
 export const ACCOUNT_ERROR = /setup problem|Payment Required|\b40[123]\b|creation limit|quota|insufficient (?:credit|balance|funds)/i;
 export const NETWORK_ERROR = /fetch failed|ENOTFOUND|EAI_AGAIN|ENETUNREACH|ECONNRESET|ETIMEDOUT|Name resolution failed|getaddrinfo/i;
+
+/** A refusal for a limit or quota on the account running the benchmark: rate limits, concurrency and service quotas. */
+export const LIMITED_ERROR = /\b429\b|\b402\b|rate.?limit|ServiceQuotaExceeded|quota|too many|concurrency limit|creation limit|trial_exhausted|insufficient_credits|Payment Required|throttl/i;

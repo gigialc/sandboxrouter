@@ -16,10 +16,21 @@ export function TaskTable() {
   // "fresh": a new sandbox for every job (start, minimum and per-sandbox fee each time). "reused": every job in
   // one sandbox that's already running, so those are paid once and drop out.
   const [mode, setMode] = useState<"fresh" | "reused">("fresh");
+  // "cheapest" by cost, "fastest" by time, or "value": cost and time together, each against the median, so a
+  // provider ranks high only if it's both cheap and quick (score 1 = median on both; lower is better).
+  const [sort, setSort] = useState<"cheapest" | "value" | "fastest">("cheapest");
   const k = kinds.find((x) => x.id === id) ?? kinds[0];
   if (!k) return null;
   const cost = (r: (typeof k.rows)[number]) => (mode === "fresh" ? r.taskUsd : r.reusedUsd);
-  const rows = [...k.rows].sort((a, b) => cost(a) - cost(b) || a.provider.localeCompare(b.provider));
+  const mid = (xs: number[]) => {
+    const s = [...xs].sort((a, b) => a - b);
+    return s.length ? (s.length % 2 ? s[(s.length - 1) / 2] : (s[s.length / 2 - 1] + s[s.length / 2]) / 2) : 1;
+  };
+  const midCost = mid(k.rows.map(cost)) || 1;
+  const midTime = mid(k.rows.map((r) => r.taskMs)) || 1;
+  const value = (r: (typeof k.rows)[number]) => (cost(r) / midCost) * (r.taskMs / midTime);
+  const key = (r: (typeof k.rows)[number]) => (sort === "cheapest" ? cost(r) : sort === "fastest" ? r.taskMs : value(r));
+  const rows = [...k.rows].sort((a, b) => key(a) - key(b) || a.provider.localeCompare(b.provider));
   const maxTask = Math.max(...k.rows.map((r) => r.taskMs), 1);
   const chip = (on: boolean) => `rounded-full px-2.5 py-1 text-[12px] ${on ? "bg-accent text-bg" : "text-ink-2 hover:bg-accent-soft hover:text-ink"}`;
 
@@ -49,6 +60,20 @@ export function TaskTable() {
             </button>
           ))}
         </div>
+        <div className="flex flex-wrap items-center gap-1">
+          <span className="mr-2 text-muted">Rank by</span>
+          {(
+            [
+              ["cheapest", "Cheapest"],
+              ["value", "Best value"],
+              ["fastest", "Fastest"],
+            ] as const
+          ).map(([m, label]) => (
+            <button key={m} aria-pressed={sort === m} onClick={() => setSort(m)} className={chip(sort === m)}>
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
       <p className="mt-4 text-[14px] text-ink-2">
         {k.blurb}{" "}
@@ -56,6 +81,7 @@ export function TaskTable() {
           {mode === "fresh"
             ? "Each job starts its own sandbox: its start, minimum charge and per-sandbox fee count every time."
             : "Every job runs in one sandbox that's already up: only the job's own time counts."}
+          {sort === "value" ? " Best value: cost times time, each against the median; 1.0 is the median on both, lower is better." : ""}
         </span>
       </p>
       <table className="mt-4 w-full text-[14px]">
@@ -65,7 +91,7 @@ export function TaskTable() {
             <th className="py-3 pr-4 font-normal">Provider</th>
             <th className="py-3 pr-4 font-normal">Task took</th>
             <th className="py-3 pr-4 font-normal">1,000 tasks cost</th>
-            <th className="hidden py-3 font-normal sm:table-cell">Per hour</th>
+            <th className="hidden py-3 font-normal sm:table-cell">{sort === "value" ? "Value score" : "Per hour"}</th>
           </tr>
         </thead>
         <tbody>
@@ -97,7 +123,7 @@ export function TaskTable() {
                   </div>
                 </td>
                 <td className="py-3 pr-4 font-mono tnum text-ink">{money(cost(r) * 1000)}</td>
-                <td className="hidden py-3 font-mono tnum text-ink-2 sm:table-cell">{perHour(r.hourlyUsd)}</td>
+                <td className="hidden py-3 font-mono tnum text-ink-2 sm:table-cell">{sort === "value" ? value(r).toFixed(2) : perHour(r.hourlyUsd)}</td>
               </tr>
             );
           })}

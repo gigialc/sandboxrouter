@@ -121,6 +121,7 @@ export function validateResult(j: any, now = Date.now()): string[] {
       if (noBench(r?.provider)) out.push(`${r.provider}: ${NO_BENCH}`);
       if (!isNum(r?.runs, 1, 1000)) out.push(`${r?.provider}: runs is not a positive number`);
       if (!isNum(r?.failures, 0, r?.runs ?? 0)) out.push(`${r?.provider}: failures must be between 0 and runs`);
+      if (r?.limited !== undefined && !isNum(r.limited, 0, r?.failures ?? 0)) out.push(`${r?.provider}: limited must be between 0 and failures`);
       for (const k of ["medianCreateMs", "medianExecMs"] as const) {
         if (r?.[k] !== undefined && !isNum(r[k], 1, MAX_MS)) out.push(`${r?.provider}: ${k} must be between 1 ms and 15 min`);
       }
@@ -152,6 +153,43 @@ export function validateResult(j: any, now = Date.now()): string[] {
         out.push(`${r?.step}: has timings, but ${j.provider}'s terms don't allow publishing performance information; save with check --save`);
       }
     }
+  } else if (j.tool === "sandboxrouter-agent") {
+    add(checkDate(j.date, now));
+    add(checkLabel(j.label));
+    add(checkBy(j.by));
+    if (typeof j.model !== "string" || !j.model || j.model.length > 80) out.push("model must name the model used");
+    if (typeof j.task !== "string") out.push("task must name the agent task version");
+    if (!isNum(j.runs, 3, 1000)) out.push("runs must be at least 3");
+    if (!Array.isArray(j.rows) || !j.rows.length) out.push("rows is empty");
+    for (const r of Array.isArray(j.rows) ? j.rows : []) {
+      provider(r?.provider, "row provider");
+      if (noBench(r?.provider)) out.push(`${r.provider}: ${NO_BENCH}`);
+      if (!isNum(r?.ok, 0, r?.runs ?? 0)) out.push(`${r?.provider}: ok must be between 0 and runs`);
+      if (r?.limited !== undefined && !isNum(r.limited, 0, 1000)) out.push(`${r?.provider}: limited is out of range`);
+      for (const k of ["medianWallMs", "medianModelMs", "medianCpuMs"] as const) {
+        if (r?.[k] !== undefined && !isNum(r[k], 0, 4 * MAX_MS)) out.push(`${r?.provider}: ${k} is out of range`);
+      }
+      if (r?.medianUsd !== undefined && !isNum(r.medianUsd, 0, 1000)) out.push(`${r?.provider}: medianUsd is out of range`);
+    }
+  } else if (j.tool === "sandboxrouter-burst") {
+    add(checkDate(j.date, now));
+    add(checkLabel(j.label));
+    add(checkBy(j.by));
+    if (!isNum(j.n, 2, 1000)) out.push("n must be between 2 and 1000");
+    if (j.task !== undefined && !taskByVersion(j.task)) out.push(`unknown task "${String(j.task)}"`);
+    if (!Array.isArray(j.rows) || !j.rows.length) out.push("rows is empty");
+    for (const r of Array.isArray(j.rows) ? j.rows : []) {
+      provider(r?.provider, "row provider");
+      if (noBench(r?.provider)) out.push(`${r.provider}: ${NO_BENCH}`);
+      if (r?.n !== j.n) out.push(`${r?.provider}: n must match the report's n`);
+      if (!isNum(r?.ok, 0, j.n) || !isNum(r?.limited, 0, j.n) || r.ok + r.limited > j.n) out.push(`${r?.provider}: ok and limited must add up to at most n`);
+      for (const k of ["p50Ms", "p95Ms", "p99Ms", "jobP50Ms"] as const) {
+        if (r?.[k] !== undefined && !isNum(r[k], 1, MAX_MS)) out.push(`${r?.provider}: ${k} must be between 1 ms and 15 min`);
+      }
+      if (!isNum(r?.wallMs, 1, 4 * MAX_MS)) out.push(`${r?.provider}: wallMs is out of range`);
+      if (r?.usd !== undefined && !isNum(r.usd, 0, 1000)) out.push(`${r?.provider}: usd is out of range`);
+      if (r?.ok > 0 && r?.p50Ms === undefined) out.push(`${r?.provider}: sandboxes started but no p50Ms`);
+    }
   } else if (j.tool === "sandboxrouter-cost") {
     add(checkDate(j.date, now));
     add(checkBy(j.by));
@@ -168,7 +206,7 @@ export function validateResult(j: any, now = Date.now()): string[] {
       }
     }
   } else {
-    out.push(`unknown tool "${String(j.tool)}": expected a bench report, a saved check or a cost run`);
+    out.push(`unknown tool "${String(j.tool)}": expected a bench report, a burst report, an agent report, a saved check or a cost run`);
   }
   return out;
 }

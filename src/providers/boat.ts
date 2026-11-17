@@ -106,7 +106,9 @@ export class BoatProvider implements Provider {
   }
 
   async connect(nativeId: string): Promise<ProviderSandbox> {
-    await this.ready(nativeId);
+    // Check it exists, but don't resume it: a handle may only be wanted to kill the sandbox, and resuming counts as a
+    // start against the plan's starts-per-hour. Data calls resume it on demand (call() waits on a 409 sandbox_not_ready).
+    await this.json("GET", `/sandboxes/${encodeURIComponent(nativeId)}`);
     return new BoatSandbox(this, nativeId);
   }
 }

@@ -17,7 +17,9 @@ const SECTIONS = [
   ["active-cpu", "Providers that bill active CPU"],
   ["check", "The real-account check"],
   ["speed", "Start time"],
-  ["jobs", "Cost of a real task"],
+  ["jobs", "Real work"],
+  ["agent", "A real agent"],
+  ["load", "Under load"],
   ["bills", "Measured bills"],
   ["limits", "What this doesn't cover"],
   ["runs", "Where it ran, and adding a run"],
@@ -143,7 +145,17 @@ export default function MethodologyPage() {
               idle) and then a short Python tool call. About a minute, mostly idle. Its sandboxes start with a 10% CPU hint, as an
               agent&apos;s would.
             </li>
+            <li>
+              <strong>Real repo</strong>: what a coding agent does first. Download Node 22 and a pinned commit of a real TypeScript
+              project (sandboxRouter itself), install its 364 packages with <code>npm ci</code>, and typecheck it. Needs only tar and
+              a way to download, so a bare image can run it.
+            </li>
           </ul>
+          <p>
+            Each job runs at least 3 times per provider (the real repo 10), and start times 100 times; the tables show medians.
+            &ldquo;Best value&rdquo; ranks by cost and time together: each divided by the median across providers, multiplied, so
+            1.0 is the median on both and lower is better.
+          </p>
           <p>
             Each job is priced two ways: in a <strong>new sandbox</strong> (its start, minimum charge and per-sandbox fee count
             every time) and in <strong>one sandbox for all jobs</strong> (only the job&apos;s own time counts), since agents often
@@ -156,6 +168,28 @@ export default function MethodologyPage() {
             read from the sandbox&apos;s own counters (<code>/proc/stat</code>) before and after each step. A container can show the
             whole host&apos;s counters instead of its own; a reading higher than the sandbox&apos;s vCPUs could produce in that time is
             thrown out, and that provider is priced with every core busy.
+          </p>
+
+          <h2 id="agent">A real agent</h2>
+          <p>
+            A real model (Gemini) gets the same task in a sandbox on every provider: write a Python script that computes the first
+            5,000 primes, saves them and prints their sum, and fix it until it works. It has one tool, which runs a shell command in
+            the sandbox. The model runs on the test machine and its key never enters the sandbox, so the sandbox waits while the
+            model thinks, as it would for any agent. Afterwards the result is checked independently inside the sandbox. Each
+            provider runs it five times; the table shows how many were done right, the median session, the share of it the
+            sandbox sat waiting, and what the sandbox was billed (the model&apos;s own cost isn&apos;t included). Its sandboxes start
+            with a 10% CPU hint, so providers that bill active CPU or reserve CPU are priced as an agent would use them.
+          </p>
+
+          <h2 id="load">Under load</h2>
+          <p>
+            100 sandboxes are asked for on one provider at the same moment, as parallel agents or an RL run start them. Each must
+            answer a command; the time it takes counts from the moment all of them were asked for, so waiting in the
+            provider&apos;s queue counts. The table shows how many started, the time at the median (p50) and for the slowest 1%
+            (p99), how long until the last one finished, and what all of them cost. Two variants run a job in each sandbox: a
+            short Python step (RL rollouts and evals) and the minute-long agent loop (parallel agents). Sandboxes the provider
+            refused for a limit on our account are counted apart: limits depend on the account&apos;s plan, and ours is a
+            standard one.
           </p>
 
           <h2 id="bills">Measured bills</h2>

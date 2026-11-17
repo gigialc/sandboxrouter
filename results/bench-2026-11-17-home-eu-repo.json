@@ -1,0 +1,267 @@
+{
+  "tool": "sandboxrouter",
+  "version": "0.10.0",
+  "date": "2026-11-17T17:00:46.828Z",
+  "label": "home-eu",
+  "by": "gigialc",
+  "runs": 10,
+  "spec": {
+    "vcpu": 2,
+    "memoryGb": 4
+  },
+  "task": "repo-v1",
+  "node": "v22.22.0",
+  "platform": "darwin-arm64",
+  "rows": [
+    {
+      "provider": "superserve",
+      "runs": 10,
+      "failures": 7,
+      "medianCreateMs": 289,
+      "medianExecMs": 169,
+      "hourlyUsd": 0.1656,
+      "medianTaskMs": 14703,
+      "taskPhasesMs": {
+        "fetch": 1699,
+        "install": 12417,
+        "typecheck": 587
+      },
+      "medianTaskCpuMs": 17000,
+      "medianTaskMaxCoreMs": 9710,
+      "limited": 7
+    },
+    {
+      "provider": "daytona",
+      "runs": 10,
+      "failures": 0,
+      "medianCreateMs": 304,
+      "medianExecMs": 417,
+      "hourlyUsd": 0.06659999999999999,
+      "medianTaskMs": 33877,
+      "taskPhasesMs": {
+        "fetch": 2208,
+        "install": 29450,
+        "typecheck": 2029
+      },
+      "medianTaskCpuMs": 214540,
+      "medianTaskMaxCoreMs": 33115
+    },
+    {
+      "provider": "novita",
+      "runs": 10,
+      "failures": 0,
+      "medianCreateMs": 333,
+      "medianExecMs": 592,
+      "hourlyUsd": 0.11664,
+      "medianTaskMs": 25009,
+      "taskPhasesMs": {
+        "fetch": 2593,
+        "install": 21351,
+        "typecheck": 1330
+      },
+      "medianTaskCpuMs": 29925,
+      "medianTaskMaxCoreMs": 16170
+    },
+    {
+      "provider": "e2b",
+      "runs": 10,
+      "failures": 0,
+      "medianCreateMs": 339,
+      "medianExecMs": 172,
+      "hourlyUsd": 0.1089,
+      "medianTaskMs": 36050,
+      "taskPhasesMs": {
+        "fetch": 2250,
+        "install": 32565,
+        "typecheck": 1078
+      },
+      "medianTaskCpuMs": 37230,
+      "medianTaskMaxCoreMs": 19495
+    },
+    {
+      "provider": "openscale",
+      "runs": 10,
+      "failures": 0,
+      "medianCreateMs": 348,
+      "medianExecMs": 1000,
+      "hourlyUsd": 0.013999999999999999,
+      "medianTaskMs": 22675,
+      "taskPhasesMs": {
+        "fetch": 2738,
+        "install": 19119,
+        "typecheck": 652
+      },
+      "medianTaskCpuMs": 23475,
+      "medianTaskMaxCoreMs": 12935
+    },
+    {
+      "provider": "vercel",
+      "runs": 10,
+      "failures": 0,
+      "medianCreateMs": 378,
+      "medianExecMs": 307,
+      "hourlyUsd": 0.3408,
+      "medianTaskMs": 19693,
+      "taskPhasesMs": {
+        "fetch": 1710,
+        "install": 17023,
+        "typecheck": 954
+      },
+      "medianTaskCpuMs": 25930,
+      "medianTaskMaxCoreMs": 14550
+    },
+    {
+      "provider": "cloudflare",
+      "runs": 10,
+      "failures": 0,
+      "medianCreateMs": 488,
+      "medianExecMs": 202,
+      "hourlyUsd": 0.21599999999999997,
+      "medianTaskMs": 25174,
+      "taskPhasesMs": {
+        "fetch": 2972,
+        "install": 21345,
+        "typecheck": 942
+      },
+      "medianTaskCpuMs": 31805,
+      "medianTaskMaxCoreMs": 16780
+    },
+    {
+      "provider": "modal",
+      "runs": 10,
+      "failures": 0,
+      "medianCreateMs": 525,
+      "medianExecMs": 790,
+      "hourlyUsd": 0.23796,
+      "medianTaskMs": 13935,
+      "taskPhasesMs": {
+        "fetch": 2269,
+        "install": 11860,
+        "typecheck": 176
+      },
+      "medianTaskCpuMs": 25170,
+      "medianTaskMaxCoreMs": 1660
+    },
+    {
+      "provider": "agent37",
+      "runs": 10,
+      "failures": 0,
+      "medianCreateMs": 802,
+      "medianExecMs": 637,
+      "hourlyUsd": 0.006520547945205479,
+      "medianTaskMs": 26555,
+      "taskPhasesMs": {
+        "fetch": 1704,
+        "install": 23870,
+        "typecheck": 904
+      },
+      "medianTaskCpuMs": 29765,
+      "medianTaskMaxCoreMs": 14890
+    },
+    {
+      "provider": "agentcore",
+      "runs": 10,
+      "failures": 0,
+      "medianCreateMs": 864,
+      "medianExecMs": 275,
+      "hourlyUsd": 0.2168
+    },
+    {
+      "provider": "maritime",
+      "runs": 10,
+      "failures": 0,
+      "medianCreateMs": 1050,
+      "medianExecMs": 274,
+      "hourlyUsd": 0.022,
+      "medianTaskMs": 35068,
+      "taskPhasesMs": {
+        "fetch": 2265,
+        "install": 31379,
+        "typecheck": 791
+      },
+      "medianTaskCpuMs": 25730,
+      "medianTaskMaxCoreMs": 13580
+    },
+    {
+      "provider": "tensorlake",
+      "runs": 10,
+      "failures": 0,
+      "medianCreateMs": 1527,
+      "medianExecMs": 551,
+      "hourlyUsd": 0.2,
+      "medianTaskMs": 23349,
+      "taskPhasesMs": {
+        "fetch": 2025,
+        "install": 20304,
+        "typecheck": 762
+      },
+      "medianTaskCpuMs": 21335,
+      "medianTaskMaxCoreMs": 11235
+    },
+    {
+      "provider": "boat",
+      "runs": 10,
+      "failures": 7,
+      "medianCreateMs": 1562,
+      "medianExecMs": 103,
+      "hourlyUsd": 0.018,
+      "limited": 7,
+      "medianTaskMs": 28413,
+      "taskPhasesMs": {
+        "fetch": 1872,
+        "install": 25871,
+        "typecheck": 670
+      },
+      "medianTaskCpuMs": 21840,
+      "medianTaskMaxCoreMs": 11640
+    },
+    {
+      "provider": "freestyle",
+      "runs": 10,
+      "failures": 0,
+      "medianCreateMs": 1964,
+      "medianExecMs": 286,
+      "hourlyUsd": 0.13362,
+      "medianTaskMs": 35027,
+      "taskPhasesMs": {
+        "fetch": 2526,
+        "install": 30746,
+        "typecheck": 1330
+      },
+      "medianTaskCpuMs": 30835,
+      "medianTaskMaxCoreMs": 16475
+    },
+    {
+      "provider": "sail",
+      "runs": 10,
+      "failures": 0,
+      "medianCreateMs": 2495,
+      "medianExecMs": 250,
+      "hourlyUsd": 0.062,
+      "medianTaskMs": 24441,
+      "taskPhasesMs": {
+        "fetch": 2763,
+        "install": 20380,
+        "typecheck": 1499
+      },
+      "medianTaskCpuMs": 29595,
+      "medianTaskMaxCoreMs": 15680
+    },
+    {
+      "provider": "lambda",
+      "runs": 10,
+      "failures": 0,
+      "medianCreateMs": 3660,
+      "medianExecMs": 397,
+      "hourlyUsd": 0.25220016,
+      "medianTaskMs": 51044,
+      "taskPhasesMs": {
+        "fetch": 4834,
+        "install": 46084,
+        "typecheck": 520
+      },
+      "medianTaskCpuMs": 16730,
+      "medianTaskMaxCoreMs": 7815
+    }
+  ]
+}

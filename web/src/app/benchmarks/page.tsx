@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { PageHeader } from "@/components/chrome";
 import Link from "next/link";
+import { AgentTable } from "@/components/AgentTable";
+import { LoadTable } from "@/components/LoadTable";
 import { TaskTable } from "@/components/TaskTable";
 import { UseCaseTable } from "@/components/UseCaseTable";
 import { site, usd } from "@/lib/site";
@@ -10,6 +12,23 @@ export const metadata: Metadata = { title: "Benchmarks" };
 const ms = (n?: number) => (n === undefined ? "n/a" : `${n.toLocaleString("en-US")} ms`);
 const cents = (n: number | null) => (n === null ? "n/a" : n === 0 ? "$0" : `$${n < 0.01 ? n.toFixed(4) : n.toFixed(3)}`);
 const shortDay = (iso: string) => new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
+/** One section: its title, one line, a link to how it's measured, then its table. */
+function Section({ id, title, how, children, line }: { id: string; title: string; how: string; line: React.ReactNode; children: React.ReactNode }) {
+  return (
+    <section id={id} className="mt-20 scroll-mt-32 first-of-type:mt-12">
+      <h2 className="text-2xl font-normal tracking-[-0.025em] sm:text-[28px]">{title}</h2>
+      <p className="mt-3 max-w-2xl text-[14px] leading-6 text-ink-2">
+        {line}{" "}
+        <Link href={`/methodology#${how}`} className="text-ink underline underline-offset-4 decoration-line-2 hover:decoration-ink">
+          How it&apos;s measured
+        </Link>
+        .
+      </p>
+      {children}
+    </section>
+  );
+}
+
 const day = (iso: string) => new Date(iso).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric", timeZone: "UTC" });
 
 export default function BenchmarksPage() {
@@ -26,34 +45,60 @@ export default function BenchmarksPage() {
 
   return (
     <div className="px-5 sm:px-10 pt-14">
-      <PageHeader kicker="Benchmarks" title="What each sandbox costs, and how fast it starts">
-        Real sandboxes on real accounts, started, used and killed. <Link href="/methodology#pricing" className="text-ink underline underline-offset-4 decoration-line-2 hover:decoration-ink">How the numbers are made</Link>.
+      <PageHeader kicker="Benchmarks" title="What each sandbox costs, and how it performs">
+        Real sandboxes on real accounts, started, used and killed: {totalRuns.toLocaleString("en-US")} so far.
       </PageHeader>
 
-      <section id="cost" className="mt-14 scroll-mt-20">
-        <h2 className="text-2xl font-normal tracking-[-0.025em] sm:text-[28px]">Cost for the job</h2>
-        <p className="mt-3 mb-6 max-w-2xl text-[14px] leading-6 text-ink-2">
-          The cheapest provider depends on how long you use it. Tested providers, ranked by what each job would be billed.{" "}
-          <Link href="/methodology#pricing" className="text-ink underline underline-offset-4 decoration-line-2 hover:decoration-ink">How it&apos;s measured</Link>.
-        </p>
-        <UseCaseTable />
-      </section>
+      {/* One line of links to every section, so the page reads as a list of answers. */}
+      <nav aria-label="On this page" className="sticky top-14 z-10 -mx-5 mt-10 border-y border-line bg-bg/95 px-5 py-3 backdrop-blur sm:-mx-10 sm:px-10">
+        <ul className="flex gap-5 overflow-x-auto whitespace-nowrap text-[13px] text-ink-2">
+          {[
+            ["cost", "Cost for the job"],
+            ["task", "Real work"],
+            ...(site.agent.length ? [["agent", "A real agent"]] : []),
+            ...(site.load.length ? [["load", "Under load"]] : []),
+            ["speed", "Start time"],
+            ["real-cost", "Bills"],
+          ].map(([id, label]) => (
+            <li key={id}>
+              <a href={`#${id}`} className="hover:text-ink">
+                {label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+
+      <Section id="cost" title="Cost for the job" how="pricing" line="The cheapest provider depends on how long you use it: tested providers, ranked by what each job would be billed.">
+        <div className="mt-6">
+          <UseCaseTable />
+        </div>
+      </Section>
 
       {site.tasks.kinds.length > 0 && (
-        <section id="task" className="mt-20 scroll-mt-20">
-          <h2 className="text-2xl font-normal tracking-[-0.025em] sm:text-[28px]">Cost of a real task</h2>
-          <p className="mt-3 max-w-2xl text-[14px] leading-6 text-ink-2">
-            The same job on every provider, priced by how long it really took. Hover a time for each step. <Link href="/methodology#jobs" className="text-ink underline underline-offset-4 decoration-line-2 hover:decoration-ink">How it&apos;s measured</Link>.
-          </p>
+        <Section id="task" title="Real work" how="jobs" line="The same job on every provider, from a short burst of CPU to installing a real repo, priced by how long it really took.">
           <TaskTable />
-        </section>
+        </Section>
       )}
 
-      <section id="speed" className="mt-20 scroll-mt-20">
-      <h2 className="text-2xl font-normal tracking-[-0.025em] sm:text-[28px]">Speed</h2>
-      <p className="mt-3 max-w-2xl text-[14px] leading-6 text-ink-2">
-        {rows.length} providers, {totalRuns} sandboxes{subs[0] ? `, last run ${day(subs[0].date)}` : ""}. <Link href="/methodology#speed" className="text-ink underline underline-offset-4 decoration-line-2 hover:decoration-ink">How it&apos;s measured</Link>.
-      </p>
+      {site.agent.length > 0 && (
+        <Section id="agent" title="A real agent" how="agent" line="A real model does the same task in a sandbox on each provider, with one tool that runs commands there.">
+          <AgentTable />
+        </Section>
+      )}
+
+      {site.load.length > 0 && (
+        <Section id="load" title="Under load" how="load" line="100 sandboxes asked for at once: how many start, how fast, and what all of them cost.">
+          <LoadTable />
+        </Section>
+      )}
+
+      <Section
+        id="speed"
+        title="Start time"
+        how="speed"
+        line={`${rows.length} providers${subs[0] ? `, last run ${day(subs[0].date)}` : ""}: time to a usable sandbox, one at a time.`}
+      >
 
       <table className="mt-6 w-full text-[14px]">
         <thead>
@@ -101,15 +146,10 @@ export default function BenchmarksPage() {
           ))}
         </tbody>
       </table>
-      </section>
+      </Section>
 
       {costs.length > 0 && (
-        <section id="real-cost" className="mt-20 scroll-mt-20">
-          <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-accent">Real cost</p>
-          <h2 className="mt-3 text-2xl font-normal tracking-[-0.025em] sm:text-[28px]">What providers actually billed</h2>
-          <p className="mt-4 max-w-2xl text-[14px] leading-6 text-ink-2">
-            A sandbox ran for a fixed time; the bill came from the provider&apos;s own billing API. <Link href="/methodology#bills" className="text-ink underline underline-offset-4 decoration-line-2 hover:decoration-ink">How it&apos;s measured</Link>.
-          </p>
+        <Section id="real-cost" title="Bills" how="bills" line="What providers actually billed for a sandbox run for a fixed time, read from their own billing APIs.">
           <div className="mt-6 overflow-x-auto">
             <table className="w-full min-w-[560px] text-[14px]">
               <thead>
@@ -143,8 +183,7 @@ export default function BenchmarksPage() {
               </tbody>
             </table>
           </div>
-
-        </section>
+        </Section>
       )}
 
       <p className="mt-16 border-t border-line pt-8 text-[14px] text-ink-2">
