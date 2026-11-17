@@ -66,6 +66,13 @@ export interface SandboxSpec {
    */
   expectedSeconds?: number;
   /**
+   * How busy the CPU will be, 0 to 1 (default 1). Only a pricing hint: providers that bill CPU only
+   * while it's busy (Vercel, Cloudflare, Tensorlake, AgentCore, Sail, Sprites, Deno, Upstash) are priced
+   * at this share of their CPU plus their full memory, never below a provider's CPU floor. An agent that
+   * mostly waits on model calls uses about 0.1; a build or test run is close to 1.
+   */
+  cpuUtilization?: number;
+  /**
    * Provider-specific image/template, keyed by provider, e.g.
    * { maritime: "python", e2b: "code-interpreter-v1", modal: "python:3.13-slim" }.
    */

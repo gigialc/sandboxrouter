@@ -1,4 +1,4 @@
-import { billingRules } from "./catalog.js";
+import { billingRules, cpuHourlyAtFull, hourlyCost, info } from "./catalog.js";
 import type { ProviderId, ProviderSandbox } from "./types.js";
 
 /**
@@ -89,8 +89,33 @@ export function phaseCommand(cmd: string, repeat: number): string {
   return repeat <= 1 ? cmd : `n=0; while [ $n -lt ${repeat} ]; do ${cmd}; n=$((n+1)); done`;
 }
 
-/** Runs a standard task in `box`: milliseconds per phase, network round trip taken out. Throws if a phase fails. */
-export async function runTask(box: Pick<ProviderSandbox, "exec">, kind: TaskKind = "short"): Promise<PhaseMs> {
+/** What one run of a task measured: milliseconds per phase, and the CPU time it used across all vCPUs, if the sandbox shows it. */
+export interface TaskRun {
+  ms: PhaseMs;
+  cpuMs?: number;
+}
+
+// Wraps a phase to read /proc/stat's total CPU line before and after it, so the run also reports the CPU
+// time it really used: what providers that bill active CPU charge for.
+const MARK = "SRCPU";
+const withCpu = (cmd: string) =>
+  `a=$(head -n 1 /proc/stat 2> /dev/null); ${cmd}; rc=$?; b=$(head -n 1 /proc/stat 2> /dev/null); echo "${MARK}|$a|$b"; exit $rc`;
+
+/** Busy CPU milliseconds between two /proc/stat "cpu" lines: user, nice, system, irq and softirq (not idle, iowait or steal), at 100 ticks a second. */
+export function busyMs(before: string, after: string): number | undefined {
+  const ticks = (line: string) => {
+    const f = line.trim().split(/\s+/);
+    if (f[0] !== "cpu" || f.length < 8) return undefined;
+    const n = f.slice(1).map(Number);
+    return n[0] + n[1] + n[2] + n[5] + n[6];
+  };
+  const a = ticks(before);
+  const b = ticks(after);
+  return a === undefined || b === undefined || !(b >= a) ? undefined : (b - a) * 10;
+}
+
+/** Runs a standard task in `box`: milliseconds per phase (network round trip taken out) and CPU time used. Throws if a phase fails. */
+export async function runTask(box: Pick<ProviderSandbox, "exec">, kind: TaskKind = "short"): Promise<TaskRun> {
   const { repeat, phases } = TASKS[kind];
   const rtt: number[] = [];
   for (let i = 0; i < 3; i++) {
@@ -100,26 +125,49 @@ export async function runTask(box: Pick<ProviderSandbox, "exec">, kind: TaskKind
   }
   const overhead = rtt.sort((a, b) => a - b)[1];
   const out: PhaseMs = {};
+  let cpuMs: number | undefined = 0;
   for (const p of phases) {
     const t = performance.now();
-    const r = await box.exec(phaseCommand(p.cmd, repeat), { timeoutSeconds: repeat > 1 ? 900 : 300 });
+    const r = await box.exec(withCpu(phaseCommand(p.cmd, repeat)), { timeoutSeconds: repeat > 1 ? 900 : 300 });
     if (r.exitCode !== 0) throw new Error(`task phase ${p.id} exited ${r.exitCode}: ${(r.stderr || r.stdout).slice(0, 120)}`);
     out[p.id] = Math.max(1, Math.round(performance.now() - t - overhead));
+    const line = r.stdout.split("\n").find((l) => l.startsWith(`${MARK}|`));
+    const used = line ? busyMs(line.split("|")[1] ?? "", line.split("|")[2] ?? "") : undefined;
+    cpuMs = cpuMs === undefined || used === undefined ? undefined : cpuMs + used;
   }
-  return out;
+  return { ms: out, ...(cpuMs !== undefined ? { cpuMs } : {}) };
 }
 
 /** The whole task's time: the phases added up. */
 export const taskMs = (phases: PhaseMs) => Object.values(phases).reduce((s, ms) => s + ms, 0);
 
 /**
- * What one task would be billed, USD: the sandbox is billed from create until it's done, so the seconds
- * are the start time plus the task, rounded up to the provider's minimum charge and billing increment,
- * plus its per-sandbox charge. `hourlyUsd` is the price for the size it ran at.
+ * What one task would be billed, USD, on a sandbox of `size`. It's billed from create until the task is
+ * done: the start time plus the task, rounded up to the provider's minimum charge and billing increment,
+ * plus its per-sandbox charge.
+ *
+ * Providers that bill CPU only while busy are charged for the CPU time the task really used (`cpuMillis`,
+ * at least their CPU floor) plus their memory for the whole time; their minimum charge covers memory only
+ * where that's how they bill (Vercel). Without `cpuMillis` they're charged as if every core was busy.
+ * `billedVsList` scales the price by what the provider was measured to really bill.
  */
-export function taskUsd(provider: ProviderId, hourlyUsd: number, createMs: number, taskMillis: number): number {
+export function taskUsd(
+  provider: ProviderId,
+  size: { vcpu: number; memoryGb: number },
+  createMs: number,
+  taskMillis: number,
+  cpuMillis?: number,
+  billedVsList = 1,
+): number {
   const { minSeconds, incrementSeconds, perSandboxUsd } = billingRules(provider);
   const seconds = (createMs + taskMillis) / 1000;
   const billed = Math.max(minSeconds, Math.ceil(seconds / incrementSeconds - 1e-9) * incrementSeconds);
-  return (hourlyUsd * billed) / 3600 + perSandboxUsd;
+  const full = hourlyCost(provider, size);
+  const cpuFull = cpuHourlyAtFull(provider, size);
+  if (cpuFull === 0 || cpuMillis === undefined) return (billedVsList * full * billed) / 3600 + perSandboxUsd;
+  const { vcpuHour, cpuFloor = 0 } = info(provider).pricing;
+  const vcpus = cpuFull / vcpuHour;
+  const cpuSeconds = Math.max(cpuMillis / 1000, cpuFloor * vcpus * seconds);
+  // Memory (and anything else that isn't CPU) is billed for the whole time, minimum included.
+  return (billedVsList * ((full - cpuFull) * billed + vcpuHour * cpuSeconds)) / 3600 + perSandboxUsd;
 }

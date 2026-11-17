@@ -61,7 +61,7 @@ List price while running, 2 vCPU / 4 GB, cheapest first; waitlisted sign-ups fol
 | [Upstash Box](https://sandboxrouter.ai/providers/upstash) | up to $0.200 | none | not run yet | [pricing](https://upstash.com/pricing/box) |
 | [Cloudflare Sandbox](https://sandboxrouter.ai/providers/cloudflare) | up to $0.216 | $5/mo | passed (2026-11-13) | [pricing](https://developers.cloudflare.com/containers/platform/pricing/) |
 | [Amazon Bedrock AgentCore Code Interpreter](https://sandboxrouter.ai/providers/agentcore) | up to $0.217 | none | passed (2026-11-13) | [pricing](https://aws.amazon.com/bedrock/agentcore/pricing/) |
-| [Modal](https://sandboxrouter.ai/providers/modal) | up to $0.238 | none | passed (2026-11-13) | [pricing](https://modal.com/pricing) |
+| [Modal](https://sandboxrouter.ai/providers/modal) | $0.238 | none | passed (2026-11-13) | [pricing](https://modal.com/pricing) |
 | [AWS Lambda MicroVMs](https://sandboxrouter.ai/providers/lambda) | $0.252 | none | passed (2026-11-13) | [pricing](https://aws.amazon.com/lambda/pricing/) |
 | [Deno Sandbox](https://sandboxrouter.ai/providers/deno) | up to $0.300 | $20/mo | not run yet | [pricing](https://deno.com/sandbox) |
 | [Runloop](https://sandboxrouter.ai/providers/runloop) | $0.317 | none | not run yet | [pricing](https://www.runloop.ai/pricing) |

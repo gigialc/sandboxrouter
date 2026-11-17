@@ -1,7 +1,7 @@
-import { CATALOG, DEFAULT_MEMORY_GB, DEFAULT_VCPU, fixedSize, hourlyCost } from "./catalog.js";
+import { CATALOG, DEFAULT_MEMORY_GB, DEFAULT_VCPU, fittingSpec, fixedSize, hourlyCost } from "./catalog.js";
 import { loadBench, median, saveBench, type BenchData } from "./bench-store.js";
 import { Router } from "./router.js";
-import { runTask, taskMs, taskUsd, TASKS, type PhaseMs, type TaskKind } from "./task.js";
+import { runTask, taskMs, taskUsd, TASKS, type TaskKind, type TaskRun } from "./task.js";
 import type { ProviderId, SandboxSpec } from "./types.js";
 
 export interface BenchRow {
@@ -13,7 +13,9 @@ export interface BenchRow {
   hourlyUsd: number;
   /** With `task`: median time of the standard task (src/task.ts), and of each of its phases. */
   medianTaskMs?: number;
-  taskPhasesMs?: PhaseMs;
+  taskPhasesMs?: Record<string, number>;
+  /** With `task`: median CPU time the task used across all vCPUs, where the sandbox shows /proc/stat. */
+  medianTaskCpuMs?: number;
   lastError?: string;
 }
 
@@ -50,7 +52,7 @@ export async function bench(opts: {
   const one = async (id: ProviderId) => {
     const createMs: number[] = [];
     const execMs: number[] = [];
-    const tasks: PhaseMs[] = [];
+    const tasks: TaskRun[] = [];
     let failures = 0;
     let lastError: string | undefined;
     for (let i = 0; i < runs; i++) {
@@ -102,9 +104,10 @@ export async function bench(opts: {
 }
 
 /** Medians of the task runs that finished: the whole task, and each phase. */
-function taskSummary(tasks: PhaseMs[], kind: TaskKind): Pick<BenchRow, "medianTaskMs" | "taskPhasesMs"> {
-  const phases: PhaseMs = Object.fromEntries(TASKS[kind].phases.map((p) => [p.id, median(tasks.map((t) => t[p.id]))!]));
-  return { medianTaskMs: median(tasks.map(taskMs)), taskPhasesMs: phases };
+function taskSummary(tasks: TaskRun[], kind: TaskKind): Pick<BenchRow, "medianTaskMs" | "taskPhasesMs" | "medianTaskCpuMs"> {
+  const phases = Object.fromEntries(TASKS[kind].phases.map((p) => [p.id, median(tasks.map((t) => t.ms[p.id]))!]));
+  const cpu = tasks.every((t) => t.cpuMs !== undefined) ? median(tasks.map((t) => t.cpuMs!)) : undefined;
+  return { medianTaskMs: median(tasks.map((t) => taskMs(t.ms))), taskPhasesMs: phases, ...(cpu !== undefined ? { medianTaskCpuMs: cpu } : {}) };
 }
 
 /** The spec a provider is benched at: the asked size, or its fixed default size if its image has one. */
@@ -117,7 +120,9 @@ export function benchMarkdown(rows: BenchRow[]): string {
   const ms = (n?: number) => (n === undefined ? "n/a" : `${n} ms`);
   const task = rows.some((r) => r.taskPhasesMs);
   const cost = (r: BenchRow) =>
-    r.medianTaskMs !== undefined && r.medianCreateMs !== undefined ? `$${taskUsd(r.provider, r.hourlyUsd, r.medianCreateMs, r.medianTaskMs).toFixed(6)}` : "n/a";
+    r.medianTaskMs !== undefined && r.medianCreateMs !== undefined
+      ? `$${taskUsd(r.provider, fittingSpec(r.provider), r.medianCreateMs, r.medianTaskMs, r.medianTaskCpuMs).toFixed(6)}`
+      : "n/a";
   const lines = [
     `| # | Provider | Cold start (median) | Exec round trip |${task ? " Task (median) | Task cost |" : ""} $/hr (list, size run) | Success |`,
     `|---|---|---|---|${task ? "---|---|" : ""}---|---|`,

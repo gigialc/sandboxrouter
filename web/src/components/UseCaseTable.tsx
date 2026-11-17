@@ -36,6 +36,7 @@ export function UseCaseTable() {
         {u.blurb}{" "}
         <span className="font-mono text-[12px] text-muted">
           {u.spec.vcpu} vCPU / {u.spec.memoryGb} GB · {runLength(u.runSeconds)}
+          {u.spec.cpuUtilization !== undefined && u.spec.cpuUtilization < 1 ? ` · ${Math.round(u.spec.cpuUtilization * 100)}% CPU` : ""}
           {u.require.length ? ` · needs ${u.require.join(", ")}` : ""}
         </span>
       </p>

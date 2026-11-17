@@ -1,4 +1,4 @@
-import { CATALOG, DEFAULT_MEMORY_GB, DEFAULT_VCPU, accessLabel, billingRules, fixedSize, hourlyCost, unfit } from "./catalog.js";
+import { accessLabel, billedCpuShare, billingRules, CATALOG, cpuHourlyAtFull, DEFAULT_MEMORY_GB, DEFAULT_VCPU, fixedSize, hourlyCost, unfit } from "./catalog.js";
 import {
   type ComputerRoute,
   RoutedComputer,
@@ -83,6 +83,11 @@ export interface Candidate {
   estimatedHourlyUsd: number;
   /** The provider's published list price for this size, USD/hour. */
   listHourlyUsd: number;
+  /**
+   * For providers that bill CPU only while busy: the CPU part of `estimatedHourlyUsd`, at the spec's
+   * `cpuUtilization`. Ranking needs it where a minimum charge covers memory only (Vercel).
+   */
+  cpuHourlyUsd?: number;
   /** Billed / list-price ratio behind `estimatedHourlyUsd`, when measured (`BILLED_VS_LIST`). */
   billedVsList?: number;
   /**
@@ -303,6 +308,7 @@ export class Router {
         provider: id,
         estimatedHourlyUsd: round(list * (ratio ?? 1)),
         listHourlyUsd: list,
+        ...(cpuHourlyAtFull(id, spec) > 0 ? { cpuHourlyUsd: round(cpuHourlyAtFull(id, spec) * billedCpuShare(id, spec) * (ratio ?? 1)) } : {}),
         ...(ratio !== undefined ? { billedVsList: ratio } : {}),
         size: sizeOf(id, spec),
         medianCreateMs: speed ? (live && live.length >= LIVE_MIN_SAMPLES ? median(live) : median(bench[id]?.createMs)) : undefined,
@@ -694,10 +700,12 @@ export function runHours(spec: SandboxSpec): number {
  * per-sandbox charge is added, so short runs favor providers that bill by the second without a fee.
  */
 export function rankUsd(c: Candidate, hours: number): number {
-  const { minSeconds, incrementSeconds } = billingRules(c.provider);
+  const { minSeconds, incrementSeconds, minimumCovers } = billingRules(c.provider);
   const seconds = hours * 3600;
   const billed = Math.max(minSeconds, Math.ceil(seconds / incrementSeconds - 1e-9) * incrementSeconds);
-  return (c.estimatedHourlyUsd * billed) / Math.max(seconds, 1) + (c.perSandboxUsd ?? 0) / Math.max(hours, 1 / 3600);
+  // Where the minimum covers memory only (Vercel), CPU is billed for the time actually used.
+  const cpu = minimumCovers === "memory" ? (c.cpuHourlyUsd ?? 0) : 0;
+  return ((c.estimatedHourlyUsd - cpu) * billed + cpu * seconds) / Math.max(seconds, 1) + (c.perSandboxUsd ?? 0) / Math.max(hours, 1 / 3600);
 }
 
 /** Seconds to wait for one provider's create before trying the next (RouteOptions.createTimeoutSeconds). */

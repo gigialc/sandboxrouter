@@ -48,6 +48,7 @@ Usage:
   sandboxrouter serve     [--port 8787] [--host 127.0.0.1] [--cors https://site.example,http://localhost:3000]
 
 Spec flags:   --vcpu N  --memory GB  --gpu T4  --timeout MIN  --expect SEC (how long you'll use it; ranks by the real bill)
+              --cpu 0.1 (how busy the CPU is, 0-1; lowers providers that bill active CPU)
 Route flags:  --provider e2b[,modal,...]  --strategy balanced|verified|cheapest|fastest (default balanced: cheapest real cost, speed breaks near-ties)
               --max-price USD (per hour, for this run: skip providers that would cost more)
               --no-fallback  --fallback-any (also on setup errors like a bad key)
@@ -64,6 +65,7 @@ const { values, positionals } = parseArgs({
     gpu: { type: "string" },
     timeout: { type: "string" },
     expect: { type: "string" },
+    cpu: { type: "string" },
     provider: { type: "string" },
     strategy: { type: "string" },
     "max-price": { type: "string" },
@@ -115,6 +117,7 @@ const spec: SandboxSpec = {
   gpu: values.gpu,
   timeoutMinutes: num(values.timeout),
   expectedSeconds: num(values.expect),
+  cpuUtilization: num(values.cpu),
 };
 const providers = list(values.provider) as ProviderId[] | undefined;
 const by = (() => {

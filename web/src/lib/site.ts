@@ -63,6 +63,8 @@ export interface TaskRow {
   phasesMs: Record<string, number>;
   hourlyUsd: number;
   taskUsd: number;
+  cpuMs?: number;
+  activeCpu: boolean;
   minimumSeconds: number;
   perSandboxUsd: number;
   measuredAt: string;
@@ -72,7 +74,7 @@ export interface UseCase {
   id: string;
   title: string;
   blurb: string;
-  spec: { vcpu?: number; memoryGb?: number; expectedSeconds?: number; timeoutMinutes?: number };
+  spec: { vcpu?: number; memoryGb?: number; expectedSeconds?: number; timeoutMinutes?: number; cpuUtilization?: number };
   require: string[];
   runSeconds: number;
   top: { provider: string; name: string; runUsd: number; runHourlyUsd: number; hourlyUsd: number; perSandboxUsd: number; minimumSeconds: number }[];

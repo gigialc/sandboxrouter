@@ -126,6 +126,7 @@ export function validateResult(j: any, now = Date.now()): string[] {
       }
       if (r?.failures < r?.runs && r?.medianCreateMs === undefined) out.push(`${r?.provider}: successful runs but no medianCreateMs`);
       if (r?.medianTaskMs !== undefined && !isNum(r.medianTaskMs, 1, MAX_MS)) out.push(`${r?.provider}: medianTaskMs must be between 1 ms and 15 min`);
+      if (r?.medianTaskCpuMs !== undefined && !isNum(r.medianTaskCpuMs, 0, 64 * MAX_MS)) out.push(`${r?.provider}: medianTaskCpuMs is out of range`);
       if (r?.taskPhasesMs !== undefined) {
         const ph = r.taskPhasesMs;
         const def = taskByVersion(j.task);

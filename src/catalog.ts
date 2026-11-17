@@ -18,6 +18,16 @@ export interface ProviderInfo {
     incrementSeconds?: number;
     /** A fixed charge per sandbox created, USD, on top of running time. */
     perSandboxUsd?: number;
+    /**
+     * Active-CPU billing only: the share of the allocated CPU billed even when idle (Tensorlake bills at
+     * least 20%). Default 0.
+     */
+    cpuFloor?: number;
+    /**
+     * What `minSeconds` applies to. "all" (default): the whole price. "memory": only the non-CPU part, as
+     * on Vercel, where provisioned memory has a one-minute minimum and active CPU has none.
+     */
+    minimumCovers?: "all" | "memory";
     note?: string;
     source: string;
     checked: string;
@@ -182,9 +192,10 @@ const ENTRIES: Omit<ProviderInfo, "billing" | "plan">[] = [
     name: "Vercel Sandbox",
     pricing: {
       minSeconds: 60,
+      minimumCovers: "memory",
       vcpuHour: 0.128,
       gbHour: 0.0212,
-      note: "iad1; active CPU, provisioned RAM in minimum 1-minute increments (2 GB/vCPU); full-CPU estimate; Hobby free within quotas, Pro $20/mo usage credit; creations $0.60/million and retained snapshots $0.08/GB-month extra",
+      note: "iad1; active CPU (I/O wait free), provisioned RAM in minimum 1-minute increments (2 GB/vCPU); listed at full CPU, cpuUtilization lowers it; Hobby free within quotas, Pro $20/mo usage credit; creations $0.60/million and retained snapshots $0.08/GB-month extra",
       source: "https://vercel.com/docs/vercel-sandbox/pricing",
       checked: "2026-11-05",
     },
@@ -251,7 +262,8 @@ const ENTRIES: Omit<ProviderInfo, "billing" | "plan">[] = [
     pricing: {
       vcpuHour: 0.07,
       gbHour: 0.015,
-      note: "bills active CPU (floor 20% of allocation); this is the full-use price; Pro plan is lower",
+      cpuFloor: 0.2,
+      note: "bills active CPU (floor 20% of allocation); listed at full CPU, cpuUtilization lowers it; Pro plan is lower",
       source: "https://www.tensorlake.ai/pricing",
       checked: "2026-11-04",
     },
@@ -700,7 +712,8 @@ const BILLING: Record<ProviderId, Pick<ProviderInfo, "billing" | "plan">> = {
   lambda: { billing: "allocated" },
   langsmith: { billing: "allocated" },
   maritime: { billing: "allocated", plan: { usdMonth: 20, credited: true, note: "Starter plan; no free tier; 7-day trial needs a card", checked: P } },
-  modal: { billing: "active-cpu" },
+  // Modal bills the larger of the reservation and actual use, and the adapter reserves the size you ask for.
+  modal: { billing: "allocated" },
   morph: { billing: "allocated" },
   northflank: { billing: "allocated" },
   novita: { billing: "allocated" },
@@ -769,9 +782,14 @@ export function cloudflareInstance(vcpu: number, memoryGb: number) {
 }
 
 /** How a provider turns running time into a bill: minimum, rounding and fixed per-sandbox charge. */
-export function billingRules(id: ProviderId): { minSeconds: number; incrementSeconds: number; perSandboxUsd: number } {
+export function billingRules(id: ProviderId): { minSeconds: number; incrementSeconds: number; perSandboxUsd: number; minimumCovers: "all" | "memory" } {
   const p = CATALOG.find((c) => c.id === id)?.pricing;
-  return { minSeconds: p?.minSeconds ?? 0, incrementSeconds: p?.incrementSeconds ?? 1, perSandboxUsd: p?.perSandboxUsd ?? 0 };
+  return {
+    minSeconds: p?.minSeconds ?? 0,
+    incrementSeconds: p?.incrementSeconds ?? 1,
+    perSandboxUsd: p?.perSandboxUsd ?? 0,
+    minimumCovers: p?.minimumCovers ?? "all",
+  };
 }
 
 /**
@@ -805,7 +823,7 @@ export function fittingSpec(id: ProviderId): { vcpu: number; memoryGb: number } 
   return fixedSize(id) ?? { vcpu: DEFAULT_VCPU, memoryGb: DEFAULT_MEMORY_GB };
 }
 
-export function hourlyCost(id: ProviderId, spec: SandboxSpec = {}): number {
+function fullHourlyCost(id: ProviderId, spec: SandboxSpec = {}): number {
   const { pricing } = info(id);
   // You get, and pay for, the default image's size whatever you asked for.
   const fixed = fixedSize(id, spec);
@@ -859,6 +877,35 @@ export function hourlyCost(id: ProviderId, spec: SandboxSpec = {}): number {
   // Morph bills whole MCUs: the larger of vCPUs and 4 GB blocks of memory.
   if (id === "morph") return Math.max(vcpu, Math.ceil(mem / 4)) * pricing.vcpuHour;
   return vcpu * pricing.vcpuHour + mem * pricing.gbHour;
+}
+
+/**
+ * Estimated USD per hour for this spec on this provider (list price, while running). For providers that
+ * bill CPU only while it's busy ("active-cpu"), the CPU part is scaled by `spec.cpuUtilization` (default
+ * 1, every core busy, so the price is the most an hour costs), never below the provider's `cpuFloor`.
+ */
+export function hourlyCost(id: ProviderId, spec: SandboxSpec = {}): number {
+  const cpu = cpuHourlyAtFull(id, spec);
+  return fullHourlyCost(id, spec) - cpu * (1 - billedCpuShare(id, spec));
+}
+
+/** The CPU part of the full-use hourly price for an "active-cpu" provider; 0 for providers that bill allocated capacity. */
+export function cpuHourlyAtFull(id: ProviderId, spec: SandboxSpec = {}): number {
+  const p = info(id);
+  if (p.billing !== "active-cpu") return 0;
+  const fixed = fixedSize(id, spec);
+  if (fixed) return fixed.vcpu * p.pricing.vcpuHour;
+  const vcpu = spec.vcpu ?? DEFAULT_VCPU;
+  const mem = spec.memoryGb ?? DEFAULT_MEMORY_GB;
+  if (id === "cloudflare") return cloudflareInstance(vcpu, mem).vcpu * p.pricing.vcpuHour;
+  if (id === "upstash") return fullHourlyCost(id, spec);
+  if (id === "deno") return 2 * p.pricing.vcpuHour;
+  return vcpu * p.pricing.vcpuHour;
+}
+
+/** Share of an "active-cpu" provider's CPU that gets billed: `cpuUtilization` (default 1), at least its `cpuFloor`. */
+export function billedCpuShare(id: ProviderId, spec: SandboxSpec = {}): number {
+  return Math.min(1, Math.max(spec.cpuUtilization ?? 1, info(id).pricing.cpuFloor ?? 0));
 }
 
 /** Why a provider can't take this spec, or null if it can. */
