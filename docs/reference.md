@@ -113,6 +113,10 @@ await p.pause();
 // Ids are portable across processes: "provider:nativeId"
 const again = await router.get(a.id);
 
+// Anything the router doesn't cover (ports, background processes, snapshots): the provider SDK's own
+// object. Undefined for providers driven over plain HTTP; use a.nativeId with their API instead.
+if (a.provider === "e2b") console.log((a.native as import("e2b").Sandbox).getHost(3000));
+
 // Dry run: who would be tried, in what order, and why anything is skipped
 console.table(router.plan({ vcpu: 32 }));
 
@@ -238,6 +242,8 @@ A sandbox the provider already stopped is just dropped from the ledger. `sandbox
 ### Bench
 
 `bench` starts real sandboxes on every configured provider, measures time to a usable sandbox and the round trip of `echo ok`, kills them, and prints a markdown leaderboard. Results are saved to `~/.sandboxrouter/bench.json`, which is what `strategy: "fastest"` routes on. Latency is measured from wherever you run it, so network distance counts.
+
+`bench --submit` runs the benchmark and opens a pull request with the report through the GitHub CLI (`gh`), forking the repo if needed; it implies `--share`. Shared reports leave out providers whose every run failed on your own account (a setup error, payment, a limit), and nothing is written when several providers fail on the network at once.
 
 `bench --task` also runs the same fixed job in every sandbox, to compare what work costs rather than what an hour costs: hash 512 MB of zeros on one core, then 256 MB on each of two cores at once, then write and flush 256 MB to disk (`src/task.ts`). It uses only `head`, `sha256sum` and `dd`, which every Linux image has. Each step is timed from your machine minus the sandbox's round trip for an empty command, so network distance mostly drops out. The job is priced as the provider would bill it: the start plus the task, rounded up to its minimum charge and billing step, plus any per-sandbox fee. What it measures is CPU and disk speed for this job; it doesn't cover networking, package installs or GPUs. `--long` runs each step 40 times in a row (minutes instead of seconds), which shows whether a provider keeps its speed under steady load and how prices compare once minimum charges stop mattering. Reports made with `--share` record the task version (`task: "v1"`, or `"v1-long"`); changing the job bumps the version, and older reports stop counting. Each step also reads the sandbox's own CPU counters (`/proc/stat`) before and after, so the report records the CPU time the job really used (`medianTaskCpuMs`); providers that bill active CPU are priced by that, plus their memory for the whole run. `--job python` runs a pure-Python script instead (200,000 records through JSON, a regex and a sort, like a code-interpreter call; providers without `python3` fail it), and `--job download` downloads the 53 MB Node.js release from nodejs.org's CDN (curl, else wget, else python3). `--parallel N` benches N providers at once, which matters for the long job.
 

@@ -48,6 +48,11 @@ export class VercelProvider implements Provider {
 }
 
 class VercelBox implements ProviderSandbox {
+  /** The provider SDK's own sandbox object, for what the router doesn't cover (RoutedSandbox.native). */
+  get native(): unknown {
+    return this.sbx;
+  }
+
   readonly nativeId: string;
   constructor(private sbx: VercelSandbox) {
     this.nativeId = sbx.name;

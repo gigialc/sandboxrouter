@@ -66,6 +66,11 @@ async function drain(stream: ReadableStream<string>, on?: (chunk: string) => voi
 }
 
 class ModalBox implements ProviderSandbox {
+  /** The provider SDK's own sandbox object, for what the router doesn't cover (RoutedSandbox.native). */
+  get native(): unknown {
+    return this.sb;
+  }
+
   readonly nativeId: string;
   constructor(private sb: ModalSandbox) {
     this.nativeId = sb.sandboxId;

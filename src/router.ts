@@ -607,6 +607,16 @@ export class RoutedSandbox {
   }
 
   /**
+   * The provider SDK's own sandbox object, for what the router doesn't cover: ports, background processes,
+   * snapshots, anything else the provider has. Narrow it with the provider's own type, e.g.
+   * `if (sbx.provider === "e2b") (sbx.native as import("e2b").Sandbox).getHost(3000)`. Undefined for providers
+   * driven over plain HTTP (use `nativeId` with their API). Calls made through it aren't routed or tracked.
+   */
+  get native(): unknown {
+    return this.box.native;
+  }
+
+  /**
    * Run a command. If it outlives `opts.timeoutSeconds` the adapter stops it and this rejects with
    * `ProviderError("<provider>: command timed out after Ns")`. Should an adapter fail to notice its
    * own deadline, the router gives up `EXEC_GRACE_S` later with the same error, so callers can

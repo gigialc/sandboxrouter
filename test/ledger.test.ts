@@ -11,6 +11,32 @@ import { FakeProvider } from "./fake.js";
 const tmpLedger = () => join(mkdtempSync(join(tmpdir(), "sbr-ledger-")), "sandboxes.jsonl");
 
 describe("sandbox ledger", () => {
+  it("compacts itself once it grows, keeping only open sandboxes", () => {
+    const file = tmpLedger();
+    const ledger = new Ledger(file);
+    const was = Ledger.COMPACT_BYTES;
+    Ledger.COMPACT_BYTES = 2000;
+    try {
+      const entry = (i: number) => ({ id: `boat:${i}`, provider: "boat", createdAt: "2026-11-17T00:00:00Z", expiresAt: "2026-11-17T01:00:00Z", usdHour: 0.018 });
+      ledger.open(entry(0));
+      for (let i = 1; i <= 50; i++) {
+        ledger.open(entry(i));
+        ledger.close(`boat:${i}`);
+      }
+      expect(ledger.list().map((e) => e.id)).toEqual(["boat:0"]);
+      expect(readFileSync(file, "utf8").length).toBeLessThan(2000);
+    } finally {
+      Ledger.COMPACT_BYTES = was;
+    }
+  });
+
+  it("exposes the provider SDK's own sandbox object as sbx.native", async () => {
+    const router = new Router({ providers: [new FakeProvider("boat")], ledger: false });
+    const sbx = await router.create({}, { provider: "boat" });
+    // FakeProvider is HTTP-style: no SDK object.
+    expect(sbx.native).toBeUndefined();
+  });
+
   it("records each create and drops it on kill, also when killed through router.get()", async () => {
     const file = tmpLedger();
     const router = new Router({ providers: [new FakeProvider("boat")], ledger: file });

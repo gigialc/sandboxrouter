@@ -16,7 +16,13 @@ Node 20+ (CI uses 22).
 
 ## Sending results
 
-The real-account results on the site come from whoever has an account. With that provider's keys set (`npx tsx src/cli.ts providers` lists them):
+The real-account results on the site come from whoever has an account, from wherever they are: a run from a new city or cloud region is as useful as a new provider. The quickest way, with any provider keys set and the [GitHub CLI](https://cli.github.com) signed in:
+
+```bash
+npx @sandboxrouter/sdk bench --task --runs 3 --label "Tokyo" --submit
+```
+
+That runs the benchmark, writes the report and opens the pull request for you (forking the repo if needed). Only the report is sent; it never contains keys. Providers whose every run failed on your account (a bad key, no credit, a limit) are left out, and nothing is written if your connection drops. More detail, per provider:
 
 ```bash
 npx tsx src/cli.ts check --provider modal --save --by YOUR_GITHUB_USERNAME     # does it work: results/conformance/modal.json

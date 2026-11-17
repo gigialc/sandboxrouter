@@ -54,6 +54,11 @@ export class SpritesProvider implements Provider {
 }
 
 class SpritesBox implements ProviderSandbox {
+  /** The provider SDK's own sandbox object, for what the router doesn't cover (RoutedSandbox.native). */
+  get native(): unknown {
+    return this.sprite;
+  }
+
   readonly nativeId: string;
   constructor(private sprite: Sprite) {
     this.nativeId = sprite.name;

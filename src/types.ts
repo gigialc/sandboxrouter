@@ -149,6 +149,11 @@ export interface ExecResult {
 /** A live sandbox as one provider sees it. Adapters implement this. */
 export interface ProviderSandbox {
   readonly nativeId: string;
+  /**
+   * The provider SDK's own sandbox object (an E2B Sandbox, a Daytona Sandbox, a Modal Sandbox, ...), for features
+   * the router doesn't cover. Undefined for providers driven over plain HTTP: use `nativeId` with their API.
+   */
+  readonly native?: unknown;
   exec(cmd: string, opts?: ExecOptions): Promise<ExecResult>;
   writeFile(path: string, content: string | Uint8Array): Promise<void>;
   readFile(path: string): Promise<Uint8Array>;

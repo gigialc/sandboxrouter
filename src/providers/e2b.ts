@@ -124,6 +124,11 @@ export interface E2BCommandHandle {
 
 /** exec/files/kill over an E2B-style SDK sandbox. `provider` labels errors. No pause. */
 export class E2BCompatBox implements ProviderSandbox {
+  /** The provider SDK's own sandbox object, for what the router doesn't cover (RoutedSandbox.native). */
+  get native(): unknown {
+    return this.sbx;
+  }
+
   readonly nativeId: string;
   constructor(
     protected sbx: E2BLikeSandbox,

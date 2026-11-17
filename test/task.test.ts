@@ -217,3 +217,16 @@ describe("bench", () => {
     for (const r of rows) expect(Object.keys(r.taskPhasesMs ?? {})).toEqual(TASK_PHASES.map((p) => p.id));
   });
 });
+
+describe("what a shared report leaves out", () => {
+  it("tells the runner's own network and account problems apart from a provider's", async () => {
+    const { ACCOUNT_ERROR, NETWORK_ERROR } = await import("../src/bench.js");
+    expect(NETWORK_ERROR.test("all providers failed: e2b: fetch failed")).toBe(true);
+    expect(NETWORK_ERROR.test("daytona: getaddrinfo ENOTFOUND app.daytona.io")).toBe(true);
+    expect(ACCOUNT_ERROR.test("sprites: token has reached its sprite creation limit (10). This looks like a setup problem with sprites")).toBe(true);
+    expect(ACCOUNT_ERROR.test("morph: HTTP 402 Payment Required for https://cloud.morph.so/api/snapshot")).toBe(true);
+    // A provider that answers but fails is the provider's result, and stays in.
+    expect(ACCOUNT_ERROR.test("vercel: command timed out after 300s")).toBe(false);
+    expect(NETWORK_ERROR.test("vercel: command timed out after 300s")).toBe(false);
+  });
+});

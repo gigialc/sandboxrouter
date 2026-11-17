@@ -128,6 +128,11 @@ async function drain(stream: BeamStream, on: ((chunk: string) => void) | undefin
 }
 
 class BeamBox implements ProviderSandbox {
+  /** The provider SDK's own sandbox object, for what the router doesn't cover (RoutedSandbox.native). */
+  get native(): unknown {
+    return this.sb;
+  }
+
   readonly nativeId: string;
   constructor(
     private sb: BeamInstance,

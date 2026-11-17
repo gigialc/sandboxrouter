@@ -191,7 +191,12 @@ export default function MethodologyPage() {
             Run it with your own keys{REPO_PUBLIC ? <> and send the report as a pull request to <a href={`${REPO}/tree/main/results`}>results/</a></> : null}.
             Label it with a city or cloud region, never an address.
           </p>
-          <CodeBlock title="terminal" code={`npx ${NPM} bench --task --runs 5 --share --label "us-east-1" --by YOUR_GITHUB_USERNAME`} />
+          <CodeBlock title="terminal" code={`npx ${NPM} bench --task --runs 3 --label "Tokyo" --submit`} />
+          <p>
+            With the <a href="https://cli.github.com">GitHub CLI</a> signed in, <code>--submit</code> opens the pull request for you.
+            Only the report is sent, never keys; providers whose every run failed on your own account are left out, and nothing is
+            written if your connection drops. A weekly run from GitHub&apos;s own servers in the US adds a second location.
+          </p>
         </article>
       </div>
     </div>

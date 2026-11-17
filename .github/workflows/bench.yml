@@ -1,0 +1,91 @@
+name: bench
+# Every Wednesday: run the benchmarks from GitHub's own runners (US), so results don't come from one laptop
+# in one place. Only providers that passed the real-account check; a provider whose every run fails on the
+# account (key, credit, a limit) is left out of the report, and bench writes none if the network drops. Commits the
+# reports to results/, where the website picks them up.
+on:
+  schedule:
+    - cron: "37 9 * * 3"
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: bench
+  cancel-in-progress: false
+jobs:
+  bench:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npm i --no-save --legacy-peer-deps @beamcloud/beam-js @codesandbox/sdk @deno/sandbox novita-sandbox langsmith ws
+        continue-on-error: true
+      - name: Run the short job and the agent loop
+        continue-on-error: true
+        run: |
+          P=$(node --import tsx -e 'import("./src/verified.ts").then((m) => console.log(Object.keys(m.VERIFIED).join(",")))')
+          day=$(date -u +%F)
+          for job in short agent; do
+            npx tsx src/cli.ts bench --provider "$P" --runs 3 --task --job "$job" --parallel 4 \
+              --share --label "GitHub Actions, US" --by github-actions --out "results/bench-$day-gha-us-$job.json" || true
+          done
+        env:
+          AGENT37_API_KEY: ${{ secrets.AGENT37_API_KEY }}
+          AGENTCORE_CODE_INTERPRETER_ID: ${{ secrets.AGENTCORE_CODE_INTERPRETER_ID }}
+          ALIBABA_SANDBOX_API_KEY: ${{ secrets.ALIBABA_SANDBOX_API_KEY }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          AZURE_SESSIONS_POOL_ENDPOINT: ${{ secrets.AZURE_SESSIONS_POOL_ENDPOINT }}
+          AZURE_SESSIONS_TOKEN: ${{ secrets.AZURE_SESSIONS_TOKEN }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          BEAM_TOKEN: ${{ secrets.BEAM_TOKEN }}
+          BEAM_WORKSPACE_ID: ${{ secrets.BEAM_WORKSPACE_ID }}
+          BL_API_KEY: ${{ secrets.BL_API_KEY }}
+          BL_WORKSPACE: ${{ secrets.BL_WORKSPACE }}
+          BOAT_API_KEY: ${{ secrets.BOAT_API_KEY }}
+          CLOUDFLARE_SANDBOX_TOKEN: ${{ secrets.CLOUDFLARE_SANDBOX_TOKEN }}
+          CLOUDFLARE_SANDBOX_URL: ${{ secrets.CLOUDFLARE_SANDBOX_URL }}
+          CSB_API_KEY: ${{ secrets.CSB_API_KEY }}
+          DAYTONA_API_KEY: ${{ secrets.DAYTONA_API_KEY }}
+          DEDALUS_API_KEY: ${{ secrets.DEDALUS_API_KEY }}
+          DENO_DEPLOY_TOKEN: ${{ secrets.DENO_DEPLOY_TOKEN }}
+          E2B_API_KEY: ${{ secrets.E2B_API_KEY }}
+          EXE_TOKEN: ${{ secrets.EXE_TOKEN }}
+          FREESTYLE_API_KEY: ${{ secrets.FREESTYLE_API_KEY }}
+          HOPX_API_KEY: ${{ secrets.HOPX_API_KEY }}
+          INSTABOX_API_KEY: ${{ secrets.INSTABOX_API_KEY }}
+          KOYEB_API_TOKEN: ${{ secrets.KOYEB_API_TOKEN }}
+          LAMBDA_MICROVM_IMAGE: ${{ secrets.LAMBDA_MICROVM_IMAGE }}
+          MARITIME_API_KEY: ${{ secrets.MARITIME_API_KEY }}
+          MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
+          MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}
+          MORPH_API_KEY: ${{ secrets.MORPH_API_KEY }}
+          NORTHFLANK_API_TOKEN: ${{ secrets.NORTHFLANK_API_TOKEN }}
+          NORTHFLANK_PROJECT_ID: ${{ secrets.NORTHFLANK_PROJECT_ID }}
+          NOVITA_API_KEY: ${{ secrets.NOVITA_API_KEY }}
+          LANGSMITH_API_KEY: ${{ secrets.LANGSMITH_API_KEY }}
+          OPENSCALE_API_KEY: ${{ secrets.OPENSCALE_API_KEY }}
+          RUNLOOP_API_KEY: ${{ secrets.RUNLOOP_API_KEY }}
+          SPRITES_TOKEN: ${{ secrets.SPRITES_TOKEN }}
+          SUPERSERVE_API_KEY: ${{ secrets.SUPERSERVE_API_KEY }}
+          SAIL_API_KEY: ${{ secrets.SAIL_API_KEY }}
+          TENSORLAKE_API_KEY: ${{ secrets.TENSORLAKE_API_KEY }}
+          UPSTASH_BOX_API_KEY: ${{ secrets.UPSTASH_BOX_API_KEY }}
+          VERCEL_OIDC_TOKEN: ${{ secrets.VERCEL_OIDC_TOKEN }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      - name: Save the reports
+        run: |
+          npm run -s results:check
+          git config user.name "bench"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add results/
+          git diff --cached --quiet || (git commit -m "bench: GitHub Actions, US, $(date -u +%F)" && git push)
