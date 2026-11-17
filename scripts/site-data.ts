@@ -3,7 +3,7 @@
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { benchmarksPublishable, billingRules, CATALOG, hourlyCost, planLabel, unfit } from "../src/catalog.js";
 import { aggregate, loadReports, taskTable } from "../src/leaderboard.js";
-import { TASK_PHASES, TASKS } from "../src/task.js";
+import { TASKS } from "../src/task.js";
 import { computerCatalog } from "../src/computers.js";
 import { CHECK_STEPS } from "../src/check.js";
 import { conformanceTable, liveStatus } from "../src/conformance.js";
@@ -123,11 +123,36 @@ const data = {
   desktops: computerCatalog(),
   leaderboard: aggregate(reports),
   tasks: {
-    phases: TASK_PHASES.map((p) => ({ id: p.id, label: p.label })),
-    kinds: [
-      { id: "short", title: "Short job", blurb: "The job once: a few seconds of work.", version: TASKS.short.version, repeat: TASKS.short.repeat, rows: taskTable(reports, TASKS.short.version) },
-      { id: "long", title: "Long job", blurb: "The same job 40 times in a row: minutes of steady work.", version: TASKS.long.version, repeat: TASKS.long.repeat, rows: taskTable(reports, TASKS.long.version) },
-    ].filter((k) => k.rows.length),
+    kinds: (
+      [
+        ["short", "Short job", "Hash 512 MB on one core, then on two, then write 256 MB to disk: a few seconds of work."],
+        ["long", "Long job", "The short job 40 times in a row: minutes of steady work, where minimum charges stop mattering."],
+        ["python", "Python", "A pure-Python script (200,000 records through JSON, a regex and a sort), like a code-interpreter call."],
+        ["download", "Download", "Download the Node.js release (53 MB) from nodejs.org's CDN: what installing toolchains and packages depends on. A provider with no internet access by default can't run it."],
+      ] as const
+    )
+      .map(([id, title, blurb]) => ({
+        id,
+        title,
+        blurb,
+        version: TASKS[id].version,
+        repeat: TASKS[id].repeat,
+        phases: TASKS[id].phases.map((p) => ({ id: p.id, label: p.label })),
+        rows: taskTable(reports, TASKS[id].version),
+        // Benched with this job but never finished it (no python3, no internet, ...): worth saying, not hiding.
+        couldNot: [
+          ...new Set(
+            reports
+              .filter((r) => r.task === TASKS[id].version)
+              .flatMap((r) => r.rows)
+              .filter((x) => x.runs > x.failures && x.medianTaskMs === undefined)
+              .map((x) => x.provider),
+          ),
+        ]
+          .filter((p) => !taskTable(reports, TASKS[id].version).some((t) => t.provider === p))
+          .map((p) => names.get(p) ?? p),
+      }))
+      .filter((k) => k.rows.length),
   },
   useCases,
   costRuns: costRows,

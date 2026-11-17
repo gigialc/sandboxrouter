@@ -86,6 +86,11 @@ describe("taskTable", () => {
     expect(taskTable(reports)[0].taskMs).toBe(2000);
     expect(taskTable(reports, TASKS.long.version)[0].taskMs).toBe(80000);
   });
+  it("prices the Python and download jobs from their own phases", () => {
+    const rows = taskTable([report({ task: TASKS.download.version }, { medianTaskMs: 900, taskPhasesMs: { download: 900 } })], TASKS.download.version);
+    expect(rows[0].phasesMs).toEqual({ download: 900 });
+    expect(taskTable([report()], TASKS.python.version)).toEqual([]);
+  });
   it("ignores reports without the task, or from an older task version", () => {
     expect(taskTable([report({ task: undefined }), report({ task: "v0" })])).toEqual([]);
   });
@@ -106,6 +111,12 @@ describe("validateResult with task times", () => {
   });
   it("refuses task times without the task version", () => {
     expect(validateResult(report({ task: undefined }), NOW)).toContainEqual(expect.stringMatching(/doesn't say which task/));
+  });
+  it("checks each job against its own phases", () => {
+    const py = report({ task: TASKS.python.version }, { medianTaskMs: 1500, taskPhasesMs: { python: 1500 } });
+    expect(validateResult(py, NOW)).toEqual([]);
+    expect(validateResult(report({ task: TASKS.python.version }), NOW)).toContainEqual(expect.stringMatching(/taskPhasesMs needs python/));
+    expect(validateResult(report({ task: "made-up" }), NOW)).toContainEqual(expect.stringMatching(/unknown task "made-up"/));
   });
   it("refuses a missing or impossible phase", () => {
     expect(validateResult(report({}, { taskPhasesMs: { cpu: 1000, cores: 800 } }), NOW)).toContainEqual(expect.stringMatching(/taskPhasesMs needs/));

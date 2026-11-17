@@ -1,7 +1,7 @@
 import { CATALOG, DEFAULT_MEMORY_GB, DEFAULT_VCPU, fixedSize, hourlyCost } from "./catalog.js";
 import { loadBench, median, saveBench, type BenchData } from "./bench-store.js";
 import { Router } from "./router.js";
-import { runTask, taskMs, taskUsd, TASK_PHASES, type PhaseMs, type TaskKind } from "./task.js";
+import { runTask, taskMs, taskUsd, TASKS, type PhaseMs, type TaskKind } from "./task.js";
 import type { ProviderId, SandboxSpec } from "./types.js";
 
 export interface BenchRow {
@@ -29,7 +29,7 @@ export async function bench(opts: {
   runs?: number;
   spec?: SandboxSpec;
   benchFile?: string;
-  /** Also run the standard task (src/task.ts) in each sandbox, to price a fixed piece of work: true or "short", or "long". */
+  /** Also run a standard task (src/task.ts) in each sandbox, to price a fixed piece of work: true or "short", "long", "python", "download". */
   task?: boolean | TaskKind;
   /** Providers benched at once (default 1). Each provider's own runs stay one after another. */
   parallel?: number;
@@ -87,7 +87,7 @@ export async function bench(opts: {
       medianCreateMs: median(createMs),
       medianExecMs: median(execMs),
       hourlyUsd: hourlyCost(id, sized(id, spec)),
-      ...(tasks.length ? taskSummary(tasks) : {}),
+      ...(tasks.length ? taskSummary(tasks, kind!) : {}),
       lastError,
     });
   };
@@ -102,8 +102,8 @@ export async function bench(opts: {
 }
 
 /** Medians of the task runs that finished: the whole task, and each phase. */
-function taskSummary(tasks: PhaseMs[]): Pick<BenchRow, "medianTaskMs" | "taskPhasesMs"> {
-  const phases = Object.fromEntries(TASK_PHASES.map((p) => [p.id, median(tasks.map((t) => t[p.id]))!])) as PhaseMs;
+function taskSummary(tasks: PhaseMs[], kind: TaskKind): Pick<BenchRow, "medianTaskMs" | "taskPhasesMs"> {
+  const phases: PhaseMs = Object.fromEntries(TASKS[kind].phases.map((p) => [p.id, median(tasks.map((t) => t[p.id]))!]));
   return { medianTaskMs: median(tasks.map(taskMs)), taskPhasesMs: phases };
 }
 
