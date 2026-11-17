@@ -17,8 +17,12 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", title: "sandboxRouter: one API for every sandbox", description: DESCRIPTION },
 };
 
-/** Apply a theme picked with the header toggle before first paint, so a dark choice doesn't flash light. */
-const THEME_SCRIPT = `try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.dataset.theme=t}catch(e){}`;
+/**
+ * Apply a theme picked with the header toggle before first paint, so a dark choice doesn't flash light.
+ * Links to the hosted dashboard (another origin) carry the theme showing here, so it opens in the same one.
+ */
+const THEME_SCRIPT = `try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.dataset.theme=t}catch(e){}
+document.addEventListener("click",function(e){var a=e.target.closest&&e.target.closest('a[href^="https://api.sandboxrouter.ai"]');if(!a)return;var d=document.documentElement.dataset.theme||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");var u=new URL(a.href);u.searchParams.set("theme",d);a.href=u.toString()},true);`;
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
