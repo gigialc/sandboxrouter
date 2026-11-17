@@ -1,21 +1,33 @@
 import { CATALOG, DEFAULT_MEMORY_GB, DEFAULT_VCPU, fittingSpec, fixedSize, hourlyCost } from "./catalog.js";
 import { loadBench, median, saveBench, type BenchData } from "./bench-store.js";
-import { Router } from "./router.js";
+import { Router, sizeOf, type Size } from "./router.js";
 import { runTask, taskMs, taskUsd, TASKS, type TaskKind, type TaskRun } from "./task.js";
 import type { ProviderId, SandboxSpec } from "./types.js";
 
 export interface BenchRow {
   provider: ProviderId;
   runs: number;
+  /** Create or first-command failures. Workload and cleanup outcomes are counted separately. */
   failures: number;
+  /** Shape selected by the router, before any provider-side allocation. */
+  size?: Size;
   medianCreateMs?: number;
   medianExecMs?: number;
+  /** Paired time from request to first successful command. */
+  medianReadyMs?: number;
   hourlyUsd: number;
   /**
    * Of the failures, how many the provider refused for a limit or quota on the benchmarking account (a rate limit,
    * a concurrency or service quota): the account's plan, not the provider's reliability. Success rates leave them out.
    */
   limited?: number;
+  createFailures?: number;
+  commandFailures?: number;
+  cleanupFailures?: number;
+  /** With a workload: requests whose workload finished and passed its checks. */
+  taskOk?: number;
+  /** Readiness time of the boxes where the workload succeeded. */
+  medianTaskReadyMs?: number;
   /** With `task`: median time of the standard task (src/task.ts), and of each of its phases. */
   medianTaskMs?: number;
   taskPhasesMs?: Record<string, number>;
@@ -63,10 +75,15 @@ export async function bench(opts: {
   const rows: BenchRow[] = [];
 
   const one = async (id: ProviderId) => {
+    const shape = sized(id, spec);
     const createMs: number[] = [];
     const execMs: number[] = [];
+    const readyMs: number[] = [];
     const tasks: TaskRun[] = [];
-    let failures = 0;
+    const taskReadyMs: number[] = [];
+    let createFailures = 0;
+    let commandFailures = 0;
+    let cleanupFailures = 0;
     let limited = 0;
     let lastError: string | undefined;
     for (let i = 0; i < runs; i++) {
@@ -74,37 +91,53 @@ export async function bench(opts: {
       let box;
       try {
         const t0 = performance.now();
-        box = await router.create(sized(id, spec), { provider: id, fallback: false });
-        createMs.push(Math.round(performance.now() - t0));
+        box = await router.create(shape, { provider: id, fallback: false });
         const t1 = performance.now();
         const r = await box.exec("echo ok");
         if (r.exitCode !== 0 || r.stdout.trim() !== "ok") throw new Error(`echo returned ${r.exitCode}: ${r.stdout}${r.stderr}`);
-        execMs.push(Math.round(performance.now() - t1));
+        const done = performance.now();
+        const took = Math.max(1, Math.round(done - t0));
+        createMs.push(Math.max(1, Math.round(t1 - t0)));
+        execMs.push(Math.max(1, Math.round(done - t1)));
+        readyMs.push(took);
         if (kind) {
-          // A failed task doesn't fail the run: the start time still counts, the task just has no time.
           try {
             tasks.push(await runTask(box, kind));
+            taskReadyMs.push(took);
           } catch (err) {
             lastError = `task: ${(err as Error).message.slice(0, 180)}`;
           }
         }
       } catch (err) {
-        failures++;
         lastError = (err as Error).message.slice(0, 200);
-        if (LIMITED_ERROR.test(lastError)) limited++;
+        if (box) commandFailures++;
+        else {
+          createFailures++;
+          if (LIMITED_ERROR.test(lastError)) limited++;
+        }
       } finally {
-        await box?.kill().catch(() => {});
+        await box?.kill().catch((err) => {
+          cleanupFailures++;
+          log(`${id} cleanup failed: ${(err as Error).message.slice(0, 180)}`);
+        });
       }
     }
+    const failures = createFailures + commandFailures;
     stored[id] = { createMs, execMs, failures, at: new Date().toISOString() };
     rows.push({
       provider: id,
       runs,
       failures,
+      createFailures,
+      commandFailures,
+      cleanupFailures,
+      size: sizeOf(id, shape),
       medianCreateMs: median(createMs),
       medianExecMs: median(execMs),
-      hourlyUsd: hourlyCost(id, sized(id, spec)),
+      medianReadyMs: median(readyMs),
+      hourlyUsd: hourlyCost(id, shape),
       ...(limited ? { limited } : {}),
+      ...(kind ? { taskOk: tasks.length, medianTaskReadyMs: median(taskReadyMs) } : {}),
       ...(tasks.length ? taskSummary(tasks, kind!) : {}),
       lastError,
     });
@@ -140,17 +173,17 @@ function sized(id: ProviderId, spec: SandboxSpec): SandboxSpec {
 export function benchMarkdown(rows: BenchRow[]): string {
   const name = (id: ProviderId) => CATALOG.find((c) => c.id === id)!.name;
   const ms = (n?: number) => (n === undefined ? "n/a" : `${n} ms`);
-  const task = rows.some((r) => r.taskPhasesMs);
+  const task = rows.some((r) => r.taskOk !== undefined);
   const cost = (r: BenchRow) =>
-    r.medianTaskMs !== undefined && r.medianCreateMs !== undefined
-      ? `$${taskUsd(r.provider, fittingSpec(r.provider), r.medianCreateMs, r.medianTaskMs, r.medianTaskCpuMs, 1, false, r.medianTaskMaxCoreMs).toFixed(6)}`
+    r.medianTaskMs !== undefined && r.medianTaskReadyMs !== undefined
+      ? `$${taskUsd(r.provider, r.size ?? fittingSpec(r.provider), r.medianTaskReadyMs, r.medianTaskMs, r.medianTaskCpuMs, 1, false, r.medianTaskMaxCoreMs).toFixed(6)}`
       : "n/a";
   const lines = [
-    `| # | Provider | Cold start (median) | Exec round trip |${task ? " Task (median) | Task cost |" : ""} $/hr (list, size run) | Success |`,
-    `|---|---|---|---|${task ? "---|---|" : ""}---|---|`,
+    `| # | Provider | Create (median) | Ready (median) | Exec round trip |${task ? " Task (median) | Est. task cost | Completed |" : ""} $/hr (list, size run) | Ready |`,
+    `|---|---|---|---|---|${task ? "---|---|---|" : ""}---|---|`,
     ...rows.map(
       (r, i) =>
-        `| ${i + 1} | ${name(r.provider)} | ${ms(r.medianCreateMs)} | ${ms(r.medianExecMs)} |${task ? ` ${ms(r.medianTaskMs)} | ${cost(r)} |` : ""} $${r.hourlyUsd.toFixed(3)} | ${r.runs - r.failures}/${r.runs} |`,
+        `| ${i + 1} | ${name(r.provider)} | ${ms(r.medianCreateMs)} | ${ms(r.medianReadyMs)} | ${ms(r.medianExecMs)} |${task ? ` ${ms(r.medianTaskMs)} | ${cost(r)} | ${r.taskOk ?? 0}/${r.runs} |` : ""} $${r.hourlyUsd.toFixed(3)} | ${r.runs - r.failures}/${r.runs}${r.limited ? ` (${r.limited} refused)` : ""} |`,
     ),
   ];
   return lines.join("\n");

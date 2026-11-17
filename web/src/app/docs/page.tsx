@@ -51,14 +51,15 @@ export default function DocsPage() {
 
       <article className="prose-sr min-w-0 max-w-3xl">
         <h2 id="quickstart">Quickstart</h2>
-        <CodeBlock title="terminal" code={`npm i @sandboxrouter/sdk\nexport E2B_API_KEY=...   # any one provider's key is enough to start`} />
+        <p>For this example, use Node 22.19+ and an E2B API key. Save the JavaScript as <code>agent.mjs</code>, then run <code>node agent.mjs</code>.</p>
+        <CodeBlock title="terminal" code={`npm i @sandboxrouter/sdk e2b\nexport E2B_API_KEY=...   # your E2B API key`} />
         <div className="h-3" />
         <CodeBlock
-          title="agent.ts"
+          title="agent.mjs"
           code={`import { Router } from "@sandboxrouter/sdk";
 
 const router = new Router();
-const sbx = await router.create({ timeoutMinutes: 10 });
+const sbx = await router.create({ timeoutMinutes: 10 }, { provider: "e2b" });
 try {
   await sbx.writeFile("/tmp/hello.py", "print('hello from a sandbox')");
   const r = await sbx.exec("python3 /tmp/hello.py");
@@ -68,8 +69,10 @@ try {
 }`}
         />
         <p>
-          Always kill the sandbox when you&apos;re done; each provider also ends it on its own at <code>timeoutMinutes</code>.
-          In TypeScript 5.2+ (or Node 24+) you can write <code>await using sbx = ...</code> instead, which kills it when the block ends.
+          Always kill the sandbox when you&apos;re done. Providers handle <code>timeoutMinutes</code> differently. E2B enforces it,
+          while Fly.io Sprites stay available until you delete them.
+          In TypeScript 5.2+ on Node 22+ with <code>ESNext.Disposable</code>, or in plain JavaScript on Node 24+,
+          you can write <code>await using sbx = ...</code> to kill it when the block ends.
         </p>
         <p>
           Ask for a size with <code>{`{ vcpu: 2, memoryGb: 4 }`}</code>. With no size you get 2 vCPU / 4 GB, except on providers whose
@@ -123,6 +126,11 @@ router.create({ cpuUtilization: 0.1 })              // an agent mostly waiting o
 router.create(spec, { maxHourlyUsd: 0.03 })        // skip providers that would cost more per hour for this run
 router.quote({ expectedSeconds: 10 })               // where it would land and what the run would cost, without starting it`}
         />
+        <p>
+          GPU charges are excluded from SDK quotes. A request with both <code>gpu</code> and <code>maxHourlyUsd</code> is refused
+          because the router cannot verify the price limit. <code>expectedSeconds</code> is a pricing assumption and does not stop
+          a running sandbox.
+        </p>
         <p>
           With no strategy, the router goes cheapest first among providers you have keys for, by list price for the size you asked
           for. Where we measured what a provider really bills (a sandbox run for a fixed time, then the provider&apos;s own bill),

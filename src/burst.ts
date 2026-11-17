@@ -18,6 +18,13 @@ export interface BurstRow {
   ok: number;
   /** Of the failures, how many the provider refused for a limit or quota on this account (429, "limit", ...). */
   limited: number;
+  /** Shape selected by the router. Provider-side resources are not independently measured. */
+  size?: { vcpu: number; memoryGb: number };
+  /** Stages with a failure, with the limit refusals above included in create failures. */
+  createFailures?: number;
+  commandFailures?: number;
+  taskFailures?: number;
+  cleanupFailures?: number;
   /** Time to interactive across the ready ones: create plus first command, from the burst's start. */
   p50Ms?: number;
   p95Ms?: number;
@@ -63,45 +70,56 @@ export async function burst(opts: {
     log(`${id}: ${opts.n} at once${kind ? `, each running the ${kind} job` : ""}`);
     const spec = { ...base, ...fixedSize(id, base) };
     const t0 = performance.now();
+    let cleanupFailures = 0;
     const results = await Promise.all(
       Array.from({ length: opts.n }, async () => {
         let box;
+        let stage: "create" | "command" | "task" = "create";
         try {
           box = await router.create(spec, { provider: id, fallback: false, deadlineSeconds: 240 });
-          const createMs = performance.now() - t0;
+          stage = "command";
           const r = await box.exec("echo ok");
           if (r.exitCode !== 0 || r.stdout.trim() !== "ok") throw new Error(`echo returned ${r.exitCode}`);
           const tti = performance.now() - t0;
+          stage = "task";
           const job: TaskRun | undefined = kind ? await runTask(box, kind) : undefined;
-          return { ok: true as const, tti, createMs, job, done: performance.now() - t0 };
+          return { ok: true as const, tti, job, done: performance.now() - t0 };
         } catch (err) {
-          return { ok: false as const, error: (err as Error).message, done: performance.now() - t0 };
+          return { ok: false as const, stage, error: (err as Error).message, done: performance.now() - t0 };
         } finally {
-          await box?.kill().catch(() => {});
+          await box?.kill().catch((err) => {
+            cleanupFailures++;
+            log(`${id} cleanup failed: ${(err as Error).message.slice(0, 180)}`);
+          });
         }
       }),
     );
     const ok = results.filter((r) => r.ok);
-    const ttis = ok.map((r) => Math.round(r.tti)).sort((a, b) => a - b);
+    const ttis = ok.map((r) => Math.max(1, Math.round(r.tti))).sort((a, b) => a - b);
     const jobs = ok.map((r) => (r.job ? taskMs(r.job.ms) : undefined)).filter((n): n is number => n !== undefined).sort((a, b) => a - b);
     const size = fittingSpec(id);
     const ratio = BILLED_VS_LIST[id]?.ratio ?? 1;
     const usd = ok.reduce(
       (sum, r) =>
         sum +
-        taskUsd(id, { ...size, ...(spec.cpuUtilization ? { cpuUtilization: spec.cpuUtilization } : {}) }, r.createMs, r.job ? taskMs(r.job.ms) : 0, r.job?.cpuMs, ratio, false, r.job?.maxCoreMs),
+        taskUsd(id, { ...size, ...(spec.cpuUtilization ? { cpuUtilization: spec.cpuUtilization } : {}) }, r.tti, r.job ? taskMs(r.job.ms) : 0, r.job?.cpuMs, ratio, false, r.job?.maxCoreMs),
       0,
     );
-    const failed = results.filter((r) => !r.ok) as { error: string }[];
+    const failed = results.filter((r) => !r.ok);
     rows.push({
       provider: id,
       n: opts.n,
       ok: ok.length,
-      limited: failed.filter((f) => LIMIT.test(f.error)).length,
+      limited: failed.filter((f) => f.stage === "create" && LIMIT.test(f.error)).length,
+      size,
+      createFailures: failed.filter((f) => f.stage === "create").length,
+      commandFailures: failed.filter((f) => f.stage === "command").length,
+      taskFailures: failed.filter((f) => f.stage === "task").length,
+      cleanupFailures,
       p50Ms: percentile(ttis, 0.5),
       p95Ms: percentile(ttis, 0.95),
       p99Ms: percentile(ttis, 0.99),
-      wallMs: Math.round(Math.max(...results.map((r) => r.done))),
+      wallMs: Math.max(1, Math.round(Math.max(...results.map((r) => r.done)))),
       ...(jobs.length ? { jobP50Ms: percentile(jobs, 0.5) } : {}),
       ...(ok.length ? { usd: Math.round(usd * 1e6) / 1e6 } : {}),
     });
@@ -202,14 +220,14 @@ export async function spreadBurst(opts: {
           continue;
         }
         let box;
+        const attemptStarted = performance.now();
         try {
           box = await router.create({ ...base, ...fixedSize(id, base) }, { provider: id, fallback: false, deadlineSeconds: 240 });
-          const createMs = performance.now() - t0;
           const r = await box.exec("echo ok");
           if (r.exitCode !== 0 || r.stdout.trim() !== "ok") throw new Error(`echo returned ${r.exitCode}`);
           const s = stats.get(id)!;
           s.ok++;
-          s.createMs.push(createMs);
+          s.createMs.push(performance.now() - attemptStarted);
           if (moved) s.spilledIn++;
           return { ok: true as const, tti: performance.now() - t0, done: performance.now() - t0 };
         } catch (err) {

@@ -120,10 +120,11 @@ export interface RouteOptions {
   /** Capabilities every candidate must have. */
   require?: Capability[];
   /**
-   * The most this sandbox may cost, in USD per hour. A provider is skipped when this run would cost more
-   * there, priced the way ranking prices it: hourly price, minimum charge and billing increment over
+   * An estimated effective hourly price limit for routing, in USD. A provider is skipped when this run
+   * is estimated to cost more there: hourly price, minimum charge and billing increment over
    * `expectedSeconds` (else `timeoutMinutes`, default 30), plus any per-sandbox charge, divided by the
-   * run's hours. Omit for no cap.
+   * run's hours. This does not stop the sandbox or enforce a budget. Requests with unpriced GPU
+   * charges cannot use this limit. Omit for no cap.
    */
   maxHourlyUsd?: number;
 }

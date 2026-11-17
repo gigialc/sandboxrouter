@@ -187,11 +187,15 @@ describe("VercelProvider", () => {
     expect(creates[1]).toEqual({ token: "vt_test", teamId: "team_test", projectId: "prj_test", runtime: "node22", timeout: 1_800_000, resources: { vcpus: 2 }, env: undefined, tags: undefined, persistent: false });
     await p().create({ vcpu: 16, memoryGb: 1 });
     expect(creates[2].resources).toEqual({ vcpus: 8 });
+    await p().create({ vcpu: 2.5, memoryGb: 4 });
+    expect(creates[3].resources).toEqual({ vcpus: 4 });
+    await p().create({ vcpu: 1, memoryGb: 5 });
+    expect(creates[4].resources).toEqual({ vcpus: 4 });
     // With only an OIDC token the SDK finds the credentials itself; create's errors pass through unwrapped.
     delete process.env.VERCEL_TOKEN;
     process.env.VERCEL_OIDC_TOKEN = "oidc";
     await expect(p().create({})).rejects.toMatchObject({ message: "Unauthorized: invalid token", status: 401 });
-    expect(creates[3]).not.toHaveProperty("token");
+    expect(creates.at(-1)).not.toHaveProperty("token");
   });
 
   it("runs `sh -c` with cwd, env and timeoutMs; detached with logs only when streaming", async () => {

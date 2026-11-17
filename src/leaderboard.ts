@@ -1,11 +1,20 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { benchmarksPublishable, billingRules, CATALOG, cpuHourlyAtFull, fittingSpec, hourlyCost } from "./catalog.js";
+import { benchmarksPublishable, billingRules, CATALOG, cpuHourlyAtFull, hourlyCost } from "./catalog.js";
 import { BILLED_VS_LIST } from "./billing.js";
-import { TASK_VERSION, taskByVersion, taskUsd, type PhaseMs } from "./task.js";
+import { AGENT_TASK_VERSION } from "./agent-bench.js";
+import { isCurrentTask, TASK_VERSION, taskByVersion, taskUsd, type PhaseMs } from "./task.js";
 import { median } from "./bench-store.js";
 import type { BenchRow } from "./bench.js";
+import { sizeOf, type Size } from "./router.js";
 import type { ProviderId, SandboxSpec } from "./types.js";
+
+const sameSize = (a: Size, b: Size) => a.vcpu === b.vcpu && a.memoryGb === b.memoryGb;
+const DEFAULT_SIZE = { vcpu: 2, memoryGb: 4 };
+const requestedSize = (spec: SandboxSpec): Size => ({
+  vcpu: spec.vcpu ?? DEFAULT_SIZE.vcpu,
+  memoryGb: spec.memoryGb ?? DEFAULT_SIZE.memoryGb,
+});
 
 /**
  * A shareable bench result. People submit these as PRs to results/, and `sandboxrouter
@@ -72,6 +81,7 @@ export interface LeaderRow {
   submissions: number;
   medianCreateMs?: number;
   medianExecMs?: number;
+  medianReadyMs?: number;
   successRate: number;
   /** Runs behind the row that the provider was asked to do (refusals for an account limit left out). */
   runs: number;
@@ -91,15 +101,16 @@ const KNOWN = new Set(CATALOG.map((c) => c.id));
  * the one with the most runs wins (a 100-run start-time benchmark over a 3-run job that also timed starts);
  * ties go to the newest.
  */
-export function aggregate(reports: BenchReport[]): LeaderRow[] {
+export function aggregate(reports: BenchReport[], cohort: Size = DEFAULT_SIZE): LeaderRow[] {
+  const comparable = reports.filter((r) => sameSize(requestedSize(r.spec ?? {}), cohort));
   const latest = new Map<string, { row: BenchRow; date: string }>();
   const newest = new Map<string, string>();
-  for (const rep of reports) for (const r of rep.rows) {
+  for (const rep of comparable) for (const r of rep.rows) {
     const key = `${r.provider}\u0000${rep.label ?? ""}`;
     if ((newest.get(key) ?? "") < rep.date) newest.set(key, rep.date);
   }
   const MONTH = 30 * 86_400_000;
-  for (const rep of reports) {
+  for (const rep of comparable) {
     for (const r of rep.rows) {
       if (!KNOWN.has(r.provider)) continue;
       const key = `${r.provider}\u0000${rep.label ?? ""}`;
@@ -111,7 +122,10 @@ export function aggregate(reports: BenchReport[]): LeaderRow[] {
   const by = new Map<ProviderId, { row: BenchRow; date: string }[]>();
   for (const x of latest.values()) by.set(x.row.provider, [...(by.get(x.row.provider) ?? []), x]);
   const rows: LeaderRow[] = [...by.entries()].map(([id, xs]) => {
-    const rs = xs.map((x) => x.row);
+    const latestRow = xs.reduce((a, b) => a.date >= b.date ? a : b).row;
+    const size = latestRow.size ?? sizeOf(id, cohort);
+    const matching = xs.filter(({ row }) => sameSize(row.size ?? sizeOf(id, cohort), size));
+    const rs = matching.map((x) => x.row);
     const runs = rs.reduce((n, r) => n + r.runs, 0);
     const ok = rs.reduce((n, r) => n + (r.runs - r.failures), 0);
     // Refusals for a limit on the benchmarking account aren't the provider failing: leave them out of the rate.
@@ -122,11 +136,12 @@ export function aggregate(reports: BenchReport[]): LeaderRow[] {
       submissions: rs.length,
       medianCreateMs: median(rs.map((r) => r.medianCreateMs).filter((n): n is number => typeof n === "number")),
       medianExecMs: median(rs.map((r) => r.medianExecMs).filter((n): n is number => typeof n === "number")),
+      medianReadyMs: rs.every((r) => r.medianReadyMs !== undefined) ? median(rs.map((r) => r.medianReadyMs!)) : undefined,
       successRate: attempted ? ok / attempted : 0,
       runs: attempted,
-      hourlyUsd: hourlyCost(id, fittingSpec(id)),
-      size: fittingSpec(id),
-      measuredAt: xs.map((x) => x.date).sort().at(-1)!,
+      hourlyUsd: hourlyCost(id, size),
+      size,
+      measuredAt: matching.map((x) => x.date).sort().at(-1)!,
     };
   });
   return rows.sort((a, b) => (a.medianCreateMs ?? Infinity) - (b.medianCreateMs ?? Infinity));
@@ -146,8 +161,10 @@ export interface TaskRow {
   taskUsd: number;
   /** What one job costs in a sandbox that's already running (no start, minimum or per-sandbox fee). */
   reusedUsd: number;
-  /** Runs behind the medians (refusals for an account limit left out). */
+  /** All requests in the comparison, including failed starts and limits. */
   runs: number;
+  ok: number;
+  limited: number;
   /** Share of those runs that finished the job. */
   successRate: number;
   /** CPU time the task used across all vCPUs (median), where the sandbox shows /proc/stat. */
@@ -164,14 +181,13 @@ export interface TaskRow {
  * `version` (the short task's by default; TASKS.long.version for `--long`): each provider's latest run
  * from each location, then the median across locations (as `aggregate` does). Cheapest task first.
  */
-export function taskTable(reports: BenchReport[], version: string = TASK_VERSION): TaskRow[] {
-  const def = taskByVersion(version);
-  if (!def) return [];
+function currentTaskRows(reports: BenchReport[], version: string, cohort: Size) {
   const latest = new Map<string, { row: BenchRow; date: string }>();
+  if (!isCurrentTask(version)) return new Map<ProviderId, { row: BenchRow; date: string }[]>();
   for (const rep of reports) {
-    if (rep.task !== version) continue;
+    if (rep.task !== version || !sameSize(requestedSize(rep.spec ?? {}), cohort)) continue;
     for (const r of rep.rows) {
-      if (!KNOWN.has(r.provider) || !r.taskPhasesMs || r.medianTaskMs === undefined || r.medianCreateMs === undefined) continue;
+      if (!KNOWN.has(r.provider) || r.size === undefined || r.taskOk === undefined) continue;
       const key = `${r.provider}\u0000${rep.label ?? ""}`;
       const seen = latest.get(key);
       if (!seen || rep.date > seen.date) latest.set(key, { row: r, date: rep.date });
@@ -179,25 +195,52 @@ export function taskTable(reports: BenchReport[], version: string = TASK_VERSION
   }
   const by = new Map<ProviderId, { row: BenchRow; date: string }[]>();
   for (const x of latest.values()) by.set(x.row.provider, [...(by.get(x.row.provider) ?? []), x]);
-  const rows = [...by.entries()].map(([id, xs]): TaskRow => {
+  // Keep a provider's region samples comparable when its default shape changes between reports.
+  for (const [id, xs] of by) {
+    const newest = xs.reduce((a, b) => a.date >= b.date ? a : b);
+    by.set(id, xs.filter((x) => sameSize(x.row.size!, newest.row.size!)));
+  }
+  return by;
+}
+
+export function taskOutcomes(reports: BenchReport[], version: string, cohort: Size = DEFAULT_SIZE) {
+  return [...currentTaskRows(reports, version, cohort)].map(([provider, xs]) => ({
+    provider,
+    name: CATALOG.find((c) => c.id === provider)!.name,
+    requested: xs.reduce((n, x) => n + x.row.runs, 0),
+    completed: xs.reduce((n, x) => n + x.row.taskOk!, 0),
+    limited: xs.reduce((n, x) => n + (x.row.limited ?? 0), 0),
+    failures: xs.reduce((n, x) => n + x.row.failures - (x.row.limited ?? 0), 0),
+    taskFailures: xs.reduce((n, x) => n + x.row.runs - x.row.failures - x.row.taskOk!, 0),
+  }));
+}
+
+export function taskTable(reports: BenchReport[], version: string = TASK_VERSION, cohort: Size = DEFAULT_SIZE): TaskRow[] {
+  const def = taskByVersion(version);
+  if (!def || !isCurrentTask(version)) return [];
+  const rows = [...currentTaskRows(reports, version, cohort)].flatMap(([id, xs]): TaskRow[] => {
     const rs = xs.map((x) => x.row);
-    const createMs = median(rs.map((r) => r.medianCreateMs!))!;
-    const taskMillis = median(rs.map((r) => r.medianTaskMs!))!;
-    const phasesMs: PhaseMs = Object.fromEntries(def.phases.map((p) => [p.id, median(rs.map((r) => r.taskPhasesMs![p.id]))!]));
+    const successful = rs.filter((r) => r.taskOk! > 0 && r.taskPhasesMs && r.medianTaskMs !== undefined && r.medianTaskReadyMs !== undefined);
+    if (!successful.length) return [];
+    const createMs = median(successful.map((r) => r.medianTaskReadyMs!))!;
+    const taskMillis = median(successful.map((r) => r.medianTaskMs!))!;
+    const phasesMs: PhaseMs = Object.fromEntries(def.phases.map((p) => [p.id, median(successful.map((r) => r.taskPhasesMs![p.id]))!]));
     // The job's own CPU hint (the agent loop's 10%) prices it the way its sandboxes were started.
-    const size = { ...fittingSpec(id), ...(def.cpuUtilization ? { cpuUtilization: def.cpuUtilization } : {}) };
+    const size = { ...rs[0].size!, ...(def.cpuUtilization ? { cpuUtilization: def.cpuUtilization } : {}) };
     const ratio = BILLED_VS_LIST[id]?.ratio ?? 1;
-    const hourlyUsd = hourlyCost(id, fittingSpec(id)) * ratio;
+    const hourlyUsd = hourlyCost(id, size) * ratio;
     const rules = billingRules(id);
-    const cpus = rs.map((r) => r.medianTaskCpuMs).filter((n): n is number => typeof n === "number");
+    const cpus = successful.map((r) => r.medianTaskCpuMs).filter((n): n is number => typeof n === "number");
     // A container can show the whole host's /proc/stat (Daytona does): a reading beyond what the sandbox's
     // own vCPUs could do in that time isn't the sandbox's, so it's dropped and the task is priced at full CPU.
-    const read = cpus.length === rs.length ? median(cpus) : undefined;
+    const read = cpus.length === successful.length ? median(cpus) : undefined;
     const cpuMs = read !== undefined && read <= size.vcpu * taskMillis * 1.1 ? read : undefined;
-    const cores = rs.map((r) => r.medianTaskMaxCoreMs).filter((n): n is number => typeof n === "number");
-    const coreRead = cores.length === rs.length ? median(cores) : undefined;
+    const cores = successful.map((r) => r.medianTaskMaxCoreMs).filter((n): n is number => typeof n === "number");
+    const coreRead = cores.length === successful.length ? median(cores) : undefined;
     const maxCoreMs = cpuMs !== undefined && coreRead !== undefined && coreRead <= taskMillis * 1.1 ? coreRead : undefined;
-    return {
+    const runs = rs.reduce((n, r) => n + r.runs, 0);
+    const ok = rs.reduce((n, r) => n + r.taskOk!, 0);
+    return [{
       provider: id,
       name: CATALOG.find((c) => c.id === id)!.name,
       size,
@@ -207,17 +250,16 @@ export function taskTable(reports: BenchReport[], version: string = TASK_VERSION
       hourlyUsd,
       taskUsd: taskUsd(id, size, createMs, taskMillis, cpuMs, ratio, false, maxCoreMs),
       reusedUsd: taskUsd(id, size, createMs, taskMillis, cpuMs, ratio, true, maxCoreMs),
-      runs: rs.reduce((n, r) => n + r.runs - (r.limited ?? 0), 0),
-      successRate: (() => {
-        const tried = rs.reduce((n, r) => n + r.runs - (r.limited ?? 0), 0);
-        return tried ? rs.reduce((n, r) => n + r.runs - r.failures, 0) / tried : 0;
-      })(),
+      runs,
+      ok,
+      limited: rs.reduce((n, r) => n + (r.limited ?? 0), 0),
+      successRate: runs ? ok / runs : 0,
       ...(cpuMs !== undefined ? { cpuMs } : {}),
       activeCpu: cpuHourlyAtFull(id, size) > 0,
       minimumSeconds: rules.minSeconds,
       perSandboxUsd: rules.perSandboxUsd,
       measuredAt: xs.map((x) => x.date).sort().at(-1)!,
-    };
+    }];
   });
   return rows.sort((a, b) => a.taskUsd - b.taskUsd || a.provider.localeCompare(b.provider));
 }
@@ -398,8 +440,6 @@ export function burstTable(reports: BurstReport[], task?: string, n?: number) {
     if ((rep.task ?? undefined) !== task) continue;
     if (n !== undefined && rep.n !== n) continue;
     for (const r of rep.rows) {
-      // Nothing started (an account blocked outright): nothing measured.
-      if (r.ok === 0) continue;
       if (!KNOWN.has(r.provider) || !benchmarksPublishable(r.provider)) continue;
       const seen = latest.get(r.provider);
       if (!seen || rep.date > seen.date) latest.set(r.provider, { row: r, date: rep.date, label: rep.label });
@@ -444,7 +484,10 @@ export function loadAgentReports(dir: string): AgentReport[] {
 /** Each provider's latest real-agent result: done right first, then cheapest sandbox per session. */
 export function agentTable(reports: AgentReport[]) {
   const latest = new Map<string, { row: import("./agent-bench.js").AgentRow; date: string; model: string }>();
+  const current = reports.filter((r) => r.task === AGENT_TASK_VERSION);
+  const cohort = current.reduce<AgentReport | undefined>((a, b) => !a || b.date > a.date ? b : a, undefined);
   for (const rep of reports) {
+    if (rep.task !== AGENT_TASK_VERSION || rep.model !== cohort?.model) continue;
     for (const r of rep.rows) {
       if (!KNOWN.has(r.provider) || !benchmarksPublishable(r.provider)) continue;
       const seen = latest.get(r.provider);
@@ -453,5 +496,5 @@ export function agentTable(reports: AgentReport[]) {
   }
   return [...latest.values()]
     .map(({ row, date, model }) => ({ ...row, name: CATALOG.find((c) => c.id === row.provider)!.name, measuredAt: date, model }))
-    .sort((a, b) => b.ok / b.runs - a.ok / a.runs || (a.medianUsd ?? Infinity) - (b.medianUsd ?? Infinity));
+    .sort((a, b) => b.ok / Math.max(1, b.requested ?? b.runs) - a.ok / Math.max(1, a.requested ?? a.runs) || (a.medianUsd ?? Infinity) - (b.medianUsd ?? Infinity));
 }

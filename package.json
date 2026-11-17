@@ -1,6 +1,6 @@
 {
   "name": "@sandboxrouter/sdk",
-  "version": "0.12.0",
+  "version": "0.13.0",
   "description": "One API for every sandbox provider: route AI agents' code by price, speed or capability, with automatic fallback. Free and open source.",
   "type": "module",
   "main": "dist/index.js",
@@ -24,7 +24,8 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "dev": "tsx src/cli.ts",
-    "prepublishOnly": "npm run build && npm test",
+    "prepublishOnly": "npm run test:package && npm test",
+    "test:package": "npm run build && node scripts/check-package.mjs",
     "test:py": "python3 -m unittest discover -s python/tests -v",
     "site:data": "node --import tsx scripts/site-data.ts",
     "price:check": "node --import tsx scripts/price-watch.ts",

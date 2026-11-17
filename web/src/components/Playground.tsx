@@ -54,7 +54,8 @@ export function Playground() {
     try {
       const s = JSON.parse(localStorage.getItem(STORE) ?? "{}");
       if (s.url) setUrl(s.url);
-      if (s.token) setToken(s.token);
+      // Remove tokens saved by older versions. Only the server URL is remembered.
+      if (s.token) localStorage.setItem(STORE, JSON.stringify({ url: s.url }));
     } catch {
       /* ignore */
     }
@@ -75,13 +76,13 @@ export function Playground() {
   async function connect() {
     setBusy("connect");
     setConnErr(null);
-    localStorage.setItem(STORE, JSON.stringify({ url, token }));
     try {
       const res = await api("/v1/providers");
       if (res.status === 401) throw new Error("The token doesn't match SANDBOXROUTER_TOKEN on the server.");
       if (!res.ok) throw new Error(`Server answered ${res.status}.`);
       const { providers } = await res.json();
       setConfigured(providers.filter((p: { configured: boolean }) => p.configured).map((p: { id: string }) => p.id));
+      try { localStorage.setItem(STORE, JSON.stringify({ url })); } catch { /* storage is optional */ }
     } catch (e) {
       setConfigured(null);
       setConnErr(
@@ -148,10 +149,16 @@ export function Playground() {
   async function kill() {
     if (!sbx) return;
     setBusy("kill");
-    await api(`/v1/sandboxes/${encodeURIComponent(sbx.id)}`, { method: "DELETE" }).catch(() => {});
-    say({ stream: "sys", text: `Killed ${sbx.id}` });
-    setSbx(null);
-    setBusy(null);
+    try {
+      const res = await api(`/v1/sandboxes/${encodeURIComponent(sbx.id)}`, { method: "DELETE" });
+      if (!res.ok) throw new Error(`server answered ${res.status}`);
+      say({ stream: "sys", text: `Killed ${sbx.id}` });
+      setSbx(null);
+    } catch (err) {
+      say({ stream: "err", text: `Could not confirm deletion of ${sbx.id}: ${(err as Error).message}. Retry or check your server.` });
+    } finally {
+      setBusy(null);
+    }
   }
 
   const field = "w-full border border-line bg-bg px-3 py-2 text-base outline-none sm:text-sm focus:border-line-2";
@@ -167,21 +174,29 @@ export function Playground() {
           </p>
           <label className="mt-4 block text-xs text-muted">
             Server URL
-            <input value={url} onChange={(e) => setUrl(e.target.value)} className={`${field} mt-1 font-mono`} />
+            <input value={url} disabled={busy !== null || !!sbx} onChange={(e) => {
+              setUrl(e.target.value);
+              setToken("");
+              setConfigured(null);
+            }} className={`${field} mt-1 font-mono`} />
           </label>
           <label className="mt-3 block text-xs text-muted">
             Token
             <input
               type="password"
               value={token}
-              onChange={(e) => setToken(e.target.value)}
+              disabled={busy !== null || !!sbx}
+              onChange={(e) => {
+                setToken(e.target.value);
+                setConfigured(null);
+              }}
               placeholder="SANDBOXROUTER_TOKEN"
               className={`${field} mt-1 font-mono`}
             />
           </label>
           <button
             onClick={connect}
-            disabled={busy !== null}
+            disabled={busy !== null || !!sbx}
             className="mt-4 w-full border border-line-2 px-4 py-2 text-sm font-medium hover:bg-panel-2 disabled:opacity-40"
           >
             {busy === "connect" ? "Connecting…" : configured ? "Reconnect" : "Connect"}

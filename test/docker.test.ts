@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { DockerProvider } from "../src/providers/docker.js";
+import { Router } from "../src/router.js";
 import { guardTimeout } from "../src/util.js";
 import { describeConformance } from "./conformance.js";
 
@@ -59,6 +60,7 @@ else if (verb === "run") {
 } else if (verb === "inspect" || verb === "pause" || verb === "unpause" || verb === "rm") {
   const name = rest[rest.length - 1], c = load(name);
   if (!c) fail(1, verb === "inspect" ? "Error: No such object: " + name : "Error response from daemon: No such container: " + name);
+  if (fs.existsSync(path.join(STATE, name + "." + verb + "-unavailable"))) fail(1, "Cannot connect to the Docker daemon");
   if (verb === "inspect") process.stdout.write(c.status + "\n");
   else if (verb === "rm") { fs.rmSync(file(name)); process.stdout.write(name + "\n"); }
   else { c.status = verb === "pause" ? "paused" : "running"; fs.writeFileSync(file(name), JSON.stringify(c)); process.stdout.write(name + "\n"); }
@@ -103,6 +105,25 @@ const p = () => new DockerProvider(bin);
 describeConformance("docker", { provider: p, dir: root });
 
 describe("DockerProvider", () => {
+  it("keeps a sandbox in the ledger when deletion or inspection cannot reach Docker", async () => {
+    const router = new Router({ providers: [p()], ledger: join(root, "failed-removal.jsonl") });
+    const sandbox = await router.create({}, { provider: "docker" });
+    const blocked = join(state, sandbox.nativeId + ".rm-unavailable");
+    writeFileSync(blocked, "");
+    await expect(sandbox.kill()).rejects.toThrow("Cannot connect to the Docker daemon");
+    expect(router.ledger?.list().map((row) => row.id)).toEqual([sandbox.id]);
+    expect(container(sandbox.nativeId).status).toBe("running");
+
+    const offline = join(state, sandbox.nativeId + ".inspect-unavailable");
+    writeFileSync(offline, "");
+    await expect(router.get(sandbox.id)).rejects.not.toMatchObject({ status: 404 });
+    rmSync(offline);
+    rmSync(blocked);
+    await sandbox.kill();
+    await sandbox.kill();
+    expect(router.ledger?.list()).toEqual([]);
+  });
+
   it("is configured when the CLI answers `info`, by constructor or SANDBOXROUTER_DOCKER_BIN", () => {
     expect(p().configured()).toBe(true);
     expect(new DockerProvider(join(root, "no-such-docker")).configured()).toBe(false);

@@ -48,6 +48,7 @@ export interface LeaderRow {
   submissions: number;
   medianCreateMs?: number;
   medianExecMs?: number;
+  medianReadyMs?: number;
   successRate: number;
   runs: number;
   hourlyUsd: number;
@@ -66,6 +67,8 @@ export interface TaskRow {
   taskUsd: number;
   reusedUsd: number;
   runs: number;
+  ok: number;
+  limited: number;
   successRate: number;
   cpuMs?: number;
   activeCpu: boolean;
@@ -89,6 +92,11 @@ export interface LoadRow {
   n: number;
   ok: number;
   limited: number;
+  size?: { vcpu: number; memoryGb: number };
+  createFailures?: number;
+  commandFailures?: number;
+  taskFailures?: number;
+  cleanupFailures?: number;
   p50Ms?: number;
   p95Ms?: number;
   p99Ms?: number;
@@ -103,6 +111,8 @@ export interface AgentRow {
   provider: string;
   name: string;
   runs: number;
+  requested?: number;
+  started?: number;
   limited?: number;
   ok: number;
   medianWallMs?: number;
@@ -180,7 +190,11 @@ export const site = data as unknown as {
   load: { id: string; n: number; job: string; title: string; blurb: string; rows: LoadRow[] }[];
   agent: AgentRow[];
   priceIndex: { lines: IndexLine[]; history: { date: string; lines: Record<string, { median: number; cheapest: number; provider: string }> }[] };
-  tasks: { kinds: { id: string; title: string; blurb: string; version: string; repeat: number; phases: { id: string; label: string }[]; rows: TaskRow[]; couldNot: string[] }[] };
+  tasks: { kinds: {
+    id: string; title: string; blurb: string; version: string; repeat: number; phases: { id: string; label: string }[];
+    rows: TaskRow[];
+    outcomes: { provider: string; name: string; requested: number; completed: number; limited: number; failures: number; taskFailures: number }[];
+  }[] };
   useCases: UseCase[];
   costRuns: CostRow[];
   submissions: { date: string; label: string | null; by: string | null; platform: string; runs: number; providers: number; ids: string[] }[];

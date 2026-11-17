@@ -43,9 +43,9 @@ describe("recommend", () => {
     const r = recommend(data, { job: "python", count: 50, priority: "speed" });
     expect(r.results.map((x) => x.provider)).toEqual(["a", "c", "b"]);
     expect(r.results[0]).toMatchObject({ measuredAtOnce: 10, readyAtOnceMs: 500, secondsEach: 4.5 });
-    expect(r.results[2].notes.join()).toMatch(/not measured at 10 at once yet/);
+    expect(r.results[2].notes).toContain("4 of 10 completed (6 reported limit refusals)");
     expect(r.results[0].usdTotal).toBeCloseTo(0.05);
-    expect(r.basis).toMatch(/measured 10 at once/);
+    expect(r.basis).toContain("readiness measured on batches of 10");
   });
 
   it("filters to the providers you name, and reuse leaves out the start", () => {
@@ -56,17 +56,23 @@ describe("recommend", () => {
 
   it("warns about conditional start fees only for fresh sandboxes", () => {
     const opts = { job: "short", count: 1_000, providers: ["boat"] } as const;
-    const fresh = recommend(PUBLISHED, opts).results[0];
+    const verified = {
+      ...data,
+      conditionalStartFees: PUBLISHED.conditionalStartFees,
+      jobs: { short: { boat: { ...data.jobs.python!.a, name: "Boat", taskUsd: 0.000015 } } },
+    };
+    const fresh = recommend(verified, opts).results[0];
     expect(fresh.usdTotal).toBeCloseTo(0.015, 6);
     expect(fresh.notes).toContain("excludes $0.03–$0.07 per start above allowance");
 
-    const reused = recommend(PUBLISHED, { ...opts, reuse: true }).results[0];
+    const reused = recommend(verified, { ...opts, reuse: true }).results[0];
     expect(reused.notes.some((note) => note.includes("start above allowance"))).toBe(false);
   });
 
-  it("answers from the data the package carries", () => {
+  it("serves create timings and keeps archived workload data out of current recommendations", () => {
     const r = recommend(PUBLISHED, { job: "repo", count: 1 });
-    expect(r.results.length).toBeGreaterThan(5);
+    expect(r.results).toEqual([]);
+    expect(r.basis).toContain("No current verified results");
     expect(recommend(PUBLISHED, { job: "start", priority: "speed" }).results[0].secondsEach).toBeLessThan(1);
   });
 });

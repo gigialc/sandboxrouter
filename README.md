@@ -2,15 +2,20 @@
 
 **One API for every sandbox.** A free, open-source router for the places an AI agent can run code: Agent37, Alibaba Cloud, AWS (Bedrock AgentCore and Lambda MicroVMs), Azure Container Apps, Beam, Blaxel, Boat, Cloudflare, CodeSandbox, Daytona, Dedalus Machines, Deno, E2B, exe.dev, Fly.io Sprites, Freestyle, HOPX, InstaBox, Koyeb, Maritime, Modal, Morph, Northflank, Novita, OpenScale, Runloop, Sail, Superserve, Tensorlake, Upstash Box and Vercel, plus Docker on your own machine. It picks a provider by price, speed or capability, and falls back to the next one when a provider is down or rate-limited.
 
+E2B quickstart (Node 22.19+ and an E2B API key):
+
 ```bash
-npm i @sandboxrouter/sdk     # plus the SDK of each provider you use: see Install below
+npm i @sandboxrouter/sdk e2b
+export E2B_API_KEY=...     # your E2B API key
 ```
 
-```ts
+Save as `agent.mjs` and run `node agent.mjs`:
+
+```js
 import { Router } from "@sandboxrouter/sdk";
 
-const router = new Router();                       // uses whichever provider keys you've set
-const sbx = await router.create();                 // or create({ vcpu: 2, memoryGb: 4 }) for a size
+const router = new Router();
+const sbx = await router.create({ timeoutMinutes: 10 }, { provider: "e2b" });
 try {
   const r = await sbx.exec("python3 -c 'print(6*7)'");
   console.log(r.stdout, "ran on", sbx.provider);
@@ -19,7 +24,7 @@ try {
 }
 ```
 
-Runs as plain JavaScript on Node 20+. (In TypeScript 5.2+, or Node 24+, `await using sbx = ...` kills the sandbox for you.)
+The SDK uses ES modules and runs on Node 20+. Each optional provider SDK can require a newer Node version. For TypeScript 5.2+ on Node 22+, `await using sbx = ...` also works when the compiler includes `ESNext.Disposable`. Plain JavaScript supports that syntax on Node 24+.
 
 Set the keys of the providers you use. `create()` starts the sandbox on the cheapest one that fits: list price for the size you asked for, corrected where we measured what a provider really bills. Providers within 10% of each other on estimated price go fastest first. The router uses its own timings, your benchmark file or published timings, in that order. Estimates exclude account-specific charges such as [Boat’s fees above its included start allowance](https://docs.boat.dev/limits.md#extra-starts). Providers that failed their last real-account check go last. Ties are alphabetical, and no provider pays for placement. If that provider is down, busy or out of credit, the next one takes it, and every attempt is on `sbx.attempts`. The sandbox stays on that provider until you `kill()` it.
 

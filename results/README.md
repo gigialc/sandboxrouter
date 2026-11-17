@@ -17,4 +17,6 @@ Rules for submissions:
 
 `conformance/` holds the last `check --save` run per provider and `cost/` holds `cost run` files; see [CONTRIBUTING.md](../CONTRIBUTING.md#sending-results).
 
-A report holds the provider, run count, failure count and median timings, plus your label, Node version and platform. It never includes keys, env vars, metadata or error messages.
+A report holds the provider, request count, outcomes and median timings, plus your label, Node version and platform. New workload reports include the requested shape, nominal router shape and the number of verified completions. They keep limit refusals, first-command failures, workload failures and cleanup failures separate. Shared records exclude raw error messages.
+
+The v1 workload series (including the Modal task reports and `gemini-primes-v1`) remains here as historical evidence. The current workload, agent and workload-burst rankings only use the new verification versions. Start-only and spread records remain available as timed requests. A spread requests the batch concurrently and kills each sandbox as it finishes.

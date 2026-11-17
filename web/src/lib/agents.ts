@@ -26,14 +26,15 @@ export function benchmarksJson() {
   return {
     ...DATA,
     about: {
-      what: "Sandbox provider benchmarks run on real accounts: start time, real jobs with estimated compute costs, bursts at once, and a real AI agent.",
+      what: "Sandbox provider create timings, request bursts, and workload results that meet the current verification requirements.",
       methodology: `${ORIGIN}/methodology`,
       page: `${ORIGIN}/benchmarks`,
       rawResults: `${REPO}/tree/main/results`,
       jobs: JOB_TEXT,
       units: "Times in milliseconds (…Ms). Costs in US dollars: taskUsd is one job in a new sandbox (start, minimum charge and per-sandbox fee included), reusedUsd one job in a sandbox already running, usdPer100 a burst's estimated cost per 100 sandboxes. Estimates exclude account-specific fees such as Boat's start fees above its included allowances.",
-      successRate: "Share of runs that worked, with refusals for the benchmarking account's own limits left out.",
-      load: "Bursts: n sandboxes asked for at once; ok started; limited refused for the benchmarking account's limit (ours, not the provider's); p50Ms/p99Ms time to ready from the moment all were asked for.",
+      successRate: "For tasks, completed workloads divided by all requests. Create observations exclude recorded limit refusals from that rate.",
+      load: "Bursts: n requests, ok verified completions (first command, and workload if applicable), limited reported limit refusals, p50Ms/p99Ms readiness among completions.",
+      archive: "The raw results include older workload reports. Only current, verified workloads are ranked in this feed.",
       recommend: `Rank these for a job with the MCP tool recommend_provider at ${ORIGIN}/mcp, \`npx ${NPM} recommend\`, or recommend() from ${NPM}.`,
     },
     agent: site.agent,
@@ -52,12 +53,13 @@ export function benchmarksMarkdown(): string {
     "",
     `Sandbox providers measured on real accounts. Data through ${DATA.dataThrough.slice(0, 10)}. How it's measured: ${ORIGIN}/methodology. Machine-readable: ${ORIGIN}/benchmarks.json. Raw results: ${REPO}/tree/main/results.`,
     "",
-    "Rankings are per successful run: a provider whose runs sometimes failed has its cost and time divided by its success rate. Refusals for the benchmarking account's own limits are left out of success rates.",
+    "Task rankings divide estimated time and cost by the share of requests that succeeded. Older workload and real-agent results are available in the raw archive. New rankings require the current verification versions.",
     "",
     "Estimates exclude account-specific fees. [Boat charges for starts above included allowances](https://docs.boat.dev/limits.md#extra-starts).",
     "",
     "## Cost and time for a job",
   ];
+  if (!Object.keys(DATA.jobs).length) out.push("", "No results have been published with the new workload checks yet.");
   for (const job of JOBS.filter((j) => j !== "start")) {
     const r = recommend(DATA, { job, priority: "value" });
     if (!r.results.length) continue;
@@ -85,7 +87,7 @@ export function benchmarksMarkdown(): string {
         ["Provider", "Done right", "Session", "Sandbox idle", "Cost per session"],
         agent.map((a) => [
           a.name,
-          `${a.ok}/${a.runs}`,
+          `${a.ok}/${a.requested ?? a.runs}`,
           secs(a.medianWallMs),
           a.medianWallMs && a.medianModelMs ? `${Math.round((a.medianModelMs / a.medianWallMs) * 100)}%` : "n/a",
           money(a.medianUsd),
@@ -93,7 +95,7 @@ export function benchmarksMarkdown(): string {
       ),
     );
   }
-  out.push("", "## Under load", "", "Sandboxes asked for at once. Time to ready counts from the moment all were asked for. Ranked by median among providers that started all of them; the rest weren't measured at that size, since the benchmarking account's limit (ours, not the provider's) stopped them.");
+  out.push("", "## Under load", "", "Readiness measures time from the batch request to each successful first command. Only complete batches receive latency ranks and scaled cost estimates.");
   for (const l of DATA.load) {
     const rows = Object.entries(l.rows);
     const full = rows.filter(([, r]) => r.ok === r.n).sort(([, a], [, b]) => (a.p50Ms ?? Infinity) - (b.p50Ms ?? Infinity));
@@ -103,21 +105,21 @@ export function benchmarksMarkdown(): string {
       `### ${l.n} at once: ${LOAD_TEXT[l.job]}`,
       "",
       table(
-        ["#", "Provider", "Ready p50", "Ready p99", "All done", "Cost per 100"],
+        ["#", "Provider", "Ready p50", "Ready p99", "Last outcome", "Est. cost per 100"],
         full.map(([, r], i) => [i + 1, r.name, secs(r.p50Ms), secs(r.p99Ms), secs(r.wallMs), money(r.usdPer100)]),
       ),
     );
-    if (rest.length) out.push("", `Not measured at ${l.n} yet: ${rest.map(([, r]) => `${r.name} (${r.ok} of ${r.n} started${r.limited ? `, ${r.limited} refused for our account's limit` : ""})`).join(", ")}.`);
+    if (rest.length) out.push("", `Incomplete: ${rest.map(([, r]) => `${r.name} (${r.ok} of ${r.n} completed, ${r.limited} reported limit refusals, ${r.n - r.ok - r.limited} other failures)`).join(", ")}.`);
   }
   const start = Object.values(DATA.start).sort((a, b) => a.medianCreateMs - b.medianCreateMs);
   out.push(
     "",
     "## Start time",
     "",
-    "Time to a usable sandbox, one at a time.",
+    "Median create response, one request at a time. The first command is measured separately.",
     "",
     table(
-      ["#", "Provider", "Median start", "Success", "Runs", "Per hour (list)"],
+      ["#", "Provider", "Median create", "Success (limits excluded)", "Runs", "Per hour (list)"],
       start.map((s, i) => [i + 1, s.name, secs(s.medianCreateMs), `${Math.round(s.successRate * 100)}%`, s.runs, money(s.hourlyUsd)]),
     ),
     "",
@@ -133,7 +135,7 @@ export function llmsTxt(): string {
 
 ## When to use sandboxRouter
 
-- **Choosing a sandbox provider.** Compare measured start times, timed jobs with estimated compute costs, tests at 10 and 100 at once, and a real AI agent. Estimates exclude account-specific fees, including Boat's fees above included start allowances.
+- **Choosing a sandbox provider.** Compare create timings and request bursts. The benchmark archive contains older workload and real-agent results. Workload rankings require the newer verification scripts. Estimates exclude account-specific fees, including Boat's fees above included start allowances.
 - **Running agent code in a sandbox.** One API over many providers; if one can't start a sandbox, the next one does: \`npm i ${NPM}\`.
 
 ## How an agent should use it
@@ -221,7 +223,7 @@ export const MCP_TOOLS = [
   {
     name: "recommend_provider",
     description:
-      "Which sandbox provider to use for a job, ranked from sandboxRouter's published benchmarks (measured on real accounts). Costs and times are per successful run. For count of 10 or more, start times measured with that many at once are used where available.",
+      "Compare providers using current benchmark results. Workload rankings require verified results. Batch measurements supplement single-request timings where available.",
     inputSchema: {
       type: "object",
       properties: {

@@ -17,6 +17,7 @@ const JOBS: [RecJob, string, string][] = [
   ["start", "Start only", "Start a sandbox and run one command."],
 ];
 const COUNTS = [1, 10, 100];
+const AVAILABLE_JOBS = JOBS.filter(([id]) => id === "start" || site.tasks.kinds.some((k) => k.id === id && k.rows.length > 0));
 
 const secs = (s: number) => (s >= 10 ? `${s.toFixed(0)} s` : `${s.toFixed(1)} s`);
 const seg = (on: boolean) =>
@@ -36,7 +37,7 @@ type Point = Recommendation & {
  * is the same data as a table.
  */
 export function Finder() {
-  const [job, setJob] = useState<RecJob>("agent");
+  const [job, setJob] = useState<RecJob>(AVAILABLE_JOBS[0][0]);
   const [count, setCount] = useState(1);
   const [all, setAll] = useState(false);
   const r = useMemo(() => recommend(published as PublishedData, { job, count, priority: "value" }), [job, count]);
@@ -65,9 +66,12 @@ export function Finder() {
   const value = eligible[0];
   const unit = job === "start" ? "per hour" : "per 1,000 jobs";
   const shown = all ? points : points.slice(0, 8);
+  const timeLabel = job !== "start" ? "per job" :
+    count >= 10 || Object.values((published as PublishedData).start).every((r) => r.medianReadyMs !== undefined)
+      ? "to first command" : "to create response";
   const answers: [string, Point | undefined, string][] = [
     ["Cheapest", cheapest, cheapest ? `${money(cheapest.y)} ${unit}` : ""],
-    ["Fastest", fastest, fastest ? `${secs(fastest.secondsEach)} ${job === "start" ? "to ready" : "per job"}` : ""],
+    ["Fastest", fastest, fastest ? `${secs(fastest.secondsEach)} ${timeLabel}` : ""],
     [
       value && (value === cheapest || value === fastest) ? `Best value · also ${value === cheapest ? "cheapest" : "fastest"}` : "Best value",
       value,
@@ -81,7 +85,7 @@ export function Finder() {
         <h2 className="text-xl font-normal tracking-[-0.02em] sm:text-2xl">Find the best provider for your job</h2>
         <div className="mt-5 flex flex-wrap items-center gap-x-8 gap-y-3">
           <div className="flex flex-wrap" role="group" aria-label="What you're running">
-            {JOBS.map(([id, label]) => (
+            {AVAILABLE_JOBS.map(([id, label]) => (
               <button key={id} aria-pressed={job === id} onClick={() => setJob(id)} className={seg(job === id)}>
                 {label}
               </button>
@@ -125,8 +129,8 @@ export function Finder() {
         <PriceSpeedMap points={points} unit={unit} count={count} startOnly={job === "start"} />
         <p className="mt-3 text-[12px] leading-5 text-muted">
           Lower and further left is better. The line joins the best deals: for each of them, no provider is both faster and cheaper.
-          {count >= 10 ? ` Start times measured ${count} at once; dashed marks weren't measured at that size yet (our test account's limit).` : ""}
-          {job === "start" ? "" : " Cost is per successful run, start and minimum charges included."}
+          {count >= 10 ? ` Readiness uses batches of ${count} requests. Dashed marks indicate incomplete or absent batches.` : ""}
+          {job === "start" ? "" : " Cost per successful run is a retry estimate, including modelled start and minimum charges."}
         </p>
 
         <table className="mt-8 w-full text-[14px]">
@@ -134,7 +138,7 @@ export function Finder() {
             <tr className="text-left text-[11px] uppercase tracking-[0.12em] text-muted">
               <th className="w-8 py-2 pr-2 font-normal">#</th>
               <th className="py-2 pr-4 font-normal">Provider</th>
-              <th className="py-2 pr-4 font-normal">{job === "start" ? "Ready in" : "Time per job"}</th>
+              <th className="py-2 pr-4 font-normal">{job === "start" ? "Median time" : "Time per job"}</th>
               <th className="py-2 pr-4 font-normal">{job === "start" ? "Per hour" : "Per 1,000 jobs"}</th>
               {count > 1 && job !== "start" ? <th className="hidden py-2 pr-4 font-normal sm:table-cell">For {count}</th> : null}
               <th className="hidden py-2 font-normal md:table-cell">Worth knowing</th>
@@ -151,7 +155,7 @@ export function Finder() {
                 </td>
                 <td className="py-2.5 pr-4 font-mono tnum">{secs(p.secondsEach)}</td>
                 <td className="py-2.5 pr-4 font-mono tnum">{money(p.y)}</td>
-                {count > 1 && job !== "start" ? <td className="hidden py-2.5 pr-4 font-mono tnum sm:table-cell">{money(p.usdTotal)}</td> : null}
+                {count > 1 && job !== "start" ? <td className="hidden py-2.5 pr-4 font-mono tnum sm:table-cell">{money((p.y / 1000) * count)}</td> : null}
                 <td className="hidden py-2.5 text-[12px] text-muted md:table-cell">{p.notes.join(" · ")}</td>
               </tr>
             ))}

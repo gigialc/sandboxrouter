@@ -3,7 +3,7 @@
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { benchmarksPublishable, billingRules, CATALOG, hourlyCost, planLabel, unfit } from "../src/catalog.js";
 import type { SpreadResult } from "../src/burst.js";
-import { agentTable, aggregate, burstTable, loadAgentReports, loadBursts, loadReports, taskTable } from "../src/leaderboard.js";
+import { agentTable, aggregate, burstTable, loadAgentReports, loadBursts, loadReports, taskOutcomes, taskTable } from "../src/leaderboard.js";
 import { TASKS } from "../src/task.js";
 import { priceIndex } from "../src/price-index.js";
 import { computerCatalog } from "../src/computers.js";
@@ -185,27 +185,15 @@ const data = {
         repeat: TASKS[id].repeat,
         phases: TASKS[id].phases.map((p) => ({ id: p.id, label: p.label })),
         rows: taskTable(reports, TASKS[id].version),
-        // Benched with this job but never finished it (no python3, no internet, ...): worth saying, not hiding.
-        couldNot: [
-          ...new Set(
-            reports
-              .filter((r) => r.task === TASKS[id].version)
-              .flatMap((r) => r.rows)
-              .filter((x) => x.runs > x.failures && x.medianTaskMs === undefined)
-              .map((x) => x.provider),
-          ),
-        ]
-          .filter((p) => !taskTable(reports, TASKS[id].version).some((t) => t.provider === p))
-          .map((p) => names.get(p) ?? p),
+        outcomes: taskOutcomes(reports, TASKS[id].version),
       }))
-      .filter((k) => k.rows.length),
+      .filter((k) => k.outcomes.length),
   },
   useCases,
   // Under load: N sandboxes at once, alone, each running the quick Python job, or the agent loop (parallel agents).
   load: (() => {
     const bursts = loadBursts("results");
-    // Two sizes: 10 at once, which every account allows, so everyone faces the same load; and 100 at once, which
-    // shows how fast and steady each provider is at scale.
+    // Two request sizes; all recorded outcomes survive, including providers that never got ready.
     const jobs = [
       { job: "start", task: undefined, title: "Start only", blurb: "each answering one command" },
       { job: "rl", task: TASKS.python.version, title: "Quick Python runs", blurb: "each running the 1 to 2 second Python job, like a batch of code-interpreter calls" },
@@ -251,7 +239,10 @@ const published: PublishedData = {
   start: Object.fromEntries(
     data.leaderboard
       .filter((r) => r.medianCreateMs !== undefined)
-      .map((r) => [r.provider, seen({ name: r.name, medianCreateMs: r.medianCreateMs!, successRate: r.successRate, runs: r.runs, hourlyUsd: r.hourlyUsd, measuredAt: r.measuredAt })]),
+      .map((r) => [r.provider, seen({
+        name: r.name, medianCreateMs: r.medianCreateMs!, medianReadyMs: r.medianReadyMs,
+        successRate: r.successRate, runs: r.runs, hourlyUsd: r.hourlyUsd, measuredAt: r.measuredAt,
+      })]),
   ),
   jobs: Object.fromEntries(
     data.tasks.kinds.map((k) => [
@@ -267,6 +258,8 @@ const published: PublishedData = {
             reusedUsd: r.reusedUsd,
             successRate: r.successRate,
             runs: r.runs,
+            ok: r.ok,
+            limited: r.limited,
             ...(r.minimumSeconds ? { minimumSeconds: r.minimumSeconds } : {}),
             ...(r.perSandboxUsd ? { perSandboxUsd: r.perSandboxUsd } : {}),
             measuredAt: r.measuredAt,
@@ -287,6 +280,11 @@ const published: PublishedData = {
             n: r.n,
             ok: r.ok,
             limited: r.limited ?? 0,
+            size: r.size,
+            createFailures: r.createFailures,
+            commandFailures: r.commandFailures,
+            taskFailures: r.taskFailures,
+            cleanupFailures: r.cleanupFailures,
             ...(r.p50Ms !== undefined ? { p50Ms: r.p50Ms } : {}),
             ...(r.p99Ms !== undefined ? { p99Ms: r.p99Ms } : {}),
             wallMs: r.wallMs,

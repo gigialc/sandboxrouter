@@ -123,7 +123,7 @@ export default function Home() {
               <Button href="/docs#routing" primary>
                 How routing works
               </Button>
-              <Button href="/playground">Try it</Button>
+              <Button href="/playground">Local playground</Button>
             </>
           }
           points={[
@@ -160,7 +160,7 @@ export default function Home() {
             }
             points={[
               {
-                title: "Capacity across providers",
+                title: "A burst across providers",
                 body: `On ${day(scale.date)}, ${scale.byProvider.length} providers in our ${scale.poolSize}-provider test pool started ${scale.ok.toLocaleString("en-US")} of ${scale.n.toLocaleString("en-US")} requested sandboxes. The test took ${time(scale.wallMs)} using our provider accounts.`,
               },
               {
@@ -303,7 +303,7 @@ function ScaleChart({ scale, day }: { scale: NonNullable<typeof site.scale>; day
   return (
     <figure className="border border-line p-5 sm:p-8">
       <p className="text-[12px] uppercase tracking-[0.12em] text-muted">
-        {scale.n.toLocaleString("en-US")} at once, {day(scale.date)} · where they ran
+        {scale.n.toLocaleString("en-US")} concurrent requests, {day(scale.date)} · where they ran
       </p>
       <ul className="mt-5 space-y-2.5">
         {scale.byProvider.map((b) => (
@@ -323,7 +323,7 @@ function ScaleChart({ scale, day }: { scale: NonNullable<typeof site.scale>; day
         <span className="font-mono text-ink tnum">
           {scale.ok.toLocaleString("en-US")}/{scale.n.toLocaleString("en-US")}
         </span>{" "}
-        started across {scale.byProvider.length} of {scale.poolSize} providers in our test pool.
+        answered a command across {scale.byProvider.length} of {scale.poolSize} providers in our test pool.
         {scale.bestSingle ? (
           <>
             {" "}
@@ -331,7 +331,7 @@ function ScaleChart({ scale, day }: { scale: NonNullable<typeof site.scale>; day
             ({scale.bestSingle.ok.toLocaleString("en-US")} of {scale.n.toLocaleString("en-US")}, across {scale.standaloneProviders} providers tested).
           </>
         ) : null}{" "}
-        <span className="text-muted">These results reflect the limits of our test accounts.</span>
+        <span className="text-muted">The test killed each sandbox after its first command. Peak live concurrency was unmeasured.</span>
         <span className="mt-2 block text-muted">A running sandbox stays on its original provider.</span>
       </figcaption>
     </figure>

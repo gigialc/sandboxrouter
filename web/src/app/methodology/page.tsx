@@ -117,14 +117,16 @@ export default function MethodologyPage() {
 
           <h2 id="speed">Start time</h2>
           <p>
-            Each run asks one provider for a 2 vCPU / 4 GB sandbox (or its fixed default size), with fallback off. The{" "}
-            <strong>cold start</strong> is the time until the sandbox can run a command. The <strong>command round trip</strong> is how
-            long <code>echo ok</code> takes to answer. Then the sandbox is killed. Any error counts the run as failed.
+            Each run asks one provider for a 2 vCPU / 4 GB sandbox (or its fixed default size), with fallback off.{" "}
+            <strong>Create</strong> measures the API response. <strong>Command</strong> measures the subsequent{" "}
+            <code>echo ok</code> round trip. New reports also measure <strong>readiness</strong> from the create request to that command&apos;s
+            successful output. The dashboard lists create and command medians separately to keep older reports comparable.
           </p>
           <p>
             Times include the network between the test machine and the provider, so where a run happens matters. Each table row
             uses each location&apos;s best-sampled run from its last 30 days (the one with the most runs, newest on a tie), and
-            the median across locations when there are several, so one heavy submitter can&apos;t move it. A run is a snapshot from one machine, not an average over days.
+            the median across locations when there are several. A run is a snapshot from one machine. New reports separate create,
+            first-command and cleanup failures.
           </p>
 
           <h2 id="jobs">Cost of a real task</h2>
@@ -156,12 +158,15 @@ export default function MethodologyPage() {
             </li>
           </ul>
           <p>
-            Each job runs at least 3 times per provider (the real repo 10), and start times 100 times; the tables show medians.
-            &ldquo;Best value&rdquo; ranks by cost and time together: each divided by the median across providers, multiplied, so
-            1.0 is the median on both and lower is better. Every ranking is <strong>per successful run</strong>: a provider whose
-            runs sometimes failed has its cost and time divided by its success rate, so failing often costs it places. Refusals
-            for our account&apos;s own limits aren&apos;t failures and are left out. The raw results behind every number are in the
-            public results folder, failed runs included.
+            Workload reports use a versioned script, check the output and count all requests. A sandbox can start successfully
+            while its job fails. Task rankings use the requested 2 vCPU / 4 GB cohort and show the nominal router shape when
+            a provider supplies a different size. Provider-side resource allocations are not measured by this benchmark.
+          </p>
+          <p>
+            Older workload reports remain in the results archive. Current rankings require a rerun with the new workload
+            checks. For those runs, time and cost are divided by the observed completion rate as a retry estimate.
+            &ldquo;Best value&rdquo; multiplies those two estimates after each is divided by the corresponding median across providers.
+            The comparison records limit refusals, start failures and workload failures separately.
           </p>
           <p>
             Each job is priced two ways: in a <strong>new sandbox</strong> (its start, minimum charge and per-sandbox fee count
@@ -182,28 +187,24 @@ export default function MethodologyPage() {
             A real model (Gemini) gets the same task in a sandbox on every provider: write a Python script that computes the first
             5,000 primes, saves them and prints their sum, and fix it until it works. It has one tool, which runs a shell command in
             the sandbox. The model runs on the test machine and its key never enters the sandbox, so the sandbox waits while the
-            model thinks, as it would for any agent. Afterwards the result is checked independently inside the sandbox. Each
-            provider runs it five times; the table shows how many were done right, the median session, the share of it the
-            sandbox sat waiting, and the estimated sandbox compute cost (the model&apos;s own cost isn&apos;t included). Its sandboxes start
+            model thinks, as it would for any agent. The verifier compares the full 5,000-number sequence to an independently
+            computed list, then reruns the script and checks that it regenerates the file and prints the correct sum.
+            The table compares one model and task version at a time. It shows verified outputs, median session time, time spent
+            waiting on the model, and estimated sandbox compute cost. Its sandboxes start
             with a 10% CPU hint, so providers that bill active CPU or reserve CPU are priced as an agent would use them.
           </p>
 
           <h2 id="load">Under load</h2>
           <p>
-            100 sandboxes are asked for on one provider at the same moment, as parallel agents or an RL run start them. Each must
-            answer a command; the time it takes counts from the moment all of them were asked for, so waiting in the
-            provider&apos;s queue counts. The table shows how many started, the time at the median (p50) and for the slowest 1%
-            (p99), how long until the last one finished, and what all of them cost. Two variants run a job in each sandbox: a
-            1 to 2 second Python job (like a batch of code-interpreter calls) and the minute-long agent loop (parallel agents). Sandboxes the provider
-            refused for a limit on our test account are counted apart: that limit is ours, not the provider&apos;s, and
-            larger accounts get higher ones.
+            The harness issues batches of 10 or 100 requests to one provider. Ready means the first command returned successfully,
+            timed from the start of the batch. The median and p99 are based on successful observations, and the last outcome
+            includes failures. Python and simulated-agent workloads require the newer task versions before they get a rank.
           </p>
           <p>
-            To compare everyone fairly, the same tests also run at <strong>10 at once</strong>, a size every account allows, so
-            every provider faces the same load; 100 at once then shows how fast and steady each one is <strong>at scale</strong>.
-            Providers are ranked only against others that started all of them, since a smaller load isn&apos;t comparable;
-            ones our test account&apos;s limit held back are named as not measured at that size yet. Cost is scaled to 100 sandboxes from the ones that ran. Rows
-            built on far fewer runs than the rest say how many.
+            A latency rank requires every request in the batch to complete. The table also shows partial and zero-completion
+            results. Reported limit refusals describe those attempts and can depend on the plan, account or provider.
+            Older reports cannot tell us which stage caused other failures. Complete-batch costs are estimates scaled to 100
+            requests.
           </p>
 
           <h2 id="bills">Measured bills</h2>
@@ -215,7 +216,8 @@ export default function MethodologyPage() {
 
           <h2 id="limits">What this doesn&apos;t cover</h2>
           <ul>
-            <li>Results so far come from one location. Start times and download speed depend on where you are.</li>
+            <li>Archived results come from one location in Europe. Start times and download speed depend on where you are.</li>
+            <li>Burst tests clean up each sandbox as it finishes. Establishing peak live concurrency requires holding sandboxes open at a common barrier.</li>
             <li>Compute speed isn&apos;t normalized across providers: the jobs measure it, but the router doesn&apos;t route on it yet.</li>
             <li>Networking beyond one download, package installs, GPUs, and snapshot and restore aren&apos;t measured.</li>
             <li>Most prices come from pricing pages, not invoices.</li>

@@ -53,8 +53,7 @@ export class MobilerunProvider implements ComputerProvider {
     return !!this.apiKey;
   }
 
-  /** @internal */
-  async sdk(): Promise<MobilerunClient> {
+  private async sdk(): Promise<MobilerunClient> {
     if (!this.apiKey) throw new ProviderError(ID, "MOBILERUN_CLOUD_API_KEY is not set");
     if (!this.client) {
       const { Mobilerun } = await optionalImport<MobilerunModule>("@mobilerun/sdk", "mobilerun");
@@ -75,13 +74,13 @@ export class MobilerunProvider implements ComputerProvider {
       const mine = (existing.items ?? []).find((d) => d.name === name && d.state !== "terminated" && d.state !== "unknown");
       if (mine) {
         if (mine.state === "stopped") await guard(client.devices.resume(mine.id));
-        return new MobilerunComputer(this, await waitReady(client, mine.id));
+        return new MobilerunComputer(client, await waitReady(client, mine.id));
       }
     }
 
     const created = await guard(client.devices.create({ deviceType: "android_cloud_phone", billing: "auto", ...(name ? { name } : {}) }));
     const ready = created.state === "ready" ? created : await waitReady(client, created.id);
-    return new MobilerunComputer(this, ready);
+    return new MobilerunComputer(client, ready);
   }
 
   /** Re-attach by device id. A parked (stopped) phone is resumed and waited on. */
@@ -90,7 +89,7 @@ export class MobilerunProvider implements ComputerProvider {
     const d = await guard(client.devices.retrieve(nativeId));
     if (d.state === "terminated") throw new ProviderError(ID, `device ${nativeId} is terminated`, 404);
     if (d.state === "stopped") await guard(client.devices.resume(nativeId));
-    return new MobilerunComputer(this, d.state === "ready" ? d : await waitReady(client, nativeId));
+    return new MobilerunComputer(client, d.state === "ready" ? d : await waitReady(client, nativeId));
   }
 }
 
@@ -223,18 +222,14 @@ class MobilerunComputer implements ProviderComputer {
   private size?: { width: number; height: number };
 
   constructor(
-    private p: MobilerunProvider,
+    private client: MobilerunClient,
     device: MobilerunDevice,
   ) {
     this.nativeId = device.id;
   }
 
-  private sdk() {
-    return this.p.sdk();
-  }
-
   async info(): Promise<ComputerInfo> {
-    const d = await guard((await this.sdk()).devices.retrieve(this.nativeId));
+    const d = await guard(this.client.devices.retrieve(this.nativeId));
     const status = d.state === "ready" ? "ready" : d.state === "stopped" ? "sleeping" : d.state === "terminated" ? "deleted" : d.state;
     const info: ComputerInfo = {
       id: d.id,
@@ -268,8 +263,7 @@ class MobilerunComputer implements ProviderComputer {
   }
 
   private async capture(): Promise<Uint8Array> {
-    const client = await this.sdk();
-    const png = await bytesOf(client.devices.screenshots.capture(this.nativeId, {}, { headers: { "Accept-Encoding": "identity" } }));
+    const png = await bytesOf(this.client.devices.screenshots.capture(this.nativeId, {}, { headers: { "Accept-Encoding": "identity" } }));
     if (!png.length) throw new Error("screenshot came back empty");
     const s = pngSize(png);
     if (s.width && s.height) this.size = { width: s.width, height: s.height };
@@ -288,7 +282,6 @@ class MobilerunComputer implements ProviderComputer {
   }
 
   private async perform(a: ComputerAction): Promise<Partial<ActionResult>> {
-    const client = await this.sdk();
     const id = this.nativeId;
     switch (a.action) {
       case "screenshot":
@@ -297,14 +290,14 @@ class MobilerunComputer implements ProviderComputer {
         if (!a.coordinate) throw new Error("left_click needs coordinate (a phone has no cursor)");
         if (a.modifier) throw new Error("mobilerun taps can't hold modifier keys");
         const [x, y] = a.coordinate;
-        await client.devices.actions.tap(id, { x: Math.round(x), y: Math.round(y) });
+        await this.client.devices.actions.tap(id, { x: Math.round(x), y: Math.round(y) });
         return {};
       }
       case "left_click_drag": {
         if (!a.startCoordinate || !a.coordinate) throw new Error("left_click_drag needs startCoordinate and coordinate (a phone has no cursor)");
         const [sx, sy] = a.startCoordinate;
         const [ex, ey] = a.coordinate;
-        await client.devices.actions.swipe(id, { startX: Math.round(sx), startY: Math.round(sy), endX: Math.round(ex), endY: Math.round(ey), duration: 600 });
+        await this.client.devices.actions.swipe(id, { startX: Math.round(sx), startY: Math.round(sy), endX: Math.round(ex), endY: Math.round(ey), duration: 600 });
         return {};
       }
       case "scroll": {
@@ -321,19 +314,19 @@ class MobilerunComputer implements ProviderComputer {
         const [sx, sy, ex, ey] = vertical
           ? [cx, cy + (sign * span) / 2, cx, cy - (sign * span) / 2]
           : [cx + (sign * span) / 2, cy, cx - (sign * span) / 2, cy];
-        await client.devices.actions.swipe(id, { startX: clampX(sx), startY: clampY(sy), endX: clampX(ex), endY: clampY(ey), duration: 400 });
+        await this.client.devices.actions.swipe(id, { startX: clampX(sx), startY: clampY(sy), endX: clampX(ex), endY: clampY(ey), duration: 400 });
         return {};
       }
       case "type":
         if (!a.text) throw new Error("type needs text");
-        await client.devices.keyboard.write(id, { text: a.text });
+        await this.client.devices.keyboard.write(id, { text: a.text });
         return {};
       case "key": {
         if (!a.text) throw new Error("key needs text");
         // xdotool accepts several space-separated keys: "Down Down Return".
         const codes = a.text.trim().split(/\s+/).map(mobilerunKey);
         for (let n = 0; n < Math.max(1, a.repeat ?? 1); n++) {
-          for (const key of codes) await client.devices.keyboard.key(id, { key });
+          for (const key of codes) await this.client.devices.keyboard.key(id, { key });
         }
         return {};
       }
@@ -376,9 +369,8 @@ class MobilerunComputer implements ProviderComputer {
 
   /** Pulls a file from a device path, e.g. /sdcard/Download/report.pdf. */
   async readFile(path: string): Promise<Uint8Array> {
-    const client = await this.sdk();
     try {
-      return await bytesOf(client.devices.files.download(this.nativeId, { path }, { headers: { "Accept-Encoding": "identity" } }));
+      return await bytesOf(this.client.devices.files.download(this.nativeId, { path }, { headers: { "Accept-Encoding": "identity" } }));
     } catch (err) {
       throw toProviderError(err);
     }
@@ -388,10 +380,9 @@ class MobilerunComputer implements ProviderComputer {
   async writeFile(path: string, content: string | Uint8Array): Promise<void> {
     const name = path.slice(path.lastIndexOf("/") + 1);
     if (!name) throw new ProviderError(ID, `writeFile needs a file path, got directory "${path}"`);
-    const client = await this.sdk();
     const { toFile } = await optionalImport<MobilerunModule>("@mobilerun/sdk", "mobilerun");
     const file = await toFile(Buffer.from(toBytes(content)), name);
-    await guard(client.devices.files.upload(this.nativeId, { path: dirname(path), file }));
+    await guard(this.client.devices.files.upload(this.nativeId, { path: dirname(path), file }));
   }
 
   /**
@@ -401,7 +392,7 @@ class MobilerunComputer implements ProviderComputer {
    * (DeviceStream hasControl={false}). Mobilerun does not publish an expiry, so expiresAt is null.
    */
   async viewer(mode: "watch" | "control" = "watch", _opts: { ttlSeconds?: number; reason?: string } = {}) {
-    const d = await guard((await this.sdk()).devices.retrieve(this.nativeId));
+    const d = await guard(this.client.devices.retrieve(this.nativeId));
     if (!d.streamUrl || !d.streamToken) throw new ProviderError(ID, `no live stream for device ${this.nativeId} (state: ${d.state})`);
     return {
       url: d.streamUrl,
@@ -414,12 +405,12 @@ class MobilerunComputer implements ProviderComputer {
 
   /** Park: apps, data and identity kept, no minutes billed. connectComputer resumes it. 404 where capabilities.stop is false. */
   async sleep(): Promise<void> {
-    await guard((await this.sdk()).devices.stop(this.nativeId));
+    await guard(this.client.devices.stop(this.nativeId));
   }
 
   /** Terminate and release. Subscription-billed (dedicated) phones refuse this with 401. */
   async delete(): Promise<void> {
-    await guard((await this.sdk()).devices.terminate(this.nativeId));
+    await guard(this.client.devices.terminate(this.nativeId));
   }
 }
 

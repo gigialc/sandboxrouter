@@ -77,8 +77,7 @@ export class LimrunProvider implements ComputerProvider {
     return !!this.apiKey;
   }
 
-  /** @internal */
-  client(): Promise<{ mod: LimrunModule; lim: LimrunClient }> {
+  private client(): Promise<{ mod: LimrunModule; lim: LimrunClient }> {
     if (!this.apiKey) return Promise.reject(err("LIM_API_KEY is not set"));
     this.sdk ??= optionalImport<LimrunModule>("@limrun/api", "limrun").then((mod) => ({
       mod,

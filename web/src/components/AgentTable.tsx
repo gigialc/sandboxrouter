@@ -25,13 +25,16 @@ export function AgentTable() {
               rank={i + 1}
               id={r.provider}
               name={r.name}
-              notes={r.limited ? [`${r.limited} more refused for our account's limit`] : undefined}
+              notes={[
+                r.started !== undefined ? `${r.started} started` : "",
+                r.limited ? `${r.limited} reported limit refusals` : "",
+              ].filter(Boolean)}
             >
               <BarNum value={r.medianUsd ?? 0} max={max}>
                 {money(r.medianUsd === undefined ? undefined : r.medianUsd * 1000)}
               </BarNum>
               <Num>
-                {r.ok}/{r.runs}
+                {r.ok}/{r.requested ?? r.runs}
               </Num>
               <Num className="hidden sm:table-cell" title={`${r.medianTurns ?? "?"} turns`}>
                 {time(r.medianWallMs)}
@@ -42,8 +45,7 @@ export function AgentTable() {
         })}
       </ResultTable>
       <Footnote>
-        {rows[0].model}, the same task each time. The sandbox&apos;s cost only, not the model&apos;s. Idle is the share of the session spent
-        waiting on the model.
+        Model: {rows[0].model}. Costs estimate sandbox usage. Idle is the share of the session spent waiting on the model.
         {rows.some((r) => r.provider === "boat") && <> <ConditionalStartFeeNote id="boat" /></>}
       </Footnote>
     </div>

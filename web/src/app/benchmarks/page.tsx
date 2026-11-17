@@ -8,7 +8,7 @@ import { LoadTable } from "@/components/LoadTable";
 import { TaskTable } from "@/components/TaskTable";
 import { UseCaseTable } from "@/components/UseCaseTable";
 import { BarNum, Num, ResultRow, ResultTable, barMax, perHour, time } from "@/components/results";
-import { site } from "@/lib/site";
+import { REPO, site } from "@/lib/site";
 
 export const metadata: Metadata = { title: "Benchmarks" };
 
@@ -34,7 +34,6 @@ const day = (iso: string) => new Date(iso).toLocaleDateString("en-US", { year: "
 export default function BenchmarksPage() {
   const rows = site.leaderboard;
   const subs = [...site.submissions].sort((a, b) => b.date.localeCompare(a.date));
-  const totalRuns = subs.reduce((n, s) => n + s.runs * s.providers, 0);
   const maxCreate = barMax(rows.map((r) => r.medianCreateMs ?? 0));
   const costs = site.costRuns.filter((r) => !r.error && r.billedUsd !== null && r.billedUsd > 0);
   // A fixed charge per sandbox isn't running time: shown apart, and taken out of the ratio the router uses.
@@ -45,7 +44,13 @@ export default function BenchmarksPage() {
   return (
     <div className="px-5 sm:px-10 pt-14">
       <PageHeader kicker="Benchmarks" title="What each sandbox costs, and how it performs">
-        Real sandboxes on real accounts, started, used and killed: {totalRuns.toLocaleString("en-US")} so far.
+        Results from real provider accounts. Prices are estimates unless marked as provider billing data.
+        <span className="mt-3 block text-[13px] text-muted">
+          Older workload reports, including Modal&apos;s short job, are in the{" "}
+          <a href={`${REPO}/tree/e1a17220f875b6911a85bb8d8c9913ddeff1bf29/results`} className="underline underline-offset-4">
+            benchmark archive
+          </a>. The current workload rankings require new runs with output verification.
+        </span>
         <span className="mt-3 block text-[13px] text-muted">
           For agents:{" "}
           <a href="/benchmarks.json" className="underline underline-offset-4 decoration-line-2 hover:text-ink">JSON</a> ·{" "}
@@ -71,33 +76,27 @@ export default function BenchmarksPage() {
             ),
           },
 
-          ...(site.tasks.kinds.length > 0
-            ? [
                 {
                   id: "task",
                   label: "Real jobs",
                   content: (
         <Section id="task" title="Real work" how="jobs" line="The same job across tested providers, from a short burst of CPU to installing a real repo, with costs estimated from measured times.">
-          <TaskTable />
+          {site.tasks.kinds.length > 0 ? <TaskTable /> :
+            <p className="mt-4 text-[13px] text-muted">No results have been published with the new workload checks yet.</p>}
         </Section>
                   ),
                 },
-              ]
-            : []),
 
-          ...(site.agent.length > 0
-            ? [
                 {
                   id: "agent",
                   label: "Real AI agent",
                   content: (
         <Section id="agent" title="A real agent" how="agent" line="A real model does the same task in a sandbox on each provider, with one tool that runs commands there.">
-          <AgentTable />
+          {site.agent.length > 0 ? <AgentTable /> :
+            <p className="mt-4 text-[13px] text-muted">Awaiting a run with the new prime sequence verifier.</p>}
         </Section>
                   ),
                 },
-              ]
-            : []),
 
           ...(site.load.length > 0
             ? [
@@ -105,7 +104,7 @@ export default function BenchmarksPage() {
                   id: "load",
                   label: "At scale",
                   content: (
-        <Section id="load" title="Under load" how="load" line="10 or 100 sandboxes asked for at once: how fast they're ready, and what all of them cost.">
+        <Section id="load" title="Under load" how="load" line="Batches of 10 or 100 requests, with readiness times, outcomes and estimated costs for complete batches.">
           <LoadTable />
         </Section>
                   ),
@@ -121,14 +120,14 @@ export default function BenchmarksPage() {
         id="speed"
         title="Start time"
         how="speed"
-        line={`${rows.length} providers${subs[0] ? `, last run ${day(subs[0].date)}` : ""}: time to a usable sandbox, one at a time, 100 runs each where our account allowed.`}
+        line={`${rows.length} providers${subs[0] ? `, last reported run ${day(subs[0].date)}` : ""}. Each row shows the provider's create response and command round trip as separate measurements.`}
       >
 
       <ResultTable
         cols={[
-          { label: "Median start" },
+          { label: "Median create" },
           { label: "Command", className: "hidden sm:table-cell" },
-          { label: "Worked", className: "hidden md:table-cell" },
+          { label: "Ready, excluding limit refusals", className: "hidden md:table-cell" },
           { label: "Per hour" },
         ]}
       >
@@ -143,7 +142,7 @@ export default function BenchmarksPage() {
               r.runs < 20 ? `only ${r.runs} runs` : "",
             ].filter(Boolean)}
           >
-            <BarNum value={r.medianCreateMs ?? 0} max={maxCreate} title={`${r.name}: median start ${time(r.medianCreateMs)} over ${r.runs} runs, measured ${shortDay(r.measuredAt)}`}>
+            <BarNum value={r.medianCreateMs ?? 0} max={maxCreate} title={`${r.name}: median create response ${time(r.medianCreateMs)} over ${r.runs} runs, measured ${shortDay(r.measuredAt)}`}>
               {time(r.medianCreateMs)}
             </BarNum>
             <Num className="hidden sm:table-cell" title="Median round trip of one command, once started">
