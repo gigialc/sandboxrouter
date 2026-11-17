@@ -1,0 +1,68 @@
+{
+  "tool": "sandboxrouter",
+  "version": "0.13.0",
+  "date": "2026-11-17T23:47:40.891Z",
+  "label": "home-eu",
+  "runs": 3,
+  "spec": {
+    "vcpu": 2,
+    "memoryGb": 4
+  },
+  "task": "repo-v2",
+  "node": "v22.22.0",
+  "platform": "darwin-arm64",
+  "rows": [
+    {
+      "provider": "openscale",
+      "runs": 3,
+      "failures": 0,
+      "createFailures": 0,
+      "commandFailures": 0,
+      "cleanupFailures": 0,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 1
+      },
+      "medianCreateMs": 319,
+      "medianExecMs": 971,
+      "medianReadyMs": 1435,
+      "hourlyUsd": 0.013999999999999999,
+      "taskOk": 3,
+      "medianTaskReadyMs": 1435,
+      "medianTaskMs": 21828,
+      "taskPhasesMs": {
+        "fetch": 2554,
+        "install": 18612,
+        "typecheck": 662
+      },
+      "medianTaskCpuMs": 23010,
+      "medianTaskMaxCoreMs": 11940
+    },
+    {
+      "provider": "e2b",
+      "runs": 3,
+      "failures": 0,
+      "createFailures": 0,
+      "commandFailures": 0,
+      "cleanupFailures": 0,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 0.5
+      },
+      "medianCreateMs": 537,
+      "medianExecMs": 307,
+      "medianReadyMs": 919,
+      "hourlyUsd": 0.1089,
+      "taskOk": 3,
+      "medianTaskReadyMs": 919,
+      "medianTaskMs": 32038,
+      "taskPhasesMs": {
+        "fetch": 2163,
+        "install": 29023,
+        "typecheck": 946
+      },
+      "medianTaskCpuMs": 31350,
+      "medianTaskMaxCoreMs": 16690
+    }
+  ]
+}

@@ -27,7 +27,7 @@ That runs the benchmark, writes the report and opens the pull request for you (f
 ```bash
 npx tsx src/cli.ts check --provider modal --save --by YOUR_GITHUB_USERNAME     # does it work: results/conformance/modal.json
 npx tsx src/cli.ts bench --provider modal --runs 5 --share --label "Berlin" --by YOUR_GITHUB_USERNAME   # cold starts: move the file into results/
-npx tsx src/cli.ts cost run --provider modal --minutes 10 --by YOUR_GITHUB_USERNAME   # real bill: results/cost/; rerun `cost settle <file>` until it posts
+npx tsx src/cli.ts cost run --provider agent37 --minutes 10 --by YOUR_GITHUB_USERNAME   # provider usage goes to results/cost/; rerun `cost settle <file>` until it posts
 ```
 
 Each costs a few cents and kills its sandboxes; `npx tsx src/cli.ts gc --all` cleans up after a crash. Run `npm run results:check`, then open a PR with the files. CI refuses keys, emails, IP addresses, street-address labels, unknown providers, impossible numbers, and edits to someone else's bench report. A maintainer reviews every result PR.

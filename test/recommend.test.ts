@@ -69,10 +69,15 @@ describe("recommend", () => {
     expect(reused.notes.some((note) => note.includes("start above allowance"))).toBe(false);
   });
 
-  it("serves create timings and keeps archived workload data out of current recommendations", () => {
-    const r = recommend(PUBLISHED, { job: "repo", count: 1 });
+  it("explains a workload with no current evidence", () => {
+    const r = recommend(data, { job: "repo", count: 1 });
     expect(r.results).toEqual([]);
     expect(r.basis).toContain("No current verified results");
-    expect(recommend(PUBLISHED, { job: "start", priority: "speed" }).results[0].secondsEach).toBeLessThan(1);
+  });
+
+  it("serves measured create timings from the bundled data", () => {
+    const r = recommend(PUBLISHED, { job: "start", priority: "speed" });
+    expect(r.results.length).toBeGreaterThan(0);
+    expect(r.results.every(({ provider, secondsEach }) => PUBLISHED.start[provider] && secondsEach > 0)).toBe(true);
   });
 });

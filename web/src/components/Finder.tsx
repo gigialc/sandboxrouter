@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import published from "@/data/published.json";
-import { recommend, type PublishedData, type RecJob, type Recommendation } from "@/lib/recommend";
+import { recommend, type PublishedData, type PublishedLoad, type RecJob, type Recommendation } from "@/lib/recommend";
 import { ProviderLogo, ProviderName } from "@/components/ProviderName";
 import { money } from "@/components/results";
 import { site } from "@/lib/site";
@@ -16,8 +16,15 @@ const JOBS: [RecJob, string, string][] = [
   ["download", "Download", "A 53 MB download over HTTPS."],
   ["start", "Start only", "Start a sandbox and run one command."],
 ];
-const COUNTS = [1, 10, 100];
-const AVAILABLE_JOBS = JOBS.filter(([id]) => id === "start" || site.tasks.kinds.some((k) => k.id === id && k.rows.length > 0));
+const DATA = published as PublishedData;
+const BATCH_JOBS: Partial<Record<RecJob, PublishedLoad["job"]>> = { start: "start", python: "rl", agent: "agents" };
+const resultsFor = (job: RecJob) => (job === "start" ? DATA.start : DATA.jobs[job] ?? {});
+const AVAILABLE_JOBS = JOBS.filter(([id]) => Object.keys(resultsFor(id)).length > 0);
+const completeProviders = (batch: PublishedLoad, job: RecJob) =>
+  Object.entries(batch.rows)
+    .filter(([id, row]) => id in resultsFor(job) && row.ok === row.n && row.p50Ms !== undefined)
+    .map(([id]) => id);
+const HAS_PAIRED_STARTS = Object.values(DATA.start).every((row) => row.medianReadyMs !== undefined);
 
 const secs = (s: number) => (s >= 10 ? `${s.toFixed(0)} s` : `${s.toFixed(1)} s`);
 const seg = (on: boolean) =>
@@ -26,8 +33,6 @@ const seg = (on: boolean) =>
 type Point = Recommendation & {
   /** Cost the chart and list show: per 1,000 jobs per successful run, or per hour for "start". */
   y: number;
-  /** Counts toward the answers: measured at this many at once when that applies. */
-  eligible: boolean;
   frontier: boolean;
 };
 
@@ -37,45 +42,49 @@ type Point = Recommendation & {
  * is the same data as a table.
  */
 export function Finder() {
-  const [job, setJob] = useState<RecJob>(AVAILABLE_JOBS[0][0]);
-  const [count, setCount] = useState(1);
+  const [job, setJob] = useState<RecJob>(AVAILABLE_JOBS[0]?.[0] ?? "start");
+  const [selectedCount, setCount] = useState(1);
   const [all, setAll] = useState(false);
-  const r = useMemo(() => recommend(published as PublishedData, { job, count, priority: "value" }), [job, count]);
+  const batches = DATA.load
+    .filter((batch) => batch.job === BATCH_JOBS[job] && batch.n >= 10 && completeProviders(batch, job).length > 0)
+    .sort((a, b) => a.n - b.n);
+  const batch = batches.find((item) => item.n === selectedCount);
+  const count = batch?.n ?? 1;
 
   const points: Point[] = useMemo(() => {
-    const ps = r.results.map((x) => ({
+    const providers = batch && completeProviders(batch, job);
+    const result = recommend(DATA, { job, count, providers, priority: "value" });
+    const ps = result.results.map((x) => ({
       ...x,
       y: job === "start" ? (x.hourlyUsd ?? 0) : ((x.usdEach ?? 0) / Math.max(x.successRate, 0.01)) * 1000,
-      eligible: count < 10 || x.measuredAtOnce !== undefined,
       frontier: false,
     }));
     // The best deals: nobody else is both faster and cheaper.
     let best = Infinity;
-    for (const p of [...ps].filter((p) => p.eligible).sort((a, b) => a.secondsEach - b.secondsEach || a.y - b.y)) {
+    for (const p of [...ps].sort((a, b) => a.secondsEach - b.secondsEach || a.y - b.y)) {
       if (p.y < best) {
         p.frontier = true;
         best = p.y;
       }
     }
     return ps;
-  }, [r, job, count]);
+  }, [batch, job, count]);
 
-  const eligible = points.filter((p) => p.eligible);
-  const cheapest = [...eligible].sort((a, b) => a.y - b.y)[0];
-  const fastest = [...eligible].sort((a, b) => a.secondsEach - b.secondsEach)[0];
-  const value = eligible[0];
+  const cheapest = [...points].sort((a, b) => a.y - b.y)[0];
+  const fastest = [...points].sort((a, b) => a.secondsEach - b.secondsEach)[0];
+  const value = points[0];
+  if (!value) return null;
   const unit = job === "start" ? "per hour" : "per 1,000 jobs";
   const shown = all ? points : points.slice(0, 8);
-  const timeLabel = job !== "start" ? "per job" :
-    count >= 10 || Object.values((published as PublishedData).start).every((r) => r.medianReadyMs !== undefined)
-      ? "to first command" : "to create response";
-  const answers: [string, Point | undefined, string][] = [
-    ["Cheapest", cheapest, cheapest ? `${money(cheapest.y)} ${unit}` : ""],
-    ["Fastest", fastest, fastest ? `${secs(fastest.secondsEach)} ${timeLabel}` : ""],
+  const startLabel = batch || HAS_PAIRED_STARTS ? "to first command" : "to create response";
+  const timeLabel = job === "start" ? startLabel : "per job";
+  const answers: [string, Point, string][] = [
+    ["Cheapest", cheapest, `${money(cheapest.y)} ${unit}`],
+    ["Fastest", fastest, `${secs(fastest.secondsEach)} ${timeLabel}`],
     [
-      value && (value === cheapest || value === fastest) ? `Best value · also ${value === cheapest ? "cheapest" : "fastest"}` : "Best value",
+      value === cheapest || value === fastest ? `Best value · also ${value === cheapest ? "cheapest" : "fastest"}` : "Best value",
       value,
-      value ? `${secs(value.secondsEach)} · ${money(value.y)} ${unit}` : "",
+      `${secs(value.secondsEach)} · ${money(value.y)} ${unit}`,
     ],
   ];
 
@@ -91,18 +100,24 @@ export function Finder() {
               </button>
             ))}
           </div>
-          <div className="flex items-center gap-3">
+          {batches.length > 0 && <div className="flex items-center gap-3">
             <span className="text-[12px] text-muted">At once</span>
             <div className="flex" role="group" aria-label="How many at once">
-              {COUNTS.map((n) => (
+              {[1, ...batches.map((item) => item.n)].map((n) => (
                 <button key={n} aria-pressed={count === n} onClick={() => setCount(n)} className={seg(count === n)}>
                   {n}
                 </button>
               ))}
             </div>
-          </div>
+          </div>}
         </div>
         <p className="mt-4 text-[13px] text-muted">{JOBS.find(([id]) => id === job)?.[2]}</p>
+        {batch && (
+          <p className="mt-2 text-[13px] text-muted">
+            {points.length} {points.length === 1 ? "provider" : "providers"} with single-run results completed a batch of {count}.{" "}
+            <a href="#load" className="underline underline-offset-4 hover:text-ink">See all batch outcomes</a>.
+          </p>
+        )}
       </div>
 
       {/* The answer, before any chart. */}
@@ -110,26 +125,22 @@ export function Finder() {
         {answers.map(([label, p, line], i) => (
           <div key={label} className={`p-5 sm:p-6 ${i ? "border-t border-line sm:border-t-0 sm:border-l" : ""}`}>
             <p className="text-[11px] uppercase tracking-[0.14em] text-muted">{label}</p>
-            {p ? (
-              <>
-                <p className="mt-2 flex items-center gap-2.5 text-[17px] text-ink">
-                  <ProviderLogo id={p.provider} name={p.name} size={22} />
-                  <span className="truncate">{p.name}</span>
-                </p>
-                <p className="mt-1.5 font-mono text-[13px] tnum text-ink-2">{line}</p>
-              </>
-            ) : (
-              <p className="mt-2 text-[14px] text-muted">Not measured yet</p>
-            )}
+            <p className="mt-2 flex items-center gap-2.5 text-[17px] text-ink">
+              <ProviderLogo id={p.provider} name={p.name} size={22} />
+              <span className="truncate">{p.name}</span>
+            </p>
+            <p className="mt-1.5 font-mono text-[13px] tnum text-ink-2">{line}</p>
           </div>
         ))}
       </div>
 
       <div className="p-5 sm:p-7">
-        <PriceSpeedMap points={points} unit={unit} count={count} startOnly={job === "start"} />
+        <PriceSpeedMap points={points} unit={unit} count={count} startOnly={job === "start"} axisLabel={`Time ${timeLabel}`} />
         <p className="mt-3 text-[12px] leading-5 text-muted">
           Lower and further left is better. The line joins the best deals: for each of them, no provider is both faster and cheaper.
-          {count >= 10 ? ` Readiness uses batches of ${count} requests. Dashed marks indicate incomplete or absent batches.` : ""}
+          {batch && (job === "start"
+            ? " Readiness comes from the batch. Hourly prices use the single-run configuration."
+            : " Time combines batch readiness with the measured single-sandbox job time.")}
           {job === "start" ? "" : " Cost per successful run is a retry estimate, including modelled start and minimum charges."}
         </p>
 
@@ -146,7 +157,7 @@ export function Finder() {
           </thead>
           <tbody>
             {shown.map((p) => (
-              <tr key={p.provider} className={`group border-t border-line ${p.eligible ? "" : "text-muted"}`}>
+              <tr key={p.provider} className="group border-t border-line">
                 <td className="py-2.5 pr-2 font-mono text-[12px] text-muted">{p.rank}</td>
                 <td className="py-2.5 pr-4">
                   <ProviderName id={p.provider} name={p.name}>
@@ -162,16 +173,13 @@ export function Finder() {
           </tbody>
         </table>
         {points.length > 8 ? (
-          <button onClick={() => setAll(!all)} className="mt-3 text-[13px] text-ink-2 underline underline-offset-4 decoration-line-2 hover:text-ink">
+          <button type="button" aria-expanded={all} onClick={() => setAll((expanded) => !expanded)} className="mt-3 text-[13px] text-ink-2 underline underline-offset-4 decoration-line-2 hover:text-ink">
             {all ? "Show fewer" : `Show all ${points.length}`}
           </button>
         ) : null}
         <p className="mt-6 text-[12px] leading-5 text-muted">
-          Ranked by best value: cost and time together, each against the median. Same answer in code:{" "}
-          <code className="font-mono text-[12px] text-ink-2">
-            npx @sandboxrouter/sdk recommend --job {job}
-            {count > 1 ? ` --count ${count}` : ""}
-          </code>
+          Value rankings combine cost and time, each compared with the median.{" "}
+          <a href="/benchmarks.json" className="underline underline-offset-4 hover:text-ink">Current benchmark data</a>.
         </p>
       </div>
     </section>
@@ -205,7 +213,7 @@ const tickMoney = (v: number) => `$${Number(v.toPrecision(1))}`;
 
 const short = (name: string) => name.replace(/ (Sandboxes?|AI Agent Sandbox|Code Interpreter)$/, "").replace("Amazon Bedrock ", "").replace(/ \(.*\)$/, "");
 
-function PriceSpeedMap({ points, unit, count, startOnly }: { points: Point[]; unit: string; count: number; startOnly: boolean }) {
+function PriceSpeedMap({ points, unit, count, startOnly, axisLabel }: { points: Point[]; unit: string; count: number; startOnly: boolean; axisLabel: string }) {
   const box = useRef<HTMLDivElement>(null);
   const [w, setW] = useState(720);
   const [hover, setHover] = useState<string | null>(null);
@@ -272,7 +280,7 @@ function PriceSpeedMap({ points, unit, count, startOnly }: { points: Point[]; un
           </g>
         ))}
         <text x={w - m.r} y={h - 6} textAnchor="end" className="fill-muted text-[11px]">
-          {startOnly ? "Time to ready" : "Time per job"}
+          {axisLabel}
           {xLog ? ", log scale" : ""} →
         </text>
         <text x={12} y={m.t} transform={`rotate(-90 12 ${m.t})`} textAnchor="end" className="fill-muted text-[11px]">
@@ -293,7 +301,7 @@ function PriceSpeedMap({ points, unit, count, startOnly }: { points: Point[]; un
           />
         ) : null}
 
-        {/* Providers: their logo on a white tile; dimmed when not a best deal, dashed when not measured at this size. */}
+        {/* Provider logos, with a stronger mark for each point on the price/speed frontier. */}
         {[...ps]
           .sort((a, b) => Number(a.frontier) - Number(b.frontier))
           .map((p) => {
@@ -303,7 +311,7 @@ function PriceSpeedMap({ points, unit, count, startOnly }: { points: Point[]; un
             return (
               <g
                 key={p.provider}
-                opacity={hover === p.provider || p.frontier ? 1 : p.eligible ? 0.55 : 0.3}
+                opacity={hover === p.provider || p.frontier ? 1 : 0.55}
                 onMouseEnter={() => setHover(p.provider)}
                 onMouseLeave={() => setHover(null)}
                 onFocus={() => setHover(p.provider)}
@@ -315,7 +323,7 @@ function PriceSpeedMap({ points, unit, count, startOnly }: { points: Point[]; un
                 <rect x={cx - 16} y={cy - 16} width={32} height={32} fill="transparent" />
                 {/* A ring in the surface color keeps overlapping marks apart; best deals get the chart color. */}
                 <rect x={cx - S / 2 - 2} y={cy - S / 2 - 2} width={S + 4} height={S + 4} fill={p.frontier ? "var(--chart)" : "var(--bg)"} />
-                <rect x={cx - S / 2} y={cy - S / 2} width={S} height={S} fill="#fff" stroke="var(--line-2)" strokeDasharray={p.eligible ? undefined : "2 2"} />
+                <rect x={cx - S / 2} y={cy - S / 2} width={S} height={S} fill="#fff" stroke="var(--line-2)" />
                 {logo ? (
                   <image href={logo} x={cx - S / 2 + 2} y={cy - S / 2 + 2} width={S - 4} height={S - 4} preserveAspectRatio="xMidYMid meet" />
                 ) : (

@@ -78,8 +78,8 @@ describe("settle", () => {
     vi.stubGlobal("fetch", fetchMock);
     const r = await settle(run());
     expect(fetchMock.mock.calls[0][0]).toBe("https://api.maritime.sh/api/billing/metered-usage");
-    expect(r.entries[0].bill).toMatchObject({ usd: 0.01, seconds: 598, source: expect.stringMatching(/maritime metered-usage/) });
-    expect(costMarkdown(r)).toContain("| $0.0100 | 273% |");
+    expect(r.entries[0].bill).toMatchObject({ usd: 0.01, seconds: 598, kind: "provider-usage", resolutionUsd: 0.01, source: expect.stringMatching(/maritime metered-usage/) });
+    expect(costMarkdown(r)).toContain("| $0.01 | n/a |");
   });
 
   it("leaves a row unsettled when the bill hasn't posted, and settles it on a later run", async () => {
@@ -93,7 +93,24 @@ describe("settle", () => {
 
   it("records an API error as the source instead of throwing", async () => {
     vi.stubGlobal("fetch", vi.fn(async () => new Response("nope", { status: 401 })));
-    expect((await settle(run())).entries[0].bill?.source).toMatch(/could not read: 401 nope/);
+    expect((await settle(run())).entries[0].bill?.source).toBe("could not read: billing HTTP 401");
+  });
+
+  it("distinguishes missing Maritime cents from a measured zero", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({ byMachineDay: { "sandbox:sbx-abc": [{ seconds: 600 }] } }))));
+    const r = await settle(run());
+    expect(r.entries[0].bill?.usd).toBeUndefined();
+    expect(r.entries[0].bill?.source).toMatch(/no valid cents/);
+  });
+
+  it("labels Sail's spend endpoint as an estimate", async () => {
+    const r = run();
+    r.entries[0].provider = "sail";
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({
+      sailboxes: [{ sailbox_id: "sbx-abc", cost_usd_nanos: 15_138_000 }],
+    }))));
+    expect((await settle(r)).entries[0].bill).toMatchObject({ usd: 0.015138, kind: "provider-estimate" });
+    expect(costMarkdown(r)).toContain("| $0.015138 | n/a |");
   });
 
   it("says where to look for providers without a billing API", async () => {

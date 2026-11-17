@@ -1,0 +1,68 @@
+{
+  "tool": "sandboxrouter",
+  "version": "0.13.0",
+  "date": "2026-11-17T23:45:01.763Z",
+  "label": "home-eu",
+  "runs": 3,
+  "spec": {
+    "vcpu": 2,
+    "memoryGb": 4
+  },
+  "task": "repo-v2",
+  "node": "v22.22.0",
+  "platform": "darwin-arm64",
+  "rows": [
+    {
+      "provider": "daytona",
+      "runs": 3,
+      "failures": 0,
+      "createFailures": 0,
+      "commandFailures": 0,
+      "cleanupFailures": 0,
+      "size": {
+        "vcpu": 1,
+        "memoryGb": 1
+      },
+      "medianCreateMs": 177,
+      "medianExecMs": 408,
+      "medianReadyMs": 585,
+      "hourlyUsd": 0.06659999999999999,
+      "taskOk": 3,
+      "medianTaskReadyMs": 585,
+      "medianTaskMs": 37992,
+      "taskPhasesMs": {
+        "fetch": 2258,
+        "install": 33679,
+        "typecheck": 2683
+      },
+      "medianTaskCpuMs": 633510,
+      "medianTaskMaxCoreMs": 20930
+    },
+    {
+      "provider": "agent37",
+      "runs": 3,
+      "failures": 0,
+      "createFailures": 0,
+      "commandFailures": 0,
+      "cleanupFailures": 0,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "medianCreateMs": 785,
+      "medianExecMs": 542,
+      "medianReadyMs": 1453,
+      "hourlyUsd": 0.006520547945205479,
+      "taskOk": 3,
+      "medianTaskReadyMs": 1453,
+      "medianTaskMs": 23285,
+      "taskPhasesMs": {
+        "fetch": 2121,
+        "install": 21249,
+        "typecheck": 720
+      },
+      "medianTaskCpuMs": 25700,
+      "medianTaskMaxCoreMs": 12860
+    }
+  ]
+}

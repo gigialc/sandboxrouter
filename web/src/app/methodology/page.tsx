@@ -209,9 +209,16 @@ export default function MethodologyPage() {
 
           <h2 id="bills">Measured bills</h2>
           <p>
-            To check list prices against reality, a sandbox runs for a fixed time with every core busy, and the bill is read back
-            from the provider&apos;s own billing API. Only providers whose bill we could read are listed. The ratio of billed to
-            list price corrects that provider&apos;s price everywhere.
+            Each direct check starts one sandbox, checks the size, applies CPU load unless marked idle, and deletes it.
+            The list estimate uses wall time at the requested size. The table reports provider usage at the precision the
+            billing endpoint supplies. Credits, reporting delay, billing increments and when the provider starts its clock can
+            affect the amount. A loaded run of at least ten minutes with a sufficiently precise usage record can inform estimated
+            routing prices.
+          </p>
+          <p>
+            A hosted check compares the quote with the final credit debit after a verified command and deletion.
+            The original quote uses the requested duration. A separately recorded quote can adjust for the actual runtime.
+            These debits include the SandboxRouter service fee.
           </p>
 
           <h2 id="limits">What this doesn&apos;t cover</h2>

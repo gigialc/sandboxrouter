@@ -1,0 +1,146 @@
+{
+  "tool": "sandboxrouter",
+  "version": "0.13.0",
+  "date": "2026-11-17T23:49:08.280Z",
+  "label": "home-eu",
+  "runs": 3,
+  "spec": {
+    "vcpu": 2,
+    "memoryGb": 4
+  },
+  "task": "v2-long",
+  "node": "v22.22.0",
+  "platform": "darwin-arm64",
+  "rows": [
+    {
+      "provider": "e2b",
+      "runs": 3,
+      "failures": 0,
+      "createFailures": 0,
+      "commandFailures": 0,
+      "cleanupFailures": 0,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 0.5
+      },
+      "medianCreateMs": 246,
+      "medianExecMs": 169,
+      "medianReadyMs": 415,
+      "hourlyUsd": 0.1089,
+      "taskOk": 3,
+      "medianTaskReadyMs": 415,
+      "medianTaskMs": 127979,
+      "taskPhasesMs": {
+        "cpu": 75527,
+        "cores": 36875,
+        "disk": 16289
+      },
+      "medianTaskCpuMs": 158230,
+      "medianTaskMaxCoreMs": 95410
+    },
+    {
+      "provider": "modal",
+      "runs": 3,
+      "failures": 0,
+      "createFailures": 0,
+      "commandFailures": 0,
+      "cleanupFailures": 0,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "medianCreateMs": 429,
+      "medianExecMs": 735,
+      "medianReadyMs": 1169,
+      "hourlyUsd": 0.23796,
+      "taskOk": 3,
+      "medianTaskReadyMs": 1169,
+      "medianTaskMs": 51095,
+      "taskPhasesMs": {
+        "cpu": 29574,
+        "cores": 16164,
+        "disk": 5357
+      },
+      "medianTaskCpuMs": 89030,
+      "medianTaskMaxCoreMs": 5500
+    },
+    {
+      "provider": "openscale",
+      "runs": 3,
+      "failures": 0,
+      "createFailures": 0,
+      "commandFailures": 0,
+      "cleanupFailures": 0,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 1
+      },
+      "medianCreateMs": 483,
+      "medianExecMs": 947,
+      "medianReadyMs": 1453,
+      "hourlyUsd": 0.013999999999999999,
+      "taskOk": 3,
+      "medianTaskReadyMs": 1453,
+      "medianTaskMs": 103079,
+      "taskPhasesMs": {
+        "cpu": 64568,
+        "cores": 30696,
+        "disk": 7786
+      },
+      "medianTaskCpuMs": 138670,
+      "medianTaskMaxCoreMs": 71080
+    },
+    {
+      "provider": "tensorlake",
+      "runs": 3,
+      "failures": 0,
+      "createFailures": 0,
+      "commandFailures": 0,
+      "cleanupFailures": 0,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "medianCreateMs": 1245,
+      "medianExecMs": 564,
+      "medianReadyMs": 2081,
+      "hourlyUsd": 0.2,
+      "taskOk": 3,
+      "medianTaskReadyMs": 2081,
+      "medianTaskMs": 29445,
+      "taskPhasesMs": {
+        "cpu": 16719,
+        "cores": 9572,
+        "disk": 2923
+      },
+      "medianTaskCpuMs": 44130,
+      "medianTaskMaxCoreMs": 25910
+    },
+    {
+      "provider": "maritime",
+      "runs": 3,
+      "failures": 0,
+      "createFailures": 0,
+      "commandFailures": 0,
+      "cleanupFailures": 0,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "medianCreateMs": 1246,
+      "medianExecMs": 331,
+      "medianReadyMs": 1587,
+      "hourlyUsd": 0.022,
+      "taskOk": 3,
+      "medianTaskReadyMs": 1587,
+      "medianTaskMs": 74352,
+      "taskPhasesMs": {
+        "cpu": 41584,
+        "cores": 24256,
+        "disk": 8727
+      },
+      "medianTaskCpuMs": 106240,
+      "medianTaskMaxCoreMs": 57920
+    }
+  ]
+}

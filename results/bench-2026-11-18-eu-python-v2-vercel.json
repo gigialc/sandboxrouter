@@ -1,0 +1,40 @@
+{
+  "tool": "sandboxrouter",
+  "version": "0.13.0",
+  "date": "2026-11-17T23:40:02.138Z",
+  "label": "home-eu",
+  "runs": 3,
+  "spec": {
+    "vcpu": 2,
+    "memoryGb": 4
+  },
+  "task": "python-v2",
+  "node": "v22.22.0",
+  "platform": "darwin-arm64",
+  "rows": [
+    {
+      "provider": "vercel",
+      "runs": 3,
+      "failures": 0,
+      "createFailures": 0,
+      "commandFailures": 0,
+      "cleanupFailures": 0,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "medianCreateMs": 466,
+      "medianExecMs": 205,
+      "medianReadyMs": 640,
+      "hourlyUsd": 0.3408,
+      "taskOk": 3,
+      "medianTaskReadyMs": 640,
+      "medianTaskMs": 3277,
+      "taskPhasesMs": {
+        "python": 3277
+      },
+      "medianTaskCpuMs": 3460,
+      "medianTaskMaxCoreMs": 3180
+    }
+  ]
+}

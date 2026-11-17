@@ -1,0 +1,58 @@
+{
+  "tool": "sandboxrouter-cost",
+  "version": "0.13.0",
+  "date": "2026-11-17T23:39:14.842Z",
+  "minutes": 2,
+  "load": true,
+  "by": "gigialc",
+  "entries": [
+    {
+      "provider": "agent37",
+      "requested": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "listUsdHour": 0.006520547945205479,
+      "startedAt": "2026-11-17T23:37:14.358Z",
+      "delivered": {
+        "vcpu": 2,
+        "memoryMb": 4096
+      },
+      "deliveredUsdHour": 0.006521,
+      "endedAt": "2026-11-17T23:39:14.825Z",
+      "seconds": 120,
+      "predictedUsd": 0.000217,
+      "bill": {
+        "usd": 0.000217,
+        "kind": "provider-usage",
+        "seconds": 120,
+        "source": "agent37 /v1/usage total_micros (billed in whole minutes: 2 awake)",
+        "at": "2026-11-17T23:39:14.844Z"
+      }
+    },
+    {
+      "provider": "daytona",
+      "requested": {
+        "vcpu": 1,
+        "memoryGb": 1
+      },
+      "listUsdHour": 0.06659999999999999,
+      "startedAt": "2026-11-17T23:37:14.372Z",
+      "delivered": {
+        "vcpu": 1,
+        "memoryMb": 1024
+      },
+      "deliveredUsdHour": 0.0666,
+      "endedAt": "2026-11-17T23:39:14.842Z",
+      "seconds": 120,
+      "predictedUsd": 0.00222,
+      "bill": {
+        "usd": 0.00222,
+        "kind": "provider-usage",
+        "seconds": 119,
+        "source": "daytona analytics /usage/sandbox totalPrice",
+        "at": "2026-11-17T23:41:38.177Z"
+      }
+    }
+  ]
+}

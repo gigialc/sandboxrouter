@@ -11,9 +11,11 @@ const runLength = (s: number) => (s < 60 ? plural(s, "second") : s < 3600 ? plur
 /** Estimated cost for each kind of run before account-specific fees. */
 export function UseCaseTable() {
   const [id, setId] = useState(site.useCases[0]?.id);
+  const [showAll, setShowAll] = useState(false);
   const u = site.useCases.find((x) => x.id === id) ?? site.useCases[0];
   if (!u) return null;
   const max = barMax(u.top.map((r) => r.runUsd));
+  const rows = showAll ? u.top : u.top.slice(0, 8);
   const spec = [
     `${u.spec.vcpu} vCPU / ${u.spec.memoryGb} GB`,
     runLength(u.runSeconds),
@@ -23,11 +25,11 @@ export function UseCaseTable() {
 
   return (
     <div>
-      <Toolbar note={`${u.blurb} ${spec.join(" · ")}.`}>
+      <Toolbar note={`${u.blurb} ${spec.join(" · ")}. ${u.top.length} ${u.top.length === 1 ? "provider fits" : "providers fit"} this request and passed the real-account check.`}>
         <Segmented label="Job" options={site.useCases.map((x) => [x.id, x.title] as const)} value={u.id} onChange={setId} />
       </Toolbar>
       <ResultTable cols={[{ label: "Est. / 1,000 runs" }, { label: "Per hour", className: "hidden sm:table-cell" }]}>
-        {u.top.map((r, i) => (
+        {rows.map((r, i) => (
           <ResultRow
             key={r.provider}
             rank={i + 1}
@@ -45,7 +47,12 @@ export function UseCaseTable() {
           </ResultRow>
         ))}
       </ResultTable>
-      {u.top.some((r) => r.provider === "boat") && (
+      {u.top.length > 8 && (
+        <button type="button" aria-expanded={showAll} onClick={() => setShowAll((expanded) => !expanded)} className="mt-3 text-[13px] text-ink-2 underline underline-offset-4 decoration-line-2 hover:text-ink">
+          {showAll ? "Show fewer" : `Show all ${u.top.length} providers`}
+        </button>
+      )}
+      {rows.some((r) => r.provider === "boat") && (
         <Footnote><ConditionalStartFeeNote id="boat" /></Footnote>
       )}
     </div>

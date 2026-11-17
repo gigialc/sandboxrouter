@@ -1,0 +1,32 @@
+{
+  "tool": "sandboxrouter-burst",
+  "version": "0.13.0",
+  "date": "2026-11-17T23:49:19.260Z",
+  "label": "home-eu",
+  "n": 10,
+  "task": "python-v2",
+  "node": "v22.22.0",
+  "platform": "darwin-arm64",
+  "rows": [
+    {
+      "provider": "maritime",
+      "n": 10,
+      "ok": 10,
+      "limited": 0,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "createFailures": 0,
+      "commandFailures": 0,
+      "taskFailures": 0,
+      "cleanupFailures": 0,
+      "p50Ms": 2722,
+      "p95Ms": 3075,
+      "p99Ms": 3075,
+      "wallMs": 5792,
+      "jobP50Ms": 2072,
+      "usd": 0.00033
+    }
+  ]
+}

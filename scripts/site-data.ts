@@ -10,7 +10,7 @@ import { computerCatalog } from "../src/computers.js";
 import { CHECK_STEPS } from "../src/check.js";
 import { conformanceTable, liveStatus } from "../src/conformance.js";
 import { BILLED_VS_LIST } from "../src/billing.js";
-import type { CostRun } from "../src/cost.js";
+import { billKind, billResolutionUsd, type CostRun, type HostedLedgerRun } from "../src/cost.js";
 import { Router, rankUsd, runHours } from "../src/router.js";
 import { VERIFIED } from "../src/verified.js";
 import type { PublishedData, PublishedLoad } from "../src/recommend.js";
@@ -32,12 +32,12 @@ const rows = new Map(conformanceTable().map((r) => [r.provider, r]));
 const conformance = new Map([...rows].map(([id, r]) => [id, r.run]));
 const names = new Map(CATALOG.map((c) => [c.id, c.name]));
 
-/** Every saved `cost run` (results/cost/*.json), newest first: list price × time against the provider's own bill. */
+/** Saved vendor usage and hosted credit ledger checks, newest first. */
 const COST_DIR = "results/cost";
 const costRuns = (existsSync(COST_DIR) ? readdirSync(COST_DIR).filter((f) => f.endsWith(".json")) : [])
-  .map((f) => JSON.parse(readFileSync(`${COST_DIR}/${f}`, "utf8")) as CostRun)
-  .sort((a, b) => b.date.localeCompare(a.date));
-const costRows = costRuns.flatMap((run) =>
+  .map((file) => ({ file, run: JSON.parse(readFileSync(`${COST_DIR}/${file}`, "utf8")) as CostRun | HostedLedgerRun }))
+  .sort((a, b) => b.run.date.localeCompare(a.run.date));
+const costRows = costRuns.flatMap(({ file, run }) => run.tool === "sandboxrouter-cost" ?
   run.entries.filter((e) => benchmarksPublishable(e.provider)).map((e) => ({
     provider: e.provider,
     name: names.get(e.provider) ?? e.provider,
@@ -52,9 +52,20 @@ const costRows = costRuns.flatMap((run) =>
     billedUsd: e.bill?.usd ?? null,
     billedSeconds: e.bill?.seconds ?? null,
     billSource: e.bill?.source ?? null,
-    error: e.error ?? null,
-  })),
+    billKind: billKind(e.bill) ?? null,
+    billResolutionUsd: billResolutionUsd(e.bill) ?? null,
+    settledAt: e.bill?.at ?? null,
+    file,
+    error: e.error ? "Sandbox run did not complete" : null,
+  })) : [],
 );
+const hostedCosts = costRuns.flatMap(({ file, run }) => run.tool === "sandboxrouter-hosted-ledger" ?
+  run.entries.filter((entry) => benchmarksPublishable(entry.provider)).map((entry) => ({
+    ...entry,
+    name: names.get(entry.provider) ?? entry.provider,
+    date: run.date,
+    file,
+  })) : []);
 
 /**
  * The best providers for common jobs, ranked the way the router ranks them: what that run would really be
@@ -87,7 +98,6 @@ const useCases = USE_CASES.map((u) => {
   const top = ranker
     .plan(u.spec, { strategy: "cheapest", require: u.require })
     .filter((c) => !c.skip)
-    .slice(0, 8)
     .map((c) => ({
       provider: c.provider,
       name: names.get(c.provider) ?? c.provider,
@@ -213,6 +223,7 @@ const data = {
     history: existsSync("scripts/price-index.json") ? JSON.parse(readFileSync("scripts/price-index.json", "utf8")) : [],
   },
   costRuns: costRows,
+  hostedCosts,
   submissions: reports.map((r) => ({
     date: r.date,
     label: r.label ?? null,

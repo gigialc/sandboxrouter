@@ -30,6 +30,8 @@ export function TaskTable() {
   const cost = (r: (typeof k.rows)[number]) => (mode === "fresh" ? r.taskUsd : r.reusedUsd);
   const rows = [...k.rows].sort((a, b) => (order.get(a.provider)?.rank ?? Infinity) - (order.get(b.provider)?.rank ?? Infinity));
   const mostRuns = Math.max(...k.rows.map((r) => r.runs), 1);
+  const requested = k.outcomes.reduce((total, row) => total + row.requested, 0);
+  const completed = k.outcomes.reduce((total, row) => total + row.completed, 0);
   const maxCost = barMax(rows.map(cost));
   const maxTime = barMax(rows.map((r) => r.taskMs));
 
@@ -58,6 +60,7 @@ export function TaskTable() {
         note={
           <>
             {k.blurb}{" "}
+            {completed} of {requested} workloads passed output verification across {k.outcomes.length} tested {k.outcomes.length === 1 ? "provider" : "providers"}.{" "}
             {mode === "fresh"
               ? "Each job starts its own sandbox, so its start, minimum charge and per-sandbox fee count every time."
               : "Every job runs in one sandbox that's already up, so only the job's own time counts."}
@@ -85,7 +88,7 @@ export function TaskTable() {
           onChange={setSort}
         />
       </Toolbar>
-      <ResultTable
+      {rows.length > 0 && <ResultTable
         cols={[
           { label: "Est. / 1,000 jobs" },
           { label: "Job took" },
@@ -113,12 +116,12 @@ export function TaskTable() {
             <Num className="hidden sm:table-cell">{sort === "value" ? (order.get(r.provider)?.valueScore ?? 0).toFixed(2) : perHour(r.hourlyUsd)}</Num>
           </ResultRow>
         ))}
-      </ResultTable>
-      <Footnote>
+      </ResultTable>}
+      {rows.length > 0 && <Footnote>
         Rankings divide estimated cost and time by the share of requests that completed. This is a retry estimate.
         {sort === "value" ? " Value is cost times time, each against the median: 1.0 is the median, lower is better." : ""}
         {mode === "fresh" && rows.some((r) => r.provider === "boat") && <> <ConditionalStartFeeNote id="boat" /></>}
-      </Footnote>
+      </Footnote>}
       {k.outcomes.some((r) => r.completed < r.requested) && (
         <ul className="mt-3 list-disc space-y-1 pl-5 text-[13px] text-muted">
           {k.outcomes.filter((r) => r.completed < r.requested).map((r) => (
