@@ -169,7 +169,10 @@ export function taskTable(reports: BenchReport[], version: string = TASK_VERSION
     const hourlyUsd = hourlyCost(id, size) * ratio;
     const rules = billingRules(id);
     const cpus = rs.map((r) => r.medianTaskCpuMs).filter((n): n is number => typeof n === "number");
-    const cpuMs = cpus.length === rs.length ? median(cpus) : undefined;
+    // A container can show the whole host's /proc/stat (Daytona does): a reading beyond what the sandbox's
+    // own vCPUs could do in that time isn't the sandbox's, so it's dropped and the task is priced at full CPU.
+    const read = cpus.length === rs.length ? median(cpus) : undefined;
+    const cpuMs = read !== undefined && read <= size.vcpu * taskMillis * 1.1 ? read : undefined;
     return {
       provider: id,
       name: CATALOG.find((c) => c.id === id)!.name,

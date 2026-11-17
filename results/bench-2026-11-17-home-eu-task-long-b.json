@@ -1,0 +1,257 @@
+{
+  "tool": "sandboxrouter",
+  "version": "0.9.0",
+  "date": "2026-11-17T11:53:12.519Z",
+  "label": "home-eu",
+  "by": "gigialc",
+  "runs": 3,
+  "spec": {
+    "vcpu": 2,
+    "memoryGb": 4
+  },
+  "task": "v1-long",
+  "node": "v22.22.0",
+  "platform": "darwin-arm64",
+  "rows": [
+    {
+      "provider": "novita",
+      "runs": 3,
+      "failures": 0,
+      "medianCreateMs": 334,
+      "medianExecMs": 820,
+      "hourlyUsd": 0.11664,
+      "medianTaskMs": 159516,
+      "taskPhasesMs": {
+        "cpu": 95958,
+        "cores": 50790,
+        "disk": 12768
+      },
+      "medianTaskCpuMs": 195060
+    },
+    {
+      "provider": "superserve",
+      "runs": 3,
+      "failures": 0,
+      "medianCreateMs": 488,
+      "medianExecMs": 188,
+      "hourlyUsd": 0.1656,
+      "medianTaskMs": 26174,
+      "taskPhasesMs": {
+        "cpu": 14590,
+        "cores": 7932,
+        "disk": 3652
+      },
+      "medianTaskCpuMs": 36590
+    },
+    {
+      "provider": "openscale",
+      "runs": 3,
+      "failures": 0,
+      "medianCreateMs": 523,
+      "medianExecMs": 1190,
+      "hourlyUsd": 0.013999999999999999,
+      "medianTaskMs": 104680,
+      "taskPhasesMs": {
+        "cpu": 65352,
+        "cores": 31022,
+        "disk": 8306
+      },
+      "medianTaskCpuMs": 141090
+    },
+    {
+      "provider": "modal",
+      "runs": 3,
+      "failures": 0,
+      "medianCreateMs": 548,
+      "medianExecMs": 941,
+      "hourlyUsd": 0.23796,
+      "medianTaskMs": 37232,
+      "taskPhasesMs": {
+        "cpu": 22975,
+        "cores": 11002,
+        "disk": 5480
+      },
+      "medianTaskCpuMs": 80410
+    },
+    {
+      "provider": "vercel",
+      "runs": 3,
+      "failures": 0,
+      "medianCreateMs": 692,
+      "medianExecMs": 399,
+      "hourlyUsd": 0.3408,
+      "medianTaskMs": 187586,
+      "taskPhasesMs": {
+        "cpu": 120335,
+        "cores": 62378,
+        "disk": 4873
+      },
+      "medianTaskCpuMs": 253150
+    },
+    {
+      "provider": "e2b",
+      "runs": 3,
+      "failures": 0,
+      "medianCreateMs": 757,
+      "medianExecMs": 218,
+      "hourlyUsd": 0.1089,
+      "medianTaskMs": 204012,
+      "taskPhasesMs": {
+        "cpu": 123233,
+        "cores": 59965,
+        "disk": 16897
+      },
+      "medianTaskCpuMs": 261250
+    },
+    {
+      "provider": "cloudflare",
+      "runs": 3,
+      "failures": 0,
+      "medianCreateMs": 845,
+      "medianExecMs": 285,
+      "hourlyUsd": 0.21599999999999997,
+      "medianTaskMs": 55664,
+      "taskPhasesMs": {
+        "cpu": 19200,
+        "cores": 13354,
+        "disk": 22985
+      },
+      "medianTaskCpuMs": 88970
+    },
+    {
+      "provider": "boat",
+      "runs": 3,
+      "failures": 0,
+      "medianCreateMs": 886,
+      "medianExecMs": 167,
+      "hourlyUsd": 0.018,
+      "medianTaskMs": 31164,
+      "taskPhasesMs": {
+        "cpu": 12915,
+        "cores": 7767,
+        "disk": 10482
+      },
+      "medianTaskCpuMs": 38370
+    },
+    {
+      "provider": "daytona",
+      "runs": 3,
+      "failures": 0,
+      "medianCreateMs": 904,
+      "medianExecMs": 520,
+      "hourlyUsd": 0.06659999999999999,
+      "medianTaskMs": 65219,
+      "taskPhasesMs": {
+        "cpu": 30262,
+        "cores": 31756,
+        "disk": 7079
+      },
+      "medianTaskCpuMs": 1075610
+    },
+    {
+      "provider": "agentcore",
+      "runs": 3,
+      "failures": 0,
+      "medianCreateMs": 953,
+      "medianExecMs": 296,
+      "hourlyUsd": 0.2168,
+      "medianTaskMs": 115192,
+      "taskPhasesMs": {
+        "cpu": 71854,
+        "cores": 39037,
+        "disk": 4202
+      },
+      "medianTaskCpuMs": 160270
+    },
+    {
+      "provider": "agent37",
+      "runs": 3,
+      "failures": 0,
+      "medianCreateMs": 1052,
+      "medianExecMs": 680,
+      "hourlyUsd": 0.006520547945205479,
+      "medianTaskMs": 205484,
+      "taskPhasesMs": {
+        "cpu": 104938,
+        "cores": 96182,
+        "disk": 4364
+      },
+      "medianTaskCpuMs": 317420
+    },
+    {
+      "provider": "maritime",
+      "runs": 3,
+      "failures": 0,
+      "medianCreateMs": 1350,
+      "medianExecMs": 345,
+      "hourlyUsd": 0.022,
+      "medianTaskMs": 74547,
+      "taskPhasesMs": {
+        "cpu": 41571,
+        "cores": 24420,
+        "disk": 8658
+      },
+      "medianTaskCpuMs": 105910
+    },
+    {
+      "provider": "freestyle",
+      "runs": 3,
+      "failures": 0,
+      "medianCreateMs": 1521,
+      "medianExecMs": 267,
+      "hourlyUsd": 0.13362,
+      "medianTaskMs": 60480,
+      "taskPhasesMs": {
+        "cpu": 20463,
+        "cores": 14804,
+        "disk": 24850
+      },
+      "medianTaskCpuMs": 81120
+    },
+    {
+      "provider": "tensorlake",
+      "runs": 3,
+      "failures": 1,
+      "medianCreateMs": 2074,
+      "medianExecMs": 749,
+      "hourlyUsd": 0.2,
+      "medianTaskMs": 38777,
+      "taskPhasesMs": {
+        "cpu": 22795,
+        "cores": 12546,
+        "disk": 3436
+      },
+      "medianTaskCpuMs": 57420
+    },
+    {
+      "provider": "lambda",
+      "runs": 3,
+      "failures": 0,
+      "medianCreateMs": 3144,
+      "medianExecMs": 533,
+      "hourlyUsd": 0.25220016,
+      "medianTaskMs": 120488,
+      "taskPhasesMs": {
+        "cpu": 61998,
+        "cores": 31328,
+        "disk": 26933
+      },
+      "medianTaskCpuMs": 143060
+    },
+    {
+      "provider": "sail",
+      "runs": 3,
+      "failures": 1,
+      "medianCreateMs": 3363,
+      "medianExecMs": 679,
+      "hourlyUsd": 0.062,
+      "medianTaskMs": 243458,
+      "taskPhasesMs": {
+        "cpu": 137413,
+        "cores": 90191,
+        "disk": 15854
+      },
+      "medianTaskCpuMs": 334800
+    }
+  ]
+}

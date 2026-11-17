@@ -143,6 +143,14 @@ describe("taskTable", () => {
   it("ignores reports without the task, or from an older task version", () => {
     expect(taskTable([report({ task: undefined }), report({ task: "v0" })])).toEqual([]);
   });
+  it("drops a CPU reading the sandbox's own vCPUs couldn't have produced (a container showing the host)", () => {
+    // Vercel, 2 vCPU, 2 s task: at most about 4 s of CPU. 3 s counts; 30 s is the host's.
+    const ok = taskTable([report({}, { provider: "vercel", medianTaskCpuMs: 3000 })]);
+    expect(ok[0].cpuMs).toBe(3000);
+    const host = taskTable([report({}, { provider: "vercel", medianTaskCpuMs: 30000 })]);
+    expect(host[0].cpuMs).toBeUndefined();
+    expect(host[0].taskUsd).toBeCloseTo(taskUsd("vercel", host[0].size, 1000, 2000), 12);
+  });
   it("keeps each location's latest run, then takes the median across locations", () => {
     const rows = taskTable([
       report({ date: "2026-11-01T00:00:00Z" }, { medianTaskMs: 9000 }),
