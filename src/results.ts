@@ -2,6 +2,7 @@ import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 import { benchmarksPublishable, CATALOG } from "./catalog.js";
 import { CHECK_STEPS } from "./check.js";
+import { TASK_PHASES } from "./task.js";
 
 /**
  * Checks for the files people submit to results/: bench reports, saved `check` runs and `cost` runs.
@@ -113,6 +114,7 @@ export function validateResult(j: any, now = Date.now()): string[] {
     add(checkLabel(j.label));
     add(checkBy(j.by));
     if (!isNum(j.runs, 3, 1000)) out.push("runs must be at least 3");
+    if (j.task !== undefined && typeof j.task !== "string") out.push("task must be the task version, e.g. \"v1\"");
     if (!Array.isArray(j.rows) || !j.rows.length) out.push("rows is empty");
     for (const r of Array.isArray(j.rows) ? j.rows : []) {
       provider(r?.provider, "row provider");
@@ -123,6 +125,14 @@ export function validateResult(j: any, now = Date.now()): string[] {
         if (r?.[k] !== undefined && !isNum(r[k], 1, MAX_MS)) out.push(`${r?.provider}: ${k} must be between 1 ms and 15 min`);
       }
       if (r?.failures < r?.runs && r?.medianCreateMs === undefined) out.push(`${r?.provider}: successful runs but no medianCreateMs`);
+      if (r?.medianTaskMs !== undefined && !isNum(r.medianTaskMs, 1, MAX_MS)) out.push(`${r?.provider}: medianTaskMs must be between 1 ms and 15 min`);
+      if (r?.taskPhasesMs !== undefined) {
+        const ph = r.taskPhasesMs;
+        if (!ph || typeof ph !== "object" || TASK_PHASES.some((p) => !isNum(ph[p.id], 1, MAX_MS))) {
+          out.push(`${r?.provider}: taskPhasesMs needs ${TASK_PHASES.map((p) => p.id).join(", ")}, each between 1 ms and 15 min`);
+        }
+        if (j.task === undefined) out.push(`${r?.provider}: has task times but the report doesn't say which task (task)`);
+      }
       if ("lastError" in (r ?? {})) out.push(`${r?.provider}: lastError must not be shared (it can hold account details)`);
     }
   } else if (j.tool === "sandboxrouter-check") {

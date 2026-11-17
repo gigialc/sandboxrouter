@@ -2,7 +2,8 @@
 // Run from the repo root: node --import tsx scripts/site-data.ts
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { benchmarksPublishable, billingRules, CATALOG, hourlyCost, planLabel, unfit } from "../src/catalog.js";
-import { aggregate, loadReports } from "../src/leaderboard.js";
+import { aggregate, loadReports, taskTable } from "../src/leaderboard.js";
+import { TASK_PHASES, TASKS } from "../src/task.js";
 import { computerCatalog } from "../src/computers.js";
 import { CHECK_STEPS } from "../src/check.js";
 import { conformanceTable, liveStatus } from "../src/conformance.js";
@@ -121,6 +122,13 @@ const data = {
   checkSteps: CHECK_STEPS,
   desktops: computerCatalog(),
   leaderboard: aggregate(reports),
+  tasks: {
+    phases: TASK_PHASES.map((p) => ({ id: p.id, label: p.label })),
+    kinds: [
+      { id: "short", title: "Short job", blurb: "The job once: a few seconds of work.", version: TASKS.short.version, repeat: TASKS.short.repeat, rows: taskTable(reports, TASKS.short.version) },
+      { id: "long", title: "Long job", blurb: "The same job 40 times in a row: minutes of steady work.", version: TASKS.long.version, repeat: TASKS.long.repeat, rows: taskTable(reports, TASKS.long.version) },
+    ].filter((k) => k.rows.length),
+  },
   useCases,
   costRuns: costRows,
   submissions: reports.map((r) => ({

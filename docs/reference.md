@@ -211,6 +211,8 @@ npx @sandboxrouter/sdk run "uname -a && nproc"      # start, run, print, kill
 npx @sandboxrouter/sdk run "pytest -q" --provider e2b,daytona --keep
 npx @sandboxrouter/sdk bench --runs 5               # cold start + exec latency table
 npx @sandboxrouter/sdk bench --share --label "us-east-1"   # also write a report for results/
+npx @sandboxrouter/sdk bench --task                 # also time and price a fixed job in each sandbox
+npx @sandboxrouter/sdk bench --task --long --parallel 4   # the job 40 times in a row, 4 providers at once
 npx @sandboxrouter/sdk leaderboard results --out leaderboard.html
 npx @sandboxrouter/sdk serve --port 8787            # HTTP API
 npx @sandboxrouter/sdk ls                           # sandboxes started here that were never killed
@@ -234,6 +236,8 @@ A sandbox the provider already stopped is just dropped from the ledger. `sandbox
 ### Bench
 
 `bench` starts real sandboxes on every configured provider, measures time to a usable sandbox and the round trip of `echo ok`, kills them, and prints a markdown leaderboard. Results are saved to `~/.sandboxrouter/bench.json`, which is what `strategy: "fastest"` routes on. Latency is measured from wherever you run it, so network distance counts.
+
+`bench --task` also runs the same fixed job in every sandbox, to compare what work costs rather than what an hour costs: hash 512 MB of zeros on one core, then 256 MB on each of two cores at once, then write and flush 256 MB to disk (`src/task.ts`). It uses only `head`, `sha256sum` and `dd`, which every Linux image has. Each step is timed from your machine minus the sandbox's round trip for an empty command, so network distance mostly drops out. The job is priced as the provider would bill it: the start plus the task, rounded up to its minimum charge and billing step, plus any per-sandbox fee. What it measures is CPU and disk speed for this job; it doesn't cover networking, package installs or GPUs. `--long` runs each step 40 times in a row (minutes instead of seconds), which shows whether a provider keeps its speed under steady load and how prices compare once minimum charges stop mattering. Reports made with `--share` record the task version (`task: "v1"`, or `"v1-long"`); changing the job bumps the version, and older reports stop counting. `--parallel N` benches N providers at once, which matters for the long job.
 
 `--share` writes a JSON report (timings, your label, Node version and platform; never keys, env or error text), and `--by` adds your GitHub username so the website can credit you. Open a PR adding it to [`results/`](../results/); CI checks every result file for keys, addresses and impossible numbers (`npm run results:check`), see [Sending results](../CONTRIBUTING.md#sending-results). `sandboxrouter leaderboard` builds one static HTML page from every report there, taking the median of each submission's medians so one submitter can't dominate. Host the page anywhere static files go.
 

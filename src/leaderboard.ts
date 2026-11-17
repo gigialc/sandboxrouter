@@ -1,6 +1,8 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { benchmarksPublishable, CATALOG, fittingSpec, hourlyCost } from "./catalog.js";
+import { benchmarksPublishable, billingRules, CATALOG, fittingSpec, hourlyCost } from "./catalog.js";
+import { BILLED_VS_LIST } from "./billing.js";
+import { TASK_PHASES, TASK_VERSION, taskUsd, type PhaseMs } from "./task.js";
 import { median } from "./bench-store.js";
 import type { BenchRow } from "./bench.js";
 import type { ProviderId, SandboxSpec } from "./types.js";
@@ -20,12 +22,14 @@ export interface BenchReport {
   by?: string;
   runs: number;
   spec: SandboxSpec;
+  /** Set when the run also timed the standard task (`bench --task`): which version of it (src/task.ts). */
+  task?: string;
   node: string;
   platform: string;
   rows: BenchRow[];
 }
 
-export function makeReport(rows: BenchRow[], opts: { version: string; runs: number; spec: SandboxSpec; label?: string; by?: string }): BenchReport {
+export function makeReport(rows: BenchRow[], opts: { version: string; runs: number; spec: SandboxSpec; label?: string; by?: string; task?: string }): BenchReport {
   return {
     tool: "sandboxrouter",
     version: opts.version,
@@ -35,6 +39,7 @@ export function makeReport(rows: BenchRow[], opts: { version: string; runs: numb
     runs: opts.runs,
     // Only the shape matters for comparison; never ship env or metadata.
     spec: { vcpu: opts.spec.vcpu, memoryGb: opts.spec.memoryGb },
+    ...(opts.task ? { task: opts.task } : {}),
     node: process.version,
     platform: `${process.platform}-${process.arch}`,
     // Providers whose terms forbid publishing benchmarks stay out of anything meant to be shared.
@@ -111,6 +116,66 @@ export function aggregate(reports: BenchReport[]): LeaderRow[] {
     };
   });
   return rows.sort((a, b) => (a.medianCreateMs ?? Infinity) - (b.medianCreateMs ?? Infinity));
+}
+
+export interface TaskRow {
+  provider: ProviderId;
+  name: string;
+  /** The size it ran at: 2 vCPU / 4 GB, or the provider's fixed default size. */
+  size: { vcpu: number; memoryGb: number };
+  createMs: number;
+  taskMs: number;
+  phasesMs: PhaseMs;
+  /** USD per hour at that size: list price, corrected by measured bills (`BILLED_VS_LIST`). */
+  hourlyUsd: number;
+  /** What one task is billed: start plus task, with the minimum charge, billing step and per-sandbox fee. */
+  taskUsd: number;
+  minimumSeconds: number;
+  perSandboxUsd: number;
+  measuredAt: string;
+}
+
+/**
+ * Cost of the standard task (src/task.ts) per provider, from reports made with `bench --task` at
+ * `version` (the short task's by default; TASKS.long.version for `--long`): each provider's latest run
+ * from each location, then the median across locations (as `aggregate` does). Cheapest task first.
+ */
+export function taskTable(reports: BenchReport[], version: string = TASK_VERSION): TaskRow[] {
+  const latest = new Map<string, { row: BenchRow; date: string }>();
+  for (const rep of reports) {
+    if (rep.task !== version) continue;
+    for (const r of rep.rows) {
+      if (!KNOWN.has(r.provider) || !r.taskPhasesMs || r.medianTaskMs === undefined || r.medianCreateMs === undefined) continue;
+      const key = `${r.provider}\u0000${rep.label ?? ""}`;
+      const seen = latest.get(key);
+      if (!seen || rep.date > seen.date) latest.set(key, { row: r, date: rep.date });
+    }
+  }
+  const by = new Map<ProviderId, { row: BenchRow; date: string }[]>();
+  for (const x of latest.values()) by.set(x.row.provider, [...(by.get(x.row.provider) ?? []), x]);
+  const rows = [...by.entries()].map(([id, xs]): TaskRow => {
+    const rs = xs.map((x) => x.row);
+    const createMs = median(rs.map((r) => r.medianCreateMs!))!;
+    const taskMillis = median(rs.map((r) => r.medianTaskMs!))!;
+    const phasesMs = Object.fromEntries(TASK_PHASES.map((p) => [p.id, median(rs.map((r) => r.taskPhasesMs![p.id]))!])) as PhaseMs;
+    const size = fittingSpec(id);
+    const hourlyUsd = hourlyCost(id, size) * (BILLED_VS_LIST[id]?.ratio ?? 1);
+    const rules = billingRules(id);
+    return {
+      provider: id,
+      name: CATALOG.find((c) => c.id === id)!.name,
+      size,
+      createMs,
+      taskMs: taskMillis,
+      phasesMs,
+      hourlyUsd,
+      taskUsd: taskUsd(id, hourlyUsd, createMs, taskMillis),
+      minimumSeconds: rules.minSeconds,
+      perSandboxUsd: rules.perSandboxUsd,
+      measuredAt: xs.map((x) => x.date).sort().at(-1)!,
+    };
+  });
+  return rows.sort((a, b) => a.taskUsd - b.taskUsd || a.provider.localeCompare(b.provider));
 }
 
 const esc = (s: unknown) =>
