@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import published from "@/data/published.json";
 import { recommend, type PublishedData, type RecJob, type Recommendation } from "@/lib/recommend";
 import { ProviderLogo, ProviderName } from "@/components/ProviderName";
+import { money } from "@/components/results";
 import { site } from "@/lib/site";
 
 const JOBS: [RecJob, string, string][] = [
@@ -18,17 +19,6 @@ const JOBS: [RecJob, string, string][] = [
 const COUNTS = [1, 10, 100];
 
 const secs = (s: number) => (s >= 10 ? `${s.toFixed(0)} s` : `${s.toFixed(1)} s`);
-// Small amounts keep two significant digits: a job can cost $0.000012, which must not read as $0.0000.
-const money = (n?: number) =>
-  n === undefined || !Number.isFinite(n)
-    ? "n/a"
-    : n >= 100
-      ? `$${n.toFixed(0)}`
-      : n >= 1
-        ? `$${n.toFixed(2)}`
-        : n >= 0.01
-          ? `$${n.toFixed(3)}`
-          : `$${Number(n.toPrecision(2)).toFixed(Math.max(2, 1 - Math.floor(Math.log10(n))))}`;
 const seg = (on: boolean) =>
   `px-3 py-1.5 text-[13px] border -ml-px first:ml-0 ${on ? "relative z-[1] border-accent bg-accent text-bg" : "border-line text-ink-2 hover:text-ink"}`;
 
