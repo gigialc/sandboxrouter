@@ -19,6 +19,7 @@ All notable changes. Versions follow [semver](https://semver.org/); while the ve
 - **Weekly benchmark from GitHub's runners in the US** (`.github/workflows/bench.yml`), so results come from more than one place.
 
 ### Changed
+- **Price check 2026-11-17** (#72): the pricing pages of Daytona, InstaBox, LangSmith, Modal, OpenScale, Upstash, Alibaba, Azure and Deno were re-read after the weekly check flagged them. No sandbox list price moved (the changes were GPU prices, new plans and Upstash's keep-alive boxes), so only the `checked` dates changed. Upstash's note now says its page lists $0.20 and $0.40 per active CPU hour for the 4/8 and 8/16 boxes without saying whether that is per core or per box; the estimate still uses $0.10 per core.
 - **Shared bench reports leave out providers whose every run failed on the runner's own account** (a setup error, payment, a limit), and say so; they'd otherwise be published as the provider failing.
 - **The ledger compacts itself** once it passes 256 KB, so a long-lived server's file stays small, and the bench file is re-read only when it changes.
 
