@@ -2,7 +2,7 @@
 
 All notable changes. Versions follow [semver](https://semver.org/); while the version is 0.x, a minor bump can change the API.
 
-## Unreleased
+## 0.12.0 (2026-11-17)
 
 ### Added
 - **Homepage:** a proof strip under the headline (1,000 of 1,000 sandboxes started at once over 12 providers against 637 for the best single provider, providers passing the real-account check, real sandboxes benchmarked), all computed from `results/`; provider logos in the strip; an "At scale" section on spillover and failover with where the 1,000 sandboxes ran; the benchmark card in the site's table style; the routing demo starts with a finished run.
