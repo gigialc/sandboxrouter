@@ -1,0 +1,218 @@
+// Which provider for a job, from the published benchmarks. Pure and import-free on purpose: scripts/site-data.ts
+// copies this file into the website (web/src/lib/recommend.ts) so the SDK, the CLI, /benchmarks.json and the MCP
+// tool all answer the same way from the same numbers.
+
+/** A job the benchmarks measure. "start" is only starting a sandbox and running one command. */
+export type RecJob = "start" | "short" | "long" | "python" | "download" | "agent" | "repo";
+/** What to rank by: lowest cost, shortest time, or both together ("value"). */
+export type RecPriority = "cost" | "speed" | "value";
+
+export interface PublishedStart {
+  name: string;
+  medianCreateMs: number;
+  successRate: number;
+  runs: number;
+  hourlyUsd: number;
+  measuredAt: string;
+}
+export interface PublishedJob {
+  name: string;
+  /** Time to a usable sandbox when it ran this job. */
+  createMs: number;
+  /** The job itself, once the sandbox was up. */
+  taskMs: number;
+  /** One job in a new sandbox: start, minimum charge and per-sandbox fee included. */
+  taskUsd: number;
+  /** One job in a sandbox that's already running. */
+  reusedUsd: number;
+  successRate: number;
+  runs: number;
+  /** Bills at least this many seconds per sandbox. */
+  minimumSeconds?: number;
+  /** Fee per sandbox started. */
+  perSandboxUsd?: number;
+  measuredAt: string;
+}
+export interface PublishedLoadRow {
+  name: string;
+  /** How many were asked for at once, and how many started. */
+  n: number;
+  ok: number;
+  /** Of those that didn't start, how many the benchmarking account's own limit refused. */
+  limited: number;
+  p50Ms?: number;
+  p99Ms?: number;
+  wallMs: number;
+  /** Cost per 100 sandboxes, scaled from the ones that ran. */
+  usdPer100?: number;
+  measuredAt: string;
+}
+export interface PublishedLoad {
+  /** Sandboxes asked for at once. */
+  n: number;
+  /** "start": one command each; "rl": a short Python step each; "agents": the minute-long agent loop each. */
+  job: "start" | "rl" | "agents";
+  rows: Record<string, PublishedLoadRow>;
+}
+/** The published benchmark numbers, as the website and the SDK carry them. */
+export interface PublishedData {
+  schema: 1;
+  /** Newest measurement in the data. */
+  dataThrough: string;
+  start: Record<string, PublishedStart>;
+  jobs: Partial<Record<Exclude<RecJob, "start">, Record<string, PublishedJob>>>;
+  load: PublishedLoad[];
+}
+
+export interface RecommendOptions {
+  /** The job to run. Default "short". */
+  job?: RecJob;
+  /** How many sandboxes at once. From 10 up, start times under that load are used where measured. Default 1. */
+  count?: number;
+  /** Default "value". */
+  priority?: RecPriority;
+  /** Jobs run in a sandbox that's already running (no start, minimum or per-sandbox fee). Default false. */
+  reuse?: boolean;
+  /** Only these providers (for example the ones you have keys for). */
+  providers?: readonly string[];
+  /** How many to return. Default all. */
+  limit?: number;
+}
+
+export interface Recommendation {
+  rank: number;
+  provider: string;
+  name: string;
+  /** Seconds for one job, start included unless reusing. */
+  secondsEach: number;
+  /** Cost of one job; for "start", undefined (see hourlyUsd). */
+  usdEach?: number;
+  /** Cost of all `count` jobs. */
+  usdTotal?: number;
+  /** List price per hour at the size it ran, for "start". */
+  hourlyUsd?: number;
+  /** Share of runs that worked (refusals for the benchmarking account's own limit left out). */
+  successRate: number;
+  /** Runs behind the numbers. */
+  runs: number;
+  /** Cost and time together, each against the median and divided by the success rate; 1.0 is the median, lower is better. */
+  valueScore: number;
+  /** The burst size the at-once numbers come from, when `count` is 10 or more and the provider started all of them. */
+  measuredAtOnce?: number;
+  /** Median time to ready when that many were asked for at once. */
+  readyAtOnceMs?: number;
+  notes: string[];
+  measuredAt: string;
+}
+
+export interface RecommendResult {
+  job: RecJob;
+  count: number;
+  priority: RecPriority;
+  reuse: boolean;
+  /** How the ranking was made, in a sentence. */
+  basis: string;
+  dataThrough: string;
+  results: Recommendation[];
+}
+
+const LOAD_JOB: Record<RecJob, PublishedLoad["job"]> = {
+  start: "start",
+  short: "start",
+  long: "start",
+  python: "rl",
+  download: "start",
+  agent: "agents",
+  repo: "start",
+};
+
+const mid = (xs: number[]) => {
+  const s = [...xs].sort((a, b) => a - b);
+  const m = Math.floor(s.length / 2);
+  return s.length === 0 ? 1 : s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+};
+
+/**
+ * Rank providers for a job from the published benchmarks. Costs and times are per successful job: each is
+ * divided by the provider's success rate, so one that fails often pays for it. For `count` of 10 or more, the
+ * start time is the one measured with that many asked for at once (the largest measured size not above
+ * `count`); providers not yet measured at that size are listed after the ones that were, since the limit that
+ * stopped them was the benchmarking account's, not theirs.
+ */
+export function recommend(data: PublishedData, opts: RecommendOptions = {}): RecommendResult {
+  const job = opts.job ?? "short";
+  const count = Math.max(1, Math.floor(opts.count ?? 1));
+  const priority = opts.priority ?? "value";
+  const reuse = job !== "start" && !!opts.reuse;
+  const only = opts.providers ? new Set(opts.providers) : undefined;
+
+  const loads = data.load.filter((l) => l.job === LOAD_JOB[job] && l.n <= count).sort((a, b) => b.n - a.n);
+  const load = count >= 10 && !reuse ? loads[0] : undefined;
+
+  type Raw = Omit<Recommendation, "rank" | "valueScore"> & { usdKey: number };
+  const raw: Raw[] = [];
+  if (job === "start") {
+    for (const [id, s] of Object.entries(data.start)) {
+      if (only && !only.has(id)) continue;
+      raw.push({ provider: id, name: s.name, secondsEach: s.medianCreateMs / 1000, hourlyUsd: s.hourlyUsd, successRate: s.successRate, runs: s.runs, notes: [], measuredAt: s.measuredAt, usdKey: s.hourlyUsd });
+    }
+  } else {
+    for (const [id, j] of Object.entries(data.jobs[job] ?? {})) {
+      if (only && !only.has(id)) continue;
+      const usd = reuse ? j.reusedUsd : j.taskUsd;
+      const notes: string[] = [];
+      if (!reuse && j.minimumSeconds && j.minimumSeconds > 1) notes.push(`bills at least ${j.minimumSeconds} s per sandbox`);
+      if (!reuse && j.perSandboxUsd) notes.push(`$${j.perSandboxUsd} per sandbox started`);
+      raw.push({
+        provider: id,
+        name: j.name,
+        secondsEach: (j.taskMs + (reuse ? 0 : j.createMs)) / 1000,
+        usdEach: usd,
+        usdTotal: usd * count,
+        successRate: j.successRate,
+        runs: j.runs,
+        notes,
+        measuredAt: j.measuredAt,
+        usdKey: usd,
+      });
+    }
+  }
+
+  const mostRuns = Math.max(1, ...raw.map((r) => r.runs));
+  for (const r of raw) {
+    if (r.runs < mostRuns / 2) r.notes.push(`only ${r.runs} runs`);
+    if (r.successRate < 1) r.notes.push(`${Math.round(r.successRate * 100)}% of runs worked`);
+    if (!load) continue;
+    const l = load.rows[r.provider];
+    if (l && l.ok === l.n && l.p50Ms !== undefined) {
+      r.measuredAtOnce = l.n;
+      r.readyAtOnceMs = l.p50Ms;
+      // Swap the one-at-a-time start for the start under load.
+      const startS = job === "start" ? r.secondsEach : r.secondsEach - (data.jobs[job as Exclude<RecJob, "start">]?.[r.provider]?.createMs ?? 0) / 1000;
+      r.secondsEach = (job === "start" ? 0 : startS) + l.p50Ms / 1000;
+    } else if (l && l.n - l.ok > l.limited) {
+      // Some failed for reasons other than the benchmarking account's limit: the provider's own.
+      r.notes.push(`${l.ok} of ${l.n} started at once`);
+    } else {
+      r.notes.push(`not measured at ${load.n} at once yet${l ? " (the benchmarking account's limit)" : ""}`);
+    }
+  }
+
+  const ok = (r: Raw) => Math.max(r.successRate, 0.01);
+  const midCost = mid(raw.map((r) => r.usdKey / ok(r)));
+  const midTime = mid(raw.map((r) => r.secondsEach / ok(r)));
+  const scored = raw.map((r) => ({ ...r, valueScore: (r.usdKey / ok(r) / midCost) * (r.secondsEach / ok(r) / midTime) }));
+  const key = (r: (typeof scored)[number]) =>
+    priority === "cost" ? r.usdKey / ok(r) : priority === "speed" ? r.secondsEach / ok(r) : r.valueScore;
+  const atScale = (r: Raw) => (load && r.measuredAtOnce === undefined ? 1 : 0);
+  scored.sort((a, b) => atScale(a) - atScale(b) || key(a) - key(b) || a.provider.localeCompare(b.provider));
+
+  const results = scored.slice(0, opts.limit ?? scored.length).map(({ usdKey: _, ...r }, i) => ({ ...r, rank: i + 1, valueScore: Math.round(r.valueScore * 100) / 100 }));
+  const what = job === "start" ? "starting a sandbox" : `the ${job} job${reuse ? " in a running sandbox" : " in a new sandbox"}`;
+  const by = priority === "cost" ? "lowest cost" : priority === "speed" ? "shortest time" : "best value (cost times time, each against the median)";
+  const basis =
+    `Ranked by ${by} for ${what}, per successful run` +
+    (load ? `, with start times measured ${load.n} at once; providers not yet measured at that size come after` : "") +
+    ".";
+  return { job, count, priority, reuse, basis, dataThrough: data.dataThrough, results };
+}

@@ -66,6 +66,7 @@ export interface TaskRow {
   taskUsd: number;
   reusedUsd: number;
   runs: number;
+  successRate: number;
   cpuMs?: number;
   activeCpu: boolean;
   minimumSeconds: number;

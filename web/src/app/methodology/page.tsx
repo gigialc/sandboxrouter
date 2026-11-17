@@ -119,8 +119,8 @@ export default function MethodologyPage() {
           </p>
           <p>
             Times include the network between the test machine and the provider, so where a run happens matters. Each table row
-            uses each location&apos;s latest run, and the median across locations when there are several, so one heavy submitter
-            can&apos;t move it. A run is a snapshot from one machine, not an average over days.
+            uses each location&apos;s best-sampled run from its last 30 days (the one with the most runs, newest on a tie), and
+            the median across locations when there are several, so one heavy submitter can&apos;t move it. A run is a snapshot from one machine, not an average over days.
           </p>
 
           <h2 id="jobs">Cost of a real task</h2>
@@ -154,7 +154,10 @@ export default function MethodologyPage() {
           <p>
             Each job runs at least 3 times per provider (the real repo 10), and start times 100 times; the tables show medians.
             &ldquo;Best value&rdquo; ranks by cost and time together: each divided by the median across providers, multiplied, so
-            1.0 is the median on both and lower is better.
+            1.0 is the median on both and lower is better. Every ranking is <strong>per successful run</strong>: a provider whose
+            runs sometimes failed has its cost and time divided by its success rate, so failing often costs it places. Refusals
+            for our account&apos;s own limits aren&apos;t failures and are left out. The raw results behind every number are in the
+            public results folder, failed runs included.
           </p>
           <p>
             Each job is priced two ways: in a <strong>new sandbox</strong> (its start, minimum charge and per-sandbox fee count

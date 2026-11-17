@@ -17,6 +17,8 @@ import { loadReports, makeReport, renderLeaderboard } from "./leaderboard.js";
 import { CATALOG, DEFAULT_MEMORY_GB, DEFAULT_VCPU, accessLabel, benchmarksPublishable, hourlyCost, listingOrder, planLabel, unfit } from "./catalog.js";
 import { Router, rankUsd, runHours } from "./router.js";
 import { createApp } from "./server.js";
+import { PUBLISHED } from "./published.js";
+import { recommend, type RecJob, type RecPriority } from "./recommend.js";
 import { RouterError, type Capability, type ProviderId, type RouteOptions, type SandboxSpec, type Strategy } from "./types.js";
 
 const HELP = `sandboxrouter: one API for every sandbox provider
@@ -25,6 +27,10 @@ Usage:
   sandboxrouter providers [--vcpu N] [--memory GB]   price table + which keys are set
   sandboxrouter route     [spec flags] [route flags] dry run: the order providers would be tried
   sandboxrouter quote     [spec/route flags] [--json]  where a create would land and what the run would cost
+  sandboxrouter recommend [--job short|long|python|download|agent|repo|start] [--count N] [--priority value|cost|speed]
+                          [--reuse] [--provider a,b] [--json]
+                          which provider for a job, from the published benchmarks: per successful run, with start
+                          times under load for --count 10 and up; --provider limits it to the ones you name
   sandboxrouter run "<cmd>" [spec flags] [route flags] [--keep]
   sandboxrouter check     --provider ID[,ID] | --all [--json] [--save [dir]] [--retry] [--out FILE] [--by GITHUB_USER]
                           test providers for real: exec, env, UTF-8, streaming, files, timeout, pause,
@@ -89,6 +95,9 @@ const { values, positionals } = parseArgs({
     task: { type: "boolean" },
     long: { type: "boolean" },
     job: { type: "string" },
+    count: { type: "string" },
+    priority: { type: "string" },
+    reuse: { type: "boolean" },
     parallel: { type: "string" },
     n: { type: "string" },
     model: { type: "string" },
@@ -189,6 +198,28 @@ async function main() {
         "         a create() that names no size, at that image's size.",
       ].join("\n"),
     );
+    return;
+  }
+
+  if (cmd === "recommend") {
+    const jobs = ["start", "short", "long", "python", "download", "agent", "repo"] as const;
+    const priorities = ["value", "cost", "speed"] as const;
+    const job = (values.job ?? "short") as RecJob;
+    const priority = (values.priority ?? "value") as RecPriority;
+    if (!jobs.includes(job)) throw new RouterError(`--job must be one of ${jobs.join(", ")}`);
+    if (!priorities.includes(priority)) throw new RouterError(`--priority must be one of ${priorities.join(", ")}`);
+    const count = values.count === undefined ? 1 : Number(values.count);
+    if (!Number.isInteger(count) || count < 1) throw new RouterError("--count must be a whole number, 1 or more");
+    const r = recommend(PUBLISHED, { job, count, priority, reuse: !!values.reuse, providers: values.provider?.split(",").map((s) => s.trim()) });
+    if (values.json) return console.log(JSON.stringify(r, null, 2));
+    const secs = (s: number) => (s >= 10 ? `${s.toFixed(0)} s` : `${s.toFixed(1)} s`);
+    const money = (n?: number) => (n === undefined ? "n/a" : n >= 1 ? `$${n.toFixed(2)}` : n >= 0.01 ? `$${n.toFixed(3)}` : `$${n.toPrecision(2)}`);
+    console.log(r.basis);
+    console.log(`Data through ${r.dataThrough.slice(0, 10)}; sandboxrouter.ai/methodology explains how it's measured.\n`);
+    for (const x of r.results.slice(0, 10)) {
+      const cost = job === "start" ? `${money(x.hourlyUsd)}/h` : count > 1 ? `${money(x.usdTotal)} for ${count}` : money(x.usdEach);
+      console.log(`${String(x.rank).padStart(2)}. ${x.name.padEnd(34)} ${secs(x.secondsEach).padStart(6)}  ${cost.padStart(14)}  value ${x.valueScore.toFixed(2)}${x.notes.length ? `  · ${x.notes.join(" · ")}` : ""}`);
+    }
     return;
   }
 

@@ -148,6 +148,8 @@ export interface TaskRow {
   reusedUsd: number;
   /** Runs behind the medians (refusals for an account limit left out). */
   runs: number;
+  /** Share of those runs that finished the job. */
+  successRate: number;
   /** CPU time the task used across all vCPUs (median), where the sandbox shows /proc/stat. */
   cpuMs?: number;
   /** True when the provider bills CPU only while busy, so `taskUsd` counts `cpuMs` rather than every core. */
@@ -206,6 +208,10 @@ export function taskTable(reports: BenchReport[], version: string = TASK_VERSION
       taskUsd: taskUsd(id, size, createMs, taskMillis, cpuMs, ratio, false, maxCoreMs),
       reusedUsd: taskUsd(id, size, createMs, taskMillis, cpuMs, ratio, true, maxCoreMs),
       runs: rs.reduce((n, r) => n + r.runs - (r.limited ?? 0), 0),
+      successRate: (() => {
+        const tried = rs.reduce((n, r) => n + r.runs - (r.limited ?? 0), 0);
+        return tried ? rs.reduce((n, r) => n + r.runs - r.failures, 0) / tried : 0;
+      })(),
       ...(cpuMs !== undefined ? { cpuMs } : {}),
       activeCpu: cpuHourlyAtFull(id, size) > 0,
       minimumSeconds: rules.minSeconds,

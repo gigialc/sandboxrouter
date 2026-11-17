@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import published from "@/data/published.json";
+import { recommend, type PublishedData, type RecJob } from "@/lib/recommend";
 import { site } from "@/lib/site";
 
 /** Enough digits to tell cheap tasks apart. */
@@ -21,16 +23,17 @@ export function TaskTable() {
   const [sort, setSort] = useState<"cheapest" | "value" | "fastest">("cheapest");
   const k = kinds.find((x) => x.id === id) ?? kinds[0];
   if (!k) return null;
+  // The order comes from the same recommend() the SDK, CLI and MCP tool use: per successful run, start included
+  // when each job starts its own sandbox.
+  const ranked = recommend(published as PublishedData, {
+    job: k.id as RecJob,
+    reuse: mode !== "fresh",
+    priority: sort === "cheapest" ? "cost" : sort === "fastest" ? "speed" : "value",
+  }).results;
+  const order = new Map(ranked.map((x) => [x.provider, x]));
   const cost = (r: (typeof k.rows)[number]) => (mode === "fresh" ? r.taskUsd : r.reusedUsd);
-  const mid = (xs: number[]) => {
-    const s = [...xs].sort((a, b) => a - b);
-    return s.length ? (s.length % 2 ? s[(s.length - 1) / 2] : (s[s.length / 2 - 1] + s[s.length / 2]) / 2) : 1;
-  };
-  const midCost = mid(k.rows.map(cost)) || 1;
-  const midTime = mid(k.rows.map((r) => r.taskMs)) || 1;
-  const value = (r: (typeof k.rows)[number]) => (cost(r) / midCost) * (r.taskMs / midTime);
-  const key = (r: (typeof k.rows)[number]) => (sort === "cheapest" ? cost(r) : sort === "fastest" ? r.taskMs : value(r));
-  const rows = [...k.rows].sort((a, b) => key(a) - key(b) || a.provider.localeCompare(b.provider));
+  const value = (r: (typeof k.rows)[number]) => order.get(r.provider)?.valueScore ?? Infinity;
+  const rows = [...k.rows].sort((a, b) => (order.get(a.provider)?.rank ?? Infinity) - (order.get(b.provider)?.rank ?? Infinity));
   const maxTask = Math.max(...k.rows.map((r) => r.taskMs), 1);
   // A row with far fewer runs than the rest says so: its median rests on less.
   const mostRuns = Math.max(...k.rows.map((r) => r.runs), 1);
@@ -83,6 +86,7 @@ export function TaskTable() {
           {mode === "fresh"
             ? "Each job starts its own sandbox: its start, minimum charge and per-sandbox fee count every time."
             : "Every job runs in one sandbox that's already up: only the job's own time counts."}
+          {" Ranked per successful run: a provider whose runs sometimes failed has its cost and time divided by its success rate."}
           {sort === "value" ? " Best value: cost times time, each against the median; 1.0 is the median on both, lower is better." : ""}
         </span>
       </p>
