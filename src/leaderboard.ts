@@ -136,14 +136,14 @@ export interface TaskRow {
 }
 
 /**
- * Cost of the standard task (src/task.ts) per provider, from reports made with `bench --task` at the
- * current TASK_VERSION: each provider's latest run from each location, then the median across
- * locations (as `aggregate` does). Cheapest task first.
+ * Cost of the standard task (src/task.ts) per provider, from reports made with `bench --task` at
+ * `version` (the short task's by default; TASKS.long.version for `--long`): each provider's latest run
+ * from each location, then the median across locations (as `aggregate` does). Cheapest task first.
  */
-export function taskTable(reports: BenchReport[]): TaskRow[] {
+export function taskTable(reports: BenchReport[], version: string = TASK_VERSION): TaskRow[] {
   const latest = new Map<string, { row: BenchRow; date: string }>();
   for (const rep of reports) {
-    if (rep.task !== TASK_VERSION) continue;
+    if (rep.task !== version) continue;
     for (const r of rep.rows) {
       if (!KNOWN.has(r.provider) || !r.taskPhasesMs || r.medianTaskMs === undefined || r.medianCreateMs === undefined) continue;
       const key = `${r.provider}\u0000${rep.label ?? ""}`;

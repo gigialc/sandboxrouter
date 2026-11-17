@@ -10,9 +10,20 @@ import type { ProviderId, ProviderSandbox } from "./types.js";
  * provider fails for lack of a package manager. Each phase is its own command, timed from here, minus the
  * sandbox's own round trip for an empty command, so network distance mostly drops out.
  *
- * Changing a phase changes what the numbers mean: bump TASK_VERSION, and older reports stop counting.
+ * Two sizes of the same job: "short" runs each phase once (seconds), "long" runs each phase 40 times in a
+ * row (minutes), which shows sustained speed (CPUs that slow down after a burst) and prices where minimum
+ * charges stop mattering. Changing a phase changes what the numbers mean: bump the versions, and older
+ * reports stop counting.
  */
-export const TASK_VERSION = "v1";
+export type TaskKind = "short" | "long";
+
+export const TASKS: Record<TaskKind, { version: string; repeat: number }> = {
+  short: { version: "v1", repeat: 1 },
+  long: { version: "v1-long", repeat: 40 },
+};
+
+/** The short task's version, which is what `bench --task` records. */
+export const TASK_VERSION = TASKS.short.version;
 
 export const TASK_PHASES = [
   // One core: hash 512 MB of zeros.
@@ -26,8 +37,14 @@ export const TASK_PHASES = [
 export type TaskPhase = (typeof TASK_PHASES)[number]["id"];
 export type PhaseMs = Record<TaskPhase, number>;
 
+/** A phase's command, run `repeat` times in a row in one shell (POSIX: no seq, no brace ranges). */
+export function phaseCommand(cmd: string, repeat: number): string {
+  return repeat <= 1 ? cmd : `n=0; while [ $n -lt ${repeat} ]; do ${cmd}; n=$((n+1)); done`;
+}
+
 /** Runs the standard task in `box`: milliseconds per phase, network round trip taken out. Throws if a phase fails. */
-export async function runTask(box: Pick<ProviderSandbox, "exec">): Promise<PhaseMs> {
+export async function runTask(box: Pick<ProviderSandbox, "exec">, kind: TaskKind = "short"): Promise<PhaseMs> {
+  const { repeat } = TASKS[kind];
   const rtt: number[] = [];
   for (let i = 0; i < 3; i++) {
     const t = performance.now();
@@ -38,7 +55,7 @@ export async function runTask(box: Pick<ProviderSandbox, "exec">): Promise<Phase
   const out = {} as PhaseMs;
   for (const p of TASK_PHASES) {
     const t = performance.now();
-    const r = await box.exec(p.cmd, { timeoutSeconds: 300 });
+    const r = await box.exec(phaseCommand(p.cmd, repeat), { timeoutSeconds: repeat > 1 ? 900 : 300 });
     if (r.exitCode !== 0) throw new Error(`task phase ${p.id} exited ${r.exitCode}: ${(r.stderr || r.stdout).slice(0, 120)}`);
     out[p.id] = Math.max(1, Math.round(performance.now() - t - overhead));
   }

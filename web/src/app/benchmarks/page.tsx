@@ -44,16 +44,19 @@ export default function BenchmarksPage() {
         <UseCaseTable />
       </section>
 
-      {site.tasks.rows.length > 0 && (
+      {site.tasks.kinds.length > 0 && (
         <section id="task" className="mt-20 scroll-mt-20">
           <h2 className="text-2xl font-normal tracking-[-0.025em] sm:text-[28px]">Cost of a real task</h2>
           <p className="mt-3 max-w-2xl text-[14px] leading-6 text-ink-2">
             The table above compares prices. This one adds speed: the same job ran in a sandbox on every provider (hash 512 MB on
             one core, then on two, then write 256 MB to disk), and was priced by how long it really took. A slower CPU or disk
-            makes the job longer, and a longer job is billed more. Cost counts the start plus the task, with each provider&apos;s
-            minimum charge, billing steps and per-sandbox fee. Measured on real accounts at 2 vCPU / 4 GB, or the provider&apos;s
-            fixed size where it has one; hover a time to see each step. Run it yourself with{" "}
-            <code className="font-mono text-[12px]">sandboxrouter bench --task</code>.
+            makes the job longer, and a longer job is billed more. The long job runs it 40 times in a row, which shows whether a
+            provider keeps its speed and how prices compare once minimum charges stop mattering. Cost counts the start plus the
+            task, with each provider&apos;s minimum charge, billing steps and per-sandbox fee: published prices applied to measured
+            times, not invoices. Measured on real accounts at 2 vCPU / 4 GB, or the provider&apos;s fixed size where it has one;
+            hover a time to see each step. Run it yourself with{" "}
+            <code className="font-mono text-[12px]">sandboxrouter bench --task</code> (add <code className="font-mono text-[12px]">--long</code>{" "}
+            for the long job).
           </p>
           <TaskTable />
         </section>
