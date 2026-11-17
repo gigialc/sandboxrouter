@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Button } from "@/components/chrome";
 import { CodeBlock, CodeTabs, InstallChip } from "@/components/code";
 import { Feature } from "@/components/Feature";
+import { RaceVideo } from "@/components/RaceVideo";
 import { RouteDemo } from "@/components/RouteDemo";
 import { DEFAULT_SHAPE, HOSTED_FEE_PCT, HOSTED_PUBLIC, HOSTED_URL, NPM, REPO, REPO_PUBLIC, site } from "@/lib/site";
 
@@ -43,6 +44,10 @@ export default function Home() {
   // Highlight the one the router would pick: the cheapest that anyone can sign up for and that didn't fail its check.
   const pick = cheapest.find((p) => p.live.status !== "failing" && !p.access)?.id;
   const [vcpu, gb] = DEFAULT_SHAPE.split("x");
+  // The benchmarks section quotes the short job: who finished first, and who cost least.
+  const short_ = site.tasks.kinds.find((k) => k.id === "short");
+  const fastest = short_ && [...short_.rows].sort((a, b) => a.taskMs - b.taskMs)[0];
+  const cheapestTask = short_?.rows[0];
 
   return (
     <div className="px-5 sm:px-10">
@@ -107,7 +112,7 @@ export default function Home() {
         </ul>
       </div>
 
-      <div className="mt-28 space-y-32 sm:mt-36 sm:space-y-44">
+      <div className="mt-24 space-y-24 sm:mt-28 sm:space-y-32">
         <Feature
           label="Route"
           claim="Each sandbox starts on the cheapest provider that fits, and moves on when one fails."
@@ -126,6 +131,37 @@ export default function Home() {
           ]}
           visual={<RouteDemo />}
         />
+
+        {short_ && fastest && cheapestTask && (
+          <Feature
+            flip
+            label="Benchmarks"
+            claim="The same job on every provider, timed and priced the way each one bills."
+            actions={
+              <>
+                <Button href="/benchmarks#task" primary>
+                  See the results
+                </Button>
+                <Button href="/benchmarks">All benchmarks</Button>
+              </>
+            }
+            points={[
+              {
+                title: "The fastest isn't the cheapest",
+                body: `On the short job, ${fastest.name} finished first (${(fastest.taskMs / 1000).toFixed(1)} s); ${cheapestTask.name} cost least: 1,000 runs for $${(cheapestTask.taskUsd * 1000).toFixed(3)}.`,
+              },
+              {
+                title: "Real jobs, real accounts",
+                body: `${short_.rows.length} providers ran the same work: hashing, disk, a Python script and a download, a few seconds or 40 times in a row. Every sandbox was started on a real account and killed after.`,
+              },
+              {
+                title: "Priced by what they really bill",
+                body: "Minimum charges, billing steps and per-sandbox fees count. Providers that bill CPU only while it's busy are charged for the CPU the job really used, read inside the sandbox.",
+              },
+            ]}
+            visual={<RaceVideo />}
+          />
+        )}
 
         <Feature
           flip
@@ -161,12 +197,15 @@ export default function Home() {
                       {p.id === pick && <span className="mt-1 block text-[12px] text-black/55">router&apos;s pick</span>}
                     </span>
                     <span className="text-[14px] tnum">
-                      ${p.prices[DEFAULT_SHAPE].usd.toFixed(3)}/hr
+                      {p.billing === "active-cpu" ? "≤ " : ""}${real(p).toFixed(3)}/hr
                       {p.live.status === "passed" && <span className={p.id === pick ? "text-accent" : "text-[#2fbf7f]"}> · tested</span>}
                     </span>
                   </Link>
                 ))}
               </div>
+              <p className="mt-4 text-[11px] leading-5 text-white/45">
+                List price, corrected by measured bills where we have them. ≤ bills CPU only while busy; shown with every core busy.
+              </p>
             </div>
           }
         />
