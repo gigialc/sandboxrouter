@@ -3,7 +3,7 @@ import { parseArgs } from "node:util";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { platform, arch } from "node:os";
 import { bench, benchMarkdown } from "./bench.js";
-import { TASKS } from "./task.js";
+import { TASKS, type TaskKind } from "./task.js";
 import { costMarkdown, costRun, settle, type CostRun } from "./cost.js";
 import { checkProvider, type CheckReport } from "./check.js";
 import { gc, listOpen } from "./gc.js";
@@ -33,7 +33,8 @@ Usage:
   sandboxrouter bench     [--runs 3] [--provider a,b] [--task [--long]] [--parallel N] [--json] [--share [--label "where you ran it"] [--by GITHUB_USER]]
                           --task also runs the same fixed job in each sandbox (hash 512 MB on 1 core,
                           then on 2, write 256 MB to disk) and prices it with each provider's billing rules;
-                          --long runs that job 40 times in a row (minutes). --parallel benches N providers at once
+                          --long runs that job 40 times in a row (minutes); --job python (a pure-Python script)
+                          or --job download (53 MB over HTTPS) runs another job. --parallel benches N providers at once
   sandboxrouter cost run  [--provider a,b] [--minutes 10] [--vcpu 2 --memory 4] [--no-load] [--out FILE] [--by GITHUB_USER]
                           start one sandbox per provider for a fixed time with every core busy, record
                           the size it really got and the list-price prediction
@@ -74,6 +75,7 @@ const { values, positionals } = parseArgs({
     runs: { type: "string" },
     task: { type: "boolean" },
     long: { type: "boolean" },
+    job: { type: "string" },
     parallel: { type: "string" },
     json: { type: "boolean" },
     port: { type: "string" },
@@ -310,11 +312,13 @@ async function main() {
   }
 
   if (cmd === "bench") {
+    const job = (values.long ? "long" : values.job ?? "short") as TaskKind;
+    if (!(job in TASKS)) return console.error(`--job must be one of: ${Object.keys(TASKS).join(", ")}`);
     const rows = await bench({
       router,
       providers,
       runs: num(values.runs) ?? 3,
-      task: values.task ? (values.long ? "long" : "short") : undefined,
+      task: values.task ? job : undefined,
       parallel: num(values.parallel),
       spec: { ...spec, timeoutMinutes: spec.timeoutMinutes ?? 5 },
       onProgress: (m) => console.error(m),
@@ -326,7 +330,7 @@ async function main() {
     for (const r of rows.filter((r) => r.lastError)) console.error(`\n${r.provider} last error: ${r.lastError}`);
     if (values.share) {
       const version = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8")).version;
-      const report = makeReport(rows, { version, runs: rows[0].runs, spec: { ...spec, vcpu: spec.vcpu ?? DEFAULT_VCPU, memoryGb: spec.memoryGb ?? DEFAULT_MEMORY_GB }, label: values.label, by, task: values.task ? TASKS[values.long ? "long" : "short"].version : undefined });
+      const report = makeReport(rows, { version, runs: rows[0].runs, spec: { ...spec, vcpu: spec.vcpu ?? DEFAULT_VCPU, memoryGb: spec.memoryGb ?? DEFAULT_MEMORY_GB }, label: values.label, by, task: values.task ? TASKS[job].version : undefined });
       const left = rows.filter((r) => !benchmarksPublishable(r.provider)).map((r) => r.provider);
       if (left.length) console.log(`\nleft out of the shared report: ${left.join(", ")} (their terms don't allow publishing benchmarks)`);
       const file = values.out ?? `sandboxrouter-bench-${report.date.slice(0, 10)}-${Math.random().toString(36).slice(2, 8)}.json`;

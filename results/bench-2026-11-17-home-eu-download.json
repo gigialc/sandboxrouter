@@ -1,0 +1,205 @@
+{
+  "tool": "sandboxrouter",
+  "version": "0.9.0",
+  "date": "2026-11-17T01:16:01.513Z",
+  "label": "home-eu",
+  "by": "gigialc",
+  "runs": 5,
+  "spec": {
+    "vcpu": 2,
+    "memoryGb": 4
+  },
+  "task": "download-v1",
+  "node": "v22.22.0",
+  "platform": "darwin-arm64",
+  "rows": [
+    {
+      "provider": "superserve",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 166,
+      "medianExecMs": 202,
+      "hourlyUsd": 0.1656,
+      "medianTaskMs": 423,
+      "taskPhasesMs": {
+        "download": 423
+      }
+    },
+    {
+      "provider": "e2b",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 293,
+      "medianExecMs": 172,
+      "hourlyUsd": 0.1089,
+      "medianTaskMs": 419,
+      "taskPhasesMs": {
+        "download": 419
+      }
+    },
+    {
+      "provider": "openscale",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 321,
+      "medianExecMs": 925,
+      "hourlyUsd": 0.013999999999999999,
+      "medianTaskMs": 457,
+      "taskPhasesMs": {
+        "download": 457
+      }
+    },
+    {
+      "provider": "novita",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 358,
+      "medianExecMs": 543,
+      "hourlyUsd": 0.11664,
+      "medianTaskMs": 563,
+      "taskPhasesMs": {
+        "download": 563
+      }
+    },
+    {
+      "provider": "cloudflare",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 373,
+      "medianExecMs": 53,
+      "hourlyUsd": 0.21599999999999997,
+      "medianTaskMs": 243,
+      "taskPhasesMs": {
+        "download": 243
+      }
+    },
+    {
+      "provider": "daytona",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 378,
+      "medianExecMs": 405,
+      "hourlyUsd": 0.06659999999999999,
+      "medianTaskMs": 166,
+      "taskPhasesMs": {
+        "download": 166
+      }
+    },
+    {
+      "provider": "modal",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 411,
+      "medianExecMs": 744,
+      "hourlyUsd": 0.23796,
+      "medianTaskMs": 319,
+      "taskPhasesMs": {
+        "download": 319
+      }
+    },
+    {
+      "provider": "vercel",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 651,
+      "medianExecMs": 247,
+      "hourlyUsd": 0.3408,
+      "medianTaskMs": 386,
+      "taskPhasesMs": {
+        "download": 386
+      }
+    },
+    {
+      "provider": "agentcore",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 818,
+      "medianExecMs": 255,
+      "hourlyUsd": 0.2168
+    },
+    {
+      "provider": "agent37",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 849,
+      "medianExecMs": 497,
+      "hourlyUsd": 0.006520547945205479,
+      "medianTaskMs": 357,
+      "taskPhasesMs": {
+        "download": 357
+      }
+    },
+    {
+      "provider": "tensorlake",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 1306,
+      "medianExecMs": 498,
+      "hourlyUsd": 0.2,
+      "medianTaskMs": 451,
+      "taskPhasesMs": {
+        "download": 451
+      }
+    },
+    {
+      "provider": "maritime",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 1441,
+      "medianExecMs": 217,
+      "hourlyUsd": 0.022,
+      "medianTaskMs": 683,
+      "taskPhasesMs": {
+        "download": 683
+      }
+    },
+    {
+      "provider": "freestyle",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 1715,
+      "medianExecMs": 212,
+      "hourlyUsd": 0.13362,
+      "medianTaskMs": 792,
+      "taskPhasesMs": {
+        "download": 792
+      }
+    },
+    {
+      "provider": "boat",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 2032,
+      "medianExecMs": 247,
+      "hourlyUsd": 0.018,
+      "medianTaskMs": 399,
+      "taskPhasesMs": {
+        "download": 399
+      }
+    },
+    {
+      "provider": "lambda",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 2641,
+      "medianExecMs": 355,
+      "hourlyUsd": 0.25220016,
+      "medianTaskMs": 3676,
+      "taskPhasesMs": {
+        "download": 3676
+      }
+    },
+    {
+      "provider": "sail",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 2711,
+      "medianExecMs": 227,
+      "hourlyUsd": 0.062,
+      "medianTaskMs": 732,
+      "taskPhasesMs": {
+        "download": 732
+      }
+    }
+  ]
+}

@@ -1,0 +1,209 @@
+{
+  "tool": "sandboxrouter",
+  "version": "0.9.0",
+  "date": "2026-11-17T01:14:45.563Z",
+  "label": "home-eu",
+  "by": "gigialc",
+  "runs": 5,
+  "spec": {
+    "vcpu": 2,
+    "memoryGb": 4
+  },
+  "task": "python-v1",
+  "node": "v22.22.0",
+  "platform": "darwin-arm64",
+  "rows": [
+    {
+      "provider": "superserve",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 182,
+      "medianExecMs": 192,
+      "hourlyUsd": 0.1656,
+      "medianTaskMs": 1611,
+      "taskPhasesMs": {
+        "python": 1611
+      }
+    },
+    {
+      "provider": "openscale",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 321,
+      "medianExecMs": 940,
+      "hourlyUsd": 0.013999999999999999,
+      "medianTaskMs": 2182,
+      "taskPhasesMs": {
+        "python": 2182
+      }
+    },
+    {
+      "provider": "novita",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 338,
+      "medianExecMs": 539,
+      "hourlyUsd": 0.11664,
+      "medianTaskMs": 1331,
+      "taskPhasesMs": {
+        "python": 1331
+      }
+    },
+    {
+      "provider": "daytona",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 376,
+      "medianExecMs": 396,
+      "hourlyUsd": 0.06659999999999999,
+      "medianTaskMs": 1230,
+      "taskPhasesMs": {
+        "python": 1230
+      }
+    },
+    {
+      "provider": "cloudflare",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 390,
+      "medianExecMs": 210,
+      "hourlyUsd": 0.21599999999999997,
+      "medianTaskMs": 1534,
+      "taskPhasesMs": {
+        "python": 1534
+      }
+    },
+    {
+      "provider": "modal",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 457,
+      "medianExecMs": 1089,
+      "hourlyUsd": 0.23796,
+      "medianTaskMs": 1817,
+      "taskPhasesMs": {
+        "python": 1817
+      }
+    },
+    {
+      "provider": "e2b",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 548,
+      "medianExecMs": 172,
+      "hourlyUsd": 0.1089,
+      "medianTaskMs": 1768,
+      "taskPhasesMs": {
+        "python": 1768
+      }
+    },
+    {
+      "provider": "vercel",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 633,
+      "medianExecMs": 283,
+      "hourlyUsd": 0.3408,
+      "medianTaskMs": 3111,
+      "taskPhasesMs": {
+        "python": 3111
+      }
+    },
+    {
+      "provider": "agent37",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 862,
+      "medianExecMs": 671,
+      "hourlyUsd": 0.006520547945205479,
+      "medianTaskMs": 1393,
+      "taskPhasesMs": {
+        "python": 1393
+      }
+    },
+    {
+      "provider": "agentcore",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 904,
+      "medianExecMs": 272,
+      "hourlyUsd": 0.2168,
+      "medianTaskMs": 1870,
+      "taskPhasesMs": {
+        "python": 1870
+      }
+    },
+    {
+      "provider": "freestyle",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 1182,
+      "medianExecMs": 204,
+      "hourlyUsd": 0.13362,
+      "medianTaskMs": 1941,
+      "taskPhasesMs": {
+        "python": 1941
+      }
+    },
+    {
+      "provider": "tensorlake",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 1212,
+      "medianExecMs": 527,
+      "hourlyUsd": 0.2,
+      "medianTaskMs": 1546,
+      "taskPhasesMs": {
+        "python": 1546
+      }
+    },
+    {
+      "provider": "maritime",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 1937,
+      "medianExecMs": 276,
+      "hourlyUsd": 0.022,
+      "medianTaskMs": 1880,
+      "taskPhasesMs": {
+        "python": 1880
+      }
+    },
+    {
+      "provider": "boat",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 2465,
+      "medianExecMs": 134,
+      "hourlyUsd": 0.018,
+      "medianTaskMs": 1091,
+      "taskPhasesMs": {
+        "python": 1091
+      }
+    },
+    {
+      "provider": "sail",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 2783,
+      "medianExecMs": 217,
+      "hourlyUsd": 0.062,
+      "medianTaskMs": 2775,
+      "taskPhasesMs": {
+        "python": 2775
+      }
+    },
+    {
+      "provider": "lambda",
+      "runs": 5,
+      "failures": 0,
+      "medianCreateMs": 2793,
+      "medianExecMs": 359,
+      "hourlyUsd": 0.25220016,
+      "medianTaskMs": 3466,
+      "taskPhasesMs": {
+        "python": 3466
+      }
+    }
+  ]
+}

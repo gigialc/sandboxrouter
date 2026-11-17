@@ -11,7 +11,7 @@ const perHour = (n: number) => `$${n >= 1 ? n.toFixed(2) : n >= 0.01 ? n.toFixed
 
 /** Measured cost of the standard task (src/task.ts) on each provider, cheapest first: the short job or the long one. Same look as the providers table. */
 export function TaskTable() {
-  const { kinds, phases } = site.tasks;
+  const { kinds } = site.tasks;
   const [id, setId] = useState(kinds[0]?.id);
   const k = kinds.find((x) => x.id === id) ?? kinds[0];
   if (!k) return null;
@@ -48,7 +48,7 @@ export function TaskTable() {
               r.minimumSeconds > 1 ? `bills at least ${r.minimumSeconds} s` : "",
               r.perSandboxUsd ? `+$${Number(r.perSandboxUsd.toPrecision(2))} per sandbox` : "",
             ].filter(Boolean);
-            const split = phases.map((p) => `${p.label} ${secs(r.phasesMs[p.id])}`).join(", ");
+            const split = k.phases.map((p) => `${p.label} ${secs(r.phasesMs[p.id])}`).join(", ");
             return (
               <tr key={r.provider} className="group border-t border-line">
                 <td className="py-3 pr-2 font-mono text-[12px] text-muted">{i + 1}</td>
@@ -73,6 +73,9 @@ export function TaskTable() {
           })}
         </tbody>
       </table>
+      {k.couldNot.length > 0 && (
+        <p className="mt-3 text-[12px] text-muted">Couldn&apos;t run this job in its default setup: {k.couldNot.join(", ")}.</p>
+      )}
     </div>
   );
 }

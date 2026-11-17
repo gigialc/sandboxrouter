@@ -6,6 +6,7 @@ All notable changes. Versions follow [semver](https://semver.org/); while the ve
 
 ### Added
 - **`bench --task`**: a cost-per-task benchmark. Each sandbox also runs the same fixed job (hash 512 MB of zeros on one core, then 256 MB on each of two cores at once, then write and flush 256 MB to disk), using only tools every Linux image has, and the job is priced by how long it really took with each provider's billing rules (start plus task, minimum charge, billing step, per-sandbox fee). A slower CPU or disk makes the job longer and so costs more, which hourly prices can't show. Reports record `task: "v1"` with `medianTaskMs` and `taskPhasesMs` per provider; `taskTable(reports)` turns them into the table, and the website's Benchmarks page shows it as "Cost of a real task". `--long` runs the same job 40 times in a row (`task: "v1-long"`), for sustained speed and prices once minimum charges stop mattering.
+- **`bench --task --job python`** (a pure-Python script, like a code-interpreter call) and **`--job download`** (the 53 MB Node.js release from nodejs.org's CDN): two more jobs for the cost-per-task table. Reports record `task: "python-v1"` or `"download-v1"`.
 - **`bench --parallel N`**: bench N providers at once (each provider's own runs stay one after another).
 
 ## 0.9.0 (2026-11-15)

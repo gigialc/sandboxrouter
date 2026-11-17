@@ -2,7 +2,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { benchmarksPublishable, billingRules, CATALOG, fittingSpec, hourlyCost } from "./catalog.js";
 import { BILLED_VS_LIST } from "./billing.js";
-import { TASK_PHASES, TASK_VERSION, taskUsd, type PhaseMs } from "./task.js";
+import { TASK_VERSION, taskByVersion, taskUsd, type PhaseMs } from "./task.js";
 import { median } from "./bench-store.js";
 import type { BenchRow } from "./bench.js";
 import type { ProviderId, SandboxSpec } from "./types.js";
@@ -141,6 +141,8 @@ export interface TaskRow {
  * from each location, then the median across locations (as `aggregate` does). Cheapest task first.
  */
 export function taskTable(reports: BenchReport[], version: string = TASK_VERSION): TaskRow[] {
+  const def = taskByVersion(version);
+  if (!def) return [];
   const latest = new Map<string, { row: BenchRow; date: string }>();
   for (const rep of reports) {
     if (rep.task !== version) continue;
@@ -157,7 +159,7 @@ export function taskTable(reports: BenchReport[], version: string = TASK_VERSION
     const rs = xs.map((x) => x.row);
     const createMs = median(rs.map((r) => r.medianCreateMs!))!;
     const taskMillis = median(rs.map((r) => r.medianTaskMs!))!;
-    const phasesMs = Object.fromEntries(TASK_PHASES.map((p) => [p.id, median(rs.map((r) => r.taskPhasesMs![p.id]))!])) as PhaseMs;
+    const phasesMs: PhaseMs = Object.fromEntries(def.phases.map((p) => [p.id, median(rs.map((r) => r.taskPhasesMs![p.id]))!]));
     const size = fittingSpec(id);
     const hourlyUsd = hourlyCost(id, size) * (BILLED_VS_LIST[id]?.ratio ?? 1);
     const rules = billingRules(id);

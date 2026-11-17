@@ -117,7 +117,7 @@ export const site = data as unknown as {
   checkSteps: string[];
   desktops: SiteDesktop[];
   leaderboard: LeaderRow[];
-  tasks: { phases: { id: string; label: string }[]; kinds: { id: string; title: string; blurb: string; version: string; repeat: number; rows: TaskRow[] }[] };
+  tasks: { kinds: { id: string; title: string; blurb: string; version: string; repeat: number; phases: { id: string; label: string }[]; rows: TaskRow[]; couldNot: string[] }[] };
   useCases: UseCase[];
   costRuns: CostRow[];
   submissions: { date: string; label: string | null; by: string | null; platform: string; runs: number; providers: number; ids: string[] }[];
