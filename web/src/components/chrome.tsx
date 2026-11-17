@@ -65,11 +65,14 @@ export function Footer() {
     <footer className="mt-32 border-t border-line">
       <div className="flex flex-col gap-4 px-5 sm:px-10 py-10 text-[13px] text-muted sm:flex-row sm:items-center">
         <Logo className="text-ink-2" />
-        <span>Open source, MIT. v{site.version}.{HOSTED_PUBLIC && " Hosted keys by AlgiAI, Corp."}</span>
+        <span>
+          Open source, MIT. v{site.version}.{HOSTED_PUBLIC && " Hosted keys by AlgiAI, Corp."} Not affiliated with any provider listed.
+        </span>
         <div className="flex flex-wrap gap-x-6 gap-y-3 sm:ml-auto">
           <Link href="/benchmarks" className="hover:text-ink">Benchmarks</Link>
           <Link href="/learn" className="hover:text-ink">Learn</Link>
           <Link href="/methodology" className="hover:text-ink">Methodology</Link>
+          <Link href="/security" className="hover:text-ink">Security</Link>
           <Link href="/docs" className="hover:text-ink">Docs</Link>
           <Link href="/playground" className="hover:text-ink">Playground</Link>
           {REPO_PUBLIC && <a href={REPO} className="hover:text-ink">GitHub</a>}
@@ -111,6 +114,17 @@ export function Button({ href, children, primary = false }: { href: string; chil
  */
 export function TableScroll({ children }: { children: React.ReactNode }) {
   return <div className="-mx-5 overflow-x-auto px-5 sm:mx-0 sm:px-0">{children}</div>;
+}
+
+/** The top of every page: a small kicker, the title, and an optional line under it. The same everywhere. */
+export function PageHeader({ kicker, title, children }: { kicker: string; title: React.ReactNode; children?: React.ReactNode }) {
+  return (
+    <header>
+      <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted">{kicker}</p>
+      <h1 className="mt-5 max-w-3xl text-4xl font-normal leading-[1.08] tracking-[-0.035em] sm:text-[44px]">{title}</h1>
+      {children ? <p className="mt-5 max-w-2xl text-[15px] leading-7 text-ink-2">{children}</p> : null}
+    </header>
+  );
 }
 
 export function SectionTitle({ id, kicker, children }: { id?: string; kicker?: string; children: React.ReactNode }) {

@@ -106,7 +106,7 @@ export default function Home() {
         </ul>
       </div>
 
-      <div className="mt-24 space-y-24 sm:mt-28 sm:space-y-32">
+      <div className="mx-auto mt-24 max-w-[1320px] space-y-24 sm:mt-28 sm:space-y-32">
         <Feature
           label="Route"
           claim="Each sandbox starts on the cheapest provider that fits, and moves on when one fails."
@@ -142,14 +142,14 @@ export default function Home() {
             points={[
               {
                 title: "The fastest isn't the cheapest",
-                body: `On the short job, ${fastest.name} finished first (${(fastest.taskMs / 1000).toFixed(1)} s); ${cheapestTask.name} cost least: 1,000 runs for $${(cheapestTask.taskUsd * 1000).toFixed(3)}.`,
+                body: `On the short job, ${cheapestTask.name} cost least: 1,000 runs for $${(cheapestTask.taskUsd * 1000).toFixed(3)}. The fastest, ${fastest.name} (${(fastest.taskMs / 1000).toFixed(1)} s), ranks #${short_.rows.findIndex((r) => r.provider === fastest.provider) + 1} of ${short_.rows.length} on cost.`,
               },
               {
                 title: "Real jobs, real accounts",
                 body: `${short_.rows.length} providers ran the same work on real accounts: hashing, disk, Python and a download.`,
               },
               {
-                title: "Priced by what they really bill",
+                title: "Priced by each provider's billing rules",
                 body: "Minimum charges and fees count, and active-CPU providers pay for the CPU the job used.",
               },
             ]}

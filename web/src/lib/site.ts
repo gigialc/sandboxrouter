@@ -10,7 +10,7 @@ export interface SiteProvider {
   credentials: string[][];
   docs: string;
   local?: boolean;
-  pricing: { vcpuHour: number; gbHour: number; note?: string; source: string; checked: string };
+  pricing: { vcpuHour: number; gbHour: number; perSandboxUsd?: number; minSeconds?: number; note?: string; source: string; checked: string };
   /** Set when you can't just sign up: "waitlist" (invite or beta only) or "closed" (no new accounts). */
   access: null | { status: "waitlist" | "closed"; note: string; checked: string };
   /** "active-cpu": CPU billed only while busy, so the listed price is the most an hour costs. */

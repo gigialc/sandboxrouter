@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { SectionTitle } from "@/components/chrome";
+import { PageHeader, SectionTitle } from "@/components/chrome";
 import { DesktopTable } from "@/components/DesktopTable";
 import { PriceIndex } from "@/components/PriceIndex";
 import { ProviderTable } from "@/components/ProviderTable";
@@ -10,9 +10,9 @@ export const metadata: Metadata = { title: "Providers" };
 export default function ProvidersPage() {
   return (
     <div className="px-5 pt-14 sm:px-10">
-      <SectionTitle id="providers" kicker="Providers">
-        What a sandbox costs, everywhere
-      </SectionTitle>
+      <div id="providers" className="scroll-mt-20">
+        <PageHeader kicker="Providers" title="What a sandbox costs, everywhere" />
+      </div>
       <div className="mt-8 max-w-3xl">
         <PriceIndex />
       </div>

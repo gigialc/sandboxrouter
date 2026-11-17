@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { PageHeader } from "@/components/chrome";
 import Link from "next/link";
 import { site } from "@/lib/site";
 
@@ -56,10 +57,7 @@ export default function LearnPage() {
 
   return (
     <div className="px-5 pt-14 sm:px-10">
-      <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted">Learn</p>
-      <h1 className="mt-5 max-w-3xl text-4xl font-normal leading-[1.08] tracking-[-0.035em] sm:text-[44px]">
-        Sandboxes for AI agents, explained
-      </h1>
+      <PageHeader kicker="Learn" title="Sandboxes for AI agents, explained" />
       <p className="mt-5 max-w-2xl text-[15px] leading-7 text-ink-2">
         Everything you need to pick, price and run sandboxes for agents, from the simple idea to the details that decide the
         bill. Each section starts in one plain sentence.

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CodeBlock } from "@/components/code";
-import { CAPABILITY_LABEL, fixedPrice, NPM, PACKAGE, provider, REPO_PUBLIC, shapeLabel, site, usd } from "@/lib/site";
+import { CAPABILITY_LABEL, fixedPrice, NPM, PACKAGE, provider, REPO, REPO_PUBLIC, shapeLabel, site, usd } from "@/lib/site";
 
 export function generateStaticParams() {
   return site.providers.map((p) => ({ id: p.id }));
@@ -245,6 +245,18 @@ await sbx.kill();`;
         <CodeBlock title="setup" code={setup} />
         <CodeBlock title={`use ${p.name}`} code={code} />
       </div>
+
+      <p className="mt-10 max-w-2xl text-[13px] leading-6 text-muted">
+        sandboxRouter isn&apos;t affiliated with {p.name}. Prices come from its public pricing page and results from our own runs.
+        Something wrong or out of date?{" "}
+        <a
+          href={`${REPO}/issues/new?title=${encodeURIComponent(`Correction: ${p.name}`)}&labels=correction&body=${encodeURIComponent(`What's wrong on https://www.sandboxrouter.ai/providers/${p.id}, and a link to the source:\n\n`)}`}
+          className="text-ink underline underline-offset-4 decoration-line-2 hover:decoration-ink"
+        >
+          Report a correction
+        </a>
+        .
+      </p>
     </div>
   );
 }

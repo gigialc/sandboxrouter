@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { PageHeader } from "@/components/chrome";
 import Link from "next/link";
 import { CodeBlock } from "@/components/code";
 import { HOSTED_FEE_PCT, NPM, REPO, REPO_PUBLIC, site } from "@/lib/site";
@@ -33,8 +34,7 @@ export default function MethodologyPage() {
 
   return (
     <div className="px-5 pt-14 sm:px-10">
-      <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted">Methodology</p>
-      <h1 className="mt-5 max-w-2xl text-4xl font-normal leading-[1.08] tracking-[-0.035em] sm:text-[44px]">How the numbers are made</h1>
+      <PageHeader kicker="Methodology" title="How the numbers are made" />
 
       <div className="mt-12 grid gap-12 lg:grid-cols-[200px_1fr]">
         <nav className="hidden lg:block">
