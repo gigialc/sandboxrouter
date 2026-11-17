@@ -2,6 +2,7 @@ import { BILLED_VS_LIST } from "./billing.js";
 import { fittingSpec, fixedSize, DEFAULT_MEMORY_GB, DEFAULT_VCPU } from "./catalog.js";
 import { Router } from "./router.js";
 import { runTask, taskMs, taskUsd, TASKS, type TaskKind, type TaskRun } from "./task.js";
+import { PUBLISHED } from "./published.js";
 import type { ProviderId, SandboxSpec } from "./types.js";
 
 /**
@@ -114,4 +115,135 @@ export async function burst(opts: {
   });
   await Promise.all(lanes);
   return rows.sort((a, b) => b.ok - a.ok || (a.p50Ms ?? Infinity) - (b.p50Ms ?? Infinity));
+}
+
+/** One burst spread over several providers, with spillover when one says no. */
+export interface SpreadResult {
+  n: number;
+  ok: number;
+  /** Sandboxes that found no provider with room. */
+  failed: number;
+  p50Ms?: number;
+  p95Ms?: number;
+  p99Ms?: number;
+  wallMs: number;
+  usd: number;
+  /** Where the sandboxes ran, and how many moved there after another provider refused. */
+  byProvider: { provider: ProviderId; ok: number; spilledIn: number; refused: number }[];
+  /** Providers that hit a limit during the burst (and were skipped for the rest of it). */
+  saturated: ProviderId[];
+}
+
+/**
+ * Ask for `n` sandboxes at once, spread round-robin over `providers`. A provider that refuses for a limit or quota
+ * is marked full for the rest of the burst, and that sandbox moves to the next provider with room: what a service
+ * running at scale needs when one provider's account limit is smaller than its burst. Time to interactive counts
+ * from the burst's start, so moving costs show. Every sandbox is killed after.
+ */
+/**
+ * How many each provider can take at once, from the published bursts: the most it started at the largest size
+ * measured (all of them, if it started all). Unmeasured providers get 10, the size every account allows.
+ */
+export function publishedCapacity(ids: ProviderId[]): Record<string, number> {
+  const loads = PUBLISHED.load.filter((l) => l.job === "start").sort((a, b) => b.n - a.n);
+  return Object.fromEntries(ids.map((id) => [id, loads.find((l) => l.rows[id])?.rows[id]?.ok ?? 10]));
+}
+
+/** `n` slots dealt out in proportion to `weights`, interleaved so every provider gets work from the first moment. */
+export function deal(ids: ProviderId[], n: number, weights: Record<string, number>): ProviderId[] {
+  const total = ids.reduce((t, id) => t + Math.max(1, weights[id] ?? 1), 0);
+  const want = new Map(ids.map((id) => [id, (Math.max(1, weights[id] ?? 1) / total) * n]));
+  const given = new Map(ids.map((id) => [id, 0]));
+  const out: ProviderId[] = [];
+  for (let i = 0; i < n; i++) {
+    // The provider furthest behind its share goes next (ties by list order).
+    let best = ids[0];
+    let gap = -Infinity;
+    for (const id of ids) {
+      const g = (want.get(id)! * (i + 1)) / n - given.get(id)!;
+      if (g > gap) {
+        gap = g;
+        best = id;
+      }
+    }
+    given.set(best, given.get(best)! + 1);
+    out.push(best);
+  }
+  return out;
+}
+
+export async function spreadBurst(opts: {
+  router?: Router;
+  providers: ProviderId[];
+  n: number;
+  /** How much each provider gets, relative; default: each one's measured capacity at once (publishedCapacity). */
+  weights?: Record<string, number> | "even";
+  onProgress?: (msg: string) => void;
+}): Promise<SpreadResult> {
+  const router = opts.router ?? new Router();
+  const log = opts.onProgress ?? (() => {});
+  const base: SandboxSpec = { vcpu: DEFAULT_VCPU, memoryGb: DEFAULT_MEMORY_GB, timeoutMinutes: 10 };
+  const full = new Set<ProviderId>();
+  const stats = new Map(opts.providers.map((p) => [p, { ok: 0, spilledIn: 0, refused: 0, createMs: [] as number[] }]));
+  const t0 = performance.now();
+  const weights = opts.weights === "even" ? Object.fromEntries(opts.providers.map((id) => [id, 1])) : (opts.weights ?? publishedCapacity(opts.providers));
+  const first = deal(opts.providers, opts.n, weights);
+  log(`${opts.n} at once, spread over ${opts.providers.length} providers by ${opts.weights === "even" ? "equal shares" : "measured capacity"}`);
+
+  const results = await Promise.all(
+    Array.from({ length: opts.n }, async (_, i) => {
+      // Start on this sandbox's dealt provider, then walk the rest, biggest capacity first.
+      const rest = [...opts.providers].filter((id) => id !== first[i]).sort((a, b) => (weights[b] ?? 1) - (weights[a] ?? 1));
+      const order = [first[i], ...rest];
+      let moved = false;
+      for (const id of order) {
+        if (full.has(id)) {
+          moved = true;
+          continue;
+        }
+        let box;
+        try {
+          box = await router.create({ ...base, ...fixedSize(id, base) }, { provider: id, fallback: false, deadlineSeconds: 240 });
+          const createMs = performance.now() - t0;
+          const r = await box.exec("echo ok");
+          if (r.exitCode !== 0 || r.stdout.trim() !== "ok") throw new Error(`echo returned ${r.exitCode}`);
+          const s = stats.get(id)!;
+          s.ok++;
+          s.createMs.push(createMs);
+          if (moved) s.spilledIn++;
+          return { ok: true as const, tti: performance.now() - t0, done: performance.now() - t0 };
+        } catch (err) {
+          const msg = (err as Error).message;
+          stats.get(id)!.refused++;
+          if (LIMIT.test(msg)) {
+            if (!full.has(id)) log(`${id}: full (${msg.slice(0, 90)})`);
+            full.add(id);
+          }
+          moved = true;
+        } finally {
+          await box?.kill().catch(() => {});
+        }
+      }
+      return { ok: false as const, done: performance.now() - t0 };
+    }),
+  );
+
+  const ttis = results.filter((r) => r.ok).map((r) => Math.round((r as { tti: number }).tti)).sort((a, b) => a - b);
+  let usd = 0;
+  for (const [id, s] of stats) {
+    const ratio = BILLED_VS_LIST[id]?.ratio ?? 1;
+    for (const c of s.createMs) usd += taskUsd(id, fittingSpec(id), c, 0, undefined, ratio, false);
+  }
+  return {
+    n: opts.n,
+    ok: ttis.length,
+    failed: opts.n - ttis.length,
+    p50Ms: percentile(ttis, 0.5),
+    p95Ms: percentile(ttis, 0.95),
+    p99Ms: percentile(ttis, 0.99),
+    wallMs: Math.round(Math.max(...results.map((r) => r.done))),
+    usd: Math.round(usd * 1e6) / 1e6,
+    byProvider: [...stats].map(([provider, s]) => ({ provider, ok: s.ok, spilledIn: s.spilledIn, refused: s.refused })).sort((a, b) => b.ok - a.ok),
+    saturated: [...full],
+  };
 }

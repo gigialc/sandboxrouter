@@ -121,6 +121,9 @@ export function errorStatus(err: unknown, depth = 0): number | undefined {
  */
 export const SETUP_ERRORS = new Set([400, 401, 403, 404, 422]);
 
+/** A provider saying no for a limit or quota on the account (rate limits, concurrency caps, spent credit). */
+export const LIMIT_ERROR = /\b429\b|rate.?limit|too many|quota|concurren|capacity|throttl|creation limit|trial_exhausted|insufficient_credits|limit exceeded/i;
+
 /** Resolve with `work`, or reject with `onExpire()` after `ms`. A late `work` rejection is swallowed. */
 export async function withDeadline<T>(work: Promise<T>, ms: number, onExpire: () => Error): Promise<T> {
   let timer: NodeJS.Timeout | undefined;

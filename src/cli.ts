@@ -5,7 +5,7 @@ import { platform, arch } from "node:os";
 import { ACCOUNT_ERROR, bench, benchMarkdown, NETWORK_ERROR } from "./bench.js";
 import { TASKS, type TaskKind } from "./task.js";
 import { submitReport } from "./submit.js";
-import { burst } from "./burst.js";
+import { burst, spreadBurst } from "./burst.js";
 import { agentBench, AGENT_TASK_VERSION } from "./agent-bench.js";
 
 /** Errors that mean the network between here and the provider failed, not the provider. */
@@ -48,7 +48,10 @@ Usage:
                           or --job download (53 MB over HTTPS) runs another job. --parallel benches N providers at once
   sandboxrouter burst     [--n 100] [--provider a,b] [--job python|agent] [--parallel 1] [--share [--label PLACE] [--by GITHUB_USER] [--submit]]
                           start --n sandboxes at once on each provider (time to interactive at p50/p95/p99, how many
-                          started); --job runs a standard job in each: python for RL-style rollouts, agent for parallel agents
+                          started); --job runs a standard job in each: python for RL-style rollouts, agent for parallel agents;
+                          --spread asks for all N at once over the providers together, moving sandboxes from any provider
+                          that hits a limit to the next one with room; shares follow each provider's measured capacity
+                          at once (--even: equal shares)
   sandboxrouter agentbench [--runs 5] [--provider a,b] [--model gemini-3.5-flash] [--parallel 4] [--share ...]
                           a real agent (Gemini, GEMINI_API_KEY) does the same task in a sandbox on each provider;
                           the key stays here and only its shell commands run in the sandbox
@@ -98,6 +101,8 @@ const { values, positionals } = parseArgs({
     count: { type: "string" },
     priority: { type: "string" },
     reuse: { type: "boolean" },
+    spread: { type: "boolean" },
+    even: { type: "boolean" },
     parallel: { type: "string" },
     n: { type: "string" },
     model: { type: "string" },
@@ -410,6 +415,18 @@ async function main() {
     const job = values.job as TaskKind | undefined;
     if (job && !(job in TASKS)) return console.error(`--job must be one of: ${Object.keys(TASKS).join(", ")}`);
     const ids = providers ?? router.registered().filter((id) => router.isConfigured(id));
+    if (values.spread) {
+      // One burst over all of them: round-robin, and a provider that says no hands its sandboxes to the next.
+      const r = await spreadBurst({ router, providers: ids, n, weights: values.even ? "even" : undefined, onProgress: (m) => console.error(m) });
+      if (values.out) writeFileSync(values.out, JSON.stringify({ tool: "sandboxrouter-spread", date: new Date().toISOString(), label: values.label, ...r }, null, 2) + "\n");
+      if (values.json) return console.log(JSON.stringify(r, null, 2));
+      const ms = (v?: number) => (v === undefined ? "n/a" : `${v} ms`);
+      console.log(`\nsandboxrouter burst --spread: ${r.ok}/${r.n} started over ${ids.length} providers; p50 ${ms(r.p50Ms)}, p95 ${ms(r.p95Ms)}, p99 ${ms(r.p99Ms)}; all done in ${(r.wallMs / 1000).toFixed(1)} s; $${r.usd.toFixed(4)}`);
+      if (r.saturated.length) console.log(`hit a limit and handed the rest on: ${r.saturated.join(", ")}`);
+      console.log("\n| Provider | Started | Moved in from a full provider | Refused |\n|---|---|---|---|");
+      for (const b of r.byProvider) console.log(`| ${b.provider} | ${b.ok} | ${b.spilledIn} | ${b.refused} |`);
+      return;
+    }
     const rows = await burst({ router, providers: ids, n, task: job, parallel: num(values.parallel), onProgress: (m) => console.error(m) });
     if (values.json) return console.log(JSON.stringify(rows, null, 2));
     console.log(`\nsandboxrouter burst: ${n} at once${job ? `, each running the ${job} job` : ""}\n`);
