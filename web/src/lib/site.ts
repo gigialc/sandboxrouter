@@ -71,6 +71,15 @@ export interface TaskRow {
   measuredAt: string;
 }
 
+export interface IndexLine {
+  id: string;
+  label: string;
+  unit: string;
+  median: number;
+  cheapest: { provider: string; name: string; usd: number };
+  providers: number;
+}
+
 export interface UseCase {
   id: string;
   title: string;
@@ -120,6 +129,7 @@ export const site = data as unknown as {
   checkSteps: string[];
   desktops: SiteDesktop[];
   leaderboard: LeaderRow[];
+  priceIndex: { lines: IndexLine[]; history: { date: string; lines: Record<string, { median: number; cheapest: number; provider: string }> }[] };
   tasks: { kinds: { id: string; title: string; blurb: string; version: string; repeat: number; phases: { id: string; label: string }[]; rows: TaskRow[]; couldNot: string[] }[] };
   useCases: UseCase[];
   costRuns: CostRow[];

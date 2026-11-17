@@ -1,0 +1,25 @@
+name: price-index
+# Every day: record the price index in scripts/price-index.json if it changed (it moves only when a
+# provider's price in the catalog does), so the website can show how it moves over time.
+on:
+  schedule:
+    - cron: "41 6 * * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: node --import tsx scripts/index-snapshot.ts
+      - name: Save it
+        run: |
+          git config user.name "price-index"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add scripts/price-index.json
+          git diff --cached --quiet || (git commit -m "price-index: $(date -u +%F)" && git push)
