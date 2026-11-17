@@ -73,6 +73,8 @@ export interface LeaderRow {
   medianCreateMs?: number;
   medianExecMs?: number;
   successRate: number;
+  /** Runs behind the row that the provider was asked to do (refusals for an account limit left out). */
+  runs: number;
   /** List price for the size the bench runs it at (`size`). */
   hourlyUsd: number;
   /** The size bench runs: 2 vCPU / 4 GB, or the provider's fixed default size. */
@@ -121,6 +123,7 @@ export function aggregate(reports: BenchReport[]): LeaderRow[] {
       medianCreateMs: median(rs.map((r) => r.medianCreateMs).filter((n): n is number => typeof n === "number")),
       medianExecMs: median(rs.map((r) => r.medianExecMs).filter((n): n is number => typeof n === "number")),
       successRate: attempted ? ok / attempted : 0,
+      runs: attempted,
       hourlyUsd: hourlyCost(id, fittingSpec(id)),
       size: fittingSpec(id),
       measuredAt: xs.map((x) => x.date).sort().at(-1)!,
@@ -143,6 +146,8 @@ export interface TaskRow {
   taskUsd: number;
   /** What one job costs in a sandbox that's already running (no start, minimum or per-sandbox fee). */
   reusedUsd: number;
+  /** Runs behind the medians (refusals for an account limit left out). */
+  runs: number;
   /** CPU time the task used across all vCPUs (median), where the sandbox shows /proc/stat. */
   cpuMs?: number;
   /** True when the provider bills CPU only while busy, so `taskUsd` counts `cpuMs` rather than every core. */
@@ -200,6 +205,7 @@ export function taskTable(reports: BenchReport[], version: string = TASK_VERSION
       hourlyUsd,
       taskUsd: taskUsd(id, size, createMs, taskMillis, cpuMs, ratio, false, maxCoreMs),
       reusedUsd: taskUsd(id, size, createMs, taskMillis, cpuMs, ratio, true, maxCoreMs),
+      runs: rs.reduce((n, r) => n + r.runs - (r.limited ?? 0), 0),
       ...(cpuMs !== undefined ? { cpuMs } : {}),
       activeCpu: cpuHourlyAtFull(id, size) > 0,
       minimumSeconds: rules.minSeconds,
@@ -380,11 +386,14 @@ export function loadBursts(dir: string): BurstReport[] {
  * how many started, time to interactive at p50/p95/p99, and what the burst cost. Most started first, then
  * fastest p50.
  */
-export function burstTable(reports: BurstReport[], task?: string) {
+export function burstTable(reports: BurstReport[], task?: string, n?: number) {
   const latest = new Map<string, { row: import("./burst.js").BurstRow; date: string; label?: string }>();
   for (const rep of reports) {
     if ((rep.task ?? undefined) !== task) continue;
+    if (n !== undefined && rep.n !== n) continue;
     for (const r of rep.rows) {
+      // Nothing started (an account blocked outright): nothing measured.
+      if (r.ok === 0) continue;
       if (!KNOWN.has(r.provider) || !benchmarksPublishable(r.provider)) continue;
       const seen = latest.get(r.provider);
       if (!seen || rep.date > seen.date) latest.set(r.provider, { row: r, date: rep.date, label: rep.label });

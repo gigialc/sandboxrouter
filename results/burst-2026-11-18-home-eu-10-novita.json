@@ -1,0 +1,23 @@
+{
+  "tool": "sandboxrouter-burst",
+  "version": "0.10.0",
+  "date": "2026-11-17T18:50:42.003Z",
+  "label": "home-eu",
+  "by": "gigialc",
+  "n": 10,
+  "node": "v22.22.0",
+  "platform": "darwin-arm64",
+  "rows": [
+    {
+      "provider": "novita",
+      "n": 10,
+      "ok": 10,
+      "limited": 0,
+      "p50Ms": 1655,
+      "p95Ms": 3157,
+      "p99Ms": 3157,
+      "wallMs": 3157,
+      "usd": 0.000324
+    }
+  ]
+}

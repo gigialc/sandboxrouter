@@ -32,6 +32,8 @@ export function TaskTable() {
   const key = (r: (typeof k.rows)[number]) => (sort === "cheapest" ? cost(r) : sort === "fastest" ? r.taskMs : value(r));
   const rows = [...k.rows].sort((a, b) => key(a) - key(b) || a.provider.localeCompare(b.provider));
   const maxTask = Math.max(...k.rows.map((r) => r.taskMs), 1);
+  // A row with far fewer runs than the rest says so: its median rests on less.
+  const mostRuns = Math.max(...k.rows.map((r) => r.runs), 1);
   const chip = (on: boolean) => `rounded-full px-2.5 py-1 text-[12px] ${on ? "bg-accent text-bg" : "text-ink-2 hover:bg-accent-soft hover:text-ink"}`;
 
   return (
@@ -101,6 +103,7 @@ export function TaskTable() {
               mode === "fresh" && r.minimumSeconds > 1 ? `bills at least ${r.minimumSeconds} s` : "",
               mode === "fresh" && r.perSandboxUsd ? `+$${Number(r.perSandboxUsd.toPrecision(2))} per sandbox` : "",
               r.activeCpu ? (r.cpuMs !== undefined ? "billed for CPU used" : "priced at full CPU") : "",
+              r.runs < mostRuns / 2 ? `only ${r.runs} runs` : "",
             ].filter(Boolean);
             const split =
               k.phases.map((p) => `${p.label} ${secs(r.phasesMs[p.id])}`).join(", ") +

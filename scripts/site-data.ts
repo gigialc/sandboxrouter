@@ -166,11 +166,18 @@ const data = {
   // Under load: N sandboxes at once, alone, each running a Python step (RL rollouts), or the agent loop (parallel agents).
   load: (() => {
     const bursts = loadBursts("results");
-    return [
-      { id: "burst", title: "100 at once", blurb: "100 sandboxes asked for at the same moment, each answering one command.", rows: burstTable(bursts) },
-      { id: "rl", title: "RL rollouts", blurb: "100 sandboxes at once, each running a short Python step, like a batch of RL rollouts or evals.", rows: burstTable(bursts, TASKS.python.version) },
-      { id: "agents", title: "Parallel agents", blurb: "100 agent loops at once, each about a minute of mostly waiting on the model.", rows: burstTable(bursts, TASKS.agent.version) },
-    ].filter((k) => k.rows.length);
+    // Two sizes: 10 at once, which every account allows, so everyone faces the same load; and 100 at once, which
+    // shows who can take that much on a standard plan.
+    const jobs = [
+      { job: "start", task: undefined, title: "Start only", blurb: "each answering one command" },
+      { job: "rl", task: TASKS.python.version, title: "RL rollouts", blurb: "each running a short Python step, like a batch of RL rollouts or evals" },
+      { job: "agents", task: TASKS.agent.version, title: "Parallel agents", blurb: "each running the minute-long agent loop, mostly waiting on the model" },
+    ] as const;
+    return [10, 100].flatMap((n) =>
+      jobs
+        .map((j) => ({ id: `${j.job}-${n}`, n, job: j.job, title: j.title, blurb: `${n} sandboxes at once, ${j.blurb}.`, rows: burstTable(bursts, j.task, n) }))
+        .filter((k) => k.rows.length),
+    );
   })(),
   // A real agent (Gemini) doing the same task in a sandbox on each provider.
   agent: agentTable(loadAgentReports("results")),

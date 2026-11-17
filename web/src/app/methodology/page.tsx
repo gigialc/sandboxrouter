@@ -191,6 +191,13 @@ export default function MethodologyPage() {
             refused for a limit on our account are counted apart: limits depend on the account&apos;s plan, and ours is a
             standard one.
           </p>
+          <p>
+            To compare everyone fairly, the same tests also run at <strong>10 at once</strong>, a size every account allows, so
+            every provider faces the same load; 100 at once then shows <strong>capacity</strong>, who can take that much on a
+            standard plan. Providers are ranked only against others that started all of them, since a smaller load isn&apos;t
+            comparable; ones our plan held back are listed apart. Cost is scaled to 100 sandboxes from the ones that ran. Rows
+            built on far fewer runs than the rest say how many.
+          </p>
 
           <h2 id="bills">Measured bills</h2>
           <p>

@@ -97,7 +97,7 @@ export default function BenchmarksPage() {
         id="speed"
         title="Start time"
         how="speed"
-        line={`${rows.length} providers${subs[0] ? `, last run ${day(subs[0].date)}` : ""}: time to a usable sandbox, one at a time.`}
+        line={`${rows.length} providers${subs[0] ? `, last run ${day(subs[0].date)}` : ""}: time to a usable sandbox, one at a time, 100 runs each where our account allowed.`}
       >
 
       <table className="mt-6 w-full text-[14px]">
@@ -119,9 +119,10 @@ export default function BenchmarksPage() {
                 <Link href={`/providers/${r.provider}`} className="text-ink group-hover:underline underline-offset-4 decoration-line-2">
                   {r.name}
                 </Link>
+                {r.runs < 20 ? <span className="ml-2 text-[11px] text-muted">only {r.runs} runs</span> : null}
               </td>
               <td className="py-3 pr-4">
-                <div className="flex items-center gap-3" title={`${r.name}: median cold start ${ms(r.medianCreateMs)}`}>
+                <div className="flex items-center gap-3" title={`${r.name}: median cold start ${ms(r.medianCreateMs)}, ${r.runs} runs`}>
                   <span className="w-20 font-mono tnum text-ink">{ms(r.medianCreateMs)}</span>
                   <span className="hidden h-px w-28 bg-line sm:block">
                     <span className="block h-px bg-bar" style={{ width: `${((r.medianCreateMs ?? 0) / maxCreate) * 100}%` }} />
