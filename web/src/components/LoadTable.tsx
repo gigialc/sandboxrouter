@@ -6,7 +6,8 @@ import { useState } from "react";
 import { site, type LoadRow } from "@/lib/site";
 
 const secs = (ms?: number) => (ms === undefined ? "n/a" : ms >= 10_000 ? `${(ms / 1000).toFixed(0)} s` : `${(ms / 1000).toFixed(1)} s`);
-const money = (n?: number) => (n === undefined ? "n/a" : n >= 1 ? `$${n.toFixed(2)}` : n >= 0.01 ? `$${n.toFixed(3)}` : `$${n.toFixed(4)}`);
+const money = (n?: number) =>
+  n === undefined ? "n/a" : n >= 1 ? `$${n.toFixed(2)}` : n >= 0.01 ? `$${n.toFixed(3)}` : `$${Number(n.toPrecision(2)).toFixed(Math.max(2, 1 - Math.floor(Math.log10(n))))}`;
 /** Cost scaled to 100 sandboxes from the ones that ran, so providers that started fewer compare fairly. */
 const per100 = (r: LoadRow) => (r.usd === undefined || !r.ok ? undefined : (r.usd / r.ok) * 100);
 

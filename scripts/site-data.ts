@@ -170,14 +170,14 @@ const data = {
       .filter((k) => k.rows.length),
   },
   useCases,
-  // Under load: N sandboxes at once, alone, each running a Python step (RL rollouts), or the agent loop (parallel agents).
+  // Under load: N sandboxes at once, alone, each running the quick Python job, or the agent loop (parallel agents).
   load: (() => {
     const bursts = loadBursts("results");
     // Two sizes: 10 at once, which every account allows, so everyone faces the same load; and 100 at once, which
     // shows how fast and steady each provider is at scale.
     const jobs = [
       { job: "start", task: undefined, title: "Start only", blurb: "each answering one command" },
-      { job: "rl", task: TASKS.python.version, title: "RL rollouts", blurb: "each running a short Python step, like a batch of RL rollouts or evals" },
+      { job: "rl", task: TASKS.python.version, title: "Quick Python runs", blurb: "each running the 1 to 2 second Python job, like a batch of code-interpreter calls" },
       { job: "agents", task: TASKS.agent.version, title: "Parallel agents", blurb: "each running the minute-long agent loop, mostly waiting on the model" },
     ] as const;
     return [10, 100].flatMap((n) =>

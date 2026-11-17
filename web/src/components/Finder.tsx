@@ -5,14 +5,14 @@ import published from "@/data/published.json";
 import { recommend, type PublishedData, type RecJob, type RecPriority } from "@/lib/recommend";
 import { ProviderName } from "@/components/ProviderName";
 
-const JOBS: [RecJob, string][] = [
-  ["agent", "Agent session"],
-  ["python", "Code run / RL step"],
-  ["repo", "Coding agent on a repo"],
-  ["short", "Short CPU job"],
-  ["long", "Long job"],
-  ["download", "Download"],
-  ["start", "Just start one"],
+const JOBS: [RecJob, string, string][] = [
+  ["agent", "Agent session", "About a minute: 10 model turns, each a 6 s wait on the model and a short Python tool call. The sandbox is mostly idle."],
+  ["python", "Quick Python run", "A 1 to 2 second pure-Python script (JSON, a regex and a sort over 200,000 records): one code-interpreter call."],
+  ["repo", "Coding agent on a repo", "Fetch Node and a real TypeScript project, npm ci, typecheck: what a coding agent does first. About 15 to 60 seconds."],
+  ["short", "Short CPU job", "Hashing on one and two cores, then a 256 MB disk write: a few seconds."],
+  ["long", "Long job", "The short job 40 times in a row: minutes of steady CPU and disk work."],
+  ["download", "Download", "A 53 MB download over HTTPS."],
+  ["start", "Just start one", "Start a sandbox and run one command."],
 ];
 const COUNTS = [1, 10, 100];
 const PRIORITIES: [RecPriority, string][] = [
@@ -22,7 +22,9 @@ const PRIORITIES: [RecPriority, string][] = [
 ];
 
 const secs = (s: number) => (s >= 10 ? `${s.toFixed(0)} s` : `${s.toFixed(1)} s`);
-const money = (n?: number) => (n === undefined ? "n/a" : n >= 1 ? `$${n.toFixed(2)}` : n >= 0.01 ? `$${n.toFixed(3)}` : `$${n.toFixed(4)}`);
+// Small amounts keep two significant digits: a job can cost $0.000012, which must not read as $0.0000.
+const money = (n?: number) =>
+  n === undefined ? "n/a" : n >= 1 ? `$${n.toFixed(2)}` : n >= 0.01 ? `$${n.toFixed(3)}` : `$${Number(n.toPrecision(2)).toFixed(Math.max(2, 1 - Math.floor(Math.log10(n))))}`;
 const chip = (on: boolean) =>
   `px-3 py-1.5 text-[13px] border ${on ? "border-accent bg-accent text-bg" : "border-line text-ink-2 hover:border-line-2 hover:text-ink"}`;
 
@@ -72,14 +74,15 @@ export function Finder() {
           )),
         )}
       </div>
+      <p className="mt-4 text-[13px] text-ink-2">{JOBS.find(([id]) => id === job)?.[2]}</p>
 
-      <table className="mt-6 w-full text-[14px]">
+      <table className="mt-4 w-full text-[14px]">
         <thead>
           <tr className="text-left text-[11px] uppercase tracking-[0.12em] text-muted">
             <th className="w-8 py-2 pr-2 font-normal">#</th>
             <th className="py-2 pr-4 font-normal">Provider</th>
             <th className="py-2 pr-4 font-normal">{job === "start" ? "Ready in" : "Time each"}</th>
-            <th className="py-2 pr-4 font-normal">{job === "start" ? "Per hour" : count > 1 ? `Cost for ${count}` : "Cost each"}</th>
+            <th className="py-2 pr-4 font-normal">{job === "start" ? "Per hour" : count > 1 ? `Cost for ${count}` : "Cost per 1,000"}</th>
             <th className="hidden py-2 font-normal md:table-cell">Worth knowing</th>
           </tr>
         </thead>
@@ -93,7 +96,7 @@ export function Finder() {
                 </ProviderName>
               </td>
               <td className="py-3 pr-4 font-mono tnum text-ink">{secs(x.secondsEach)}</td>
-              <td className="py-3 pr-4 font-mono tnum text-ink">{job === "start" ? `${money(x.hourlyUsd)}/h` : money(count > 1 ? x.usdTotal : x.usdEach)}</td>
+              <td className="py-3 pr-4 font-mono tnum text-ink">{job === "start" ? `${money(x.hourlyUsd)}/h` : money(count > 1 ? x.usdTotal : (x.usdEach ?? 0) * 1000)}</td>
               <td className="hidden py-3 text-[12px] text-muted md:table-cell">{x.notes.join(" · ") || ""}</td>
             </tr>
           ))}

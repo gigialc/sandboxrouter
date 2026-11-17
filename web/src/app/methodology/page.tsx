@@ -190,7 +190,7 @@ export default function MethodologyPage() {
             answer a command; the time it takes counts from the moment all of them were asked for, so waiting in the
             provider&apos;s queue counts. The table shows how many started, the time at the median (p50) and for the slowest 1%
             (p99), how long until the last one finished, and what all of them cost. Two variants run a job in each sandbox: a
-            short Python step (RL rollouts and evals) and the minute-long agent loop (parallel agents). Sandboxes the provider
+            1 to 2 second Python job (like a batch of code-interpreter calls) and the minute-long agent loop (parallel agents). Sandboxes the provider
             refused for a limit on our test account are counted apart: that limit is ours, not the provider&apos;s, and
             larger accounts get higher ones.
           </p>

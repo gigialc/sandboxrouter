@@ -14,12 +14,12 @@ const JOB_TEXT: Record<RecJob, string> = {
   start: "Start a sandbox and run one command.",
   short: "Hashing on one and two cores, then a 256 MB disk write: a few seconds.",
   long: "The short job 40 times in a row: minutes of steady work.",
-  python: "A pure-Python script, like a code-interpreter call or an RL rollout step.",
+  python: "A 1 to 2 second pure-Python script, like one code-interpreter call.",
   download: "A 53 MB download over HTTPS.",
   agent: "An agent loop: 10 turns of a 6 s model wait and a short Python tool call; about a minute, mostly idle.",
   repo: "What a coding agent does first: fetch Node 22 and a pinned real TypeScript project, npm ci, typecheck.",
 };
-const LOAD_TEXT = { start: "Start only", rl: "RL rollouts (a Python step each)", agents: "Parallel agents (the agent loop each)" };
+const LOAD_TEXT = { start: "Start only", rl: "Quick Python runs (the 1 to 2 second Python job each)", agents: "Parallel agents (the agent loop each)" };
 
 /** /benchmarks.json: the published numbers, with what they mean. */
 export function benchmarksJson() {
