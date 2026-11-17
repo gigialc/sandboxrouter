@@ -38,7 +38,7 @@
     "vercel": "/logos/vercel.png"
   },
   "version": "0.10.0",
-  "generatedAt": "2026-11-17T19:36:38.181Z",
+  "generatedAt": "2026-11-17T19:44:32.903Z",
   "shapes": [
     "1x2",
     "2x4",
@@ -6387,8 +6387,8 @@
       "id": "rl-10",
       "n": 10,
       "job": "rl",
-      "title": "RL rollouts",
-      "blurb": "10 sandboxes at once, each running a short Python step, like a batch of RL rollouts or evals.",
+      "title": "Quick Python runs",
+      "blurb": "10 sandboxes at once, each running the 1 to 2 second Python job, like a batch of code-interpreter calls.",
       "rows": [
         {
           "provider": "cloudflare",
@@ -7030,8 +7030,8 @@
       "id": "rl-100",
       "n": 100,
       "job": "rl",
-      "title": "RL rollouts",
-      "blurb": "100 sandboxes at once, each running a short Python step, like a batch of RL rollouts or evals.",
+      "title": "Quick Python runs",
+      "blurb": "100 sandboxes at once, each running the 1 to 2 second Python job, like a batch of code-interpreter calls.",
       "rows": [
         {
           "provider": "cloudflare",
