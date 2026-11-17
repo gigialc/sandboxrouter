@@ -24,6 +24,7 @@ export {
 } from "./router.js";
 export { VERIFIED, FAILING } from "./verified.js";
 export { PUBLISHED } from "./published.js";
+export { compare, type CompareRow } from "./compare.js";
 export {
   recommend,
   type RecJob,

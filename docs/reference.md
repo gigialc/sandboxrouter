@@ -251,6 +251,10 @@ A sandbox the provider already stopped is just dropped from the ledger. `sandbox
 
 `--share` writes a JSON report (timings, your label, Node version and platform; never keys, env or error text), and `--by` adds your GitHub username so the website can credit you. Open a PR adding it to [`results/`](../results/); CI checks every result file for keys, addresses and impossible numbers (`npm run results:check`), see [Sending results](../CONTRIBUTING.md#sending-results). `sandboxrouter leaderboard` builds one static HTML page from every report there, taking the median of each submission's medians so one submitter can't dominate. Host the page anywhere static files go.
 
+### Compare your own workload
+
+`sandboxrouter compare "<cmd>" [--setup "<cmd>"] [--runs 3] [--provider a,b] [--seconds 600] [--json]` runs your own command in a new sandbox on each provider, a few times, after an optional setup command (installs, a clone). It reports how many runs worked, the median start, setup and command time, and the estimated cost of one run: the sandbox's whole life priced by that provider's billing rules, with every core busy. Times are measured; costs are estimates, marked where the provider's real bill has been measured. Failures aren't dropped: a provider where the sandbox didn't start, the setup failed or the command failed is listed with the count of each and the first error, which also shows which providers your environment works on. `compare({ providers, command, setup, runs })` does the same in code.
+
 ### Cooldowns
 
 The router remembers trouble between creates. A provider that refuses for a limit (a 429, a quota, a concurrency cap) goes to the back of the line for 30 seconds, and one that fails 3 creates within a minute goes to the back for 60, so one provider's outage or rate limit doesn't slow every request. It's still tried when nothing else can take the sandbox, and one success clears it. `router.troubled()` lists the providers cooling and why; `plan()` entries carry `cooling`. Tune with `new Router({ cooldown: { limitSeconds, failures, windowSeconds, downSeconds } })`, or turn it off with `cooldown: false`.

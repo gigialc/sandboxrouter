@@ -6,6 +6,7 @@ import { ACCOUNT_ERROR, bench, benchMarkdown, NETWORK_ERROR } from "./bench.js";
 import { TASKS, type TaskKind } from "./task.js";
 import { submitReport } from "./submit.js";
 import { burst, spreadBurst } from "./burst.js";
+import { compare } from "./compare.js";
 import { agentBench, AGENT_TASK_VERSION } from "./agent-bench.js";
 
 /** Errors that mean the network between here and the provider failed, not the provider. */
@@ -31,6 +32,9 @@ Usage:
                           [--reuse] [--provider a,b] [--json]
                           which provider for a job, from the published benchmarks: per successful run, with start
                           times under load for --count 10 and up; --provider limits it to the ones you name
+  sandboxrouter compare "<cmd>" [--setup "<cmd>"] [--runs 3] [--provider a,b] [--seconds 600] [--json]
+                          your own workload on each provider: the same setup and command in a new sandbox, with how
+                          often it worked, start/setup/command time and the estimated cost; failures are counted
   sandboxrouter run "<cmd>" [spec flags] [route flags] [--keep]
   sandboxrouter check     --provider ID[,ID] | --all [--json] [--save [dir]] [--retry] [--out FILE] [--by GITHUB_USER]
                           test providers for real: exec, env, UTF-8, streaming, files, timeout, pause,
@@ -102,6 +106,8 @@ const { values, positionals } = parseArgs({
     priority: { type: "string" },
     reuse: { type: "boolean" },
     spread: { type: "boolean" },
+    setup: { type: "string" },
+    seconds: { type: "string" },
     even: { type: "boolean" },
     parallel: { type: "string" },
     n: { type: "string" },
@@ -203,6 +209,25 @@ async function main() {
         "         a create() that names no size, at that image's size.",
       ].join("\n"),
     );
+    return;
+  }
+
+  if (cmd === "compare") {
+    const command = rest[0];
+    if (!command) throw new RouterError('usage: sandboxrouter compare "<cmd>" [--setup "<cmd>"] [--runs 3] [--provider a,b]');
+    const ids = providers ?? router.registered().filter((id) => router.isConfigured(id));
+    const rows = await compare({ router, providers: ids, command, setup: values.setup, runs: num(values.runs), timeoutSeconds: num(values.seconds), parallel: num(values.parallel), onProgress: (m) => console.error(m) });
+    if (values.json) return console.log(JSON.stringify(rows, null, 2));
+    const s = (v?: number) => (v === undefined ? "n/a" : `${(v / 1000).toFixed(1)} s`);
+    const usd = (v?: number) => (v === undefined ? "n/a" : v >= 0.01 ? `$${v.toFixed(3)}` : `$${v.toPrecision(2)}`);
+    console.log(`\nsandboxrouter compare: ${JSON.stringify(command)}${values.setup ? `, after setup ${JSON.stringify(values.setup)}` : ""}\n`);
+    console.log("| Provider | Worked | Start | Setup | Command | Total | Est. cost per run |\n|---|---|---|---|---|---|---|");
+    for (const r of rows) {
+      console.log(`| ${r.provider} | ${r.ok}/${r.runs} | ${s(r.medianStartMs)} | ${values.setup ? s(r.medianSetupMs) : "-"} | ${s(r.medianCommandMs)} | ${s(r.medianTotalMs)} | ${usd(r.estimatedUsd)}${r.billMeasured ? " (bill measured)" : ""} |`);
+    }
+    const bad = rows.filter((r) => r.error);
+    if (bad.length) console.log(`\nFailures:\n${bad.map((r) => `- ${r.provider}: ${r.startFailed} didn't start, ${r.setupFailed} failed setup, ${r.commandFailed} failed the command. ${r.error}`).join("\n")}`);
+    console.log("\nTimes are measured medians of the runs that worked. Costs are estimates from each provider's billing rules for the sandbox's whole life (start, setup, command), not bills.");
     return;
   }
 
