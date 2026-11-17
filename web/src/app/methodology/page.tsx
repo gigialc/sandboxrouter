@@ -188,14 +188,14 @@ export default function MethodologyPage() {
             provider&apos;s queue counts. The table shows how many started, the time at the median (p50) and for the slowest 1%
             (p99), how long until the last one finished, and what all of them cost. Two variants run a job in each sandbox: a
             short Python step (RL rollouts and evals) and the minute-long agent loop (parallel agents). Sandboxes the provider
-            refused for a limit on our account are counted apart: limits depend on the account&apos;s plan, and ours is a
-            standard one.
+            refused for a limit on our test account are counted apart: that limit is ours, not the provider&apos;s, and
+            larger accounts get higher ones.
           </p>
           <p>
             To compare everyone fairly, the same tests also run at <strong>10 at once</strong>, a size every account allows, so
-            every provider faces the same load; 100 at once then shows <strong>capacity</strong>, who can take that much on a
-            standard plan. Providers are ranked only against others that started all of them, since a smaller load isn&apos;t
-            comparable; ones our plan held back are listed apart. Cost is scaled to 100 sandboxes from the ones that ran. Rows
+            every provider faces the same load; 100 at once then shows how fast and steady each one is <strong>at scale</strong>.
+            Providers are ranked only against others that started all of them, since a smaller load isn&apos;t comparable;
+            ones our test account&apos;s limit held back are named as not measured at that size yet. Cost is scaled to 100 sandboxes from the ones that ran. Rows
             built on far fewer runs than the rest say how many.
           </p>
 

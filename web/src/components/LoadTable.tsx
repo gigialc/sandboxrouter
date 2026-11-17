@@ -11,8 +11,9 @@ const per100 = (r: LoadRow) => (r.usd === undefined || !r.ok ? undefined : (r.us
 
 /**
  * Providers under load. Two sizes: 10 at once, which every account allows, so everyone faces the same load; and
- * 100 at once, which shows who can take that much on a standard plan. Providers that started them all are ranked
- * together; ones our account's plan held back are listed apart, since a smaller load isn't comparable.
+ * 100 at once, which shows how fast and steady each provider is at scale. Only providers measured at the full size are
+ * ranked; ones our test account's limit held back are named apart as not measured yet, since that limit is ours, not
+ * theirs (larger accounts get higher limits).
  */
 export function LoadTable() {
   const kinds = site.load;
@@ -23,7 +24,7 @@ export function LoadTable() {
   const k = jobs.find((x) => x.job === job) ?? jobs[0];
   if (!k) return null;
   const full = k.rows.filter((r) => r.ok === r.n).sort((a, b) => (a.p50Ms ?? Infinity) - (b.p50Ms ?? Infinity));
-  const partial = k.rows.filter((r) => r.ok < r.n).sort((a, b) => b.ok - a.ok);
+  const partial = k.rows.filter((r) => r.ok < r.n).sort((a, b) => a.name.localeCompare(b.name));
   const maxP99 = Math.max(...k.rows.map((r) => r.p99Ms ?? 0), 1);
   const chip = (on: boolean) => `rounded-full px-2.5 py-1 text-[12px] ${on ? "bg-accent text-bg" : "text-ink-2 hover:bg-accent-soft hover:text-ink"}`;
 
@@ -34,11 +35,6 @@ export function LoadTable() {
         <Link href={`/providers/${r.provider}`} className="text-ink group-hover:underline underline-offset-4 decoration-line-2">
           {r.name}
         </Link>
-        {r.ok < r.n ? (
-          <span className="ml-2 text-[11px] text-muted">
-            {r.ok} of {r.n} started{r.limited ? ", the rest over our account's limit" : ""}
-          </span>
-        ) : null}
       </td>
       <td className="py-3 pr-4 font-mono tnum text-ink">{secs(r.p50Ms)}</td>
       <td className="hidden py-3 pr-4 sm:table-cell">
@@ -62,7 +58,7 @@ export function LoadTable() {
             <span className="mr-2 text-muted">At once</span>
             {sizes.map((s) => (
               <button key={s} aria-pressed={s === n} onClick={() => setN(s)} className={chip(s === n)}>
-                {s === sizes[0] ? `${s}: same load for all` : `${s}: capacity`}
+                {s === sizes[0] ? `${s}` : `${s}: at scale`}
               </button>
             ))}
           </div>
@@ -95,20 +91,15 @@ export function LoadTable() {
         </thead>
         <tbody>
           {full.map((r, i) => row(r, i))}
-          {partial.length > 0 && (
-            <tr>
-              <td colSpan={6} className="pt-8 pb-2 text-[11px] uppercase tracking-[0.12em] text-muted">
-                Not all {k.n} started on our account: not ranked, since a smaller load isn&apos;t comparable
-              </td>
-            </tr>
-          )}
-          {partial.map((r) => row(r))}
         </tbody>
       </table>
-      <p className="mt-3 text-[12px] text-muted">
-        Limits depend on the account&apos;s plan: ours are standard ones, and a higher plan can usually start more at once. Cost per
-        100 is scaled from the sandboxes that ran.
-      </p>
+      {partial.length > 0 && (
+        <p className="mt-4 text-[13px] text-ink-2">
+          <span className="text-muted">Not measured at {k.n} yet:</span> {partial.map((r) => r.name).join(", ")}.{" "}
+          <span className="text-muted">Our test account&apos;s limit stopped these before {k.n}; that limit is ours, not the provider&apos;s, and larger accounts get higher ones.</span>
+        </p>
+      )}
+      <p className="mt-3 text-[12px] text-muted">Cost per 100 is scaled from the sandboxes that ran.</p>
     </div>
   );
 }

@@ -167,7 +167,7 @@ const data = {
   load: (() => {
     const bursts = loadBursts("results");
     // Two sizes: 10 at once, which every account allows, so everyone faces the same load; and 100 at once, which
-    // shows who can take that much on a standard plan.
+    // shows how fast and steady each provider is at scale.
     const jobs = [
       { job: "start", task: undefined, title: "Start only", blurb: "each answering one command" },
       { job: "rl", task: TASKS.python.version, title: "RL rollouts", blurb: "each running a short Python step, like a batch of RL rollouts or evals" },
