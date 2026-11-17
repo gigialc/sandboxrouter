@@ -75,20 +75,20 @@ export function Toolbar({ children, note }: { children: React.ReactNode; note?: 
 
 // ---- table ----
 
-export type Col = { label: string; className?: string };
+export type Col = { label: string; className?: string; left?: boolean };
 const hide = (c?: string) => c ?? "";
 
 /** The table frame: readable width, hairline rows, uppercase muted headers, numbers right-aligned. */
-export function ResultTable({ cols, children, ranked = true }: { cols: Col[]; children: React.ReactNode; ranked?: boolean }) {
+export function ResultTable({ cols, children, ranked = true, wide }: { cols: Col[]; children: React.ReactNode; ranked?: boolean; wide?: boolean }) {
   return (
-    <div className="mt-5 max-w-5xl">
+    <div className={`mt-5 ${wide ? "" : "max-w-5xl"}`}>
       <table className="w-full text-[14px]">
         <thead>
           <tr className="border-b border-line text-[11px] uppercase tracking-[0.12em] text-muted">
             {ranked ? <th className="w-9 py-2.5 pr-2 text-left font-normal">#</th> : null}
             <th className="py-2.5 pr-4 text-left font-normal">Provider</th>
             {cols.map((c) => (
-              <th key={c.label} className={`py-2.5 pl-4 text-right font-normal ${hide(c.className)}`}>
+              <th key={c.label} className={`whitespace-nowrap py-2.5 pl-4 font-normal ${c.left ? "text-left" : "text-right"} ${hide(c.className)}`}>
                 {c.label}
               </th>
             ))}
@@ -134,6 +134,15 @@ export function ResultRow({
 export function Num({ children, strong, className, title }: { children: React.ReactNode; strong?: boolean; className?: string; title?: string }) {
   return (
     <td title={title} className={`py-3 pl-4 text-right align-top font-mono tnum whitespace-nowrap ${strong ? "text-ink" : "text-ink-2"} ${hide(className)}`}>
+      {children}
+    </td>
+  );
+}
+
+/** A left-aligned text cell (a plan, a status, a list of features). */
+export function Txt({ children, className, title }: { children: React.ReactNode; className?: string; title?: string }) {
+  return (
+    <td title={title} className={`py-3 pl-4 align-top text-[13px] text-ink-2 ${hide(className)}`}>
       {children}
     </td>
   );

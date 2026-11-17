@@ -1,143 +1,103 @@
 "use client";
 
 import Link from "next/link";
-import { ProviderName } from "@/components/ProviderName";
 import { useState } from "react";
-import { CAPABILITY_LABEL, DEFAULT_SHAPE, fixedPrice, ranked, shapeLabel, site, usd } from "@/lib/site";
+import { BarNum, Footnote, Num, ResultRow, ResultTable, Segmented, Toolbar, Txt, barMax, perHour, time } from "@/components/results";
+import { CAPABILITY_LABEL, DEFAULT_SHAPE, fixedPrice, ranked, shapeLabel, site, usd, type Shape } from "@/lib/site";
 
 const NEEDS = ["pause", "gpu", "custom-image"] as const;
 
+/** Every provider's list price at a size, cheapest first, in the same table style as the benchmarks. */
 export function ProviderTable() {
-  const [shape, setShape] = useState(DEFAULT_SHAPE);
-  const [need, setNeed] = useState<string | null>(null);
-  const [tested, setTested] = useState(false);
+  const [shape, setShape] = useState<Shape>(DEFAULT_SHAPE);
+  const [need, setNeed] = useState<string>("any");
+  const [tested, setTested] = useState<"all" | "passed">("all");
   const speed = new Map(site.leaderboard.map((r) => [r.provider, r.medianCreateMs]));
-  const showSpeed = speed.size > 0;
-
   const has = (p: (typeof site.providers)[number], c: string) => p.capabilities.includes(c);
-  const rows = ranked(shape).filter((p) => (!need || has(p, need)) && (!tested || p.live.status === "passed"));
+  const rows = ranked(shape).filter((p) => (need === "any" || has(p, need)) && (tested === "all" || p.live.status === "passed"));
   const passing = site.providers.filter((p) => !p.local && p.live.status === "passed").length;
-  const cloud = rows.filter((r) => !r.local && !r.prices[shape].unfit);
-  const max = Math.max(0.0001, ...cloud.map((r) => r.prices[shape].usd));
-
-  const chip = (on: boolean) => `rounded-full px-2.5 py-1 text-[12px] tnum ${on ? "bg-accent text-bg" : "text-ink-2 hover:bg-accent-soft hover:text-ink"}`;
+  const max = barMax(rows.filter((r) => !r.local && !r.prices[shape].unfit).map((r) => r.prices[shape].usd));
 
   return (
     <div>
-      <div className="flex flex-wrap items-center gap-x-6 gap-y-3 border-y border-line py-3 text-[12px]">
-        <div className="flex flex-wrap items-center gap-1">
-          <span className="mr-2 text-muted">Size</span>
-          {site.shapes.map((s) => (
-            <button key={s} onClick={() => setShape(s)} className={chip(s === shape)}>
-              {shapeLabel(s)}
-            </button>
-          ))}
-        </div>
-        <div className="flex flex-wrap items-center gap-1">
-          <span className="mr-2 text-muted">Needs</span>
-          {NEEDS.map((n) => (
-            <button key={n} aria-pressed={need === n} onClick={() => setNeed(need === n ? null : n)} className={chip(need === n)}>
-              {CAPABILITY_LABEL[n]}
-            </button>
-          ))}
-        </div>
-        <button aria-pressed={tested} onClick={() => setTested(!tested)} className={`${chip(tested)} sm:ml-auto`}>
-          Passed on a real account ({passing})
-        </button>
-      </div>
+      <Toolbar>
+        <Segmented label="Size" options={site.shapes.map((s) => [s as Shape, shapeLabel(s as Shape)] as const)} value={shape} onChange={setShape} />
+        <Segmented
+          label="Needs"
+          options={[["any", "Anything"] as const, ...NEEDS.map((n) => [n, CAPABILITY_LABEL[n]] as const)]}
+          value={need}
+          onChange={setNeed}
+        />
+        <Segmented
+          label="Tested"
+          options={[
+            ["all", "All"],
+            ["passed", `Passed on a real account (${passing})`],
+          ]}
+          value={tested}
+          onChange={setTested}
+        />
+      </Toolbar>
 
-      <table className="w-full text-[14px]">
-        <thead>
-          <tr className="text-left text-[11px] uppercase tracking-[0.12em] text-muted">
-            <th className="py-3 pr-4 font-normal">Provider</th>
-            <th className="py-3 pr-4 font-normal">List price / hr</th>
-            <th className="hidden py-3 pr-4 font-normal sm:table-cell">Plan needed</th>
-            {showSpeed && <th className="hidden py-3 pr-4 font-normal sm:table-cell">Cold start</th>}
-            <th className="hidden py-3 pr-4 font-normal md:table-cell">Real account</th>
-            <th className="hidden py-3 font-normal lg:table-cell">Supports</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((p) => {
-            const price = p.prices[shape];
-            const fixed = fixedPrice(p, shape);
-            const pct = p.local || price.unfit ? 0 : Math.max(1.5, (price.usd / max) * 100);
-            return (
-              <tr key={p.id} className="group border-t border-line">
-                <td className="py-3 pr-4">
-                  <ProviderName id={p.id} name={p.name} />
-                  {p.local && <span className="ml-2 text-[11px] text-muted">opt-in</span>}
-                  {p.access && (
-                    <span className="ml-2 text-[11px] text-muted" title={p.access.note}>
-                      {p.access.status === "waitlist" ? "waitlist" : "no new accounts"}
-                    </span>
-                  )}
-                </td>
-                <td className="py-3 pr-4">
-                  {fixed ? (
-                    <div
-                      className="flex items-center gap-3"
-                      title={`${p.name}'s default image is ${fixed.size} whatever size you ask for; a bigger size needs a custom image (image.${p.id}). This is its price at ${fixed.size}.`}
-                    >
-                      <span className="w-20 font-mono tnum text-ink-2">{usd(fixed.usd)}</span>
-                      <span className="text-[12px] text-muted" title="The size of its default template; a bigger size needs your own template">
-                        default template {fixed.size}
-                      </span>
-                    </div>
-                  ) : price.unfit ? (
-                    <span className="text-muted">{price.unfit}</span>
-                  ) : (
-                    <div
-                      className="flex items-center gap-3"
-                      title={
-                        p.billing === "active-cpu"
-                          ? `${p.name}: CPU is billed only while busy; ${usd(price.usd)} is the price with every core busy`
-                          : `${p.name}: ${usd(price.usd)} per hour at list price`
-                      }
-                    >
-                      <span className="w-20 font-mono tnum text-ink">
-                        {p.billing === "active-cpu" && <span className="mr-1 text-[11px] text-muted">≤</span>}
-                        {usd(price.usd)}
-                      </span>
-                      <span className="hidden h-px w-28 bg-line sm:block">
-                        <span className="block h-px bg-bar" style={{ width: `${pct}%` }} />
-                      </span>
-                    </div>
-                  )}
-                </td>
-                <td className="hidden py-3 pr-4 text-ink-2 sm:table-cell" title={p.plan?.note}>
-                  {p.planLabel}
-                </td>
-                {showSpeed && (
-                  <td className="hidden py-3 pr-4 font-mono tnum text-ink-2 sm:table-cell">{speed.get(p.id) ? `${speed.get(p.id)} ms` : "—"}</td>
-                )}
-                <td className="hidden py-3 pr-4 md:table-cell">
-                  <span className={p.live.status === "passed" ? "text-ink" : "text-muted"}>
-                    {p.live.status === "passed" ? "passed" : p.live.status === "failing" ? "failed last run" : "not yet"}
-                  </span>
-                </td>
-                <td className="hidden py-3 text-ink-2 lg:table-cell">
-                  {p.capabilities.map((c) => CAPABILITY_LABEL[c] ?? c).join(" · ") || "—"}
-                </td>
-              </tr>
-            );
-          })}
-          {rows.length === 0 && (
-            <tr className="border-t border-line">
-              <td colSpan={6} className="py-8 text-center text-muted">
-                {tested ? "No provider with that has passed on a real account yet." : "No provider supports that yet."}
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-      <p className="mt-4 max-w-4xl text-[13px] leading-6 text-ink-2">
-        Cheapest first, open sign-ups before waitlisted ones; the router tries ones that passed on a real account first. ≤ = billed only while the CPU is busy. &ldquo;Not yet&rdquo; = tested
-        against mocks only.{" "}
+      <ResultTable
+        wide
+        cols={[
+          { label: "Per hour" },
+          { label: "Starts in", className: "hidden sm:table-cell" },
+          { label: "Plan", left: true, className: "hidden md:table-cell" },
+          { label: "Real account", left: true, className: "hidden md:table-cell" },
+          { label: "Supports", left: true, className: "hidden lg:table-cell" },
+        ]}
+      >
+        {rows.map((p, i) => {
+          const price = p.prices[shape];
+          const fixed = fixedPrice(p, shape);
+          const notes = [
+            p.local ? "opt-in, runs on your machine" : "",
+            p.access ? (p.access.status === "waitlist" ? "sign-up waitlisted" : "not taking new accounts") : "",
+            fixed ? `default template is ${fixed.size}` : "",
+            p.billing === "active-cpu" ? "CPU billed only while busy" : "",
+          ].filter(Boolean);
+          return (
+            <ResultRow key={p.id} rank={p.local || price.unfit ? 0 : i + 1} id={p.id} name={p.name} notes={notes} dim={!!p.access}>
+              {fixed ? (
+                <Num title={`${p.name}'s default image is ${fixed.size} whatever size you ask for; this is its price at that size.`}>{perHour(fixed.usd)}</Num>
+              ) : price.unfit ? (
+                <Txt className="text-right text-muted">{price.unfit}</Txt>
+              ) : p.local ? (
+                <Num>$0</Num>
+              ) : (
+                <BarNum
+                  value={price.usd}
+                  max={max}
+                  title={p.billing === "active-cpu" ? `${p.name}: ${usd(price.usd)} per hour with every core busy; less when idle` : `${p.name}: ${usd(price.usd)} per hour at list price`}
+                >
+                  {p.billing === "active-cpu" ? "≤ " : ""}
+                  {perHour(price.usd)}
+                </BarNum>
+              )}
+              <Num className="hidden sm:table-cell">{speed.get(p.id) ? time(speed.get(p.id)) : "—"}</Num>
+              <Txt className="hidden md:table-cell" title={p.plan?.note}>
+                {p.planLabel}
+              </Txt>
+              <Txt className="hidden md:table-cell">
+                <span className={p.live.status === "passed" ? "text-ink" : "text-muted"}>
+                  {p.live.status === "passed" ? "passed" : p.live.status === "failing" ? "failed last run" : "not yet"}
+                </span>
+              </Txt>
+              <Txt className="hidden lg:table-cell">{p.capabilities.map((c) => CAPABILITY_LABEL[c] ?? c).join(" · ") || "—"}</Txt>
+            </ResultRow>
+          );
+        })}
+      </ResultTable>
+      {rows.length === 0 ? <p className="mt-6 text-[14px] text-muted">No provider matches that yet.</p> : null}
+      <Footnote>
+        Cheapest first, open sign-ups before waitlisted ones; the router tries ones that passed on a real account first. ≤ means CPU is
+        billed only while busy, so an idle sandbox costs less. &ldquo;Not yet&rdquo; means tested against mocks only.{" "}
         <Link href="/docs#price-table" className="underline decoration-line-2 underline-offset-2 hover:text-ink">
           How to read this table
         </Link>
-      </p>
+      </Footnote>
     </div>
   );
 }
