@@ -1,4 +1,4 @@
-import { DEFAULT_MEMORY_GB, DEFAULT_VCPU } from "../catalog.js";
+import { vercelSandboxSize } from "../catalog.js";
 import { ProviderError, type ExecOptions, type ExecResult, type Provider, type ProviderSandbox, type SandboxSpec } from "../types.js";
 import { DEFAULT_EXEC_TIMEOUT_S, killedByTimeout, optionalImport, timeoutError, toBytes, wrapCommand } from "../util.js";
 
@@ -26,7 +26,7 @@ export class VercelProvider implements Provider {
 
   async create(spec: SandboxSpec): Promise<ProviderSandbox> {
     const { Sandbox } = await optionalImport<VercelModule>("@vercel/sandbox", "vercel");
-    const vcpus = Math.min(8, Math.max(spec.vcpu ?? DEFAULT_VCPU, Math.ceil((spec.memoryGb ?? DEFAULT_MEMORY_GB) / 2)));
+    const { vcpu: vcpus } = vercelSandboxSize(spec);
     const sbx = await Sandbox.create({
       ...this.creds(),
       runtime: spec.image?.vercel ?? "node22",

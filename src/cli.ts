@@ -2,7 +2,7 @@
 import { parseArgs } from "node:util";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { platform, arch } from "node:os";
-import { ACCOUNT_ERROR, bench, benchMarkdown, NETWORK_ERROR } from "./bench.js";
+import { bench, benchMarkdown, NETWORK_ERROR } from "./bench.js";
 import { TASKS, type TaskKind } from "./task.js";
 import { submitReport } from "./submit.js";
 import { burst, spreadBurst } from "./burst.js";
@@ -257,7 +257,7 @@ async function main() {
     const q = router.quote(spec, route);
     if (values.json) return console.log(JSON.stringify({ ...q, candidates: undefined }, null, 2));
     const rules = [
-      q.minimumSeconds ? `at least ${q.minimumSeconds} s billed` : "",
+      q.minimumSeconds ? `at least ${q.minimumSeconds} s billed${q.minimumCovers === "memory" ? " for memory" : ""}` : "",
       q.billedInSecondsOf ? `billed in steps of ${q.billedInSecondsOf} s` : "",
       q.perSandboxUsd ? `$${q.perSandboxUsd} per sandbox` : "",
     ].filter(Boolean);
@@ -266,6 +266,7 @@ async function main() {
     console.log(`this run  ${q.runSeconds} s ≈ $${q.estimatedUsd.toFixed(6)} ($${q.runHourlyUsd.toFixed(4)}/hr)`);
     const extra = q.conditionalStartFee;
     if (extra) console.log(`Excludes $${extra.minUsd}–$${extra.maxUsd} per start above your allowance. ${extra.source}`);
+    if (q.excludesGpuCost) console.log("The estimate excludes GPU charges. Check your provider's GPU rates.");
     const next = q.candidates.filter((c) => !c.skip && c.provider !== q.provider).slice(0, 3).map((c) => c.provider);
     if (next.length) console.log(`fallback  ${next.join(" → ")}`);
     return;
@@ -288,7 +289,8 @@ async function main() {
       const run = spec.expectedSeconds ? `  ≈ $${(rankUsd(c, hours) * hours).toFixed(6)} for ${Math.round(hours * 3600)} s` : "";
       const extra = c.conditionalStartFee;
       const feeNote = extra ? `excludes $${extra.minUsd}–$${extra.maxUsd} per start above allowance` : "";
-      const cols = [`$${c.estimatedHourlyUsd.toFixed(4)}/hr${list}${fee}${run}`, size, speed, tested, feeNote].filter(Boolean).join("  ");
+      const gpuNote = c.excludesGpuCost ? "excludes GPU charges" : "";
+      const cols = [`$${c.estimatedHourlyUsd.toFixed(4)}/hr${list}${fee}${run}`, size, speed, tested, feeNote, gpuNote].filter(Boolean).join("  ");
       console.log(`${mark} ${c.provider.padEnd(11)} ${cols}${c.skip ? `  (skipped: ${c.skip})` : ""}`);
     }
     return;
@@ -305,7 +307,7 @@ async function main() {
     };
     if (!values.keep) process.once("SIGINT", stop);
     for (const a of sbx.attempts.filter((a) => !a.ok)) console.error(`! ${a.provider} failed, fell back: ${a.error}`);
-    console.error(`> ${sbx.id} on ${sbx.provider} (~$${sbx.estimatedHourlyUsd}/hr, started in ${sbx.attempts.at(-1)?.ms} ms)`);
+    console.error(`> ${sbx.id} on ${sbx.provider} (~$${sbx.estimatedHourlyUsd}/hr${spec.gpu ? " excluding GPU charges" : ""}, started in ${sbx.attempts.at(-1)?.ms} ms)`);
     try {
       const r = await sbx.exec(command, {
         timeoutSeconds: 600,
@@ -323,8 +325,12 @@ async function main() {
   if (cmd === "check") {
     const ids = values.all ? router.registered().filter((id) => router.isConfigured(id)) : providers;
     if (!ids?.length) {
-      if (values.all) return console.log("No providers configured: set at least one provider's keys (sandboxrouter providers lists them).");
-      throw new RouterError("usage: sandboxrouter check --provider <id>[,<id>...] | --all");
+      if (!values.all) throw new RouterError("usage: sandboxrouter check --provider <id>[,<id>...] | --all");
+      console.error("No providers configured: set at least one provider's keys (sandboxrouter providers lists them).");
+      if (values.out) writeFileSync(values.out, "[]\n");
+      if (values.json) console.log("[]");
+      process.exitCode = 1;
+      return;
     }
     const version = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8")).version;
     const saveDir = values.save ? (rest[0] ?? "results/conformance") : undefined;
@@ -357,14 +363,14 @@ async function main() {
         writeFileSync(`${saveDir}/${p}.json`, JSON.stringify(saved, null, 2) + "\n");
       }
     }
+    const ran = reports.filter((r) => !r.inconclusive);
     if (values.out) writeFileSync(values.out, JSON.stringify(reports, null, 2) + "\n");
     if (values.json) console.log(JSON.stringify(reports, null, 2));
     else {
-      const unpaid = reports.filter((r) => r.inconclusive).length;
-      const ran = reports.length - unpaid;
-      console.log(`\n${reports.filter((r) => r.ok).length}/${ran} passed${unpaid ? `; ${unpaid} not run (the account can't pay, or the provider's package isn't installed)` : ""}`);
+      const skipped = reports.length - ran.length;
+      console.log(`\n${ran.filter((r) => r.ok).length}/${ran.length} passed${skipped ? `; ${skipped} not run (the account can't pay, or the provider's package isn't installed)` : ""}`);
     }
-    if (reports.some((r) => !r.ok && !r.inconclusive)) process.exitCode = 1;
+    if (!ran.length || ran.some((r) => !r.ok)) process.exitCode = 1;
     return;
   }
 
@@ -395,22 +401,27 @@ async function main() {
 
   if (cmd === "agentbench") {
     const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) return console.error("agentbench needs GEMINI_API_KEY (it stays on this machine; only shell commands reach the sandbox)");
+    if (!apiKey) {
+      console.error("agentbench needs GEMINI_API_KEY (it stays on this machine; only shell commands reach the sandbox)");
+      if (values.json) console.log("[]");
+      process.exitCode = 1;
+      return;
+    }
     const model = values.model ?? "gemini-3.5-flash";
     const ids = providers ?? router.registered().filter((id) => router.isConfigured(id));
+    if (!ids.length) {
+      console.error("agentbench has no configured providers (sandboxrouter providers lists them).");
+      if (values.json) console.log("[]");
+      process.exitCode = 1;
+      return;
+    }
     const rows = await agentBench({ router, providers: ids, runs: num(values.runs) ?? 5, apiKey, model, parallel: num(values.parallel), onProgress: (m) => console.error(m) });
     if (values.json) return console.log(JSON.stringify(rows, null, 2));
     console.log(`\nsandboxrouter agentbench: ${model}, ${num(values.runs) ?? 5} runs each\n`);
     console.log("| Provider | Done right | Wall | Waiting on model | Sandbox CPU | Turns | Sandbox cost |\n|---|---|---|---|---|---|---|");
     const s = (v?: number) => (v === undefined ? "n/a" : `${(v / 1000).toFixed(1)} s`);
-    for (const r of rows) console.log(`| ${r.provider} | ${r.ok}/${r.runs} | ${s(r.medianWallMs)} | ${s(r.medianModelMs)} | ${s(r.medianCpuMs)} | ${r.medianTurns ?? "n/a"} | ${r.medianUsd === undefined ? "n/a" : `$${r.medianUsd.toFixed(6)}`} |`);
+    for (const r of rows) console.log(`| ${r.provider} | ${r.ok}/${r.requested ?? r.runs}${r.limited ? ` (${r.limited} refused)` : ""} | ${s(r.medianWallMs)} | ${s(r.medianModelMs)} | ${s(r.medianCpuMs)} | ${r.medianTurns ?? "n/a"} | ${r.medianUsd === undefined ? "n/a" : `$${r.medianUsd.toFixed(6)}`} |`);
     if (values.share || values.submit) {
-      const started = rows.filter((r) => r.medianWallMs !== undefined);
-      if (rows.length - started.length >= 3) {
-        console.error(`\nnot writing a report: ${rows.length - started.length} providers never started a session, which looks like this machine lost its connection. Run it again.`);
-        process.exitCode = 1;
-        return;
-      }
       const version = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8")).version;
       const report = {
         tool: "sandboxrouter-agent",
@@ -423,7 +434,7 @@ async function main() {
         runs: num(values.runs) ?? 5,
         node: process.version,
         platform: `${platform()}-${arch()}`,
-        rows: started.filter((r) => benchmarksPublishable(r.provider)),
+        rows: rows.filter((r) => benchmarksPublishable(r.provider)),
       };
       const file = values.out ?? `sandboxrouter-agent-${report.date.slice(0, 10)}-${Math.random().toString(36).slice(2, 8)}.json`;
       writeFileSync(file, JSON.stringify(report, null, 2) + "\n");
@@ -459,14 +470,12 @@ async function main() {
     const rows = await burst({ router, providers: ids, n, task: job, parallel: num(values.parallel), onProgress: (m) => console.error(m) });
     if (values.json) return console.log(JSON.stringify(rows, null, 2));
     console.log(`\nsandboxrouter burst: ${n} at once${job ? `, each running the ${job} job` : ""}\n`);
-    console.log("| Provider | Started | p50 | p95 | p99 | All done | Burst cost |\n|---|---|---|---|---|---|---|");
+    console.log(`| Provider | ${job ? "Completed jobs" : "Ready"} | p50 ready | p95 ready | p99 ready | Last outcome | Est. cost of successes |\n|---|---|---|---|---|---|---|`);
     for (const r of rows) {
       const ms = (v?: number) => (v === undefined ? "n/a" : `${v} ms`);
       console.log(`| ${r.provider} | ${r.ok}/${r.n}${r.limited ? ` (${r.limited} limited)` : ""} | ${ms(r.p50Ms)} | ${ms(r.p95Ms)} | ${ms(r.p99Ms)} | ${(r.wallMs / 1000).toFixed(1)} s | ${r.usd === undefined ? "n/a" : `$${r.usd.toFixed(4)}`} |`);
     }
     if (values.share || values.submit) {
-      // As with bench: nothing from a run where this machine lost its connection, and no provider that never answered.
-      const shared = rows.filter((r) => r.ok > 0 || r.limited > 0);
       const version = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8")).version;
       const report = {
         tool: "sandboxrouter-burst",
@@ -478,13 +487,8 @@ async function main() {
         ...(job ? { task: TASKS[job].version } : {}),
         node: process.version,
         platform: `${platform()}-${arch()}`,
-        rows: shared.filter((r) => benchmarksPublishable(r.provider)),
+        rows: rows.filter((r) => benchmarksPublishable(r.provider)),
       };
-      if (rows.length - shared.length >= 3) {
-        console.error(`\nnot writing a report: ${rows.length - shared.length} providers started nothing, which looks like this machine lost its connection. Run it again.`);
-        process.exitCode = 1;
-        return;
-      }
       const file = values.out ?? `sandboxrouter-burst-${report.date.slice(0, 10)}-${Math.random().toString(36).slice(2, 8)}.json`;
       writeFileSync(file, JSON.stringify(report, null, 2) + "\n");
       if (values.submit) {
@@ -524,11 +528,7 @@ async function main() {
       process.exitCode = 1;
     } else if (values.share || values.submit) {
       const version = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8")).version;
-      // A provider whose every run failed on the submitter's own account (bad key, no credit, a limit hit) says
-      // nothing about the provider: leave it out of what's shared, and say so.
-      const account = rows.filter((r) => r.failures === r.runs && r.lastError && ACCOUNT_ERROR.test(r.lastError));
-      if (account.length) console.error(`\nleft out of the shared report, every run failed on your account: ${account.map((r) => r.provider).join(", ")}`);
-      const report = makeReport(rows.filter((r) => !account.includes(r)), { version, runs: rows[0].runs, spec: { ...spec, vcpu: spec.vcpu ?? DEFAULT_VCPU, memoryGb: spec.memoryGb ?? DEFAULT_MEMORY_GB }, label: values.label, by, task: values.task ? TASKS[job].version : undefined });
+      const report = makeReport(rows, { version, runs: rows[0].runs, spec: { ...spec, vcpu: spec.vcpu ?? DEFAULT_VCPU, memoryGb: spec.memoryGb ?? DEFAULT_MEMORY_GB }, label: values.label, by, task: values.task ? TASKS[job].version : undefined });
       const left = rows.filter((r) => !benchmarksPublishable(r.provider)).map((r) => r.provider);
       if (left.length) console.log(`\nleft out of the shared report: ${left.join(", ")} (their terms don't allow publishing benchmarks)`);
       const file = values.out ?? `sandboxrouter-bench-${report.date.slice(0, 10)}-${Math.random().toString(36).slice(2, 8)}.json`;

@@ -103,7 +103,8 @@ export function TaskTable() {
               mode === "fresh" && r.minimumSeconds > 1 ? `bills at least ${r.minimumSeconds} s` : "",
               mode === "fresh" && r.perSandboxUsd ? `+${money(r.perSandboxUsd)} per sandbox` : "",
               r.activeCpu ? (r.cpuMs !== undefined ? "billed for CPU used" : "priced at full CPU") : "",
-              r.successRate < 1 ? `${Math.round(r.successRate * 100)}% of runs worked` : "",
+              `${r.ok}/${r.runs} workloads verified`,
+              r.limited ? `${r.limited} reported limit refusals` : "",
               r.runs < mostRuns / 2 ? `only ${r.runs} runs` : "",
             ].filter(Boolean)}
           >
@@ -114,11 +115,22 @@ export function TaskTable() {
         ))}
       </ResultTable>
       <Footnote>
-        Ranked per successful run: a provider whose runs sometimes failed has its cost and time divided by its success rate.
+        Rankings divide estimated cost and time by the share of requests that completed. This is a retry estimate.
         {sort === "value" ? " Value is cost times time, each against the median: 1.0 is the median, lower is better." : ""}
         {mode === "fresh" && rows.some((r) => r.provider === "boat") && <> <ConditionalStartFeeNote id="boat" /></>}
-        {k.couldNot.length ? ` Couldn't run this job in its default setup: ${k.couldNot.join(", ")}.` : ""}
       </Footnote>
+      {k.outcomes.some((r) => r.completed < r.requested) && (
+        <ul className="mt-3 list-disc space-y-1 pl-5 text-[13px] text-muted">
+          {k.outcomes.filter((r) => r.completed < r.requested).map((r) => (
+            <li key={r.provider}>
+              {r.name} verified {r.completed}/{r.requested}.
+              {r.limited > 0 && ` ${r.limited} reported limit refusals.`}
+              {r.failures > 0 && ` ${r.failures} other start or first-command failures.`}
+              {r.taskFailures > 0 && ` ${r.taskFailures} workload failures.`}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

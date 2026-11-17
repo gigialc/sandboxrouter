@@ -36,13 +36,26 @@ export interface TaskPhaseDef {
   timeoutSeconds?: number;
 }
 
+const ZERO_256_SHA256 = "a6d72ac7690f53be6ae46ba88506bd97302a093f7108472bd9efc3cefda06484";
+const ZERO_512_SHA256 = "9acca8e8c22201155389f65abbf6bc9723edc7384ead80503839f49dcc56d767";
+const hashZeros = (count: number, hash: string) =>
+  `hash=$(head -c ${count} /dev/zero | sha256sum) && [ "${'${hash%% *}'}" = "${hash}" ]`;
+
 const HASH_DISK: TaskPhaseDef[] = [
   // One core: hash 512 MB of zeros.
-  { id: "cpu", label: "1 core", cmd: "head -c 536870912 /dev/zero | sha256sum > /dev/null" },
+  { id: "cpu", label: "1 core", cmd: hashZeros(536870912, ZERO_512_SHA256) },
   // Two cores at once (bench asks for 2 vCPU), 256 MB each: shows whether the second vCPU is real.
-  { id: "cores", label: "2 cores", cmd: "for i in 1 2; do (head -c 268435456 /dev/zero | sha256sum > /dev/null) & done; wait" },
+  {
+    id: "cores",
+    label: "2 cores",
+    cmd: `(${hashZeros(268435456, ZERO_256_SHA256)}) & left=$!; (${hashZeros(268435456, ZERO_256_SHA256)}) & right=$!; wait "$left"; l=$?; wait "$right"; r=$?; [ "$l" = 0 ] && [ "$r" = 0 ]`,
+  },
   // Write 256 MB and flush it to disk, then delete it.
-  { id: "disk", label: "disk", cmd: "dd if=/dev/zero of=/tmp/sr-task bs=1048576 count=256 conv=fsync 2> /dev/null; rm -f /tmp/sr-task" },
+  {
+    id: "disk",
+    label: "disk",
+    cmd: 'f=$(mktemp /tmp/sr-task.XXXXXX) || exit $?; dd if=/dev/zero of="$f" bs=1048576 count=256 conv=fsync 2> /dev/null && [ "$(wc -c < "$f")" -eq 268435456 ]; rc=$?; rm -f "$f" || exit $?; exit "$rc"',
+  },
 ];
 
 // 200,000 small records through JSON, a regex and a sort: the kind of thing a code-interpreter call does.
@@ -53,7 +66,7 @@ const PYTHON = [
   "back = json.loads(json.dumps(rows))",
   "hits = sum(1 for r in back if re.search('abc', r['name']))",
   "top = sorted(back, key=lambda r: (r['name'], r['v']))[:10]",
-  "print(hits, top[0]['id'])",
+  "if (hits, top[0]['id']) != (2837, 68550): raise SystemExit('Python output check failed')",
 ].join("\n");
 
 // The Node.js 22.11.0 Linux release (53 MB), from nodejs.org's CDN: a real download, like installing a toolchain.
@@ -68,9 +81,11 @@ const FETCH = [
   'case "$(uname -m)" in aarch64|arm64) A=arm64 ;; *) A=x64 ;; esac',
   `get() { if command -v curl > /dev/null; then curl -sSfL -o "$2" "$1"; elif command -v wget > /dev/null; then wget -q -O "$2" "$1"; else python3 -c "import shutil, sys, urllib.request; shutil.copyfileobj(urllib.request.urlopen(sys.argv[1]), open(sys.argv[2], 'wb'))" "$1" "$2"; fi; }`,
   "rm -rf /tmp/sr-node /tmp/sr-repo && mkdir -p /tmp/sr-node /tmp/sr-repo",
-  `get "${NODE_BASE}-$A.tar.gz" /tmp/sr-node.tgz && tar xzf /tmp/sr-node.tgz -C /tmp/sr-node --strip-components=1`,
-  `get "${REPO_TARBALL}" /tmp/sr-repo.tgz && tar xzf /tmp/sr-repo.tgz -C /tmp/sr-repo --strip-components=1`,
-  "set +e",
+  `get "${NODE_BASE}-$A.tar.gz" /tmp/sr-node.tgz || exit $?`,
+  "tar xzf /tmp/sr-node.tgz -C /tmp/sr-node --strip-components=1",
+  `get "${REPO_TARBALL}" /tmp/sr-repo.tgz || exit $?`,
+  "tar xzf /tmp/sr-repo.tgz -C /tmp/sr-repo --strip-components=1",
+  "test -x /tmp/sr-node/bin/node && test -f /tmp/sr-repo/package-lock.json",
 ].join("\n");
 const IN_REPO = "cd /tmp/sr-repo && PATH=/tmp/sr-node/bin:$PATH";
 
@@ -79,11 +94,11 @@ const TOOL = "import json, hashlib; d = [{'i': i, 'h': hashlib.sha256(str(i).enc
 
 /** `cpuUtilization`: the hint the job's sandboxes start with (the agent loop is mostly idle), which Modal reserves and pricing uses. */
 export const TASKS: Record<TaskKind, { version: string; repeat: number; phases: TaskPhaseDef[]; cpuUtilization?: number }> = {
-  short: { version: "v1", repeat: 1, phases: HASH_DISK },
-  long: { version: "v1-long", repeat: 40, phases: HASH_DISK },
-  python: { version: "python-v1", repeat: 1, phases: [{ id: "python", label: "Python", cmd: `python3 -c "${PYTHON}"` }] },
+  short: { version: "v2", repeat: 1, phases: HASH_DISK },
+  long: { version: "v2-long", repeat: 40, phases: HASH_DISK },
+  python: { version: "python-v2", repeat: 1, phases: [{ id: "python", label: "Python", cmd: `python3 -c "${PYTHON}"` }] },
   repo: {
-    version: "repo-v1",
+    version: "repo-v2",
     repeat: 1,
     phases: [
       { id: "fetch", label: "fetch Node and the repo", cmd: FETCH, timeoutSeconds: 600 },
@@ -92,13 +107,13 @@ export const TASKS: Record<TaskKind, { version: string; repeat: number; phases: 
     ],
   },
   agent: {
-    version: "agent-v1",
+    version: "agent-v2",
     repeat: 1,
     cpuUtilization: 0.1,
-    phases: [{ id: "agent", label: "10 turns", cmd: `n=0; while [ $n -lt 10 ]; do sleep 6; python3 -c "${TOOL}" > /dev/null; n=$((n+1)); done` }],
+    phases: [{ id: "agent", label: "10 turns", cmd: `n=0; while [ $n -lt 10 ]; do sleep 6 && python3 -c "${TOOL}" > /dev/null || exit $?; n=$((n+1)); done` }],
   },
   download: {
-    version: "download-v1",
+    version: "download-v2",
     repeat: 1,
     phases: [
       {
@@ -120,14 +135,21 @@ export const TASK_PHASES = TASKS.short.phases;
 /** Milliseconds per phase, by phase id. */
 export type PhaseMs = Record<string, number>;
 
-/** The task a report's `task` version names, if it's one this release knows. */
+const LEGACY_TASKS: Record<string, TaskKind> = {
+  v1: "short", "v1-long": "long", "python-v1": "python", "repo-v1": "repo", "agent-v1": "agent", "download-v1": "download",
+};
+
+export const isCurrentTask = (version: unknown) => Object.values(TASKS).some((t) => t.version === version);
+
+/** Legacy reports keep their original phase schema for validation and archival. */
 export function taskByVersion(version: unknown): (typeof TASKS)[TaskKind] | undefined {
-  return Object.values(TASKS).find((t) => t.version === version);
+  return Object.values(TASKS).find((t) => t.version === version) ??
+    (typeof version === "string" && Object.hasOwn(LEGACY_TASKS, version) ? TASKS[LEGACY_TASKS[version]] : undefined);
 }
 
 /** A phase's command, run `repeat` times in a row in one shell (POSIX: no seq, no brace ranges). */
 export function phaseCommand(cmd: string, repeat: number): string {
-  return repeat <= 1 ? cmd : `n=0; while [ $n -lt ${repeat} ]; do ${cmd}; n=$((n+1)); done`;
+  return repeat <= 1 ? cmd : `n=0; while [ $n -lt ${repeat} ]; do (${cmd}) || exit $?; n=$((n+1)); done`;
 }
 
 /** What one run of a task measured: milliseconds per phase, and the CPU time it used across all vCPUs, if the sandbox shows it. */
@@ -143,7 +165,7 @@ export interface TaskRun {
 const MARK = "SRCPU";
 // Every "cpu" line (the total, then one per core), joined with ";" so the reading stays on one output line.
 const STAT = `grep '^cpu' /proc/stat 2> /dev/null | tr '\\n' ';'`;
-const withCpu = (cmd: string) => `a=$(${STAT}); ${cmd}; rc=$?; b=$(${STAT}); echo "${MARK}|$a|$b"; exit $rc`;
+const withCpu = (cmd: string) => `a=$(${STAT}); (${cmd}); rc=$?; b=$(${STAT}); echo "${MARK}|$a|$b"; exit $rc`;
 
 /** Busy ticks on one /proc/stat cpu line: user, nice, system, irq and softirq (not idle, iowait or steal). */
 const lineTicks = (line: string) => {
@@ -179,7 +201,7 @@ export async function runTask(box: Pick<ProviderSandbox, "exec">, kind: TaskKind
   const rtt: number[] = [];
   for (let i = 0; i < 3; i++) {
     const t = performance.now();
-    await box.exec("true");
+    if ((await box.exec("true")).exitCode !== 0) throw new Error("task round-trip probe failed");
     rtt.push(performance.now() - t);
   }
   const overhead = rtt.sort((a, b) => a - b)[1];

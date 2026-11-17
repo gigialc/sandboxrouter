@@ -1,4 +1,4 @@
-import { accessLabel, billedCpuShare, billingRules, CATALOG, cpuHourlyAtFull, DEFAULT_MEMORY_GB, DEFAULT_VCPU, fixedSize, hourlyCost, info, unfit, type ProviderInfo } from "./catalog.js";
+import { accessLabel, billedCpuShare, billingRules, CATALOG, cpuHourlyAtFull, DEFAULT_MEMORY_GB, DEFAULT_VCPU, fixedSize, hourlyCost, info, unfit, vercelSandboxSize, type ProviderInfo } from "./catalog.js";
 import {
   type ComputerRoute,
   RoutedComputer,
@@ -109,6 +109,8 @@ export interface Candidate {
   perSandboxUsd?: number;
   /** Account-specific start fees that the estimate and price cap exclude. */
   conditionalStartFee?: ProviderInfo["pricing"]["conditionalStartFee"];
+  /** The compute estimate omits GPU charges when the request includes a GPU. */
+  excludesGpuCost?: true;
   /** Why this provider won't be tried, if it won't. */
   skip?: string;
   /** Set while the provider is at the back of the line after a limit or repeated failures (see `cooldown`). */
@@ -130,12 +132,16 @@ export interface Quote {
   estimatedUsd: number;
   /** The provider bills at least this many seconds per sandbox. */
   minimumSeconds?: number;
+  /** Which components are subject to the minimum. */
+  minimumCovers?: "all" | "memory";
   /** The provider bills in whole steps of this many seconds. */
   billedInSecondsOf?: number;
   /** A fixed charge per sandbox started, included in `estimatedUsd`. */
   perSandboxUsd?: number;
   /** Account-specific start fees that the estimate excludes. */
   conditionalStartFee?: Candidate["conditionalStartFee"];
+  /** The compute estimate omits GPU charges when the request includes a GPU. */
+  excludesGpuCost?: true;
   /** The whole plan: every provider, in the order a create would try them, with why any are skipped. */
   candidates: Candidate[];
 }
@@ -351,6 +357,7 @@ export class Router {
       if (fee) c.perSandboxUsd = fee;
       const conditionalStartFee = info(id).pricing.conditionalStartFee;
       if (conditionalStartFee) c.conditionalStartFee = { ...conditionalStartFee };
+      if (spec.gpu) c.excludesGpuCost = true;
       if (!p) c.skip = "no adapter registered";
       else {
         const gated = accessLabel(id);
@@ -360,8 +367,11 @@ export class Router {
           (this.requireVerified && !c.verified ? "not tested (this router only uses providers that passed the real-account check)" : undefined);
       }
       if (!c.skip && route.maxHourlyUsd !== undefined) {
-        const rate = rankUsd(c, runHours(spec));
-        if (rate > route.maxHourlyUsd) c.skip = `${OVER_CAP}: ${usdPerHour(rate)} for this run, cap ${usdPerHour(route.maxHourlyUsd)}`;
+        if (c.excludesGpuCost) c.skip = "cannot verify maxHourlyUsd because GPU charges are not modelled";
+        else {
+          const rate = rankUsd(c, runHours(spec));
+          if (rate > route.maxHourlyUsd) c.skip = `${OVER_CAP}: ${usdPerHour(rate)} for this run, cap ${usdPerHour(route.maxHourlyUsd)}`;
+        }
       }
       return c;
     });
@@ -485,10 +495,11 @@ export class Router {
       runSeconds: Math.round(hours * 3600),
       runHourlyUsd,
       estimatedUsd: runHourlyUsd * hours,
-      ...(rules.minSeconds > 1 ? { minimumSeconds: rules.minSeconds } : {}),
+      ...(rules.minSeconds > 1 ? { minimumSeconds: rules.minSeconds, minimumCovers: rules.minimumCovers } : {}),
       ...(rules.incrementSeconds > 1 ? { billedInSecondsOf: rules.incrementSeconds } : {}),
       ...(first.perSandboxUsd ? { perSandboxUsd: first.perSandboxUsd } : {}),
       ...(first.conditionalStartFee ? { conditionalStartFee: first.conditionalStartFee } : {}),
+      ...(first.excludesGpuCost ? { excludesGpuCost: true } : {}),
       candidates,
     };
   }
@@ -808,7 +819,8 @@ export const DEFAULT_CREATE_DEADLINE_S = 240;
 export const EXEC_GRACE_S = 30;
 
 
-/** The size a provider gives for a spec: its fixed default image size, else what was asked for. */
+/** The size a provider gives for a spec, including fixed images and Vercel allocations. */
 export function sizeOf(id: ProviderId, spec: SandboxSpec = {}): Size {
+  if (id === "vercel") return vercelSandboxSize(spec);
   return fixedSize(id, spec) ?? { vcpu: spec.vcpu ?? DEFAULT_VCPU, memoryGb: spec.memoryGb ?? DEFAULT_MEMORY_GB };
 }

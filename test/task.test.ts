@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { taskTable, type BenchReport } from "../src/leaderboard.js";
+import { spawnSync } from "node:child_process";
+import { agentTable, makeReport, taskOutcomes, taskTable, type BenchReport } from "../src/leaderboard.js";
+import { AGENT_TASK_VERSION, AGENT_VERIFY } from "../src/agent-bench.js";
 import { validateResult } from "../src/results.js";
 import { bench } from "../src/bench.js";
 import { rankUsd, Router } from "../src/router.js";
@@ -19,7 +21,11 @@ const report = (over: Partial<BenchReport> = {}, row: Record<string, unknown> = 
   task: TASK_VERSION,
   node: "v22.0.0",
   platform: "darwin-arm64",
-  rows: [{ provider: "maritime", runs: 3, failures: 0, medianCreateMs: 1000, medianExecMs: 100, hourlyUsd: 0.022, medianTaskMs: 2000, taskPhasesMs: phases, ...row }],
+  rows: [{
+    provider: "maritime", runs: 3, failures: 0, size: { vcpu: 2, memoryGb: 4 }, taskOk: 3,
+    medianCreateMs: 1000, medianTaskReadyMs: 1000, medianExecMs: 100, hourlyUsd: 0.022, medianTaskMs: 2000, taskPhasesMs: phases,
+    ...row,
+  }],
   ...over,
 });
 
@@ -122,12 +128,22 @@ describe("runTask", () => {
     const ran: string[] = [];
     await runTask(box(ran), "long");
     TASK_PHASES.forEach((p, i) => expect(ran[3 + i]).toContain(phaseCommand(p.cmd, 40)));
-    expect(phaseCommand("x", 40)).toBe("n=0; while [ $n -lt 40 ]; do x; n=$((n+1)); done");
+    expect(spawnSync("/bin/sh", ["-c", phaseCommand("exit 7", 40)]).status).toBe(7);
     expect(phaseCommand("x", 1)).toBe("x");
   });
   it("throws when a phase fails", async () => {
     const failing = { exec: async (cmd: string): Promise<ExecResult> => ({ exitCode: cmd === "true" ? 0 : 127, stdout: "", stderr: "sha256sum: not found", durationMs: 1 }) };
     await expect(runTask(failing)).rejects.toThrow(/task phase cpu exited 127/);
+  });
+  it("rejects failed disk writes, background hashes and simulated-agent tool calls", () => {
+    const failures = [
+      ['mktemp() { echo /dev/null; }; dd() { return 1; }; rm() { return 0; }; ', TASKS.short.phases[2].cmd],
+      ['head() { return 1; }; sha256sum() { return 1; }; ', TASKS.short.phases[1].cmd],
+      ['sleep() { return 0; }; python3() { return 127; }; ', TASKS.agent.phases[0].cmd],
+    ];
+    for (const [prefix, phase] of failures) {
+      expect(spawnSync("/bin/sh", ["-c", prefix + phase]).status).toBeGreaterThan(0);
+    }
   });
   it("counts busy ticks only: not idle, iowait or steal", () => {
     expect(busyMs("cpu 10 1 5 100 50 2 3 7", "cpu 20 1 6 900 90 2 4 70")).toBe((10 + 1 + 1) * 10);
@@ -158,7 +174,18 @@ describe("taskTable", () => {
     expect(taskTable([report()], TASKS.python.version)).toEqual([]);
   });
   it("ignores reports without the task, or from an older task version", () => {
-    expect(taskTable([report({ task: undefined }), report({ task: "v0" })])).toEqual([]);
+    const legacy = report({ task: "v1" });
+    expect(taskTable([report({ task: undefined }), legacy])).toEqual([]);
+    expect(taskTable([legacy], "v1")).toEqual([]);
+    expect(validateResult(legacy, Date.parse("2026-11-18T00:00:00Z"))).toEqual([]);
+  });
+  it("preserves a latest zero-completion cohort instead of ranking a previous success", () => {
+    const older = report();
+    const failed = report({ date: "2026-11-17T11:00:00Z" }, {
+      taskOk: 0, medianTaskReadyMs: undefined, medianTaskMs: undefined, taskPhasesMs: undefined,
+    });
+    expect(taskTable([older, failed])).toEqual([]);
+    expect(taskOutcomes([older, failed], TASK_VERSION)).toMatchObject([{ provider: "maritime", requested: 3, completed: 0, taskFailures: 3 }]);
   });
   it("drops a CPU reading the sandbox's own vCPUs couldn't have produced (a container showing the host)", () => {
     // Vercel, 2 vCPU, 2 s task: at most about 4 s of CPU. 3 s counts; 30 s is the host's.
@@ -215,6 +242,51 @@ describe("bench", () => {
     const rows = await bench({ router, runs: 1, task: "short", parallel: 2, benchFile: "/dev/null" });
     expect(rows.map((r) => r.provider).sort()).toEqual(["agent37", "boat", "maritime"]);
     for (const r of rows) expect(Object.keys(r.taskPhasesMs ?? {})).toEqual(TASK_PHASES.map((p) => p.id));
+  });
+  it("counts workload failures after readiness and keeps the requested shape in its own comparison", async () => {
+    const p = new FakeProvider("modal");
+    const create = p.create.bind(p);
+    let made = 0;
+    p.create = async (spec) => {
+      const b = await create(spec);
+      const run = ++made;
+      b.exec = async (cmd) => ({ exitCode: cmd.includes("python3 -c") && run > 1 ? 1 : 0, stdout: cmd === "echo ok" ? "ok\n" : "", stderr: "", durationMs: 1 });
+      return b;
+    };
+    const spec = { vcpu: 8, memoryGb: 16 };
+    const rows = await bench({ router: new Router({ providers: [p], ledger: false }), runs: 3, task: "python", spec, benchFile: "/dev/null" });
+    expect(rows).toMatchObject([{ runs: 3, failures: 0, taskOk: 1, size: spec }]);
+    const r = makeReport(rows, { version: "0.13.0", runs: 3, spec, task: TASKS.python.version });
+    expect(taskTable([r], TASKS.python.version)).toEqual([]);
+    expect(taskOutcomes([r], TASKS.python.version, spec)).toMatchObject([{ completed: 1, requested: 3, taskFailures: 2 }]);
+    expect(taskTable([r], TASKS.python.version, spec)).toMatchObject([{
+      size: spec, hourlyUsd: 0.95184, successRate: 1 / 3,
+    }]);
+  });
+});
+
+describe("real-agent validation", () => {
+  it("rejects composite output even with the correct line count, last number and printed sum", () => {
+    const testVerifier = AGENT_VERIFY.replace(
+      'work = pathlib.Path("/tmp/work")',
+      `import tempfile
+fixture = tempfile.TemporaryDirectory()
+work = pathlib.Path(fixture.name)
+(work / "primes.txt").write_text("4\\n" * 4999 + "48611\\n")
+(work / "primes.py").write_text("print(114455259)\\n")`,
+    );
+    const result = spawnSync("/bin/sh", ["-c", testVerifier], { encoding: "utf8" });
+    expect(result.status).toBeGreaterThan(0);
+    expect(result.stderr).toContain("incorrect saved prime sequence");
+    expect(result.stdout).not.toContain("VERIFIED");
+  });
+  it("keeps older verifier versions and different models out of the current ranking", () => {
+    const r = { tool: "sandboxrouter-agent" as const, label: "eu", date: "2026-11-17T10:00:00Z", task: AGENT_TASK_VERSION, model: "current", runs: 5, rows: [{ provider: "maritime" as const, runs: 5, ok: 3 }] };
+    expect(agentTable([
+      r,
+      { ...r, date: "2026-11-16T10:00:00Z", model: "other", rows: [{ provider: "boat", runs: 5, ok: 5 }] },
+      { ...r, date: "2026-11-18T10:00:00Z", task: "gemini-primes-v1", rows: [{ provider: "boat", runs: 5, ok: 5 }] },
+    ])).toMatchObject([{ provider: "maritime", ok: 3 }]);
   });
 });
 

@@ -52,7 +52,10 @@ export class DockerProvider implements Provider {
 
   async connect(nativeId: string): Promise<ProviderSandbox> {
     const r = await run(this.bin, ["inspect", "-f", "{{.State.Status}}", nativeId]);
-    if (r.code !== 0) throw new ProviderError("docker", `no container ${nativeId}`, 404);
+    if (r.code !== 0) {
+      if (containerAbsent(r.stderr)) throw new ProviderError("docker", `no container ${nativeId}`, 404);
+      throw new ProviderError("docker", `inspect failed: ${r.stderr.trim().slice(0, 300)}`);
+    }
     if (r.stdout.trim() === "paused") await run(this.bin, ["unpause", nativeId]);
     return new DockerBox(this.bin, nativeId);
   }
@@ -98,8 +101,16 @@ class DockerBox implements ProviderSandbox {
   }
 
   async kill(): Promise<void> {
-    await run(this.bin, ["rm", "-f", this.nativeId]);
+    const r = await run(this.bin, ["rm", "-f", this.nativeId]);
+    if (r.code !== 0 && !containerAbsent(r.stderr)) {
+      throw new ProviderError("docker", `docker rm failed: ${r.stderr.trim().slice(0, 300)}`);
+    }
   }
+}
+
+/** Only an explicit daemon response confirms that the container is gone. */
+function containerAbsent(stderr: string): boolean {
+  return /^(?:Error(?: response from daemon)?: )?No such (?:container|object): /im.test(stderr);
 }
 
 interface RunResult {

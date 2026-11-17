@@ -123,9 +123,17 @@ describe("burst reports", () => {
     expect(rows[0].ok).toBe(100);
     expect(burstTable([report({ task: "python-v1" })], "python-v1")).toHaveLength(1);
   });
-  it("keeps each burst size apart and leaves out providers where nothing started", () => {
+  it("keeps each burst size apart and preserves zero starts", () => {
     const ten = report({ n: 10, rows: [{ provider: "maritime", n: 10, ok: 10, limited: 0, p50Ms: 700, wallMs: 900 }, { provider: "boat", n: 10, ok: 0, limited: 10, wallMs: 1 }] });
-    expect(burstTable([report(), ten], undefined, 10)).toEqual([expect.objectContaining({ provider: "maritime", n: 10, ok: 10 })]);
+    expect(burstTable([report(), ten], undefined, 10)).toEqual([
+      expect.objectContaining({ provider: "maritime", n: 10, ok: 10 }),
+      expect.objectContaining({ provider: "boat", n: 10, ok: 0, limited: 10 }),
+    ]);
     expect(burstTable([report(), ten], undefined, 100)).toEqual([expect.objectContaining({ provider: "maritime", n: 100 })]);
+  });
+  it("takes a latest zero-result burst instead of resurfacing an older success", () => {
+    const earlier = report({ n: 10, rows: [{ provider: "maritime", n: 10, ok: 10, limited: 0, p50Ms: 700, wallMs: 900 }] });
+    const latest = report({ date: "2026-11-17T13:00:00Z", n: 10, rows: [{ provider: "maritime", n: 10, ok: 0, limited: 0, wallMs: 900, createFailures: 2, commandFailures: 8, taskFailures: 0 }] });
+    expect(burstTable([earlier, latest], undefined, 10)).toMatchObject([{ provider: "maritime", n: 10, ok: 0, limited: 0, commandFailures: 8 }]);
   });
 });

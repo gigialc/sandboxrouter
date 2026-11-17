@@ -27,6 +27,7 @@ jobs:
         # Keys, emails, addresses and impossible numbers in results/; on a PR also edits to existing bench reports.
         run: npm run results:check -- ${{ github.event_name == 'pull_request' && '--against HEAD^1' || '' }}
       - run: npm test
+      - run: npm run test:package
       - run: npm run test:py
       - run: npm ci && npm run build
         working-directory: web

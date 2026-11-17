@@ -2,7 +2,8 @@ import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 import { benchmarksPublishable, CATALOG } from "./catalog.js";
 import { CHECK_STEPS } from "./check.js";
-import { taskByVersion } from "./task.js";
+import { isCurrentTask, taskByVersion } from "./task.js";
+import { AGENT_TASK_VERSION } from "./agent-bench.js";
 
 /**
  * Checks for the files people submit to results/: bench reports, saved `check` runs and `cost` runs.
@@ -75,6 +76,8 @@ const ADDRESS =
   /\b\d+[A-Za-z]?\s+(?:[A-Za-zÀ-ÿ'.-]+\s+){0,3}(?:street|st|road|rd|avenue|ave|lane|ln|drive|dr|way|court|ct|place|pl|boulevard|blvd|terrace|close)\b\.?|\b(?:calle|carrer|rue|via|avenida|straße|strasse|str)\.?\s+[A-Za-zÀ-ÿ'.-]+(?:\s+[A-Za-zÀ-ÿ'.-]+){0,3}\s+\d+|\b(?:apt|apartment|flat|suite|unit|piso|puerta)\.?\s*#?\d+/i;
 
 const isNum = (n: unknown, min = 0, max = Infinity) => typeof n === "number" && Number.isFinite(n) && n >= min && n <= max;
+const isCount = (n: unknown, max: number) => Number.isInteger(n) && isNum(n, 0, max);
+const isSize = (size: any) => isNum(size?.vcpu, 0.1, 1024) && isNum(size?.memoryGb, 0.0625, 4096);
 
 function checkDate(iso: unknown, now: number): string | undefined {
   if (typeof iso !== "string" || Number.isNaN(Date.parse(iso))) return "date is missing or not an ISO date";
@@ -122,10 +125,28 @@ export function validateResult(j: any, now = Date.now()): string[] {
       if (!isNum(r?.runs, 1, 1000)) out.push(`${r?.provider}: runs is not a positive number`);
       if (!isNum(r?.failures, 0, r?.runs ?? 0)) out.push(`${r?.provider}: failures must be between 0 and runs`);
       if (r?.limited !== undefined && !isNum(r.limited, 0, r?.failures ?? 0)) out.push(`${r?.provider}: limited must be between 0 and failures`);
-      for (const k of ["medianCreateMs", "medianExecMs"] as const) {
+      for (const k of ["medianCreateMs", "medianExecMs", "medianReadyMs", "medianTaskReadyMs"] as const) {
         if (r?.[k] !== undefined && !isNum(r[k], 1, MAX_MS)) out.push(`${r?.provider}: ${k} must be between 1 ms and 15 min`);
       }
       if (r?.failures < r?.runs && r?.medianCreateMs === undefined) out.push(`${r?.provider}: successful runs but no medianCreateMs`);
+      if (r?.size !== undefined && !isSize(r.size)) out.push(`${r?.provider}: invalid sandbox size`);
+      if (isCurrentTask(j.task)) {
+        if (!isSize(j.spec) || !isSize(r?.size)) out.push(`${r?.provider}: current tasks must record requested and nominal sizes`);
+        if (!isCount(r?.taskOk, (r?.runs ?? 0) - (r?.failures ?? 0))) out.push(`${r?.provider}: invalid completed task count`);
+        if (r?.taskOk > 0 && (r.medianTaskMs === undefined || r.medianTaskReadyMs === undefined || !r.taskPhasesMs)) {
+          out.push(`${r.provider}: completed tasks require task and readiness timings`);
+        }
+        if (r?.taskOk === 0 && (r.medianTaskMs !== undefined || r.medianTaskReadyMs !== undefined || r.taskPhasesMs)) {
+          out.push(`${r.provider}: task timings require a completed task`);
+        }
+      }
+      if (r?.createFailures !== undefined || r?.commandFailures !== undefined) {
+        if (!isCount(r.createFailures, r.runs) || !isCount(r.commandFailures, r.runs) ||
+            r.createFailures + r.commandFailures !== r.failures || (r.limited ?? 0) > r.createFailures) {
+          out.push(`${r.provider}: create and command failure counts must reconcile with failures and limits`);
+        }
+      }
+      if (r?.cleanupFailures !== undefined && !isCount(r.cleanupFailures, r.runs)) out.push(`${r.provider}: invalid cleanup failure count`);
       if (r?.medianTaskMs !== undefined && !isNum(r.medianTaskMs, 1, MAX_MS)) out.push(`${r?.provider}: medianTaskMs must be between 1 ms and 15 min`);
       if (r?.medianTaskCpuMs !== undefined && !isNum(r.medianTaskCpuMs, 0, 64 * MAX_MS)) out.push(`${r?.provider}: medianTaskCpuMs is out of range`);
       if (r?.medianTaskMaxCoreMs !== undefined && !isNum(r.medianTaskMaxCoreMs, 0, MAX_MS)) out.push(`${r?.provider}: medianTaskMaxCoreMs is out of range`);
@@ -165,6 +186,11 @@ export function validateResult(j: any, now = Date.now()): string[] {
       provider(r?.provider, "row provider");
       if (noBench(r?.provider)) out.push(`${r.provider}: ${NO_BENCH}`);
       if (!isNum(r?.ok, 0, r?.runs ?? 0)) out.push(`${r?.provider}: ok must be between 0 and runs`);
+      if (j.task === AGENT_TASK_VERSION &&
+          (r?.requested !== j.runs || r.runs + (r.limited ?? 0) !== r.requested ||
+            !isCount(r.started, r.runs) || r.ok > r.started || !isSize(r.size))) {
+        out.push(`${r?.provider}: agent request, start, success counts and shape must reconcile`);
+      }
       if (r?.limited !== undefined && !isNum(r.limited, 0, 1000)) out.push(`${r?.provider}: limited is out of range`);
       for (const k of ["medianWallMs", "medianModelMs", "medianCpuMs"] as const) {
         if (r?.[k] !== undefined && !isNum(r[k], 0, 4 * MAX_MS)) out.push(`${r?.provider}: ${k} is out of range`);
@@ -183,6 +209,14 @@ export function validateResult(j: any, now = Date.now()): string[] {
       if (noBench(r?.provider)) out.push(`${r.provider}: ${NO_BENCH}`);
       if (r?.n !== j.n) out.push(`${r?.provider}: n must match the report's n`);
       if (!isNum(r?.ok, 0, j.n) || !isNum(r?.limited, 0, j.n) || r.ok + r.limited > j.n) out.push(`${r?.provider}: ok and limited must add up to at most n`);
+      if (r?.size !== undefined && !isSize(r.size)) out.push(`${r.provider}: invalid sandbox size`);
+      if (r?.createFailures !== undefined || r?.commandFailures !== undefined || r?.taskFailures !== undefined) {
+        if (![r.createFailures, r.commandFailures, r.taskFailures].every((n) => isCount(n, j.n)) ||
+            r.ok + r.createFailures + r.commandFailures + r.taskFailures !== j.n || r.limited > r.createFailures) {
+          out.push(`${r.provider}: burst failures, limits and completed requests do not reconcile`);
+        }
+      }
+      if (r?.cleanupFailures !== undefined && !isCount(r.cleanupFailures, j.n)) out.push(`${r.provider}: invalid cleanup failure count`);
       for (const k of ["p50Ms", "p95Ms", "p99Ms", "jobP50Ms"] as const) {
         if (r?.[k] !== undefined && !isNum(r[k], 1, MAX_MS)) out.push(`${r?.provider}: ${k} must be between 1 ms and 15 min`);
       }

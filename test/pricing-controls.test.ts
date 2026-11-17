@@ -42,6 +42,17 @@ describe("maxHourlyUsd", () => {
   it("must be a positive number", () => {
     expect(() => router().plan(spec, { maxHourlyUsd: 0 })).toThrow(/maxHourlyUsd must be a positive number/);
   });
+
+  it("refuses a capped GPU request when the provider's GPU price is unknown", async () => {
+    const modal = new FakeProvider("modal");
+    const r = new Router({ providers: [modal], ledger: false });
+    const gpuSpec = { ...spec, timeoutMinutes: 60, gpu: "H100:1" };
+    expect(r.quote(gpuSpec, { provider: "modal" })).toMatchObject({ estimatedUsd: 0.238, excludesGpuCost: true });
+    const capped = { provider: "modal" as const, maxHourlyUsd: 0.25 };
+    expect(() => r.quote(gpuSpec, capped)).toThrow(/GPU charges are not modelled/);
+    await expect(r.create(gpuSpec, capped)).rejects.toThrow(/GPU charges are not modelled/);
+    expect(modal.created).toHaveLength(0);
+  });
 });
 
 describe("quote", () => {
@@ -63,6 +74,15 @@ describe("quote", () => {
     expect(quote.estimatedUsd).toBeCloseTo(0.00005, 9);
     expect(quote.perSandboxUsd).toBeUndefined();
     expect(quote.conditionalStartFee).toMatchObject({ minUsd: 0.03, maxUsd: 0.07 });
+  });
+
+  it("quotes the larger Vercel shape that the adapter allocates for extra RAM", () => {
+    const r = new Router({ providers: [new FakeProvider("vercel")], ledger: false });
+    const shape = { vcpu: 1, memoryGb: 16, timeoutMinutes: 60 };
+    const quote = r.quote(shape, { provider: "vercel" });
+    expect(quote).toMatchObject({ size: { vcpu: 8, memoryGb: 16 }, hourlyUsd: 1.3632 });
+    expect(quote.estimatedUsd).toBeCloseTo(1.3632, 9);
+    expect(() => r.quote(shape, { provider: "vercel", maxHourlyUsd: 0.50 })).toThrow(/over your price cap/);
   });
 
   it("throws the create's reason when nothing fits", () => {

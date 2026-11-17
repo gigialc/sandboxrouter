@@ -133,14 +133,14 @@ export class RoutedComputer {
     if (actions.length > 50) throw new RouterError("at most 50 actions per batch");
     return this.c.actBatch(actions);
   }
-  screenshot(opts?: { format?: "png" | "jpeg"; quality?: number }) {
+  screenshot(opts?: { format?: "png" | "jpeg"; quality?: number }): Promise<Uint8Array> {
     return this.c.screenshot(opts);
   }
   /** Run a shell command (max 30 s). The second argument is `{ timeoutSeconds }`, or the number alone. */
   exec(command: string, opts?: number | { timeoutSeconds?: number }) {
     return this.c.exec(command, typeof opts === "number" ? opts : opts?.timeoutSeconds);
   }
-  readFile(path: string) {
+  readFile(path: string): Promise<Uint8Array> {
     return this.c.readFile(path);
   }
   writeFile(path: string, content: string | Uint8Array) {

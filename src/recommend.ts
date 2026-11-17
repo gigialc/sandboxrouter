@@ -10,6 +10,7 @@ export type RecPriority = "cost" | "speed" | "value";
 export interface PublishedStart {
   name: string;
   medianCreateMs: number;
+  medianReadyMs?: number;
   successRate: number;
   runs: number;
   hourlyUsd: number;
@@ -27,6 +28,8 @@ export interface PublishedJob {
   reusedUsd: number;
   successRate: number;
   runs: number;
+  ok?: number;
+  limited?: number;
   /** Bills at least this many seconds per sandbox. */
   minimumSeconds?: number;
   /** Fee per sandbox started. */
@@ -40,6 +43,11 @@ export interface PublishedLoadRow {
   ok: number;
   /** Of those that didn't start, how many the benchmarking account's own limit refused. */
   limited: number;
+  size?: { vcpu: number; memoryGb: number };
+  createFailures?: number;
+  commandFailures?: number;
+  taskFailures?: number;
+  cleanupFailures?: number;
   p50Ms?: number;
   p99Ms?: number;
   wallMs: number;
@@ -153,10 +161,12 @@ export function recommend(data: PublishedData, opts: RecommendOptions = {}): Rec
 
   type Raw = Omit<Recommendation, "rank" | "valueScore"> & { usdKey: number };
   const raw: Raw[] = [];
+  const startRows = Object.entries(data.start).filter(([id]) => !only || only.has(id));
+  // Use one timing definition across the cohort. Legacy reports did not store paired readiness.
+  const paired = startRows.length > 0 && startRows.every(([, s]) => s.medianReadyMs !== undefined);
   if (job === "start") {
-    for (const [id, s] of Object.entries(data.start)) {
-      if (only && !only.has(id)) continue;
-      raw.push({ provider: id, name: s.name, secondsEach: s.medianCreateMs / 1000, hourlyUsd: s.hourlyUsd, successRate: s.successRate, runs: s.runs, notes: [], measuredAt: s.measuredAt, usdKey: s.hourlyUsd });
+    for (const [id, s] of startRows) {
+      raw.push({ provider: id, name: s.name, secondsEach: (paired ? s.medianReadyMs! : s.medianCreateMs) / 1000, hourlyUsd: s.hourlyUsd, successRate: s.successRate, runs: s.runs, notes: [], measuredAt: s.measuredAt, usdKey: s.hourlyUsd });
     }
   } else {
     for (const [id, j] of Object.entries(data.jobs[job] ?? {})) {
@@ -165,6 +175,7 @@ export function recommend(data: PublishedData, opts: RecommendOptions = {}): Rec
       const notes: string[] = [];
       if (!reuse && j.minimumSeconds && j.minimumSeconds > 1) notes.push(`bills at least ${j.minimumSeconds} s per sandbox`);
       if (!reuse && j.perSandboxUsd) notes.push(`$${j.perSandboxUsd} per sandbox started`);
+      if (j.limited) notes.push(`${j.limited} reported limit refusals`);
       raw.push({
         provider: id,
         name: j.name,
@@ -194,11 +205,10 @@ export function recommend(data: PublishedData, opts: RecommendOptions = {}): Rec
       // Swap the one-at-a-time start for the start under load.
       const startS = job === "start" ? r.secondsEach : r.secondsEach - (data.jobs[job as Exclude<RecJob, "start">]?.[r.provider]?.createMs ?? 0) / 1000;
       r.secondsEach = (job === "start" ? 0 : startS) + l.p50Ms / 1000;
-    } else if (l && l.n - l.ok > l.limited) {
-      // Some failed for reasons other than the benchmarking account's limit: the provider's own.
-      r.notes.push(`${l.ok} of ${l.n} started at once`);
+    } else if (l) {
+      r.notes.push(`${l.ok} of ${l.n} completed${l.limited ? ` (${l.limited} reported limit refusals)` : ""}`);
     } else {
-      r.notes.push(`not measured at ${load.n} at once yet${l ? " (the benchmarking account's limit)" : ""}`);
+      r.notes.push(`not measured at ${load.n} at once yet`);
     }
   }
 
@@ -214,9 +224,9 @@ export function recommend(data: PublishedData, opts: RecommendOptions = {}): Rec
   const results = scored.slice(0, opts.limit ?? scored.length).map(({ usdKey: _, ...r }, i) => ({ ...r, rank: i + 1, valueScore: Math.round(r.valueScore * 100) / 100 }));
   const what = job === "start" ? "starting a sandbox" : `the ${job} job${reuse ? " in a running sandbox" : " in a new sandbox"}`;
   const by = priority === "cost" ? "lowest cost" : priority === "speed" ? "shortest time" : "best value (cost times time, each against the median)";
-  const basis =
-    `Ranked by ${by} for ${what}, per successful run` +
-    (load ? `, with start times measured ${load.n} at once; providers not yet measured at that size come after` : "") +
-    ".";
+  const basis = !results.length ? `No current verified results for ${what}.` :
+    `Ranked by ${by} for ${what} with a success-rate adjustment` +
+    (load ? `, with readiness measured on batches of ${load.n}; providers that did not finish the batch are listed after` : "") +
+    (job === "start" && !paired ? ". Single-request timings use the create response; the first command is measured separately" : "") + ".";
   return { job, count, priority, reuse, basis, dataThrough: data.dataThrough, results };
 }

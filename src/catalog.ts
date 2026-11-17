@@ -799,6 +799,14 @@ export function cloudflareInstance(vcpu: number, memoryGb: number) {
   return CLOUDFLARE_INSTANCES.find((t) => t.vcpu >= vcpu && t.memoryGb >= memoryGb) ?? CLOUDFLARE_INSTANCES[CLOUDFLARE_INSTANCES.length - 1];
 }
 
+/** The Vercel adapter allocates enough vCPUs to provide the requested RAM, with 2 GB per vCPU. */
+export function vercelSandboxSize(spec: SandboxSpec) {
+  const needed = Math.max(spec.vcpu ?? DEFAULT_VCPU, (spec.memoryGb ?? DEFAULT_MEMORY_GB) / 2);
+  // Vercel supports one vCPU or an even vCPU count.
+  const vcpu = Math.min(8, needed <= 1 ? 1 : Math.ceil(needed / 2) * 2);
+  return { vcpu, memoryGb: vcpu * 2 };
+}
+
 /** How a provider turns running time into a bill: minimum, rounding and fixed per-sandbox charge. */
 export function billingRules(id: ProviderId): { minSeconds: number; incrementSeconds: number; perSandboxUsd: number; minimumCovers: "all" | "memory" } {
   const p = CATALOG.find((c) => c.id === id)?.pricing;
@@ -848,8 +856,10 @@ function fullHourlyCost(id: ProviderId, spec: SandboxSpec = {}): number {
   if (fixed) return fixed.vcpu * pricing.vcpuHour + fixed.memoryGb * pricing.gbHour;
   const vcpu = spec.vcpu ?? DEFAULT_VCPU;
   let mem = spec.memoryGb ?? DEFAULT_MEMORY_GB;
-  // Vercel fixes memory at 2 GB per vCPU.
-  if (id === "vercel") mem = Math.max(mem, vcpu * 2);
+  if (id === "vercel") {
+    const size = vercelSandboxSize(spec);
+    return size.vcpu * pricing.vcpuHour + size.memoryGb * pricing.gbHour;
+  }
   // Blaxel sizes by memory, about 2 GB per core.
   if (id === "blaxel") mem = Math.max(mem, vcpu * 2);
   // Boat rents the smallest fixed size that fits.
@@ -916,6 +926,7 @@ export function cpuHourlyAtFull(id: ProviderId, spec: SandboxSpec = {}): number 
   if (fixed) return fixed.vcpu * p.pricing.vcpuHour;
   const vcpu = spec.vcpu ?? DEFAULT_VCPU;
   const mem = spec.memoryGb ?? DEFAULT_MEMORY_GB;
+  if (id === "vercel") return vercelSandboxSize(spec).vcpu * p.pricing.vcpuHour;
   if (id === "cloudflare") return cloudflareInstance(vcpu, mem).vcpu * p.pricing.vcpuHour;
   if (id === "upstash") return fullHourlyCost(id, spec);
   if (id === "deno") return 2 * p.pricing.vcpuHour;
