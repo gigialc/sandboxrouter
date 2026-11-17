@@ -16,6 +16,8 @@ export interface BenchRow {
   taskPhasesMs?: Record<string, number>;
   /** With `task`: median CPU time the task used across all vCPUs, where the sandbox shows /proc/stat. */
   medianTaskCpuMs?: number;
+  /** With `task`: median busy time of the busiest core, for providers that meter CPU per VM. */
+  medianTaskMaxCoreMs?: number;
   lastError?: string;
 }
 
@@ -43,7 +45,13 @@ export async function bench(opts: {
   const given = Object.fromEntries(Object.entries(opts.spec ?? {}).filter(([, v]) => v !== undefined)) as SandboxSpec;
   const kind: TaskKind | undefined = opts.task === true ? "short" : opts.task || undefined;
   // The long task can take minutes on a slow provider: give the sandbox room to finish it.
-  const spec: SandboxSpec = { vcpu: DEFAULT_VCPU, memoryGb: DEFAULT_MEMORY_GB, timeoutMinutes: kind === "long" ? 20 : 5, ...given };
+  const spec: SandboxSpec = {
+    vcpu: DEFAULT_VCPU,
+    memoryGb: DEFAULT_MEMORY_GB,
+    timeoutMinutes: kind === "long" ? 20 : 5,
+    ...(kind && TASKS[kind].cpuUtilization ? { cpuUtilization: TASKS[kind].cpuUtilization } : {}),
+    ...given,
+  };
   const ids = opts.providers ?? router.registered().filter((id) => router.isConfigured(id));
   const log = opts.onProgress ?? (() => {});
   const stored: BenchData = loadBench(opts.benchFile);
@@ -104,10 +112,16 @@ export async function bench(opts: {
 }
 
 /** Medians of the task runs that finished: the whole task, and each phase. */
-function taskSummary(tasks: TaskRun[], kind: TaskKind): Pick<BenchRow, "medianTaskMs" | "taskPhasesMs" | "medianTaskCpuMs"> {
+function taskSummary(tasks: TaskRun[], kind: TaskKind): Pick<BenchRow, "medianTaskMs" | "taskPhasesMs" | "medianTaskCpuMs" | "medianTaskMaxCoreMs"> {
   const phases = Object.fromEntries(TASKS[kind].phases.map((p) => [p.id, median(tasks.map((t) => t.ms[p.id]))!]));
   const cpu = tasks.every((t) => t.cpuMs !== undefined) ? median(tasks.map((t) => t.cpuMs!)) : undefined;
-  return { medianTaskMs: median(tasks.map((t) => taskMs(t.ms))), taskPhasesMs: phases, ...(cpu !== undefined ? { medianTaskCpuMs: cpu } : {}) };
+  const core = tasks.every((t) => t.maxCoreMs !== undefined) ? median(tasks.map((t) => t.maxCoreMs!)) : undefined;
+  return {
+    medianTaskMs: median(tasks.map((t) => taskMs(t.ms))),
+    taskPhasesMs: phases,
+    ...(cpu !== undefined ? { medianTaskCpuMs: cpu } : {}),
+    ...(core !== undefined ? { medianTaskMaxCoreMs: core } : {}),
+  };
 }
 
 /** The spec a provider is benched at: the asked size, or its fixed default size if its image has one. */
@@ -121,7 +135,7 @@ export function benchMarkdown(rows: BenchRow[]): string {
   const task = rows.some((r) => r.taskPhasesMs);
   const cost = (r: BenchRow) =>
     r.medianTaskMs !== undefined && r.medianCreateMs !== undefined
-      ? `$${taskUsd(r.provider, fittingSpec(r.provider), r.medianCreateMs, r.medianTaskMs, r.medianTaskCpuMs).toFixed(6)}`
+      ? `$${taskUsd(r.provider, fittingSpec(r.provider), r.medianCreateMs, r.medianTaskMs, r.medianTaskCpuMs, 1, false, r.medianTaskMaxCoreMs).toFixed(6)}`
       : "n/a";
   const lines = [
     `| # | Provider | Cold start (median) | Exec round trip |${task ? " Task (median) | Task cost |" : ""} $/hr (list, size run) | Success |`,

@@ -1,6 +1,6 @@
 {
   "version": "0.10.0",
-  "generatedAt": "2026-11-17T12:24:29.318Z",
+  "generatedAt": "2026-11-17T14:30:33.319Z",
   "shapes": [
     "1x2",
     "2x4",
@@ -1930,6 +1930,8 @@
       "docs": "https://modal.com/docs/guide/sandbox",
       "pricing": {
         "vcpuHour": 0.070956,
+        "reservesCpu": true,
+        "cpuFloor": 0.125,
         "gbHour": 0.024012,
         "note": "sandbox rates, per second ($0.00003942 per physical core = 2 vCPUs); GPUs extra; region pinning x1.15-1.75; Starter includes $30/mo credit",
         "source": "https://modal.com/pricing",
@@ -2745,6 +2747,7 @@
       "pricing": {
         "minSeconds": 60,
         "minimumCovers": "memory",
+        "cpuMeteredPerVm": true,
         "vcpuHour": 0.128,
         "gbHour": 0.0212,
         "note": "iad1; active CPU (I/O wait free), provisioned RAM in minimum 1-minute increments (2 GB/vCPU); listed at full CPU, cpuUtilization lowers it; Hobby free within quotas, Pro $20/mo usage credit; creations $0.60/million and retained snapshots $0.08/GB-month extra",
@@ -2974,6 +2977,34 @@
   ],
   "leaderboard": [
     {
+      "provider": "e2b",
+      "name": "E2B",
+      "submissions": 2,
+      "medianCreateMs": 294,
+      "medianExecMs": 171,
+      "successRate": 1,
+      "hourlyUsd": 0.1089,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 0.5
+      },
+      "measuredAt": "2026-11-17T14:30:21.414Z"
+    },
+    {
+      "provider": "superserve",
+      "name": "Superserve",
+      "submissions": 1,
+      "medianCreateMs": 294,
+      "medianExecMs": 168,
+      "successRate": 1,
+      "hourlyUsd": 0.1656,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "measuredAt": "2026-11-17T14:30:21.414Z"
+    },
+    {
       "provider": "sprites",
       "name": "Fly.io Sprites",
       "submissions": 1,
@@ -2988,228 +3019,200 @@
       "measuredAt": "2026-11-11T21:29:12.572Z"
     },
     {
-      "provider": "novita",
-      "name": "Novita AI Agent Sandbox",
-      "submissions": 1,
-      "medianCreateMs": 334,
-      "medianExecMs": 820,
-      "successRate": 1,
-      "hourlyUsd": 0.11664,
-      "size": {
-        "vcpu": 2,
-        "memoryGb": 4
-      },
-      "measuredAt": "2026-11-17T11:53:12.519Z"
-    },
-    {
       "provider": "openscale",
       "name": "OpenScale Sandboxes",
       "submissions": 2,
-      "medianCreateMs": 437,
-      "medianExecMs": 1091,
+      "medianCreateMs": 354,
+      "medianExecMs": 1010,
       "successRate": 1,
       "hourlyUsd": 0.013999999999999999,
       "size": {
         "vcpu": 2,
         "memoryGb": 1
       },
-      "measuredAt": "2026-11-17T11:53:12.519Z"
+      "measuredAt": "2026-11-17T14:30:21.414Z"
     },
     {
-      "provider": "superserve",
-      "name": "Superserve",
+      "provider": "novita",
+      "name": "Novita AI Agent Sandbox",
       "submissions": 1,
-      "medianCreateMs": 488,
-      "medianExecMs": 188,
+      "medianCreateMs": 359,
+      "medianExecMs": 607,
       "successRate": 1,
-      "hourlyUsd": 0.1656,
+      "hourlyUsd": 0.11664,
       "size": {
         "vcpu": 2,
         "memoryGb": 4
       },
-      "measuredAt": "2026-11-17T11:53:12.519Z"
-    },
-    {
-      "provider": "e2b",
-      "name": "E2B",
-      "submissions": 2,
-      "medianCreateMs": 545,
-      "medianExecMs": 194,
-      "successRate": 1,
-      "hourlyUsd": 0.1089,
-      "size": {
-        "vcpu": 2,
-        "memoryGb": 0.5
-      },
-      "measuredAt": "2026-11-17T11:53:12.519Z"
-    },
-    {
-      "provider": "modal",
-      "name": "Modal",
-      "submissions": 1,
-      "medianCreateMs": 548,
-      "medianExecMs": 941,
-      "successRate": 1,
-      "hourlyUsd": 0.23796,
-      "size": {
-        "vcpu": 2,
-        "memoryGb": 4
-      },
-      "measuredAt": "2026-11-17T11:53:12.519Z"
+      "measuredAt": "2026-11-17T14:30:21.414Z"
     },
     {
       "provider": "daytona",
       "name": "Daytona",
       "submissions": 2,
-      "medianCreateMs": 634,
-      "medianExecMs": 462,
+      "medianCreateMs": 365,
+      "medianExecMs": 400,
       "successRate": 1,
       "hourlyUsd": 0.06659999999999999,
       "size": {
         "vcpu": 1,
         "memoryGb": 1
       },
-      "measuredAt": "2026-11-17T11:53:12.519Z"
+      "measuredAt": "2026-11-17T14:30:21.414Z"
     },
     {
       "provider": "vercel",
       "name": "Vercel Sandbox",
       "submissions": 1,
-      "medianCreateMs": 692,
-      "medianExecMs": 399,
+      "medianCreateMs": 366,
+      "medianExecMs": 267,
       "successRate": 1,
       "hourlyUsd": 0.3408,
       "size": {
         "vcpu": 2,
         "memoryGb": 4
       },
-      "measuredAt": "2026-11-17T11:53:12.519Z"
+      "measuredAt": "2026-11-17T14:30:21.414Z"
+    },
+    {
+      "provider": "modal",
+      "name": "Modal",
+      "submissions": 1,
+      "medianCreateMs": 506,
+      "medianExecMs": 985,
+      "successRate": 1,
+      "hourlyUsd": 0.23796,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "measuredAt": "2026-11-17T14:30:21.414Z"
     },
     {
       "provider": "cloudflare",
       "name": "Cloudflare Sandbox",
       "submissions": 1,
-      "medianCreateMs": 845,
-      "medianExecMs": 285,
+      "medianCreateMs": 726,
+      "medianExecMs": 227,
       "successRate": 1,
       "hourlyUsd": 0.21599999999999997,
       "size": {
         "vcpu": 2,
         "memoryGb": 4
       },
-      "measuredAt": "2026-11-17T11:53:12.519Z"
-    },
-    {
-      "provider": "boat",
-      "name": "Boat",
-      "submissions": 1,
-      "medianCreateMs": 886,
-      "medianExecMs": 167,
-      "successRate": 1,
-      "hourlyUsd": 0.018,
-      "size": {
-        "vcpu": 2,
-        "memoryGb": 4
-      },
-      "measuredAt": "2026-11-17T11:53:12.519Z"
+      "measuredAt": "2026-11-17T14:30:21.414Z"
     },
     {
       "provider": "agentcore",
       "name": "Amazon Bedrock AgentCore Code Interpreter",
       "submissions": 1,
-      "medianCreateMs": 953,
-      "medianExecMs": 296,
+      "medianCreateMs": 903,
+      "medianExecMs": 277,
       "successRate": 1,
       "hourlyUsd": 0.2168,
       "size": {
         "vcpu": 2,
         "memoryGb": 4
       },
-      "measuredAt": "2026-11-17T11:53:12.519Z"
+      "measuredAt": "2026-11-17T14:18:12.013Z"
     },
     {
       "provider": "agent37",
       "name": "Agent37",
       "submissions": 1,
-      "medianCreateMs": 1052,
-      "medianExecMs": 680,
+      "medianCreateMs": 993,
+      "medianExecMs": 667,
       "successRate": 1,
       "hourlyUsd": 0.006520547945205479,
       "size": {
         "vcpu": 2,
         "memoryGb": 4
       },
-      "measuredAt": "2026-11-17T11:53:12.519Z"
+      "measuredAt": "2026-11-17T14:18:12.013Z"
     },
     {
       "provider": "maritime",
       "name": "Maritime",
       "submissions": 2,
-      "medianCreateMs": 1291,
-      "medianExecMs": 267,
+      "medianCreateMs": 1252,
+      "medianExecMs": 242,
       "successRate": 1,
       "hourlyUsd": 0.022,
       "size": {
         "vcpu": 2,
         "memoryGb": 4
       },
-      "measuredAt": "2026-11-17T11:53:12.519Z"
+      "measuredAt": "2026-11-17T14:30:21.414Z"
+    },
+    {
+      "provider": "boat",
+      "name": "Boat",
+      "submissions": 1,
+      "medianCreateMs": 1639,
+      "medianExecMs": 110,
+      "successRate": 1,
+      "hourlyUsd": 0.018,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "measuredAt": "2026-11-17T14:18:12.013Z"
+    },
+    {
+      "provider": "tensorlake",
+      "name": "Tensorlake",
+      "submissions": 1,
+      "medianCreateMs": 2101,
+      "medianExecMs": 716,
+      "successRate": 1,
+      "hourlyUsd": 0.2,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "measuredAt": "2026-11-17T14:18:12.013Z"
     },
     {
       "provider": "freestyle",
       "name": "Freestyle",
       "submissions": 1,
-      "medianCreateMs": 1521,
-      "medianExecMs": 267,
+      "medianCreateMs": 2393,
+      "medianExecMs": 265,
       "successRate": 1,
       "hourlyUsd": 0.13362,
       "size": {
         "vcpu": 2,
         "memoryGb": 4
       },
-      "measuredAt": "2026-11-17T11:53:12.519Z"
+      "measuredAt": "2026-11-17T14:30:21.414Z"
     },
     {
-      "provider": "tensorlake",
-      "name": "Tensorlake",
+      "provider": "sail",
+      "name": "Sailboxes (Sail Research)",
       "submissions": 1,
-      "medianCreateMs": 2074,
-      "medianExecMs": 749,
-      "successRate": 0.6666666666666666,
-      "hourlyUsd": 0.2,
+      "medianCreateMs": 2729,
+      "medianExecMs": 388,
+      "successRate": 1,
+      "hourlyUsd": 0.062,
       "size": {
         "vcpu": 2,
         "memoryGb": 4
       },
-      "measuredAt": "2026-11-17T11:53:12.519Z"
+      "measuredAt": "2026-11-17T14:30:21.414Z"
     },
     {
       "provider": "lambda",
       "name": "AWS Lambda MicroVMs",
       "submissions": 1,
-      "medianCreateMs": 3144,
-      "medianExecMs": 533,
+      "medianCreateMs": 2930,
+      "medianExecMs": 402,
       "successRate": 1,
       "hourlyUsd": 0.25220016,
       "size": {
         "vcpu": 2,
         "memoryGb": 4
       },
-      "measuredAt": "2026-11-17T11:53:12.519Z"
-    },
-    {
-      "provider": "sail",
-      "name": "Sailboxes (Sail Research)",
-      "submissions": 1,
-      "medianCreateMs": 3363,
-      "medianExecMs": 679,
-      "successRate": 0.6666666666666666,
-      "hourlyUsd": 0.062,
-      "size": {
-        "vcpu": 2,
-        "memoryGb": 4
-      },
-      "measuredAt": "2026-11-17T11:53:12.519Z"
+      "measuredAt": "2026-11-17T14:18:12.013Z"
     }
   ],
   "tasks": {
@@ -3251,6 +3254,7 @@
             },
             "hourlyUsd": 0.018,
             "taskUsd": 0.000014999999999999999,
+            "reusedUsd": 0.0000054549999999999994,
             "cpuMs": 1090,
             "activeCpu": false,
             "minimumSeconds": 0,
@@ -3273,6 +3277,7 @@
             },
             "hourlyUsd": 0.013999999999999999,
             "taskUsd": 0.000015555555555555555,
+            "reusedUsd": 0.00001340111111111111,
             "cpuMs": 4540,
             "activeCpu": false,
             "minimumSeconds": 0,
@@ -3295,6 +3300,7 @@
             },
             "hourlyUsd": 0.022,
             "taskUsd": 0.00002444444444444444,
+            "reusedUsd": 0.000013664444444444445,
             "cpuMs": 3070,
             "activeCpu": false,
             "minimumSeconds": 0,
@@ -3317,6 +3323,7 @@
             },
             "hourlyUsd": 0.06659999999999999,
             "taskUsd": 0.000055499999999999994,
+            "reusedUsd": 0.000029784999999999997,
             "activeCpu": false,
             "minimumSeconds": 0,
             "perSandboxUsd": 0,
@@ -3338,6 +3345,7 @@
             },
             "hourlyUsd": 0.2,
             "taskUsd": 0.00008266666666666667,
+            "reusedUsd": 0.000051599999999999994,
             "cpuMs": 1680,
             "activeCpu": true,
             "minimumSeconds": 0,
@@ -3360,6 +3368,7 @@
             },
             "hourlyUsd": 0.1656,
             "taskUsd": 0.000092,
+            "reusedUsd": 0.000042596,
             "cpuMs": 1170,
             "activeCpu": false,
             "minimumSeconds": 0,
@@ -3382,6 +3391,7 @@
             },
             "hourlyUsd": 0.006507506849315068,
             "taskUsd": 0.00010845844748858446,
+            "reusedUsd": 0.000007906620821917807,
             "cpuMs": 6830,
             "activeCpu": false,
             "minimumSeconds": 60,
@@ -3404,6 +3414,7 @@
             },
             "hourlyUsd": 0.21599999999999997,
             "taskUsd": 0.00011659999999999997,
+            "reusedUsd": 0.00009471999999999999,
             "cpuMs": 2830,
             "activeCpu": true,
             "minimumSeconds": 0,
@@ -3426,6 +3437,7 @@
             },
             "hourlyUsd": 0.1089,
             "taskUsd": 0.000121,
+            "reusedUsd": 0.00009925024999999999,
             "cpuMs": 4100,
             "activeCpu": false,
             "minimumSeconds": 0,
@@ -3448,6 +3460,7 @@
             },
             "hourlyUsd": 0.23796,
             "taskUsd": 0.00013220000000000001,
+            "reusedUsd": 0.0000397922,
             "activeCpu": false,
             "minimumSeconds": 0,
             "perSandboxUsd": 0,
@@ -3469,6 +3482,7 @@
             },
             "hourlyUsd": 0.2168,
             "taskUsd": 0.00014169305555555554,
+            "reusedUsd": 0.00012961805555555554,
             "cpuMs": 4010,
             "activeCpu": true,
             "minimumSeconds": 0,
@@ -3491,6 +3505,7 @@
             },
             "hourlyUsd": 0.13362,
             "taskUsd": 0.00014846666666666665,
+            "reusedUsd": 0.00008006065,
             "cpuMs": 2650,
             "activeCpu": false,
             "minimumSeconds": 0,
@@ -3513,6 +3528,7 @@
             },
             "hourlyUsd": 0.11664,
             "taskUsd": 0.0001944,
+            "reusedUsd": 0.0001494612,
             "cpuMs": 5810,
             "activeCpu": false,
             "minimumSeconds": 0,
@@ -3535,6 +3551,7 @@
             },
             "hourlyUsd": 0.25220016,
             "taskUsd": 0.0005604448000000001,
+            "reusedUsd": 0.0002601164428,
             "cpuMs": 3920,
             "activeCpu": false,
             "minimumSeconds": 0,
@@ -3548,20 +3565,21 @@
               "vcpu": 2,
               "memoryGb": 4
             },
-            "createMs": 783,
-            "taskMs": 4517,
+            "createMs": 451,
+            "taskMs": 5242,
             "phasesMs": {
-              "cpu": 2716,
-              "cores": 1452,
-              "disk": 167
+              "cpu": 3154,
+              "cores": 1939,
+              "disk": 172
             },
             "hourlyUsd": 0.3408,
-            "taskUsd": 0.0016273777777777775,
-            "cpuMs": 6020,
+            "taskUsd": 0.0016920888888888887,
+            "reusedUsd": 0.0004022337777777777,
+            "cpuMs": 6690,
             "activeCpu": true,
             "minimumSeconds": 60,
             "perSandboxUsd": 0,
-            "measuredAt": "2026-11-17T10:49:27.756Z"
+            "measuredAt": "2026-11-17T14:18:42.548Z"
           },
           {
             "provider": "sail",
@@ -3579,6 +3597,7 @@
             },
             "hourlyUsd": 0.03069,
             "taskUsd": 0.01006622,
+            "reusedUsd": 0.0000512072,
             "cpuMs": 8640,
             "activeCpu": true,
             "minimumSeconds": 0,
@@ -3625,6 +3644,7 @@
             },
             "hourlyUsd": 0.018,
             "taskUsd": 0.000165,
+            "reusedUsd": 0.00015582,
             "cpuMs": 38370,
             "activeCpu": false,
             "minimumSeconds": 0,
@@ -3647,6 +3667,7 @@
             },
             "hourlyUsd": 0.013999999999999999,
             "taskUsd": 0.00041222222222222213,
+            "reusedUsd": 0.0004070888888888889,
             "cpuMs": 141090,
             "activeCpu": false,
             "minimumSeconds": 0,
@@ -3669,6 +3690,7 @@
             },
             "hourlyUsd": 0.006507506849315068,
             "taskUsd": 0.00043383378995433784,
+            "reusedUsd": 0.0003714412603957382,
             "cpuMs": 317420,
             "activeCpu": false,
             "minimumSeconds": 60,
@@ -3691,6 +3713,7 @@
             },
             "hourlyUsd": 0.022,
             "taskUsd": 0.0004644444444444444,
+            "reusedUsd": 0.00045556499999999995,
             "cpuMs": 105910,
             "activeCpu": false,
             "minimumSeconds": 0,
@@ -3713,6 +3736,7 @@
             },
             "hourlyUsd": 0.06659999999999999,
             "taskUsd": 0.0012394999999999997,
+            "reusedUsd": 0.0012065514999999999,
             "activeCpu": false,
             "minimumSeconds": 0,
             "perSandboxUsd": 0,
@@ -3734,6 +3758,7 @@
             },
             "hourlyUsd": 0.1656,
             "taskUsd": 0.0012419999999999998,
+            "reusedUsd": 0.001204004,
             "cpuMs": 36590,
             "activeCpu": false,
             "minimumSeconds": 0,
@@ -3756,6 +3781,7 @@
             },
             "hourlyUsd": 0.2,
             "taskUsd": 0.0017998333333333334,
+            "reusedUsd": 0.0017627833333333333,
             "cpuMs": 57420,
             "activeCpu": true,
             "minimumSeconds": 0,
@@ -3778,6 +3804,7 @@
             },
             "hourlyUsd": 0.13362,
             "taskUsd": 0.0023383499999999995,
+            "reusedUsd": 0.0022448159999999997,
             "cpuMs": 81120,
             "activeCpu": false,
             "minimumSeconds": 0,
@@ -3800,6 +3827,7 @@
             },
             "hourlyUsd": 0.23796,
             "taskUsd": 0.0025118,
+            "reusedUsd": 0.0024610352,
             "cpuMs": 80410,
             "activeCpu": false,
             "minimumSeconds": 0,
@@ -3822,6 +3850,7 @@
             },
             "hourlyUsd": 0.21599999999999997,
             "taskUsd": 0.0029193999999999995,
+            "reusedUsd": 0.0028926799999999995,
             "cpuMs": 88970,
             "activeCpu": true,
             "minimumSeconds": 0,
@@ -3844,6 +3873,7 @@
             },
             "hourlyUsd": 0.11664,
             "taskUsd": 0.005183999999999999,
+            "reusedUsd": 0.005168318399999999,
             "cpuMs": 195060,
             "activeCpu": false,
             "minimumSeconds": 0,
@@ -3866,6 +3896,7 @@
             },
             "hourlyUsd": 0.2168,
             "taskUsd": 0.005212990277777778,
+            "reusedUsd": 0.005194006277777778,
             "cpuMs": 160270,
             "activeCpu": true,
             "minimumSeconds": 0,
@@ -3888,6 +3919,7 @@
             },
             "hourlyUsd": 0.1089,
             "taskUsd": 0.00620125,
+            "reusedUsd": 0.006171363,
             "cpuMs": 261250,
             "activeCpu": false,
             "minimumSeconds": 0,
@@ -3910,6 +3942,7 @@
             },
             "hourlyUsd": 0.25220016,
             "taskUsd": 0.0086868944,
+            "reusedUsd": 0.0084408591328,
             "cpuMs": 143060,
             "activeCpu": false,
             "minimumSeconds": 0,
@@ -3932,6 +3965,7 @@
             },
             "hourlyUsd": 0.03069,
             "taskUsd": 0.011777325,
+            "reusedUsd": 0.0017617402,
             "cpuMs": 334800,
             "activeCpu": true,
             "minimumSeconds": 0,
@@ -3945,20 +3979,21 @@
               "vcpu": 2,
               "memoryGb": 4
             },
-            "createMs": 692,
-            "taskMs": 187586,
+            "createMs": 495,
+            "taskMs": 173019,
             "phasesMs": {
-              "cpu": 120335,
-              "cores": 62378,
-              "disk": 4873
+              "cpu": 111486,
+              "cores": 56414,
+              "disk": 4861
             },
             "hourlyUsd": 0.3408,
-            "taskUsd": 0.013452888888888886,
-            "cpuMs": 253150,
+            "taskUsd": 0.012469866666666666,
+            "reusedUsd": 0.012446758666666667,
+            "cpuMs": 229820,
             "activeCpu": true,
             "minimumSeconds": 60,
             "perSandboxUsd": 0,
-            "measuredAt": "2026-11-17T11:53:12.519Z"
+            "measuredAt": "2026-11-17T14:27:44.070Z"
           }
         ],
         "couldNot": []
@@ -3990,6 +4025,7 @@
             },
             "hourlyUsd": 0.013999999999999999,
             "taskUsd": 0.000011666666666666666,
+            "reusedUsd": 0.000008757777777777777,
             "cpuMs": 2190,
             "activeCpu": false,
             "minimumSeconds": 0,
@@ -4010,6 +4046,7 @@
             },
             "hourlyUsd": 0.018,
             "taskUsd": 0.000014999999999999999,
+            "reusedUsd": 0.000005084999999999999,
             "cpuMs": 990,
             "activeCpu": false,
             "minimumSeconds": 0,
@@ -4030,6 +4067,7 @@
             },
             "hourlyUsd": 0.022,
             "taskUsd": 0.00002444444444444444,
+            "reusedUsd": 0.000011604999999999998,
             "cpuMs": 1910,
             "activeCpu": false,
             "minimumSeconds": 0,
@@ -4050,6 +4088,7 @@
             },
             "hourlyUsd": 0.06659999999999999,
             "taskUsd": 0.000037,
+            "reusedUsd": 0.000028378999999999997,
             "activeCpu": false,
             "minimumSeconds": 0,
             "perSandboxUsd": 0,
@@ -4069,6 +4108,7 @@
             },
             "hourlyUsd": 0.2168,
             "taskUsd": 0.00007948194444444445,
+            "reusedUsd": 0.00006774294444444445,
             "cpuMs": 1930,
             "activeCpu": true,
             "minimumSeconds": 0,
@@ -4089,6 +4129,7 @@
             },
             "hourlyUsd": 0.1089,
             "taskUsd": 0.00009075,
+            "reusedUsd": 0.00007002875,
             "cpuMs": 2260,
             "activeCpu": false,
             "minimumSeconds": 0,
@@ -4109,6 +4150,7 @@
             },
             "hourlyUsd": 0.1656,
             "taskUsd": 0.000092,
+            "reusedUsd": 0.000063526,
             "cpuMs": 1390,
             "activeCpu": false,
             "minimumSeconds": 0,
@@ -4129,6 +4171,7 @@
             },
             "hourlyUsd": 0.21599999999999997,
             "taskUsd": 0.00009719999999999998,
+            "reusedUsd": 0.00007291999999999999,
             "cpuMs": 1860,
             "activeCpu": true,
             "minimumSeconds": 0,
@@ -4149,6 +4192,7 @@
             },
             "hourlyUsd": 0.11664,
             "taskUsd": 0.0000972,
+            "reusedUsd": 0.000067554,
             "cpuMs": 1980,
             "activeCpu": false,
             "minimumSeconds": 0,
@@ -4169,6 +4213,7 @@
             },
             "hourlyUsd": 0.2,
             "taskUsd": 0.00010711111111111111,
+            "reusedUsd": 0.0000755111111111111,
             "cpuMs": 2080,
             "activeCpu": true,
             "minimumSeconds": 0,
@@ -4189,6 +4234,7 @@
             },
             "hourlyUsd": 0.006507506849315068,
             "taskUsd": 0.00010845844748858446,
+            "reusedUsd": 0.0000025758881278538808,
             "cpuMs": 1360,
             "activeCpu": false,
             "minimumSeconds": 60,
@@ -4209,6 +4255,7 @@
             },
             "hourlyUsd": 0.13362,
             "taskUsd": 0.00014846666666666665,
+            "reusedUsd": 0.00007720266666666667,
             "cpuMs": 2200,
             "activeCpu": false,
             "minimumSeconds": 0,
@@ -4229,6 +4276,7 @@
             },
             "hourlyUsd": 0.23796,
             "taskUsd": 0.00019830000000000002,
+            "reusedUsd": 0.00010609049999999999,
             "cpuMs": 1640,
             "activeCpu": false,
             "minimumSeconds": 0,
@@ -4249,6 +4297,7 @@
             },
             "hourlyUsd": 0.25220016,
             "taskUsd": 0.0004903892,
+            "reusedUsd": 0.000240640986,
             "cpuMs": 1290,
             "activeCpu": false,
             "minimumSeconds": 0,
@@ -4262,18 +4311,19 @@
               "vcpu": 2,
               "memoryGb": 4
             },
-            "createMs": 422,
-            "taskMs": 2865,
+            "createMs": 432,
+            "taskMs": 2978,
             "phasesMs": {
-              "python": 2865
+              "python": 2978
             },
             "hourlyUsd": 0.3408,
-            "taskUsd": 0.0015167999999999998,
-            "cpuMs": 2910,
+            "taskUsd": 0.0015783111111111108,
+            "reusedUsd": 0.00023512622222222223,
+            "cpuMs": 2970,
             "activeCpu": true,
             "minimumSeconds": 60,
             "perSandboxUsd": 0,
-            "measuredAt": "2026-11-17T10:51:25.019Z"
+            "measuredAt": "2026-11-17T14:19:06.906Z"
           },
           {
             "provider": "sail",
@@ -4289,6 +4339,7 @@
             },
             "hourlyUsd": 0.03069,
             "taskUsd": 0.01003669875,
+            "reusedUsd": 0.000021501150000000003,
             "cpuMs": 2860,
             "activeCpu": true,
             "minimumSeconds": 0,
@@ -4325,6 +4376,7 @@
             },
             "hourlyUsd": 0.013999999999999999,
             "taskUsd": 0.000003888888888888889,
+            "reusedUsd": 0.0000021427777777777776,
             "cpuMs": 200,
             "activeCpu": false,
             "minimumSeconds": 0,
@@ -4345,6 +4397,7 @@
             },
             "hourlyUsd": 0.022,
             "taskUsd": 0.00001222222222222222,
+            "reusedUsd": 0.000004858333333333333,
             "cpuMs": 250,
             "activeCpu": false,
             "minimumSeconds": 0,
@@ -4365,6 +4418,7 @@
             },
             "hourlyUsd": 0.018,
             "taskUsd": 0.000014999999999999999,
+            "reusedUsd": 0.000002465,
             "cpuMs": 70,
             "activeCpu": false,
             "minimumSeconds": 0,
@@ -4385,6 +4439,7 @@
             },
             "hourlyUsd": 0.06659999999999999,
             "taskUsd": 0.0000185,
+            "reusedUsd": 0.000006697,
             "activeCpu": false,
             "minimumSeconds": 0,
             "perSandboxUsd": 0,
@@ -4404,6 +4459,7 @@
             },
             "hourlyUsd": 0.21599999999999997,
             "taskUsd": 0.000023799999999999992,
+            "reusedUsd": 0.000012099999999999996,
             "cpuMs": 190,
             "activeCpu": true,
             "minimumSeconds": 0,
@@ -4424,6 +4480,7 @@
             },
             "hourlyUsd": 0.1656,
             "taskUsd": 0.000046,
+            "reusedUsd": 0.000013477999999999999,
             "cpuMs": 150,
             "activeCpu": false,
             "minimumSeconds": 0,
@@ -4444,6 +4501,7 @@
             },
             "hourlyUsd": 0.1089,
             "taskUsd": 0.0000605,
+            "reusedUsd": 0.0000200255,
             "cpuMs": 230,
             "activeCpu": false,
             "minimumSeconds": 0,
@@ -4464,6 +4522,7 @@
             },
             "hourlyUsd": 0.11664,
             "taskUsd": 0.0000648,
+            "reusedUsd": 0.0000187272,
             "cpuMs": 150,
             "activeCpu": false,
             "minimumSeconds": 0,
@@ -4484,6 +4543,7 @@
             },
             "hourlyUsd": 0.2,
             "taskUsd": 0.00006578111111111112,
+            "reusedUsd": 0.000008322222222222223,
             "cpuMs": 140,
             "activeCpu": true,
             "minimumSeconds": 0,
@@ -4504,6 +4564,7 @@
             },
             "hourlyUsd": 0.23796,
             "taskUsd": 0.00006610000000000001,
+            "reusedUsd": 0.0000259112,
             "cpuMs": 340,
             "activeCpu": false,
             "minimumSeconds": 0,
@@ -4524,6 +4585,7 @@
             },
             "hourlyUsd": 0.006507506849315068,
             "taskUsd": 0.00010845844748858446,
+            "reusedUsd": 4.3383378995433783e-7,
             "cpuMs": 130,
             "activeCpu": false,
             "minimumSeconds": 60,
@@ -4544,6 +4606,7 @@
             },
             "hourlyUsd": 0.13362,
             "taskUsd": 0.00011135,
+            "reusedUsd": 0.00002950775,
             "cpuMs": 350,
             "activeCpu": false,
             "minimumSeconds": 0,
@@ -4564,6 +4627,7 @@
             },
             "hourlyUsd": 0.25220016,
             "taskUsd": 0.0004203336,
+            "reusedUsd": 0.00016119793560000003,
             "cpuMs": 140,
             "activeCpu": false,
             "minimumSeconds": 0,
@@ -4577,18 +4641,19 @@
               "vcpu": 2,
               "memoryGb": 4
             },
-            "createMs": 386,
-            "taskMs": 222,
+            "createMs": 343,
+            "taskMs": 319,
             "phasesMs": {
-              "download": 222
+              "download": 319
             },
             "hourlyUsd": 0.3408,
-            "taskUsd": 0.0014172444444444442,
-            "cpuMs": 110,
+            "taskUsd": 0.001418311111111111,
+            "reusedUsd": 0.000012492,
+            "cpuMs": 120,
             "activeCpu": true,
             "minimumSeconds": 60,
             "perSandboxUsd": 0,
-            "measuredAt": "2026-11-17T10:52:59.217Z"
+            "measuredAt": "2026-11-17T14:19:18.460Z"
           },
           {
             "provider": "sail",
@@ -4604,6 +4669,7 @@
             },
             "hourlyUsd": 0.03069,
             "taskUsd": 0.010017868125000001,
+            "reusedUsd": 0.000003651725,
             "cpuMs": 130,
             "activeCpu": true,
             "minimumSeconds": 0,
@@ -4614,6 +4680,373 @@
         "couldNot": [
           "Amazon Bedrock AgentCore Code Interpreter"
         ]
+      },
+      {
+        "id": "agent",
+        "title": "Agent loop",
+        "blurb": "10 turns of a 6 s model wait and a short Python tool call: about a minute, mostly idle.",
+        "version": "agent-v1",
+        "repeat": 1,
+        "phases": [
+          {
+            "id": "agent",
+            "label": "10 turns"
+          }
+        ],
+        "rows": [
+          {
+            "provider": "agent37",
+            "name": "Agent37",
+            "size": {
+              "vcpu": 2,
+              "memoryGb": 4,
+              "cpuUtilization": 0.1
+            },
+            "createMs": 993,
+            "taskMs": 63239,
+            "phasesMs": {
+              "agent": 63239
+            },
+            "hourlyUsd": 0.006507506849315068,
+            "taskUsd": 0.00021691689497716892,
+            "reusedUsd": 0.00011431339601217654,
+            "cpuMs": 950,
+            "activeCpu": false,
+            "minimumSeconds": 60,
+            "perSandboxUsd": 0,
+            "measuredAt": "2026-11-17T14:18:12.013Z"
+          },
+          {
+            "provider": "openscale",
+            "name": "OpenScale Sandboxes",
+            "size": {
+              "vcpu": 2,
+              "memoryGb": 1,
+              "cpuUtilization": 0.1
+            },
+            "createMs": 357,
+            "taskMs": 61757,
+            "phasesMs": {
+              "agent": 61757
+            },
+            "hourlyUsd": 0.013999999999999999,
+            "taskUsd": 0.000245,
+            "reusedUsd": 0.00024016611111111108,
+            "cpuMs": 1690,
+            "activeCpu": false,
+            "minimumSeconds": 0,
+            "perSandboxUsd": 0,
+            "measuredAt": "2026-11-17T14:30:21.414Z"
+          },
+          {
+            "provider": "boat",
+            "name": "Boat",
+            "size": {
+              "vcpu": 2,
+              "memoryGb": 4,
+              "cpuUtilization": 0.1
+            },
+            "createMs": 1639,
+            "taskMs": 60616,
+            "phasesMs": {
+              "agent": 60616
+            },
+            "hourlyUsd": 0.018,
+            "taskUsd": 0.00031499999999999996,
+            "reusedUsd": 0.00030307999999999995,
+            "cpuMs": 5920,
+            "activeCpu": false,
+            "minimumSeconds": 0,
+            "perSandboxUsd": 0,
+            "measuredAt": "2026-11-17T14:18:12.013Z"
+          },
+          {
+            "provider": "maritime",
+            "name": "Maritime",
+            "size": {
+              "vcpu": 2,
+              "memoryGb": 4,
+              "cpuUtilization": 0.1
+            },
+            "createMs": 1273,
+            "taskMs": 61048,
+            "phasesMs": {
+              "agent": 61048
+            },
+            "hourlyUsd": 0.022,
+            "taskUsd": 0.000385,
+            "reusedUsd": 0.00037307111111111114,
+            "cpuMs": 1360,
+            "activeCpu": false,
+            "minimumSeconds": 0,
+            "perSandboxUsd": 0,
+            "measuredAt": "2026-11-17T14:30:21.414Z"
+          },
+          {
+            "provider": "agentcore",
+            "name": "Amazon Bedrock AgentCore Code Interpreter",
+            "size": {
+              "vcpu": 2,
+              "memoryGb": 4,
+              "cpuUtilization": 0.1
+            },
+            "createMs": 903,
+            "taskMs": 60861,
+            "phasesMs": {
+              "agent": 60861
+            },
+            "hourlyUsd": 0.2168,
+            "taskUsd": 0.0006880430555555555,
+            "reusedUsd": 0.0006760835555555555,
+            "cpuMs": 1490,
+            "activeCpu": true,
+            "minimumSeconds": 0,
+            "perSandboxUsd": 0,
+            "measuredAt": "2026-11-17T14:18:12.013Z"
+          },
+          {
+            "provider": "daytona",
+            "name": "Daytona",
+            "size": {
+              "vcpu": 1,
+              "memoryGb": 1,
+              "cpuUtilization": 0.1
+            },
+            "createMs": 366,
+            "taskMs": 60715,
+            "phasesMs": {
+              "agent": 60715
+            },
+            "hourlyUsd": 0.06659999999999999,
+            "taskUsd": 0.0011469999999999998,
+            "reusedUsd": 0.0011232274999999998,
+            "activeCpu": false,
+            "minimumSeconds": 0,
+            "perSandboxUsd": 0,
+            "measuredAt": "2026-11-17T14:30:21.414Z"
+          },
+          {
+            "provider": "cloudflare",
+            "name": "Cloudflare Sandbox",
+            "size": {
+              "vcpu": 2,
+              "memoryGb": 4,
+              "cpuUtilization": 0.1
+            },
+            "createMs": 726,
+            "taskMs": 61130,
+            "phasesMs": {
+              "agent": 61130
+            },
+            "hourlyUsd": 0.21599999999999997,
+            "taskUsd": 0.0012681999999999995,
+            "reusedUsd": 0.0012507999999999996,
+            "cpuMs": 1410,
+            "activeCpu": true,
+            "minimumSeconds": 0,
+            "perSandboxUsd": 0,
+            "measuredAt": "2026-11-17T14:30:21.414Z"
+          },
+          {
+            "provider": "vercel",
+            "name": "Vercel Sandbox",
+            "size": {
+              "vcpu": 2,
+              "memoryGb": 4,
+              "cpuUtilization": 0.1
+            },
+            "createMs": 366,
+            "taskMs": 61154,
+            "phasesMs": {
+              "agent": 61154
+            },
+            "hourlyUsd": 0.3408,
+            "taskUsd": 0.001510933333333333,
+            "reusedUsd": 0.001491005333333333,
+            "cpuMs": 1270,
+            "activeCpu": true,
+            "minimumSeconds": 60,
+            "perSandboxUsd": 0,
+            "measuredAt": "2026-11-17T14:30:21.414Z"
+          },
+          {
+            "provider": "e2b",
+            "name": "E2B",
+            "size": {
+              "vcpu": 2,
+              "memoryGb": 0.5,
+              "cpuUtilization": 0.1
+            },
+            "createMs": 255,
+            "taskMs": 61054,
+            "phasesMs": {
+              "agent": 61054
+            },
+            "hourlyUsd": 0.1089,
+            "taskUsd": 0.0018754999999999998,
+            "reusedUsd": 0.0018468835,
+            "cpuMs": 1180,
+            "activeCpu": false,
+            "minimumSeconds": 0,
+            "perSandboxUsd": 0,
+            "measuredAt": "2026-11-17T14:30:21.414Z"
+          },
+          {
+            "provider": "modal",
+            "name": "Modal",
+            "size": {
+              "vcpu": 2,
+              "memoryGb": 4,
+              "cpuUtilization": 0.1
+            },
+            "createMs": 506,
+            "taskMs": 61015,
+            "phasesMs": {
+              "agent": 61015
+            },
+            "hourlyUsd": 0.23796,
+            "taskUsd": 0.0019573047275,
+            "reusedUsd": 0.0019285316124999998,
+            "cpuMs": 1030,
+            "activeCpu": true,
+            "minimumSeconds": 0,
+            "perSandboxUsd": 0,
+            "measuredAt": "2026-11-17T14:30:21.414Z"
+          },
+          {
+            "provider": "novita",
+            "name": "Novita AI Agent Sandbox",
+            "size": {
+              "vcpu": 2,
+              "memoryGb": 4,
+              "cpuUtilization": 0.1
+            },
+            "createMs": 359,
+            "taskMs": 60749,
+            "phasesMs": {
+              "agent": 60749
+            },
+            "hourlyUsd": 0.11664,
+            "taskUsd": 0.0020088,
+            "reusedUsd": 0.0019682676,
+            "cpuMs": 1000,
+            "activeCpu": false,
+            "minimumSeconds": 0,
+            "perSandboxUsd": 0,
+            "measuredAt": "2026-11-17T14:30:21.414Z"
+          },
+          {
+            "provider": "freestyle",
+            "name": "Freestyle",
+            "size": {
+              "vcpu": 2,
+              "memoryGb": 4,
+              "cpuUtilization": 0.1
+            },
+            "createMs": 2393,
+            "taskMs": 62414,
+            "phasesMs": {
+              "agent": 62414
+            },
+            "hourlyUsd": 0.13362,
+            "taskUsd": 0.0024125833333333334,
+            "reusedUsd": 0.002316599633333333,
+            "cpuMs": 1730,
+            "activeCpu": false,
+            "minimumSeconds": 0,
+            "perSandboxUsd": 0,
+            "measuredAt": "2026-11-17T14:30:21.414Z"
+          },
+          {
+            "provider": "superserve",
+            "name": "Superserve",
+            "size": {
+              "vcpu": 2,
+              "memoryGb": 4,
+              "cpuUtilization": 0.1
+            },
+            "createMs": 294,
+            "taskMs": 60646,
+            "phasesMs": {
+              "agent": 60646
+            },
+            "hourlyUsd": 0.1656,
+            "taskUsd": 0.002806,
+            "reusedUsd": 0.0027897160000000002,
+            "cpuMs": 660,
+            "activeCpu": false,
+            "minimumSeconds": 0,
+            "perSandboxUsd": 0,
+            "measuredAt": "2026-11-17T14:30:21.414Z"
+          },
+          {
+            "provider": "tensorlake",
+            "name": "Tensorlake",
+            "size": {
+              "vcpu": 2,
+              "memoryGb": 4,
+              "cpuUtilization": 0.1
+            },
+            "createMs": 2101,
+            "taskMs": 128582,
+            "phasesMs": {
+              "agent": 128582
+            },
+            "hourlyUsd": 0.2,
+            "taskUsd": 0.0031997566666666665,
+            "reusedUsd": 0.0031431155555555553,
+            "cpuMs": 1245,
+            "activeCpu": true,
+            "minimumSeconds": 0,
+            "perSandboxUsd": 0,
+            "measuredAt": "2026-11-17T14:18:12.013Z"
+          },
+          {
+            "provider": "lambda",
+            "name": "AWS Lambda MicroVMs",
+            "size": {
+              "vcpu": 2,
+              "memoryGb": 4,
+              "cpuUtilization": 0.1
+            },
+            "createMs": 2930,
+            "taskMs": 64859,
+            "phasesMs": {
+              "agent": 64859
+            },
+            "hourlyUsd": 0.25220016,
+            "taskUsd": 0.0047637808,
+            "reusedUsd": 0.0045437361604,
+            "cpuMs": 740,
+            "activeCpu": false,
+            "minimumSeconds": 0,
+            "perSandboxUsd": 0,
+            "measuredAt": "2026-11-17T14:18:12.013Z"
+          },
+          {
+            "provider": "sail",
+            "name": "Sailboxes (Sail Research)",
+            "size": {
+              "vcpu": 2,
+              "memoryGb": 4,
+              "cpuUtilization": 0.1
+            },
+            "createMs": 2729,
+            "taskMs": 62334,
+            "phasesMs": {
+              "agent": 62334
+            },
+            "hourlyUsd": 0.03069,
+            "taskUsd": 0.010303043125,
+            "reusedUsd": 0.000286912725,
+            "cpuMs": 6130,
+            "activeCpu": true,
+            "minimumSeconds": 0,
+            "perSandboxUsd": 0.01,
+            "measuredAt": "2026-11-17T14:30:21.414Z"
+          }
+        ],
+        "couldNot": []
       }
     ]
   },
@@ -5390,6 +5823,42 @@
       ]
     },
     {
+      "date": "2026-11-17T14:30:21.414Z",
+      "label": "home-eu",
+      "by": "gigialc",
+      "platform": "darwin-arm64",
+      "runs": 3,
+      "providers": 11,
+      "ids": [
+        "e2b",
+        "superserve",
+        "openscale",
+        "novita",
+        "daytona",
+        "vercel",
+        "modal",
+        "cloudflare",
+        "maritime",
+        "freestyle",
+        "sail"
+      ]
+    },
+    {
+      "date": "2026-11-17T14:18:12.013Z",
+      "label": "home-eu",
+      "by": "gigialc",
+      "platform": "darwin-arm64",
+      "runs": 3,
+      "providers": 5,
+      "ids": [
+        "agentcore",
+        "agent37",
+        "boat",
+        "tensorlake",
+        "lambda"
+      ]
+    },
+    {
       "date": "2026-11-17T10:52:59.217Z",
       "label": "home-eu",
       "by": "gigialc",
@@ -5413,6 +5882,17 @@
         "tensorlake",
         "sail",
         "lambda"
+      ]
+    },
+    {
+      "date": "2026-11-17T14:19:18.460Z",
+      "label": "home-eu",
+      "by": "gigialc",
+      "platform": "darwin-arm64",
+      "runs": 5,
+      "providers": 1,
+      "ids": [
+        "vercel"
       ]
     },
     {
@@ -5465,6 +5945,17 @@
         "freestyle",
         "sail",
         "lambda"
+      ]
+    },
+    {
+      "date": "2026-11-17T14:19:06.906Z",
+      "label": "home-eu",
+      "by": "gigialc",
+      "platform": "darwin-arm64",
+      "runs": 5,
+      "providers": 1,
+      "ids": [
+        "vercel"
       ]
     },
     {
@@ -5546,6 +6037,17 @@
       ]
     },
     {
+      "date": "2026-11-17T14:27:44.070Z",
+      "label": "home-eu",
+      "by": "gigialc",
+      "platform": "darwin-arm64",
+      "runs": 3,
+      "providers": 1,
+      "ids": [
+        "vercel"
+      ]
+    },
+    {
       "date": "2026-11-17T00:46:11.826Z",
       "label": "home-eu",
       "by": "gigialc",
@@ -5569,6 +6071,17 @@
         "boat",
         "lambda",
         "sail"
+      ]
+    },
+    {
+      "date": "2026-11-17T14:18:42.548Z",
+      "label": "home-eu",
+      "by": "gigialc",
+      "platform": "darwin-arm64",
+      "runs": 3,
+      "providers": 1,
+      "ids": [
+        "vercel"
       ]
     },
     {

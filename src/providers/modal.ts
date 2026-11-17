@@ -32,9 +32,14 @@ export class ModalProvider implements Provider {
     const modal = await this.modal();
     const app = await modal.apps.fromName(APP_NAME, { createIfMissing: true });
     const image = modal.images.fromRegistry(spec.image?.modal ?? "python:3.13-slim");
+    // Modal's cpu is physical cores (1 core = 2 vCPUs); the catalog and the spec count vCPUs. Modal bills the
+    // larger of the reservation and actual use, so with cpuUtilization below 1 only that share is reserved
+    // (at least 1/8 core, Modal's own default) and the sandbox may burst to the full size when the host has room.
+    const cores = (spec.vcpu ?? DEFAULT_VCPU) / 2;
+    const share = Math.min(1, spec.cpuUtilization ?? 1);
     const sb = await modal.sandboxes.create(app, image, {
-      // Modal's cpu is physical cores (1 core = 2 vCPUs); the catalog and the spec count vCPUs.
-      cpu: (spec.vcpu ?? DEFAULT_VCPU) / 2,
+      cpu: share < 1 ? Math.max(0.125, cores * share) : cores,
+      ...(share < 1 ? { cpuLimit: cores } : {}),
       memoryMiB: Math.round((spec.memoryGb ?? DEFAULT_MEMORY_GB) * 1024),
       gpu: spec.gpu,
       timeoutMs: (spec.timeoutMinutes ?? 30) * 60_000,

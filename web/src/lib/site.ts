@@ -63,6 +63,7 @@ export interface TaskRow {
   phasesMs: Record<string, number>;
   hourlyUsd: number;
   taskUsd: number;
+  reusedUsd: number;
   cpuMs?: number;
   activeCpu: boolean;
   minimumSeconds: number;

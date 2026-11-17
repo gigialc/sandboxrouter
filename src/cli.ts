@@ -4,6 +4,9 @@ import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { platform, arch } from "node:os";
 import { bench, benchMarkdown } from "./bench.js";
 import { TASKS, type TaskKind } from "./task.js";
+
+/** Errors that mean the network between here and the provider failed, not the provider. */
+export const NETWORK_ERROR = /fetch failed|ENOTFOUND|EAI_AGAIN|ENETUNREACH|ECONNRESET|ETIMEDOUT|Name resolution failed|getaddrinfo/i;
 import { costMarkdown, costRun, settle, type CostRun } from "./cost.js";
 import { checkProvider, type CheckReport } from "./check.js";
 import { gc, listOpen } from "./gc.js";
@@ -331,7 +334,13 @@ async function main() {
     console.log(`\nsandboxrouter bench: ${new Date().toISOString().slice(0, 10)}, ${rows[0].runs} runs each\n`);
     console.log(benchMarkdown(rows));
     for (const r of rows.filter((r) => r.lastError)) console.error(`\n${r.provider} last error: ${r.lastError}`);
-    if (values.share) {
+    // Several providers all failing on the network at once is this machine's connection, not theirs: a
+    // report from it would mark them down. Refuse to write one.
+    const offline = rows.filter((r) => r.failures === r.runs && r.lastError && NETWORK_ERROR.test(r.lastError));
+    if (values.share && offline.length >= 3) {
+      console.error(`\nnot writing a report: ${offline.length} providers failed with network errors (${offline.map((r) => r.provider).join(", ")}), which looks like this machine lost its connection. Run it again.`);
+      process.exitCode = 1;
+    } else if (values.share) {
       const version = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8")).version;
       const report = makeReport(rows, { version, runs: rows[0].runs, spec: { ...spec, vcpu: spec.vcpu ?? DEFAULT_VCPU, memoryGb: spec.memoryGb ?? DEFAULT_MEMORY_GB }, label: values.label, by, task: values.task ? TASKS[job].version : undefined });
       const left = rows.filter((r) => !benchmarksPublishable(r.provider)).map((r) => r.provider);
