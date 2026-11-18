@@ -33,11 +33,16 @@ export default function Home() {
   const cloud = site.providers.filter((p) => !p.local);
   const passed = cloud.filter((p) => p.live.status === "passed");
   const desktops = cloud.filter((p) => p.computers.length).length;
-  // The strip under the hero: tested providers first, then the rest by name.
+  // Prefer tested providers in the hero strip, with Vercel in the former Sprites slot.
   const short = (n: string) => n.replace(/ \(.*\)$/, "");
-  const strip = [...passed, ...cloud.filter((p) => p.live.status !== "passed").sort((a, b) => a.name.localeCompare(b.name))]
-    .filter((p) => short(p.name).length <= 14)
-    .slice(0, 9);
+  const stripOrder = [...passed, ...cloud.filter((p) => p.live.status !== "passed").sort((a, b) => a.name.localeCompare(b.name))]
+    .filter((p) => short(p.name).length <= 14);
+  const spritesIndex = stripOrder.findIndex((p) => p.id === "sprites");
+  const vercelIndex = stripOrder.findIndex((p) => p.id === "vercel");
+  if (spritesIndex >= 0 && vercelIndex > spritesIndex) {
+    [stripOrder[spritesIndex], stripOrder[vercelIndex]] = [stripOrder[vercelIndex], stripOrder[spritesIndex]];
+  }
+  const strip = stripOrder.filter((p) => p.id !== "sprites").slice(0, 9);
   // The benchmarks section quotes the short job: who finished first, and who cost least.
   const short_ = site.tasks.kinds.find((k) => k.id === "short");
   const scale = site.scale;
