@@ -119,7 +119,7 @@
     }
   },
   "version": "0.14.1",
-  "generatedAt": "2026-11-18T17:23:56.366Z",
+  "generatedAt": "2026-11-18T17:53:47.335Z",
   "shapes": [
     "1x2",
     "2x4",
@@ -3381,6 +3381,22 @@
       "measuredAt": "2026-11-17T16:19:15.367Z"
     },
     {
+      "provider": "beam",
+      "name": "Beam",
+      "submissions": 1,
+      "medianCreateMs": 282,
+      "medianExecMs": 529,
+      "medianReadyMs": 792,
+      "successRate": 1,
+      "runs": 3,
+      "hourlyUsd": 0.14,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "measuredAt": "2026-11-18T17:49:19.514Z"
+    },
+    {
       "provider": "novita",
       "name": "Novita AI Agent Sandbox",
       "submissions": 1,
@@ -3546,6 +3562,22 @@
       "measuredAt": "2026-11-17T16:19:15.367Z"
     },
     {
+      "provider": "morph",
+      "name": "Morph Cloud",
+      "submissions": 1,
+      "medianCreateMs": 1470,
+      "medianExecMs": 540,
+      "medianReadyMs": 1992,
+      "successRate": 1,
+      "runs": 3,
+      "hourlyUsd": 0.1,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "measuredAt": "2026-11-18T17:44:07.988Z"
+    },
+    {
       "provider": "boat",
       "name": "Boat",
       "submissions": 1,
@@ -3591,6 +3623,22 @@
       "measuredAt": "2026-11-17T16:19:15.367Z"
     },
     {
+      "provider": "google",
+      "name": "Google Cloud Agent Platform",
+      "submissions": 1,
+      "medianCreateMs": 2456,
+      "medianExecMs": 222,
+      "medianReadyMs": 2678,
+      "successRate": 1,
+      "runs": 3,
+      "hourlyUsd": 0.10300000000000001,
+      "size": {
+        "vcpu": 1,
+        "memoryGb": 2
+      },
+      "measuredAt": "2026-11-18T17:53:44.923Z"
+    },
+    {
       "provider": "sail",
       "name": "Sailboxes (Sail Research)",
       "submissions": 1,
@@ -3619,6 +3667,22 @@
         "memoryGb": 4
       },
       "measuredAt": "2026-11-17T16:19:15.367Z"
+    },
+    {
+      "provider": "northflank",
+      "name": "Northflank",
+      "submissions": 1,
+      "medianCreateMs": 7789,
+      "medianExecMs": 402,
+      "medianReadyMs": 8191,
+      "successRate": 1,
+      "runs": 3,
+      "hourlyUsd": 0.0074990000000000005,
+      "size": {
+        "vcpu": 0.2,
+        "memoryGb": 0.5
+      },
+      "measuredAt": "2026-11-18T17:51:44.834Z"
     }
   ],
   "tasks": {
@@ -3626,7 +3690,7 @@
       {
         "id": "short",
         "title": "Short job",
-        "blurb": "Hashing on one and two cores, then a disk write: a few seconds.",
+        "blurb": "One hash, then two concurrent hashes, then a disk write.",
         "version": "v2",
         "repeat": 1,
         "phases": [
@@ -3750,6 +3814,32 @@
             "minimumSeconds": 0,
             "perSandboxUsd": 0,
             "measuredAt": "2026-11-17T23:40:37.832Z"
+          },
+          {
+            "provider": "northflank",
+            "name": "Northflank",
+            "size": {
+              "vcpu": 0.2,
+              "memoryGb": 0.5
+            },
+            "createMs": 8191,
+            "taskMs": 26695,
+            "phasesMs": {
+              "cpu": 12615,
+              "cores": 13089,
+              "disk": 1156
+            },
+            "hourlyUsd": 0.0074990000000000005,
+            "taskUsd": 0.00007290694444444444,
+            "reusedUsd": 0.00005560716805555556,
+            "runs": 3,
+            "ok": 3,
+            "limited": 0,
+            "successRate": 1,
+            "activeCpu": false,
+            "minimumSeconds": 0,
+            "perSandboxUsd": 0,
+            "measuredAt": "2026-11-18T17:51:44.834Z"
           },
           {
             "provider": "tensorlake",
@@ -3967,6 +4057,87 @@
             "measuredAt": "2026-11-17T23:36:05.829Z"
           },
           {
+            "provider": "beam",
+            "name": "Beam",
+            "size": {
+              "vcpu": 2,
+              "memoryGb": 4
+            },
+            "createMs": 727,
+            "taskMs": 3676,
+            "phasesMs": {
+              "cpu": 2149,
+              "cores": 1095,
+              "disk": 223
+            },
+            "hourlyUsd": 0.14,
+            "taskUsd": 0.00019444444444444446,
+            "reusedUsd": 0.00014295555555555558,
+            "runs": 3,
+            "ok": 3,
+            "limited": 0,
+            "successRate": 1,
+            "cpuMs": 6940,
+            "activeCpu": false,
+            "minimumSeconds": 0,
+            "perSandboxUsd": 0,
+            "measuredAt": "2026-11-18T17:44:19.747Z"
+          },
+          {
+            "provider": "google",
+            "name": "Google Cloud Agent Platform",
+            "size": {
+              "vcpu": 1,
+              "memoryGb": 2
+            },
+            "createMs": 2394,
+            "taskMs": 7298,
+            "phasesMs": {
+              "cpu": 3114,
+              "cores": 4047,
+              "disk": 164
+            },
+            "hourlyUsd": 0.10300000000000001,
+            "taskUsd": 0.0002861111111111111,
+            "reusedUsd": 0.0002088038888888889,
+            "runs": 3,
+            "ok": 3,
+            "limited": 0,
+            "successRate": 1,
+            "cpuMs": 7950,
+            "activeCpu": false,
+            "minimumSeconds": 0,
+            "perSandboxUsd": 0,
+            "measuredAt": "2026-11-18T17:49:01.865Z"
+          },
+          {
+            "provider": "morph",
+            "name": "Morph Cloud",
+            "size": {
+              "vcpu": 2,
+              "memoryGb": 4
+            },
+            "createMs": 1992,
+            "taskMs": 8131,
+            "phasesMs": {
+              "cpu": 3225,
+              "cores": 2060,
+              "disk": 3066
+            },
+            "hourlyUsd": 0.1,
+            "taskUsd": 0.0003055555555555556,
+            "reusedUsd": 0.00022586111111111111,
+            "runs": 3,
+            "ok": 3,
+            "limited": 0,
+            "successRate": 1,
+            "cpuMs": 9170,
+            "activeCpu": false,
+            "minimumSeconds": 0,
+            "perSandboxUsd": 0,
+            "measuredAt": "2026-11-18T17:44:07.988Z"
+          },
+          {
             "provider": "lambda",
             "name": "AWS Lambda MicroVMs",
             "size": {
@@ -4068,8 +4239,26 @@
             "taskFailures": 0
           },
           {
+            "provider": "google",
+            "name": "Google Cloud Agent Platform",
+            "requested": 3,
+            "completed": 3,
+            "limited": 0,
+            "failures": 0,
+            "taskFailures": 0
+          },
+          {
             "provider": "maritime",
             "name": "Maritime",
+            "requested": 3,
+            "completed": 3,
+            "limited": 0,
+            "failures": 0,
+            "taskFailures": 0
+          },
+          {
+            "provider": "morph",
+            "name": "Morph Cloud",
             "requested": 3,
             "completed": 3,
             "limited": 0,
@@ -4190,6 +4379,24 @@
             "requested": 3,
             "completed": 0,
             "limited": 3,
+            "failures": 0,
+            "taskFailures": 0
+          },
+          {
+            "provider": "beam",
+            "name": "Beam",
+            "requested": 3,
+            "completed": 3,
+            "limited": 0,
+            "failures": 0,
+            "taskFailures": 0
+          },
+          {
+            "provider": "northflank",
+            "name": "Northflank",
+            "requested": 3,
+            "completed": 3,
+            "limited": 0,
             "failures": 0,
             "taskFailures": 0
           }
@@ -4792,6 +4999,31 @@
             "measuredAt": "2026-11-17T23:41:06.827Z"
           },
           {
+            "provider": "beam",
+            "name": "Beam",
+            "size": {
+              "vcpu": 2,
+              "memoryGb": 4
+            },
+            "createMs": 850,
+            "taskMs": 1731,
+            "phasesMs": {
+              "python": 1731
+            },
+            "hourlyUsd": 0.14,
+            "taskUsd": 0.00011666666666666668,
+            "reusedUsd": 0.00006731666666666667,
+            "runs": 3,
+            "ok": 3,
+            "limited": 0,
+            "successRate": 1,
+            "cpuMs": 1480,
+            "activeCpu": false,
+            "minimumSeconds": 0,
+            "perSandboxUsd": 0,
+            "measuredAt": "2026-11-18T17:44:32.822Z"
+          },
+          {
             "provider": "e2b",
             "name": "E2B",
             "size": {
@@ -4815,6 +5047,31 @@
             "minimumSeconds": 0,
             "perSandboxUsd": 0,
             "measuredAt": "2026-11-17T23:36:51.852Z"
+          },
+          {
+            "provider": "google",
+            "name": "Google Cloud Agent Platform",
+            "size": {
+              "vcpu": 1,
+              "memoryGb": 2
+            },
+            "createMs": 2346,
+            "taskMs": 1683,
+            "phasesMs": {
+              "python": 1683
+            },
+            "hourlyUsd": 0.10300000000000001,
+            "taskUsd": 0.00014305555555555556,
+            "reusedUsd": 0.00004815250000000001,
+            "runs": 3,
+            "ok": 3,
+            "limited": 0,
+            "successRate": 1,
+            "cpuMs": 1690,
+            "activeCpu": false,
+            "minimumSeconds": 0,
+            "perSandboxUsd": 0,
+            "measuredAt": "2026-11-18T17:49:17.541Z"
           },
           {
             "provider": "freestyle",
@@ -4962,6 +5219,15 @@
             "taskFailures": 0
           },
           {
+            "provider": "google",
+            "name": "Google Cloud Agent Platform",
+            "requested": 3,
+            "completed": 3,
+            "limited": 0,
+            "failures": 0,
+            "taskFailures": 0
+          },
+          {
             "provider": "maritime",
             "name": "Maritime",
             "requested": 3,
@@ -5084,6 +5350,15 @@
             "requested": 3,
             "completed": 0,
             "limited": 3,
+            "failures": 0,
+            "taskFailures": 0
+          },
+          {
+            "provider": "beam",
+            "name": "Beam",
+            "requested": 3,
+            "completed": 3,
+            "limited": 0,
             "failures": 0,
             "taskFailures": 0
           }
@@ -5250,6 +5525,31 @@
             "minimumSeconds": 0,
             "perSandboxUsd": 0,
             "measuredAt": "2026-11-17T23:37:36.070Z"
+          },
+          {
+            "provider": "beam",
+            "name": "Beam",
+            "size": {
+              "vcpu": 2,
+              "memoryGb": 4
+            },
+            "createMs": 702,
+            "taskMs": 414,
+            "phasesMs": {
+              "download": 414
+            },
+            "hourlyUsd": 0.14,
+            "taskUsd": 0.00007777777777777778,
+            "reusedUsd": 0.000016100000000000002,
+            "runs": 3,
+            "ok": 3,
+            "limited": 0,
+            "successRate": 1,
+            "cpuMs": 260,
+            "activeCpu": false,
+            "minimumSeconds": 0,
+            "perSandboxUsd": 0,
+            "measuredAt": "2026-11-18T17:44:41.265Z"
           },
           {
             "provider": "novita",
@@ -5447,6 +5747,15 @@
             "taskFailures": 0
           },
           {
+            "provider": "google",
+            "name": "Google Cloud Agent Platform",
+            "requested": 3,
+            "completed": 0,
+            "limited": 0,
+            "failures": 0,
+            "taskFailures": 3
+          },
+          {
             "provider": "maritime",
             "name": "Maritime",
             "requested": 3,
@@ -5569,6 +5878,15 @@
             "requested": 3,
             "completed": 0,
             "limited": 3,
+            "failures": 0,
+            "taskFailures": 0
+          },
+          {
+            "provider": "beam",
+            "name": "Beam",
+            "requested": 3,
+            "completed": 3,
+            "limited": 0,
             "failures": 0,
             "taskFailures": 0
           }
@@ -5769,6 +6087,32 @@
             "measuredAt": "2026-11-17T23:44:45.227Z"
           },
           {
+            "provider": "google",
+            "name": "Google Cloud Agent Platform",
+            "size": {
+              "vcpu": 1,
+              "memoryGb": 2,
+              "cpuUtilization": 0.1
+            },
+            "createMs": 2678,
+            "taskMs": 61085,
+            "phasesMs": {
+              "agent": 61085
+            },
+            "hourlyUsd": 0.10300000000000001,
+            "taskUsd": 0.0018311111111111113,
+            "reusedUsd": 0.0017477097222222222,
+            "runs": 3,
+            "ok": 3,
+            "limited": 0,
+            "successRate": 1,
+            "cpuMs": 1060,
+            "activeCpu": false,
+            "minimumSeconds": 0,
+            "perSandboxUsd": 0,
+            "measuredAt": "2026-11-18T17:53:44.923Z"
+          },
+          {
             "provider": "e2b",
             "name": "E2B",
             "size": {
@@ -5845,6 +6189,32 @@
             "minimumSeconds": 0,
             "perSandboxUsd": 0,
             "measuredAt": "2026-11-17T23:47:54.312Z"
+          },
+          {
+            "provider": "beam",
+            "name": "Beam",
+            "size": {
+              "vcpu": 2,
+              "memoryGb": 4,
+              "cpuUtilization": 0.1
+            },
+            "createMs": 1122,
+            "taskMs": 61068,
+            "phasesMs": {
+              "agent": 61068
+            },
+            "hourlyUsd": 0.14,
+            "taskUsd": 0.00245,
+            "reusedUsd": 0.002374866666666667,
+            "runs": 3,
+            "ok": 3,
+            "limited": 0,
+            "successRate": 1,
+            "cpuMs": 2200,
+            "activeCpu": false,
+            "minimumSeconds": 0,
+            "perSandboxUsd": 0,
+            "measuredAt": "2026-11-18T17:47:54.680Z"
           },
           {
             "provider": "lambda",
@@ -5991,6 +6361,15 @@
             "taskFailures": 0
           },
           {
+            "provider": "google",
+            "name": "Google Cloud Agent Platform",
+            "requested": 3,
+            "completed": 3,
+            "limited": 0,
+            "failures": 0,
+            "taskFailures": 0
+          },
+          {
             "provider": "maritime",
             "name": "Maritime",
             "requested": 3,
@@ -6002,6 +6381,15 @@
           {
             "provider": "vercel",
             "name": "Vercel Sandbox",
+            "requested": 3,
+            "completed": 3,
+            "limited": 0,
+            "failures": 0,
+            "taskFailures": 0
+          },
+          {
+            "provider": "beam",
+            "name": "Beam",
             "requested": 3,
             "completed": 3,
             "limited": 0,
@@ -6220,6 +6608,33 @@
             "measuredAt": "2026-11-17T23:47:40.891Z"
           },
           {
+            "provider": "beam",
+            "name": "Beam",
+            "size": {
+              "vcpu": 2,
+              "memoryGb": 4
+            },
+            "createMs": 792,
+            "taskMs": 24821,
+            "phasesMs": {
+              "fetch": 2370,
+              "install": 21019,
+              "typecheck": 1085
+            },
+            "hourlyUsd": 0.14,
+            "taskUsd": 0.0010111111111111113,
+            "reusedUsd": 0.0009652611111111112,
+            "runs": 3,
+            "ok": 3,
+            "limited": 0,
+            "successRate": 1,
+            "cpuMs": 48530,
+            "activeCpu": false,
+            "minimumSeconds": 0,
+            "perSandboxUsd": 0,
+            "measuredAt": "2026-11-18T17:49:19.514Z"
+          },
+          {
             "provider": "freestyle",
             "name": "Freestyle",
             "size": {
@@ -6431,6 +6846,15 @@
           {
             "provider": "vercel",
             "name": "Vercel Sandbox",
+            "requested": 3,
+            "completed": 3,
+            "limited": 0,
+            "failures": 0,
+            "taskFailures": 0
+          },
+          {
+            "provider": "beam",
+            "name": "Beam",
             "requested": 3,
             "completed": 3,
             "limited": 0,
@@ -8806,6 +9230,17 @@
       ]
     },
     {
+      "date": "2026-11-18T17:53:44.923Z",
+      "label": "home-eu",
+      "by": "gigialc",
+      "platform": "darwin-arm64",
+      "runs": 3,
+      "providers": 1,
+      "ids": [
+        "google"
+      ]
+    },
+    {
       "date": "2026-11-17T23:54:45.098Z",
       "label": "home-eu",
       "by": null,
@@ -8837,6 +9272,17 @@
       "ids": [
         "daytona",
         "agent37"
+      ]
+    },
+    {
+      "date": "2026-11-18T17:50:29.669Z",
+      "label": "home-eu",
+      "by": "gigialc",
+      "platform": "darwin-arm64",
+      "runs": 3,
+      "providers": 1,
+      "ids": [
+        "google"
       ]
     },
     {
@@ -8943,6 +9389,17 @@
       "ids": [
         "daytona",
         "agent37"
+      ]
+    },
+    {
+      "date": "2026-11-18T17:49:17.541Z",
+      "label": "home-eu",
+      "by": "gigialc",
+      "platform": "darwin-arm64",
+      "runs": 3,
+      "providers": 1,
+      "ids": [
+        "google"
       ]
     },
     {
@@ -9074,6 +9531,17 @@
       ]
     },
     {
+      "date": "2026-11-18T17:49:01.865Z",
+      "label": "home-eu",
+      "by": "gigialc",
+      "platform": "darwin-arm64",
+      "runs": 3,
+      "providers": 1,
+      "ids": [
+        "google"
+      ]
+    },
+    {
       "date": "2026-11-17T23:49:34.784Z",
       "label": "home-eu",
       "by": null,
@@ -9082,6 +9550,28 @@
       "providers": 1,
       "ids": [
         "maritime"
+      ]
+    },
+    {
+      "date": "2026-11-18T17:44:07.988Z",
+      "label": "home-eu",
+      "by": "gigialc",
+      "platform": "darwin-arm64",
+      "runs": 3,
+      "providers": 1,
+      "ids": [
+        "morph"
+      ]
+    },
+    {
+      "date": "2026-11-18T17:51:44.834Z",
+      "label": "home-eu",
+      "by": null,
+      "platform": "darwin-arm64",
+      "runs": 3,
+      "providers": 1,
+      "ids": [
+        "northflank"
       ]
     },
     {
@@ -9128,6 +9618,39 @@
       ]
     },
     {
+      "date": "2026-11-18T17:47:38.582Z",
+      "label": "home-eu",
+      "by": null,
+      "platform": "darwin-arm64",
+      "runs": 3,
+      "providers": 1,
+      "ids": [
+        "northflank"
+      ]
+    },
+    {
+      "date": "2026-11-18T17:48:25.973Z",
+      "label": "home-eu",
+      "by": "gigialc",
+      "platform": "darwin-arm64",
+      "runs": 3,
+      "providers": 1,
+      "ids": [
+        "google"
+      ]
+    },
+    {
+      "date": "2026-11-18T17:43:26.484Z",
+      "label": "home-eu",
+      "by": "gigialc",
+      "platform": "darwin-arm64",
+      "runs": 3,
+      "providers": 1,
+      "ids": [
+        "morph"
+      ]
+    },
+    {
       "date": "2026-11-17T23:54:12.771Z",
       "label": "home-eu",
       "by": null,
@@ -9136,6 +9659,72 @@
       "providers": 1,
       "ids": [
         "sprites"
+      ]
+    },
+    {
+      "date": "2026-11-18T17:47:54.680Z",
+      "label": "home-eu",
+      "by": "gigialc",
+      "platform": "darwin-arm64",
+      "runs": 3,
+      "providers": 1,
+      "ids": [
+        "beam"
+      ]
+    },
+    {
+      "date": "2026-11-18T17:44:41.265Z",
+      "label": "home-eu",
+      "by": "gigialc",
+      "platform": "darwin-arm64",
+      "runs": 3,
+      "providers": 1,
+      "ids": [
+        "beam"
+      ]
+    },
+    {
+      "date": "2026-11-18T17:44:32.822Z",
+      "label": "home-eu",
+      "by": "gigialc",
+      "platform": "darwin-arm64",
+      "runs": 3,
+      "providers": 1,
+      "ids": [
+        "beam"
+      ]
+    },
+    {
+      "date": "2026-11-18T17:49:19.514Z",
+      "label": "home-eu",
+      "by": "gigialc",
+      "platform": "darwin-arm64",
+      "runs": 3,
+      "providers": 1,
+      "ids": [
+        "beam"
+      ]
+    },
+    {
+      "date": "2026-11-18T17:44:19.747Z",
+      "label": "home-eu",
+      "by": "gigialc",
+      "platform": "darwin-arm64",
+      "runs": 3,
+      "providers": 1,
+      "ids": [
+        "beam"
+      ]
+    },
+    {
+      "date": "2026-11-18T17:43:58.369Z",
+      "label": "home-eu",
+      "by": "gigialc",
+      "platform": "darwin-arm64",
+      "runs": 3,
+      "providers": 1,
+      "ids": [
+        "beam"
       ]
     }
   ]

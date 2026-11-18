@@ -6,9 +6,11 @@
 export type RecJob = "start" | "short" | "long" | "python" | "download" | "agent" | "repo";
 /** What to rank by: lowest cost, shortest time, or both together ("value"). */
 export type RecPriority = "cost" | "speed" | "value";
+type BenchmarkSize = { vcpu: number; memoryGb: number };
 
 export interface PublishedStart {
   name: string;
+  size?: BenchmarkSize;
   medianCreateMs: number;
   medianReadyMs?: number;
   successRate: number;
@@ -18,6 +20,7 @@ export interface PublishedStart {
 }
 export interface PublishedJob {
   name: string;
+  size?: BenchmarkSize;
   /** Time to a usable sandbox when it ran this job. */
   createMs: number;
   /** The job itself, once the sandbox was up. */
@@ -43,7 +46,7 @@ export interface PublishedLoadRow {
   ok: number;
   /** Of those that didn't start, how many the benchmarking account's own limit refused. */
   limited: number;
-  size?: { vcpu: number; memoryGb: number };
+  size?: BenchmarkSize;
   createFailures?: number;
   commandFailures?: number;
   taskFailures?: number;
@@ -93,6 +96,8 @@ export interface Recommendation {
   rank: number;
   provider: string;
   name: string;
+  /** Nominal sandbox size used for the single-run measurement. */
+  size?: BenchmarkSize;
   /** Seconds for one job, start included unless reusing. */
   secondsEach: number;
   /** Cost of one job; for "start", undefined (see hourlyUsd). */
@@ -166,7 +171,7 @@ export function recommend(data: PublishedData, opts: RecommendOptions = {}): Rec
   const paired = startRows.length > 0 && startRows.every(([, s]) => s.medianReadyMs !== undefined);
   if (job === "start") {
     for (const [id, s] of startRows) {
-      raw.push({ provider: id, name: s.name, secondsEach: (paired ? s.medianReadyMs! : s.medianCreateMs) / 1000, hourlyUsd: s.hourlyUsd, successRate: s.successRate, runs: s.runs, notes: [], measuredAt: s.measuredAt, usdKey: s.hourlyUsd });
+      raw.push({ provider: id, name: s.name, ...(s.size ? { size: s.size } : {}), secondsEach: (paired ? s.medianReadyMs! : s.medianCreateMs) / 1000, hourlyUsd: s.hourlyUsd, successRate: s.successRate, runs: s.runs, notes: [], measuredAt: s.measuredAt, usdKey: s.hourlyUsd });
     }
   } else {
     for (const [id, j] of Object.entries(data.jobs[job] ?? {})) {
@@ -179,6 +184,7 @@ export function recommend(data: PublishedData, opts: RecommendOptions = {}): Rec
       raw.push({
         provider: id,
         name: j.name,
+        ...(j.size ? { size: j.size } : {}),
         secondsEach: (j.taskMs + (reuse ? 0 : j.createMs)) / 1000,
         usdEach: usd,
         usdTotal: usd * count,

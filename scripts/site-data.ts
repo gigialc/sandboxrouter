@@ -1,7 +1,7 @@
 // Generates web/src/data/site.json from the library itself, so the website can't drift from the code.
 // Run from the repo root: node --import tsx scripts/site-data.ts
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
-import { benchmarksPublishable, billingRules, CATALOG, hourlyCost, planLabel, unfit } from "../src/catalog.js";
+import { benchmarksPublishable, billingRules, CATALOG, DEFAULT_MEMORY_GB, DEFAULT_VCPU, hourlyCost, planLabel, unfit } from "../src/catalog.js";
 import type { SpreadResult } from "../src/burst.js";
 import { agentTable, aggregate, burstTable, loadAgentReports, loadBursts, loadReports, taskOutcomes, taskTable } from "../src/leaderboard.js";
 import { TASKS } from "../src/task.js";
@@ -11,7 +11,7 @@ import { CHECK_STEPS } from "../src/check.js";
 import { conformanceTable, liveStatus } from "../src/conformance.js";
 import { BILLED_VS_LIST } from "../src/billing.js";
 import { billKind, billResolutionUsd, type CostRun, type HostedLedgerRun } from "../src/cost.js";
-import { Router, rankUsd, runHours } from "../src/router.js";
+import { Router, rankUsd, runHours, type Size } from "../src/router.js";
 import { VERIFIED } from "../src/verified.js";
 import type { PublishedData, PublishedLoad } from "../src/recommend.js";
 import type { Capability, Provider, ProviderId, SandboxSpec } from "../src/types.js";
@@ -28,6 +28,27 @@ const SHAPES = [
 const pkg = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
 // Providers whose terms forbid publishing benchmarks are dropped from every report before anything is computed.
 const reports = loadReports("results").map((r) => ({ ...r, rows: r.rows.filter((x) => benchmarksPublishable(x.provider)) }));
+const standardSize = { vcpu: DEFAULT_VCPU, memoryGb: DEFAULT_MEMORY_GB };
+const smallerSizes = new Map<string, Size>();
+for (const { spec } of reports) {
+  const { vcpu = DEFAULT_VCPU, memoryGb = DEFAULT_MEMORY_GB } = spec ?? {};
+  if (vcpu <= DEFAULT_VCPU && memoryGb <= DEFAULT_MEMORY_GB && (vcpu < DEFAULT_VCPU || memoryGb < DEFAULT_MEMORY_GB)) {
+    smallerSizes.set(`${vcpu}x${memoryGb}`, { vcpu, memoryGb });
+  }
+}
+const benchmarkSizes = [standardSize, ...[...smallerSizes.values()].sort((a, b) => b.vcpu - a.vcpu || b.memoryGb - a.memoryGb)];
+
+/** Prefer standard measurements. Show another cohort only for a provider without a measurement at that size. */
+function benchmarkRows<T extends { provider: ProviderId }>(read: (size: Size) => T[], measured: (row: T) => boolean): T[] {
+  const chosen = new Map<ProviderId, T>();
+  for (const size of benchmarkSizes) {
+    for (const row of read(size)) {
+      const prior = chosen.get(row.provider);
+      if (!prior || (!measured(prior) && measured(row))) chosen.set(row.provider, row);
+    }
+  }
+  return [...chosen.values()];
+}
 const rows = new Map(conformanceTable().map((r) => [r.provider, r]));
 const conformance = new Map([...rows].map(([id, r]) => [id, r.run]));
 const names = new Map(CATALOG.map((c) => [c.id, c.name]));
@@ -175,11 +196,12 @@ const data = {
   })),
   checkSteps: CHECK_STEPS,
   desktops: computerCatalog(),
-  leaderboard: aggregate(reports),
+  leaderboard: benchmarkRows((size) => aggregate(reports, size), (row) => row.medianCreateMs !== undefined)
+    .sort((a, b) => (a.medianCreateMs ?? Infinity) - (b.medianCreateMs ?? Infinity)),
   tasks: {
     kinds: (
       [
-        ["short", "Short job", "Hashing on one and two cores, then a disk write: a few seconds."],
+        ["short", "Short job", "One hash, then two concurrent hashes, then a disk write."],
         ["long", "Long job", "The short job 40 times in a row: minutes of steady work."],
         ["python", "Python", "A Python script, like a code-interpreter call."],
         ["download", "Download", "A 53 MB download from nodejs.org."],
@@ -187,16 +209,23 @@ const data = {
         ["repo", "Real repo", "What a coding agent does first: fetch Node and a real TypeScript project, npm ci, typecheck."],
       ] as const
     )
-      .map(([id, title, blurb]) => ({
-        id,
-        title,
-        blurb,
-        version: TASKS[id].version,
-        repeat: TASKS[id].repeat,
-        phases: TASKS[id].phases.map((p) => ({ id: p.id, label: p.label })),
-        rows: taskTable(reports, TASKS[id].version),
-        outcomes: taskOutcomes(reports, TASKS[id].version),
-      }))
+      .map(([id, title, blurb]) => {
+        const { version, repeat, phases } = TASKS[id];
+        const selected = benchmarkRows((size) => {
+          const completed = new Map(taskTable(reports, version, size).map((row) => [row.provider, row]));
+          return taskOutcomes(reports, version, size).map((outcome) => ({
+            provider: outcome.provider,
+            outcome,
+            row: completed.get(outcome.provider),
+          }));
+        }, (entry) => entry.row !== undefined);
+        return {
+          id, title, blurb, version, repeat,
+          phases: phases.map((p) => ({ id: p.id, label: p.label })),
+          rows: selected.flatMap(({ row }) => row ? [row] : []).sort((a, b) => a.taskUsd - b.taskUsd),
+          outcomes: selected.map(({ outcome }) => outcome),
+        };
+      })
       .filter((k) => k.outcomes.length),
   },
   useCases,
@@ -251,7 +280,7 @@ const published: PublishedData = {
     data.leaderboard
       .filter((r) => r.medianCreateMs !== undefined)
       .map((r) => [r.provider, seen({
-        name: r.name, medianCreateMs: r.medianCreateMs!, medianReadyMs: r.medianReadyMs,
+        name: r.name, size: r.size, medianCreateMs: r.medianCreateMs!, medianReadyMs: r.medianReadyMs,
         successRate: r.successRate, runs: r.runs, hourlyUsd: r.hourlyUsd, measuredAt: r.measuredAt,
       })]),
   ),
@@ -263,6 +292,7 @@ const published: PublishedData = {
           r.provider,
           seen({
             name: r.name,
+            size: { vcpu: r.size.vcpu, memoryGb: r.size.memoryGb },
             createMs: r.createMs,
             taskMs: r.taskMs,
             taskUsd: r.taskUsd,

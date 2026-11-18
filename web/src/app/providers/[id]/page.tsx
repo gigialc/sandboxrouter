@@ -54,7 +54,13 @@ await sbx.kill();`;
     facts.push(["Real-account check", `${p.check.passed} / ${total} steps`, `${p.check.date.slice(0, 10)}${credit(p.check.by)}`]);
   }
   if (!hidden && lb) {
-    if (lb.medianCreateMs !== undefined) facts.push(["Median create", time(lb.medianCreateMs), `${lb.runs} requests, ${lb.measuredAt.slice(0, 10)}`]);
+    if (lb.medianCreateMs !== undefined) {
+      facts.push([
+        "Median create",
+        time(lb.medianCreateMs),
+        `${lb.size.vcpu} vCPU / ${lb.size.memoryGb} GB · ${lb.runs} requests · ${lb.measuredAt.slice(0, 10)}`,
+      ]);
+    }
     if (lb.runs > 0) facts.push(["Ready", `${Math.round(lb.successRate * 100)}%`, "Excluding recorded limit refusals"]);
   }
   if (!hidden && size && sizeRun) {

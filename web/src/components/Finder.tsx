@@ -12,7 +12,7 @@ const JOBS: [RecJob, string, string][] = [
   ["agent", "Agent session", "About a minute: 10 model turns, each a 6 s wait on the model and a short Python tool call. The sandbox is mostly idle."],
   ["python", "Quick Python run", "A 1 to 2 second pure-Python script (JSON, a regex and a sort over 200,000 records): one code-interpreter call."],
   ["repo", "Coding agent on a repo", "Fetch Node and a real TypeScript project, npm ci, typecheck: what a coding agent does first."],
-  ["short", "Short CPU job", "Hashing on one and two cores, then a 256 MB disk write: a few seconds."],
+  ["short", "Short CPU job", "One hash, then two concurrent hashes, then a 256 MB disk write."],
   ["long", "Long job", "The short job 40 times in a row: minutes of steady CPU and disk work."],
   ["download", "Download", "A 53 MB download over HTTPS."],
   ["start", "Start only", "Start a sandbox and run one command."],
@@ -29,6 +29,8 @@ const HAS_PAIRED_STARTS = Object.values(DATA.start).every((row) => row.medianRea
 const shareButton = "border border-line px-3 py-1.5 text-[13px] text-ink-2 hover:border-line-2 hover:text-ink disabled:opacity-50";
 
 const secs = (s: number) => (s >= 10 ? `${s.toFixed(0)} s` : `${s.toFixed(1)} s`);
+const measuredSize = (size: Recommendation["size"]) =>
+  size && (size.vcpu !== 2 || size.memoryGb !== 4) ? `${size.vcpu} vCPU / ${size.memoryGb} GB` : "";
 const seg = (on: boolean) =>
   `px-3 py-1.5 text-[13px] border -ml-px first:ml-0 ${on ? "relative z-[1] border-accent bg-accent text-bg" : "border-line text-ink-2 hover:text-ink"}`;
 
@@ -191,6 +193,7 @@ export function Finder() {
               <span className="truncate">{p.name}</span>
             </p>
             <p className="mt-1.5 font-mono text-[13px] tnum text-ink-2">{line}</p>
+            {measuredSize(p.size) && <p className="mt-1 text-[12px] text-muted">{measuredSize(p.size)}</p>}
           </div>
         ))}
       </div>
@@ -219,6 +222,7 @@ export function Finder() {
             ? " Readiness comes from the batch. Hourly prices use the single-run configuration."
             : " Time combines batch readiness with the measured single-sandbox job time.")}
           {job === "start" ? "" : " Cost per successful run is a retry estimate, including modelled start and minimum charges."}
+          {points.some((p) => measuredSize(p.size)) && " Sandbox sizes other than 2 vCPU / 4 GB are shown with their results."}
           {job !== "start" && boatFee && <> <ConditionalStartFeeNote id="boat" /></>}
         </p>
 
@@ -241,6 +245,7 @@ export function Finder() {
                   <ProviderName id={p.provider} name={p.name}>
                     {p.frontier ? <span className="text-[11px] text-accent-ink">best deal</span> : null}
                   </ProviderName>
+                  {measuredSize(p.size) && <p className="mt-0.5 pl-[28px] text-[12px] text-muted">{measuredSize(p.size)}</p>}
                 </td>
                 <td className="py-2.5 pr-4 font-mono tnum">{secs(p.secondsEach)}</td>
                 <td className="py-2.5 pr-4 font-mono tnum">{money(p.y)}</td>
@@ -395,7 +400,7 @@ function PriceSpeedMap({ svgRef, points, unit, count, startOnly, axisLabel }: { 
                 onFocus={() => setHover(p.provider)}
                 onBlur={() => setHover(null)}
                 tabIndex={0}
-                aria-label={`${p.name}: ${secs(p.secondsEach)}, ${money(p.y)} ${unit}`}
+                aria-label={[`${p.name}: ${secs(p.secondsEach)}, ${money(p.y)} ${unit}`, measuredSize(p.size)].filter(Boolean).join(", ")}
                 className="outline-none"
               >
                 <rect x={cx - 16} y={cy - 16} width={32} height={32} fill="transparent" />
@@ -460,6 +465,7 @@ function PriceSpeedMap({ svgRef, points, unit, count, startOnly, axisLabel }: { 
           <p className="mt-1 text-muted">
             {Math.round(hp.successRate * 100)}% of runs worked · {hp.runs} runs
           </p>
+          {measuredSize(hp.size) && <p className="mt-1 text-muted">{measuredSize(hp.size)}</p>}
           {hp.notes.length ? <p className="mt-1 text-muted">{hp.notes.join(" · ")}</p> : null}
         </div>
       ) : null}

@@ -119,7 +119,8 @@ export default function MethodologyPage() {
 
           <h2 id="speed">Start time</h2>
           <p>
-            Each run asks one provider for a 2 vCPU / 4 GB sandbox (or its fixed default size), with fallback off.{" "}
+            Each run targets one provider. The standard request is 2 vCPU / 4 GB, or the provider&apos;s fixed default size. If a provider only
+            has results at a smaller requested size, the site shows that measurement and labels its size.{" "}
             <strong>Create</strong> measures the API response. <strong>Command</strong> measures the subsequent{" "}
             <code>echo ok</code> round trip. New reports also measure <strong>readiness</strong> from the create request to that command&apos;s
             successful output. The dashboard lists create and command medians separately to keep older reports comparable.
@@ -135,7 +136,7 @@ export default function MethodologyPage() {
           <p>The same job runs in a sandbox on every provider, using only tools every Linux image has:</p>
           <ul>
             <li>
-              <strong>Short job</strong>: hash 512 MB on one core, then 256 MB on each of two cores at once, then write and flush
+              <strong>Short job</strong>: hash 512 MB, then run two 256 MB hashes concurrently, then write and flush
               256 MB to disk.
             </li>
             <li>
@@ -161,8 +162,9 @@ export default function MethodologyPage() {
           </ul>
           <p>
             Workload reports use a versioned script, check the output and count all requests. A sandbox can start successfully
-            while its job fails. Task rankings use the requested 2 vCPU / 4 GB cohort and show the nominal router shape when
-            a provider supplies a different size. Provider-side resource allocations are not measured by this benchmark.
+            while its job fails. Rankings prefer the requested 2 vCPU / 4 GB cohort and can show a smaller measured cohort when a provider
+            has no verified runs for the standard request. The table labels each non-standard configured size. Each provider&apos;s timings come
+            from one size for that task.
           </p>
           <p>
             Older workload reports remain in the results archive. Current rankings require a rerun with the new workload
