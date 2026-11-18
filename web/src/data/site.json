@@ -120,8 +120,8 @@
       "ok": 637
     }
   },
-  "version": "0.15.0",
-  "generatedAt": "2026-11-18T21:37:44.934Z",
+  "version": "0.15.1",
+  "generatedAt": "2026-11-18T21:53:44.777Z",
   "shapes": [
     "1x2",
     "2x4",
@@ -3752,9 +3752,9 @@
               "cores": 785,
               "disk": 1130
             },
-            "hourlyUsd": 0.013999999999999999,
-            "taskUsd": 0.000019444444444444442,
-            "reusedUsd": 0.000013953333333333332,
+            "hourlyUsd": 0.017,
+            "taskUsd": 0.000023611111111111114,
+            "reusedUsd": 0.000016943333333333334,
             "runs": 3,
             "ok": 3,
             "limited": 0,
@@ -3791,32 +3791,6 @@
             "minimumSeconds": 0,
             "perSandboxUsd": 0,
             "measuredAt": "2026-11-17T23:49:34.784Z"
-          },
-          {
-            "provider": "daytona",
-            "name": "Daytona",
-            "size": {
-              "vcpu": 2,
-              "memoryGb": 4
-            },
-            "createMs": 1748,
-            "taskMs": 844,
-            "phasesMs": {
-              "cpu": 391,
-              "cores": 348,
-              "disk": 98
-            },
-            "hourlyUsd": 0.06659999999999999,
-            "taskUsd": 0.000055499999999999994,
-            "reusedUsd": 0.000015614,
-            "runs": 3,
-            "ok": 3,
-            "limited": 0,
-            "successRate": 1,
-            "activeCpu": false,
-            "minimumSeconds": 0,
-            "perSandboxUsd": 0,
-            "measuredAt": "2026-11-18T20:22:58.672Z"
           },
           {
             "provider": "northflank",
@@ -4006,6 +3980,32 @@
             "measuredAt": "2026-11-17T23:36:05.829Z"
           },
           {
+            "provider": "daytona",
+            "name": "Daytona",
+            "size": {
+              "vcpu": 2,
+              "memoryGb": 4
+            },
+            "createMs": 1748,
+            "taskMs": 844,
+            "phasesMs": {
+              "cpu": 391,
+              "cores": 348,
+              "disk": 98
+            },
+            "hourlyUsd": 0.1656,
+            "taskUsd": 0.000138,
+            "reusedUsd": 0.00003882399999999999,
+            "runs": 3,
+            "ok": 3,
+            "limited": 0,
+            "successRate": 1,
+            "activeCpu": false,
+            "minimumSeconds": 0,
+            "perSandboxUsd": 0,
+            "measuredAt": "2026-11-18T20:22:58.672Z"
+          },
+          {
             "provider": "freestyle",
             "name": "Freestyle",
             "size": {
@@ -4031,33 +4031,6 @@
             "minimumSeconds": 0,
             "perSandboxUsd": 0,
             "measuredAt": "2026-11-17T23:36:05.829Z"
-          },
-          {
-            "provider": "e2b",
-            "name": "E2B",
-            "size": {
-              "vcpu": 2,
-              "memoryGb": 4
-            },
-            "createMs": 1001,
-            "taskMs": 3098,
-            "phasesMs": {
-              "cpu": 1800,
-              "cores": 932,
-              "disk": 305
-            },
-            "hourlyUsd": 0.1089,
-            "taskUsd": 0.00015125,
-            "reusedUsd": 0.00009371449999999999,
-            "runs": 3,
-            "ok": 3,
-            "limited": 0,
-            "successRate": 1,
-            "cpuMs": 4090,
-            "activeCpu": false,
-            "minimumSeconds": 0,
-            "perSandboxUsd": 0,
-            "measuredAt": "2026-11-18T20:22:58.672Z"
           },
           {
             "provider": "agentcore",
@@ -4112,6 +4085,33 @@
             "minimumSeconds": 0,
             "perSandboxUsd": 0,
             "measuredAt": "2026-11-18T17:44:19.747Z"
+          },
+          {
+            "provider": "e2b",
+            "name": "E2B",
+            "size": {
+              "vcpu": 2,
+              "memoryGb": 4
+            },
+            "createMs": 1001,
+            "taskMs": 3098,
+            "phasesMs": {
+              "cpu": 1800,
+              "cores": 932,
+              "disk": 305
+            },
+            "hourlyUsd": 0.1656,
+            "taskUsd": 0.00022999999999999998,
+            "reusedUsd": 0.00014250799999999998,
+            "runs": 3,
+            "ok": 3,
+            "limited": 0,
+            "successRate": 1,
+            "cpuMs": 4090,
+            "activeCpu": false,
+            "minimumSeconds": 0,
+            "perSandboxUsd": 0,
+            "measuredAt": "2026-11-18T20:22:58.672Z"
           },
           {
             "provider": "google",
@@ -4454,33 +4454,6 @@
             "measuredAt": "2026-11-18T00:06:52.487Z"
           },
           {
-            "provider": "openscale",
-            "name": "OpenScale Sandboxes",
-            "size": {
-              "vcpu": 2,
-              "memoryGb": 4
-            },
-            "createMs": 1265,
-            "taskMs": 104352,
-            "phasesMs": {
-              "cpu": 64932,
-              "cores": 30884,
-              "disk": 8543
-            },
-            "hourlyUsd": 0.013999999999999999,
-            "taskUsd": 0.00041222222222222213,
-            "reusedUsd": 0.00040581333333333336,
-            "runs": 3,
-            "ok": 3,
-            "limited": 0,
-            "successRate": 1,
-            "cpuMs": 138750,
-            "activeCpu": false,
-            "minimumSeconds": 0,
-            "perSandboxUsd": 0,
-            "measuredAt": "2026-11-18T20:54:36.345Z"
-          },
-          {
             "provider": "maritime",
             "name": "Maritime",
             "size": {
@@ -4508,26 +4481,27 @@
             "measuredAt": "2026-11-17T23:49:08.280Z"
           },
           {
-            "provider": "daytona",
-            "name": "Daytona",
+            "provider": "openscale",
+            "name": "OpenScale Sandboxes",
             "size": {
               "vcpu": 2,
               "memoryGb": 4
             },
-            "createMs": 1749,
-            "taskMs": 34769,
+            "createMs": 1265,
+            "taskMs": 104352,
             "phasesMs": {
-              "cpu": 15678,
-              "cores": 15529,
-              "disk": 3593
+              "cpu": 64932,
+              "cores": 30884,
+              "disk": 8543
             },
-            "hourlyUsd": 0.06659999999999999,
-            "taskUsd": 0.0006845,
-            "reusedUsd": 0.0006432264999999998,
+            "hourlyUsd": 0.017,
+            "taskUsd": 0.0005005555555555555,
+            "reusedUsd": 0.0004927733333333334,
             "runs": 3,
             "ok": 3,
             "limited": 0,
             "successRate": 1,
+            "cpuMs": 138750,
             "activeCpu": false,
             "minimumSeconds": 0,
             "perSandboxUsd": 0,
@@ -4559,6 +4533,32 @@
             "minimumSeconds": 0,
             "perSandboxUsd": 0,
             "measuredAt": "2026-11-17T23:49:08.280Z"
+          },
+          {
+            "provider": "daytona",
+            "name": "Daytona",
+            "size": {
+              "vcpu": 2,
+              "memoryGb": 4
+            },
+            "createMs": 1749,
+            "taskMs": 34769,
+            "phasesMs": {
+              "cpu": 15678,
+              "cores": 15529,
+              "disk": 3593
+            },
+            "hourlyUsd": 0.1656,
+            "taskUsd": 0.001702,
+            "reusedUsd": 0.0015993739999999998,
+            "runs": 3,
+            "ok": 3,
+            "limited": 0,
+            "successRate": 1,
+            "activeCpu": false,
+            "minimumSeconds": 0,
+            "perSandboxUsd": 0,
+            "measuredAt": "2026-11-18T20:54:36.345Z"
           },
           {
             "provider": "freestyle",
@@ -4642,33 +4642,6 @@
             "measuredAt": "2026-11-17T23:49:08.280Z"
           },
           {
-            "provider": "e2b",
-            "name": "E2B",
-            "size": {
-              "vcpu": 2,
-              "memoryGb": 4
-            },
-            "createMs": 918,
-            "taskMs": 177765,
-            "phasesMs": {
-              "cpu": 108947,
-              "cores": 53248,
-              "disk": 15886
-            },
-            "hourlyUsd": 0.1089,
-            "taskUsd": 0.005414749999999999,
-            "reusedUsd": 0.0053773912499999995,
-            "runs": 3,
-            "ok": 3,
-            "limited": 0,
-            "successRate": 1,
-            "cpuMs": 231910,
-            "activeCpu": false,
-            "minimumSeconds": 0,
-            "perSandboxUsd": 0,
-            "measuredAt": "2026-11-18T20:54:36.345Z"
-          },
-          {
             "provider": "morph",
             "name": "Morph Cloud",
             "size": {
@@ -4720,6 +4693,33 @@
             "minimumSeconds": 0,
             "perSandboxUsd": 0,
             "measuredAt": "2026-11-18T18:00:22.162Z"
+          },
+          {
+            "provider": "e2b",
+            "name": "E2B",
+            "size": {
+              "vcpu": 2,
+              "memoryGb": 4
+            },
+            "createMs": 918,
+            "taskMs": 177765,
+            "phasesMs": {
+              "cpu": 108947,
+              "cores": 53248,
+              "disk": 15886
+            },
+            "hourlyUsd": 0.1656,
+            "taskUsd": 0.008234,
+            "reusedUsd": 0.008177189999999999,
+            "runs": 3,
+            "ok": 3,
+            "limited": 0,
+            "successRate": 1,
+            "cpuMs": 231910,
+            "activeCpu": false,
+            "minimumSeconds": 0,
+            "perSandboxUsd": 0,
+            "measuredAt": "2026-11-18T20:54:36.345Z"
           },
           {
             "provider": "google",
@@ -4921,9 +4921,9 @@
             "phasesMs": {
               "python": 2256
             },
-            "hourlyUsd": 0.013999999999999999,
-            "taskUsd": 0.000015555555555555555,
-            "reusedUsd": 0.000008773333333333331,
+            "hourlyUsd": 0.017,
+            "taskUsd": 0.00001888888888888889,
+            "reusedUsd": 0.000010653333333333332,
             "runs": 3,
             "ok": 3,
             "limited": 0,
@@ -4983,30 +4983,6 @@
             "minimumSeconds": 0,
             "perSandboxUsd": 0,
             "measuredAt": "2026-11-17T23:36:51.852Z"
-          },
-          {
-            "provider": "daytona",
-            "name": "Daytona",
-            "size": {
-              "vcpu": 2,
-              "memoryGb": 4
-            },
-            "createMs": 1708,
-            "taskMs": 1463,
-            "phasesMs": {
-              "python": 1463
-            },
-            "hourlyUsd": 0.06659999999999999,
-            "taskUsd": 0.000074,
-            "reusedUsd": 0.000027065499999999997,
-            "runs": 3,
-            "ok": 3,
-            "limited": 0,
-            "successRate": 1,
-            "activeCpu": false,
-            "minimumSeconds": 0,
-            "perSandboxUsd": 0,
-            "measuredAt": "2026-11-18T20:23:41.167Z"
           },
           {
             "provider": "agentcore",
@@ -5159,31 +5135,6 @@
             "measuredAt": "2026-11-18T17:44:32.822Z"
           },
           {
-            "provider": "e2b",
-            "name": "E2B",
-            "size": {
-              "vcpu": 2,
-              "memoryGb": 4
-            },
-            "createMs": 1042,
-            "taskMs": 2177,
-            "phasesMs": {
-              "python": 2177
-            },
-            "hourlyUsd": 0.1089,
-            "taskUsd": 0.000121,
-            "reusedUsd": 0.00006585425,
-            "runs": 3,
-            "ok": 3,
-            "limited": 0,
-            "successRate": 1,
-            "cpuMs": 2140,
-            "activeCpu": false,
-            "minimumSeconds": 0,
-            "perSandboxUsd": 0,
-            "measuredAt": "2026-11-18T20:23:41.167Z"
-          },
-          {
             "provider": "google",
             "name": "Google Cloud Agent Platform",
             "size": {
@@ -5232,6 +5183,55 @@
             "minimumSeconds": 0,
             "perSandboxUsd": 0,
             "measuredAt": "2026-11-17T23:36:51.852Z"
+          },
+          {
+            "provider": "daytona",
+            "name": "Daytona",
+            "size": {
+              "vcpu": 2,
+              "memoryGb": 4
+            },
+            "createMs": 1708,
+            "taskMs": 1463,
+            "phasesMs": {
+              "python": 1463
+            },
+            "hourlyUsd": 0.1656,
+            "taskUsd": 0.000184,
+            "reusedUsd": 0.000067298,
+            "runs": 3,
+            "ok": 3,
+            "limited": 0,
+            "successRate": 1,
+            "activeCpu": false,
+            "minimumSeconds": 0,
+            "perSandboxUsd": 0,
+            "measuredAt": "2026-11-18T20:23:41.167Z"
+          },
+          {
+            "provider": "e2b",
+            "name": "E2B",
+            "size": {
+              "vcpu": 2,
+              "memoryGb": 4
+            },
+            "createMs": 1042,
+            "taskMs": 2177,
+            "phasesMs": {
+              "python": 2177
+            },
+            "hourlyUsd": 0.1656,
+            "taskUsd": 0.000184,
+            "reusedUsd": 0.00010014199999999999,
+            "runs": 3,
+            "ok": 3,
+            "limited": 0,
+            "successRate": 1,
+            "cpuMs": 2140,
+            "activeCpu": false,
+            "minimumSeconds": 0,
+            "perSandboxUsd": 0,
+            "measuredAt": "2026-11-18T20:23:41.167Z"
           },
           {
             "provider": "modal",
@@ -5508,9 +5508,9 @@
             "phasesMs": {
               "download": 498
             },
-            "hourlyUsd": 0.013999999999999999,
-            "taskUsd": 0.000007777777777777777,
-            "reusedUsd": 0.000001936666666666666,
+            "hourlyUsd": 0.017,
+            "taskUsd": 0.000009444444444444445,
+            "reusedUsd": 0.000002351666666666667,
             "runs": 3,
             "ok": 3,
             "limited": 0,
@@ -5572,30 +5572,6 @@
             "measuredAt": "2026-11-17T23:37:36.070Z"
           },
           {
-            "provider": "daytona",
-            "name": "Daytona",
-            "size": {
-              "vcpu": 2,
-              "memoryGb": 4
-            },
-            "createMs": 1526,
-            "taskMs": 262,
-            "phasesMs": {
-              "download": 262
-            },
-            "hourlyUsd": 0.06659999999999999,
-            "taskUsd": 0.000037,
-            "reusedUsd": 0.0000048469999999999995,
-            "runs": 3,
-            "ok": 3,
-            "limited": 0,
-            "successRate": 1,
-            "activeCpu": false,
-            "minimumSeconds": 0,
-            "perSandboxUsd": 0,
-            "measuredAt": "2026-11-18T20:24:08.421Z"
-          },
-          {
             "provider": "sail",
             "name": "Sailboxes (Sail Research)",
             "size": {
@@ -5619,31 +5595,6 @@
             "minimumSeconds": 0,
             "perSandboxUsd": 0,
             "measuredAt": "2026-11-17T23:37:36.070Z"
-          },
-          {
-            "provider": "e2b",
-            "name": "E2B",
-            "size": {
-              "vcpu": 2,
-              "memoryGb": 4
-            },
-            "createMs": 1138,
-            "taskMs": 708,
-            "phasesMs": {
-              "download": 708
-            },
-            "hourlyUsd": 0.1089,
-            "taskUsd": 0.0000605,
-            "reusedUsd": 0.000021417,
-            "runs": 3,
-            "ok": 3,
-            "limited": 0,
-            "successRate": 1,
-            "cpuMs": 140,
-            "activeCpu": false,
-            "minimumSeconds": 0,
-            "perSandboxUsd": 0,
-            "measuredAt": "2026-11-18T20:24:08.421Z"
           },
           {
             "provider": "tensorlake",
@@ -5719,6 +5670,55 @@
             "minimumSeconds": 0,
             "perSandboxUsd": 0,
             "measuredAt": "2026-11-18T17:55:29.358Z"
+          },
+          {
+            "provider": "daytona",
+            "name": "Daytona",
+            "size": {
+              "vcpu": 2,
+              "memoryGb": 4
+            },
+            "createMs": 1526,
+            "taskMs": 262,
+            "phasesMs": {
+              "download": 262
+            },
+            "hourlyUsd": 0.1656,
+            "taskUsd": 0.000092,
+            "reusedUsd": 0.000012052,
+            "runs": 3,
+            "ok": 3,
+            "limited": 0,
+            "successRate": 1,
+            "activeCpu": false,
+            "minimumSeconds": 0,
+            "perSandboxUsd": 0,
+            "measuredAt": "2026-11-18T20:24:08.421Z"
+          },
+          {
+            "provider": "e2b",
+            "name": "E2B",
+            "size": {
+              "vcpu": 2,
+              "memoryGb": 4
+            },
+            "createMs": 1138,
+            "taskMs": 708,
+            "phasesMs": {
+              "download": 708
+            },
+            "hourlyUsd": 0.1656,
+            "taskUsd": 0.000092,
+            "reusedUsd": 0.000032568,
+            "runs": 3,
+            "ok": 3,
+            "limited": 0,
+            "successRate": 1,
+            "cpuMs": 140,
+            "activeCpu": false,
+            "minimumSeconds": 0,
+            "perSandboxUsd": 0,
+            "measuredAt": "2026-11-18T20:24:08.421Z"
           },
           {
             "provider": "novita",
@@ -6097,9 +6097,9 @@
             "phasesMs": {
               "agent": 61733
             },
-            "hourlyUsd": 0.013999999999999999,
-            "taskUsd": 0.0002488888888888889,
-            "reusedUsd": 0.00024007277777777773,
+            "hourlyUsd": 0.017,
+            "taskUsd": 0.0003022222222222222,
+            "reusedUsd": 0.00029151694444444444,
             "runs": 3,
             "ok": 3,
             "limited": 0,
@@ -6189,31 +6189,6 @@
             "measuredAt": "2026-11-17T23:47:54.312Z"
           },
           {
-            "provider": "daytona",
-            "name": "Daytona",
-            "size": {
-              "vcpu": 2,
-              "memoryGb": 4,
-              "cpuUtilization": 0.1
-            },
-            "createMs": 2080,
-            "taskMs": 60889,
-            "phasesMs": {
-              "agent": 60889
-            },
-            "hourlyUsd": 0.06659999999999999,
-            "taskUsd": 0.0011654999999999999,
-            "reusedUsd": 0.0011264464999999999,
-            "runs": 3,
-            "ok": 3,
-            "limited": 0,
-            "successRate": 1,
-            "activeCpu": false,
-            "minimumSeconds": 0,
-            "perSandboxUsd": 0,
-            "measuredAt": "2026-11-18T20:33:46.227Z"
-          },
-          {
             "provider": "cloudflare",
             "name": "Cloudflare Sandbox",
             "size": {
@@ -6292,32 +6267,6 @@
             "measuredAt": "2026-11-18T17:53:44.923Z"
           },
           {
-            "provider": "e2b",
-            "name": "E2B",
-            "size": {
-              "vcpu": 2,
-              "memoryGb": 4,
-              "cpuUtilization": 0.1
-            },
-            "createMs": 1046,
-            "taskMs": 61202,
-            "phasesMs": {
-              "agent": 61202
-            },
-            "hourlyUsd": 0.1089,
-            "taskUsd": 0.00190575,
-            "reusedUsd": 0.0018513604999999998,
-            "runs": 3,
-            "ok": 3,
-            "limited": 0,
-            "successRate": 1,
-            "cpuMs": 1460,
-            "activeCpu": false,
-            "minimumSeconds": 0,
-            "perSandboxUsd": 0,
-            "measuredAt": "2026-11-18T20:33:46.227Z"
-          },
-          {
             "provider": "novita",
             "name": "Novita AI Agent Sandbox",
             "size": {
@@ -6394,6 +6343,57 @@
             "minimumSeconds": 0,
             "perSandboxUsd": 0,
             "measuredAt": "2026-11-18T17:47:54.680Z"
+          },
+          {
+            "provider": "daytona",
+            "name": "Daytona",
+            "size": {
+              "vcpu": 2,
+              "memoryGb": 4,
+              "cpuUtilization": 0.1
+            },
+            "createMs": 2080,
+            "taskMs": 60889,
+            "phasesMs": {
+              "agent": 60889
+            },
+            "hourlyUsd": 0.1656,
+            "taskUsd": 0.002898,
+            "reusedUsd": 0.002800894,
+            "runs": 3,
+            "ok": 3,
+            "limited": 0,
+            "successRate": 1,
+            "activeCpu": false,
+            "minimumSeconds": 0,
+            "perSandboxUsd": 0,
+            "measuredAt": "2026-11-18T20:33:46.227Z"
+          },
+          {
+            "provider": "e2b",
+            "name": "E2B",
+            "size": {
+              "vcpu": 2,
+              "memoryGb": 4,
+              "cpuUtilization": 0.1
+            },
+            "createMs": 1046,
+            "taskMs": 61202,
+            "phasesMs": {
+              "agent": 61202
+            },
+            "hourlyUsd": 0.1656,
+            "taskUsd": 0.002898,
+            "reusedUsd": 0.002815292,
+            "runs": 3,
+            "ok": 3,
+            "limited": 0,
+            "successRate": 1,
+            "cpuMs": 1460,
+            "activeCpu": false,
+            "minimumSeconds": 0,
+            "perSandboxUsd": 0,
+            "measuredAt": "2026-11-18T20:33:46.227Z"
           },
           {
             "provider": "lambda",
@@ -6582,33 +6582,6 @@
         ],
         "rows": [
           {
-            "provider": "openscale",
-            "name": "OpenScale Sandboxes",
-            "size": {
-              "vcpu": 2,
-              "memoryGb": 4
-            },
-            "createMs": 1309,
-            "taskMs": 23036,
-            "phasesMs": {
-              "fetch": 2646,
-              "install": 19647,
-              "typecheck": 666
-            },
-            "hourlyUsd": 0.013999999999999999,
-            "taskUsd": 0.00009722222222222222,
-            "reusedUsd": 0.00008958444444444445,
-            "runs": 3,
-            "ok": 3,
-            "limited": 0,
-            "successRate": 1,
-            "cpuMs": 24400,
-            "activeCpu": false,
-            "minimumSeconds": 0,
-            "perSandboxUsd": 0,
-            "measuredAt": "2026-11-18T20:38:14.816Z"
-          },
-          {
             "provider": "agent37",
             "name": "Agent37",
             "size": {
@@ -6634,6 +6607,33 @@
             "minimumSeconds": 60,
             "perSandboxUsd": 0,
             "measuredAt": "2026-11-17T23:45:01.763Z"
+          },
+          {
+            "provider": "openscale",
+            "name": "OpenScale Sandboxes",
+            "size": {
+              "vcpu": 2,
+              "memoryGb": 4
+            },
+            "createMs": 1309,
+            "taskMs": 23036,
+            "phasesMs": {
+              "fetch": 2646,
+              "install": 19647,
+              "typecheck": 666
+            },
+            "hourlyUsd": 0.017,
+            "taskUsd": 0.00011805555555555557,
+            "reusedUsd": 0.00010878111111111113,
+            "runs": 3,
+            "ok": 3,
+            "limited": 0,
+            "successRate": 1,
+            "cpuMs": 24400,
+            "activeCpu": false,
+            "minimumSeconds": 0,
+            "perSandboxUsd": 0,
+            "measuredAt": "2026-11-18T20:38:14.816Z"
           },
           {
             "provider": "maritime",
@@ -6690,32 +6690,6 @@
             "measuredAt": "2026-11-17T23:53:49.019Z"
           },
           {
-            "provider": "daytona",
-            "name": "Daytona",
-            "size": {
-              "vcpu": 2,
-              "memoryGb": 4
-            },
-            "createMs": 1783,
-            "taskMs": 26613,
-            "phasesMs": {
-              "fetch": 1771,
-              "install": 23848,
-              "typecheck": 1020
-            },
-            "hourlyUsd": 0.06659999999999999,
-            "taskUsd": 0.0005365,
-            "reusedUsd": 0.0004923404999999999,
-            "runs": 3,
-            "ok": 3,
-            "limited": 0,
-            "successRate": 1,
-            "activeCpu": false,
-            "minimumSeconds": 0,
-            "perSandboxUsd": 0,
-            "measuredAt": "2026-11-18T20:38:14.816Z"
-          },
-          {
             "provider": "novita",
             "name": "Novita AI Agent Sandbox",
             "size": {
@@ -6768,33 +6742,6 @@
             "minimumSeconds": 0,
             "perSandboxUsd": 0,
             "measuredAt": "2026-11-17T23:53:49.019Z"
-          },
-          {
-            "provider": "e2b",
-            "name": "E2B",
-            "size": {
-              "vcpu": 2,
-              "memoryGb": 4
-            },
-            "createMs": 1020,
-            "taskMs": 30382,
-            "phasesMs": {
-              "fetch": 2732,
-              "install": 26683,
-              "typecheck": 962
-            },
-            "hourlyUsd": 0.1089,
-            "taskUsd": 0.000968,
-            "reusedUsd": 0.0009190555000000001,
-            "runs": 3,
-            "ok": 3,
-            "limited": 0,
-            "successRate": 1,
-            "cpuMs": 29260,
-            "activeCpu": false,
-            "minimumSeconds": 0,
-            "perSandboxUsd": 0,
-            "measuredAt": "2026-11-18T20:38:14.816Z"
           },
           {
             "provider": "morph",
@@ -6851,6 +6798,32 @@
             "measuredAt": "2026-11-18T17:49:19.514Z"
           },
           {
+            "provider": "daytona",
+            "name": "Daytona",
+            "size": {
+              "vcpu": 2,
+              "memoryGb": 4
+            },
+            "createMs": 1783,
+            "taskMs": 26613,
+            "phasesMs": {
+              "fetch": 1771,
+              "install": 23848,
+              "typecheck": 1020
+            },
+            "hourlyUsd": 0.1656,
+            "taskUsd": 0.001334,
+            "reusedUsd": 0.0012241980000000001,
+            "runs": 3,
+            "ok": 3,
+            "limited": 0,
+            "successRate": 1,
+            "activeCpu": false,
+            "minimumSeconds": 0,
+            "perSandboxUsd": 0,
+            "measuredAt": "2026-11-18T20:38:14.816Z"
+          },
+          {
             "provider": "freestyle",
             "name": "Freestyle",
             "size": {
@@ -6876,6 +6849,33 @@
             "minimumSeconds": 0,
             "perSandboxUsd": 0,
             "measuredAt": "2026-11-17T23:53:49.019Z"
+          },
+          {
+            "provider": "e2b",
+            "name": "E2B",
+            "size": {
+              "vcpu": 2,
+              "memoryGb": 4
+            },
+            "createMs": 1020,
+            "taskMs": 30382,
+            "phasesMs": {
+              "fetch": 2732,
+              "install": 26683,
+              "typecheck": 962
+            },
+            "hourlyUsd": 0.1656,
+            "taskUsd": 0.001472,
+            "reusedUsd": 0.001397572,
+            "runs": 3,
+            "ok": 3,
+            "limited": 0,
+            "successRate": 1,
+            "cpuMs": 29260,
+            "activeCpu": false,
+            "minimumSeconds": 0,
+            "perSandboxUsd": 0,
+            "measuredAt": "2026-11-18T20:38:14.816Z"
           },
           {
             "provider": "vercel",
