@@ -15,7 +15,7 @@ import { describeConformance } from "./conformance.js";
  * IMAGE CMD...` (records the container, runs nothing; exit 125 for an image that can't be pulled),
  * `exec [-i] [-w DIR] [-e K=V]... N ARGV...` (runs ARGV with the container's env plus -e in a
  * per-container dir or -w, stdin and output passed through; 126 for a missing cwd, 1 for a paused
- * or missing container), `inspect -f {{.State.Status}}`, `pause`, `unpause` and `rm -f`. Every
+ * or missing container), `port`, `inspect -f {{.State.Status}}`, `pause`, `unpause` and `rm -f`. Every
  * invocation is appended to calls.log. The adapter's guardTimeout needs `timeout` (or pkill),
  * so the wrapper puts a shim on PATH where coreutils is missing.
  */
@@ -36,10 +36,17 @@ const kv = (o, s) => { const i = s.indexOf("="); o[s.slice(0, i)] = s.slice(i + 
 const [verb, ...rest] = args;
 if (verb === "info") { process.stdout.write("27.3.1\n"); }
 else if (verb === "run") {
-  const c = { status: "running", env: {}, labels: {}, flags: {} }; let i = 0, name;
+  const c = { status: "running", env: {}, labels: {}, flags: {}, published: {} }; let i = 0, name;
   while (i < rest.length && rest[i].startsWith("-")) {
     const f = rest[i++]; if (f === "-d" || f === "--rm") continue; const v = rest[i++];
-    if (f === "--name") name = v; else if (f === "-e") kv(c.env, v); else if (f === "--label") kv(c.labels, v); else c.flags[f] = v;
+    if (f === "--name") name = v;
+    else if (f === "-e") kv(c.env, v);
+    else if (f === "--label") kv(c.labels, v);
+    else if (f === "--publish") {
+      const [ip, , port] = v.split(":");
+      c.published[port + "/tcp"] = ip + ":" + (43000 + Object.keys(c.published).length);
+    }
+    else c.flags[f] = v;
   }
   c.image = rest[i]; c.cmd = rest.slice(i + 1);
   if (c.image === "no/such:image") fail(125, "Unable to find image 'no/such:image' locally\ndocker: Error response from daemon: pull access denied for no/such, repository does not exist or may require 'docker login'.");
@@ -57,6 +64,11 @@ else if (verb === "run") {
   const child = spawn(argv[0], argv.slice(1), { cwd, env: { ...process.env, ...c.env, ...env }, stdio: "inherit" });
   child.on("error", (e) => fail(126, "OCI runtime exec failed: " + e.message));
   child.on("close", (code, signal) => process.exit(code ?? (signal === "SIGKILL" ? 137 : 143)));
+} else if (verb === "port") {
+  const [name, port] = rest, c = load(name);
+  if (!c) fail(1, "Error response from daemon: No such container: " + name);
+  if (!c.published[port]) fail(1, "Error: No public port '" + port + "' published for " + name);
+  process.stdout.write(c.published[port] + "\n");
 } else if (verb === "inspect" || verb === "pause" || verb === "unpause" || verb === "rm") {
   const name = rest[rest.length - 1], c = load(name);
   if (!c) fail(1, verb === "inspect" ? "Error: No such object: " + name : "Error response from daemon: No such container: " + name);
@@ -156,6 +168,19 @@ describe("DockerProvider", () => {
     const short = await p().create({ timeoutMinutes: 0.1 });
     expect(calls().at(-1)!.slice(-2)).toEqual(["sleep", "60"]);
     await short.kill();
+  });
+
+  it("binds only requested ports on the Docker host's loopback and resolves the mapping after reconnect", async () => {
+    const prov = p();
+    const box = await prov.create({ ports: [3000, 3001] });
+    try {
+      expect(calls().at(-1)).toEqual(expect.arrayContaining(["--publish", "127.0.0.1::3000", "127.0.0.1::3001"]));
+      expect(await box.url!(3000)).toBe("http://127.0.0.1:43000");
+      expect(await (await prov.connect(box.nativeId)).url!(3001)).toBe("http://127.0.0.1:43001");
+      await expect(box.url!(3002)).rejects.toMatchObject({ status: 400, message: expect.stringContaining("no loopback mapping") });
+    } finally {
+      await box.kill();
+    }
   });
 
   it("maps CLI failures to ProviderError", async () => {

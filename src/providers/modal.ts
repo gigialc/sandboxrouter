@@ -44,6 +44,7 @@ export class ModalProvider implements Provider {
       gpu: spec.gpu,
       timeoutMs: (spec.timeoutMinutes ?? 30) * 60_000,
       env: spec.env,
+      ...(spec.ports?.length ? { encryptedPorts: spec.ports } : {}),
     });
     return new ModalBox(sb);
   }
@@ -97,6 +98,12 @@ class ModalBox implements ProviderSandbox {
       if (/deadline exceeded/i.test(message) && killedByTimeout(-1, Date.now() - t0, seconds)) throw timeoutError("modal", seconds);
       throw new ProviderError("modal", message);
     }
+  }
+
+  async url(port: number): Promise<string> {
+    const tunnel = (await this.sb.tunnels())[port];
+    if (!tunnel) throw new ProviderError("modal", `port ${port} was not requested when this sandbox was created`, 400);
+    return tunnel.url;
   }
 
   async writeFile(path: string, content: string | Uint8Array): Promise<void> {

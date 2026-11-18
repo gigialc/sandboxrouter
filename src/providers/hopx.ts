@@ -1,3 +1,4 @@
+import { info } from "../catalog.js";
 import { ProviderError, type ExecOptions, type ExecResult, type Provider, type ProviderSandbox, type SandboxSpec } from "../types.js";
 import { DEFAULT_EXEC_TIMEOUT_S, optionalImport, timeoutError, toBytes } from "../util.js";
 
@@ -59,6 +60,17 @@ class HopxBox implements ProviderSandbox {
   readonly nativeId: string;
   constructor(private sbx: HopxSandbox) {
     this.nativeId = sbx.sandboxId;
+  }
+
+  async url(port: number): Promise<string> {
+    if (info("hopx").limits.reservedPorts?.includes(port)) {
+      throw new ProviderError("hopx", `port ${port} is reserved for the sandbox agent`, 400);
+    }
+    try {
+      return await this.sbx.getPreviewUrl(port);
+    } catch (err) {
+      throw fail(err);
+    }
   }
 
   async exec(cmd: string, opts: ExecOptions = {}): Promise<ExecResult> {

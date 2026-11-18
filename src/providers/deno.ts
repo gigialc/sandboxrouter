@@ -14,6 +14,7 @@ import { dirname, optionalImport, toBytes } from "../util.js";
  * The default timeout ("session") would end the VM when this process disconnects, so the adapter
  * always passes a duration, which is what lets connect() reattach. exec streams stdout/stderr from
  * a spawned `/bin/sh -c`. No pause.
+ * url() explicitly opens a public HTTP preview; Deno serves it through the sandbox lifetime.
  * Docs: https://docs.deno.com/sandbox/, https://docs.deno.com/sandbox/create/,
  *       https://docs.deno.com/sandbox/timeouts/, https://docs.deno.com/sandbox/security/,
  *       https://deno.com/sandbox (pricing), https://jsr.io/@deno/sandbox
@@ -34,6 +35,7 @@ interface DenoChild {
 interface DenoSdkSandbox {
   readonly id: string;
   spawn(command: string, options?: Record<string, unknown>): Promise<DenoChild>;
+  exposeHttp(target: { port: number }): Promise<string>;
   fs: {
     writeFile(path: string, data: Uint8Array): Promise<void>;
     readFile(path: string): Promise<Uint8Array>;
@@ -102,6 +104,7 @@ class DenoBox implements ProviderSandbox {
   }
 
   readonly nativeId: string;
+  private previews = new Map<number, Promise<string>>();
 
   constructor(private sbx: DenoSdkSandbox) {
     this.nativeId = sbx.id;
@@ -145,6 +148,18 @@ class DenoBox implements ProviderSandbox {
       clearTimeout(timer);
       clearTimeout(giveUp);
     }
+  }
+
+  url(port: number): Promise<string> {
+    // exposeHttp allocates a fresh public hostname on each call.
+    const existing = this.previews.get(port);
+    if (existing) return existing;
+    const pending = sdk(() => this.sbx.exposeHttp({ port })).catch((err: unknown) => {
+      this.previews.delete(port);
+      throw err;
+    });
+    this.previews.set(port, pending);
+    return pending;
   }
 
   async writeFile(path: string, content: string | Uint8Array): Promise<void> {

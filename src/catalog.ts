@@ -48,7 +48,7 @@ export interface ProviderInfo {
   };
   /** Capabilities this adapter actually implements, not everything the provider markets. */
   capabilities: Capability[];
-  limits: { maxVcpu: number; maxMemoryGb: number };
+  limits: { maxVcpu: number; maxMemoryGb: number; maxPorts?: number; reservedPorts?: number[] };
   /**
    * The size every sandbox gets unless a custom image (template, snapshot) is passed, whatever
    * vcpu/memoryGb ask for. Measured inside real sandboxes (nproc, MemTotal). The router skips the
@@ -131,7 +131,7 @@ const ENTRIES: Omit<ProviderInfo, "billing" | "plan">[] = [
       source: "https://docs.docker.com/engine/",
       checked: "2026-11-04",
     },
-    capabilities: ["pause", "custom-image"],
+    capabilities: ["pause", "custom-image", "ports"],
     limits: { maxVcpu: 64, maxMemoryGb: 256 },
     local: true,
     credentials: [],
@@ -162,7 +162,7 @@ const ENTRIES: Omit<ProviderInfo, "billing" | "plan">[] = [
       source: "https://e2b.dev/pricing",
       checked: "2026-11-04",
     },
-    capabilities: ["pause", "custom-image"],
+    capabilities: ["pause", "custom-image", "ports", "background"],
     limits: { maxVcpu: 8, maxMemoryGb: 8 },
     // The default template; a bigger size needs a template built with --cpu-count / --memory-mb.
     defaultSize: { vcpu: 2, memoryGb: 0.5, measured: "2026-11-06" },
@@ -179,7 +179,7 @@ const ENTRIES: Omit<ProviderInfo, "billing" | "plan">[] = [
       source: "https://www.daytona.io/pricing",
       checked: "2026-11-17",
     },
-    capabilities: ["pause", "custom-image"],
+    capabilities: ["pause", "custom-image", "ports", "background"],
     limits: { maxVcpu: 4, maxMemoryGb: 8 },
     // The default snapshot; resources only apply when creating from an image (image.daytona).
     defaultSize: { vcpu: 1, memoryGb: 1, measured: "2026-11-06" },
@@ -198,7 +198,7 @@ const ENTRIES: Omit<ProviderInfo, "billing" | "plan">[] = [
       source: "https://modal.com/pricing",
       checked: "2026-11-17",
     },
-    capabilities: ["gpu", "custom-image"],
+    capabilities: ["gpu", "custom-image", "ports"],
     limits: { maxVcpu: 64, maxMemoryGb: 256 },
     credentials: [["MODAL_TOKEN_ID", "MODAL_TOKEN_SECRET"]],
     docs: "https://modal.com/docs/guide/sandbox",
@@ -216,8 +216,8 @@ const ENTRIES: Omit<ProviderInfo, "billing" | "plan">[] = [
       source: "https://vercel.com/docs/vercel-sandbox/pricing",
       checked: "2026-11-05",
     },
-    capabilities: [],
-    limits: { maxVcpu: 8, maxMemoryGb: 16 },
+    capabilities: ["ports", "background"],
+    limits: { maxVcpu: 8, maxMemoryGb: 16, maxPorts: 15 },
     credentials: [["VERCEL_OIDC_TOKEN"], ["VERCEL_TOKEN", "VERCEL_TEAM_ID", "VERCEL_PROJECT_ID"]],
     docs: "https://vercel.com/docs/vercel-sandbox",
   },
@@ -262,9 +262,9 @@ const ENTRIES: Omit<ProviderInfo, "billing" | "plan">[] = [
       source: "https://blaxel.ai/pricing",
       checked: "2026-11-04",
     },
-    capabilities: ["custom-image"],
+    capabilities: ["custom-image", "ports", "background"],
     // Self-serve caps are per-tier and not published; these are conservative.
-    limits: { maxVcpu: 8, maxMemoryGb: 16 },
+    limits: { maxVcpu: 8, maxMemoryGb: 16, reservedPorts: [80, 443, 8080] },
     credentials: [["BL_API_KEY", "BL_WORKSPACE"]],
     docs: "https://docs.blaxel.ai/Sandboxes/Overview",
     noBenchmarks: {
@@ -365,9 +365,9 @@ ENTRIES.push(
       source: "https://hopx.ai/pricing",
       checked: "2026-11-04",
     },
-    capabilities: ["pause", "custom-image"],
+    capabilities: ["pause", "custom-image", "ports"],
     // HOPX takes no size at create; capped at the default size so bigger requests go elsewhere.
-    limits: { maxVcpu: 2, maxMemoryGb: 4 },
+    limits: { maxVcpu: 2, maxMemoryGb: 4, reservedPorts: [7777] },
     credentials: [["HOPX_API_KEY"]],
     docs: "https://docs.hopx.ai",
   },
@@ -586,7 +586,7 @@ ENTRIES.push(
       source: "https://deno.com/sandbox",
       checked: "2026-11-17",
     },
-    capabilities: ["custom-image"],
+    capabilities: ["custom-image", "ports"],
     limits: { maxVcpu: 2, maxMemoryGb: 4 },
     credentials: [["DENO_DEPLOY_TOKEN"]],
     docs: "https://docs.deno.com/sandbox/",
@@ -673,7 +673,7 @@ ENTRIES.push(
       source: "https://docs.novita.ai/guides/sandbox-pricing",
       checked: "2026-11-04",
     },
-    capabilities: ["pause", "custom-image"],
+    capabilities: ["pause", "custom-image", "ports", "background"],
     limits: { maxVcpu: 8, maxMemoryGb: 8 },
     credentials: [["NOVITA_API_KEY"]],
     docs: "https://docs.novita.ai/guides/sandbox-overview",
@@ -943,7 +943,11 @@ export function unfit(id: ProviderId, spec: SandboxSpec, require: Capability[] =
   const p = info(id);
   const needs = new Set(require);
   if (spec.gpu) needs.add("gpu");
+  if (spec.ports?.length) needs.add("ports");
   for (const c of needs) if (!p.capabilities.includes(c)) return `no ${c} support`;
+  if (spec.ports?.length && p.limits.maxPorts !== undefined && spec.ports.length > p.limits.maxPorts) return `max ${p.limits.maxPorts} preview ports`;
+  const reserved = spec.ports?.find((port) => p.limits.reservedPorts?.includes(port));
+  if (reserved !== undefined) return `port ${reserved} is reserved by the provider`;
   if ((spec.vcpu ?? DEFAULT_VCPU) > p.limits.maxVcpu) return `max ${p.limits.maxVcpu} vCPU`;
   if ((spec.memoryGb ?? DEFAULT_MEMORY_GB) > p.limits.maxMemoryGb) return `max ${p.limits.maxMemoryGb} GB memory`;
   // A default image's size is fixed. With no size asked for you get that size, so only a size you

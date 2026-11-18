@@ -23,6 +23,7 @@ const creates: any[] = [];
 const connects: [string, string | undefined][] = [];
 const runs: { cmd: string; opts: any }[] = [];
 const streams: { code: string; opts: any }[] = [];
+const previewRequests: number[] = [];
 const sandboxes = new Map<string, FakeHopx>();
 let createError: unknown;
 let runError: unknown;
@@ -50,6 +51,11 @@ class FakeHopx {
   ) {}
   private live() {
     if (this.state === "killed") throw hopxError("NotFoundError", `Sandbox ${this.sandboxId} not found`);
+  }
+  async getPreviewUrl(port: number): Promise<string> {
+    this.live();
+    previewRequests.push(port);
+    return `https://${port}-${this.sandboxId}.test.vms.hopx.dev/`;
   }
   commands = {
     run: async (cmd: string, opts: { timeout?: number; workingDir?: string; env?: Record<string, string> } = {}) => {
@@ -158,6 +164,7 @@ const p = () => new HopxProvider("hx_test");
 
 beforeEach(() => {
   for (const a of [creates, connects, runs, streams]) a.length = 0;
+  previewRequests.length = 0;
   createError = runError = undefined;
 });
 
@@ -192,6 +199,21 @@ describe("HopxProvider", () => {
     await expect(p().create({})).rejects.toMatchObject({ status: 429 });
     await expect(p().connect("hx_missing")).rejects.toMatchObject({ status: 404 });
     expect(connects.at(-1)).toEqual(["hx_missing", "hx_test"]);
+  });
+
+  it("resolves a public preview on request without using the reserved agent port", async () => {
+    const provider = p();
+    const created = await provider.create({ ports: [8080] });
+    expect(previewRequests).toHaveLength(0);
+    const sandbox = await provider.connect(created.nativeId);
+    try {
+      expect(await sandbox.url!(8080)).toBe(`https://8080-${created.nativeId}.test.vms.hopx.dev/`);
+      await expect(sandbox.url!(7777)).rejects.toMatchObject({ status: 400 });
+      expect(previewRequests).toEqual([8080]);
+    } finally {
+      await sandbox.kill();
+    }
+    await expect(sandbox.url!(8080)).rejects.toMatchObject({ status: 404 });
   });
 
   it("runs without callbacks through commands.run with timeout, workingDir and env", async () => {

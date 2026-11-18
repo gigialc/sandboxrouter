@@ -15,6 +15,7 @@ import { DenoProvider, type DenoSdk } from "../src/providers/deno.js";
  */
 let root = "";
 const calls: [string, any][] = [];
+let exposureRefused = false;
 
 function fakeSandbox(id: string) {
   return {
@@ -35,6 +36,11 @@ function fakeSandbox(id: string) {
           child.kill(signal as NodeJS.Signals);
         },
       };
+    },
+    async exposeHttp({ port }: { port: number }) {
+      calls.push(["exposeHttp", port]);
+      if (exposureRefused) throw Object.assign(new Error("preview unavailable"), { status: 503 });
+      return `https://preview-${port}.sandbox.deno.net`;
     },
     fs: {
       async writeFile(path: string, data: Uint8Array) {
@@ -122,6 +128,24 @@ describe("DenoProvider", () => {
   it("surfaces SDK errors with their status", async () => {
     await expect(p("ddo_bad").create({})).rejects.toMatchObject({ status: 401, message: expect.stringContaining("Invalid token") });
     await expect(p().connect("sbx_ord_nope")).rejects.toMatchObject({ status: 404 });
+  });
+
+  it("opens a public HTTP URL only when requested, reuses it, and retries a failed attempt", async () => {
+    calls.length = 0;
+    const sbx = await p().create({ ports: [3000], timeoutMinutes: 2 });
+    expect(calls).toHaveLength(1);
+    exposureRefused = true;
+    try {
+      await expect(sbx.url!(3000)).rejects.toMatchObject({ status: 503 });
+    } finally {
+      exposureRefused = false;
+    }
+    expect(await Promise.all([sbx.url!(3000), sbx.url!(3000)])).toEqual([
+      "https://preview-3000.sandbox.deno.net",
+      "https://preview-3000.sandbox.deno.net",
+    ]);
+    expect(calls.filter(([method]) => method === "exposeHttp")).toEqual([["exposeHttp", 3000], ["exposeHttp", 3000]]);
+    await sbx.kill();
   });
 
   it("runs commands through /bin/sh with env and cwd", async () => {

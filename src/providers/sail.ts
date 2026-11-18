@@ -206,7 +206,7 @@ class SailBox implements ProviderSandbox {
     return `/sailboxes/${encodeURIComponent(this.nativeId)}`;
   }
 
-  private url(sub: string) {
+  private sandboxUrl(sub: string) {
     return `${this.p.sailboxApi}${this.path}${sub}`;
   }
 
@@ -255,7 +255,7 @@ class SailBox implements ProviderSandbox {
     };
     try {
       const res = await this.live(() =>
-        this.p.request("POST", this.url("/exec"), {
+        this.p.request("POST", this.sandboxUrl("/exec"), {
           signal: ctl.signal,
           json: {
             command: guardTimeout(wrapCommand(cmd, { cwd: opts.cwd }), secs),
@@ -319,13 +319,13 @@ class SailBox implements ProviderSandbox {
 
   async writeFile(path: string, content: string | Uint8Array): Promise<void> {
     const q = new URLSearchParams({ path, mode: "420" });
-    const res = await this.live(() => this.p.request("PUT", this.url(`/files?${q}`), { body: toBytes(content) }));
+    const res = await this.live(() => this.p.request("PUT", this.sandboxUrl(`/files?${q}`), { body: toBytes(content) }));
     await res.arrayBuffer().catch(() => {});
   }
 
   async readFile(path: string): Promise<Uint8Array> {
     const q = new URLSearchParams({ path });
-    const res = await this.live(() => this.p.request("GET", this.url(`/files?${q}`)));
+    const res = await this.live(() => this.p.request("GET", this.sandboxUrl(`/files?${q}`)));
     return new Uint8Array(await res.arrayBuffer());
   }
 

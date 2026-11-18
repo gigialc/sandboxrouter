@@ -76,6 +76,18 @@ class ClientTest(unittest.TestCase):
         self.assertEqual(e.exception.code, "all_failed")
         self.assertEqual(e.exception.attempts[0]["provider"], "maritime")
 
+    def test_preview_and_background_process(self):
+        with self.sr.create(provider="e2b", ports=[3000], require=["ports", "background"]) as sbx:
+            command = sbx.start("serve", cwd="/app", env={"PORT": "3000"})
+            self.assertTrue(command.id)
+            self.assertEqual(sbx.url(3000), "https://preview.example/3000")
+            with self.assertRaises(SandboxRouterError) as e:
+                sbx.url(65536)
+            self.assertEqual(e.exception.code, "bad_request")
+            command.kill()
+            command.kill()
+            self.assertEqual(sbx.exec("pwd").exit_code, 0)
+
     def test_rejects_unknown_option(self):
         with self.assertRaises(TypeError):
             self.sr.create(cpus=2)

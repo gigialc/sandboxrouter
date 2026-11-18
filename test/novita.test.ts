@@ -10,6 +10,7 @@ function fakeSandbox(id = "sbx_nov") {
   return {
     calls,
     sandboxId: id,
+    getHost: (port: number) => `${port}-${id}.sandbox.novita.ai`,
     commands: {
       // Like the SDK with `background: true`: a handle whose wait() rejects with CommandExitError on a nonzero exit.
       run: vi.fn(async (cmd: string, opts: any) => {
@@ -18,11 +19,12 @@ function fakeSandbox(id = "sbx_nov") {
         opts?.onStdout?.("one\n");
         opts?.onStderr?.("two\n");
         return {
+          disconnect: async () => { calls.push(["disconnect", cmd]); },
           wait: async () => {
             if (cmd === "exit 3") throw Object.assign(new Error("exit status 3"), { name: "CommandExitError", exitCode: 3, stdout: "", stderr: "boom" });
             return { exitCode: 0, stdout: "one\n", stderr: "two\n" };
           },
-          kill: vi.fn(async () => true),
+          kill: vi.fn(async () => (calls.push(["killCommand", cmd]), true)),
         };
       }),
     },
@@ -77,6 +79,19 @@ describe("NovitaProvider", () => {
     const box = await new NovitaProvider("sk_test").create({});
     expect(await box.exec("exit 3")).toMatchObject({ exitCode: 3, stderr: "boom" });
     await expect(box.exec("explode")).rejects.toMatchObject({ name: "ProviderError", provider: "novita", message: "novita: sandbox unreachable" });
+  });
+
+  it("shares the native HTTPS port and detached command path", async () => {
+    const box = await new NovitaProvider("sk_test").connect("sbx_nov");
+    await expect(box.url!(3000)).resolves.toBe("https://3000-sbx_nov.sandbox.novita.ai");
+    const command = await box.start!("exec sleep 30", { cwd: "/tmp", env: { DEMO: "1" } });
+    await command.kill();
+    expect(sbx.calls).toEqual([
+      ["run", "exec sleep 30", { cwd: "/tmp", envs: { DEMO: "1" }, background: true, timeoutMs: 0 }],
+      ["disconnect", "exec sleep 30"],
+      ["killCommand", "exec sleep 30"],
+    ]);
+    expect(sbx.kill).not.toHaveBeenCalled();
   });
 
   it("moves files as bytes, pauses, kills", async () => {

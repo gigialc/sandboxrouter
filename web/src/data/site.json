@@ -118,8 +118,8 @@
       "ok": 637
     }
   },
-  "version": "0.13.0",
-  "generatedAt": "2026-11-18T00:07:08.060Z",
+  "version": "0.14.0",
+  "generatedAt": "2026-11-18T00:33:08.749Z",
   "shapes": [
     "1x2",
     "2x4",
@@ -639,11 +639,18 @@
       "name": "Blaxel",
       "local": false,
       "capabilities": [
-        "custom-image"
+        "custom-image",
+        "ports",
+        "background"
       ],
       "limits": {
         "maxVcpu": 8,
-        "maxMemoryGb": 16
+        "maxMemoryGb": 16,
+        "reservedPorts": [
+          80,
+          443,
+          8080
+        ]
       },
       "credentials": [
         [
@@ -998,7 +1005,9 @@
       "local": false,
       "capabilities": [
         "pause",
-        "custom-image"
+        "custom-image",
+        "ports",
+        "background"
       ],
       "limits": {
         "maxVcpu": 4,
@@ -1160,7 +1169,8 @@
       "name": "Deno Sandbox",
       "local": false,
       "capabilities": [
-        "custom-image"
+        "custom-image",
+        "ports"
       ],
       "limits": {
         "maxVcpu": 2,
@@ -1230,7 +1240,8 @@
       "local": true,
       "capabilities": [
         "pause",
-        "custom-image"
+        "custom-image",
+        "ports"
       ],
       "limits": {
         "maxVcpu": 64,
@@ -1316,7 +1327,9 @@
       "local": false,
       "capabilities": [
         "pause",
-        "custom-image"
+        "custom-image",
+        "ports",
+        "background"
       ],
       "limits": {
         "maxVcpu": 8,
@@ -1664,11 +1677,15 @@
       "local": false,
       "capabilities": [
         "pause",
-        "custom-image"
+        "custom-image",
+        "ports"
       ],
       "limits": {
         "maxVcpu": 2,
-        "maxMemoryGb": 4
+        "maxMemoryGb": 4,
+        "reservedPorts": [
+          7777
+        ]
       },
       "credentials": [
         [
@@ -2039,7 +2056,8 @@
       "local": false,
       "capabilities": [
         "gpu",
-        "custom-image"
+        "custom-image",
+        "ports"
       ],
       "limits": {
         "maxVcpu": 64,
@@ -2264,7 +2282,9 @@
       "local": false,
       "capabilities": [
         "pause",
-        "custom-image"
+        "custom-image",
+        "ports",
+        "background"
       ],
       "limits": {
         "maxVcpu": 8,
@@ -2849,10 +2869,14 @@
       "id": "vercel",
       "name": "Vercel Sandbox",
       "local": false,
-      "capabilities": [],
+      "capabilities": [
+        "ports",
+        "background"
+      ],
       "limits": {
         "maxVcpu": 8,
-        "maxMemoryGb": 16
+        "maxMemoryGb": 16,
+        "maxPorts": 15
       },
       "credentials": [
         [

@@ -24,8 +24,9 @@ const creates: unknown[][] = [];
 const connects: unknown[][] = [];
 const runs: { cmd: string; opts: any }[] = [];
 const kills: number[] = [];
+const disconnects: number[] = [];
 const sandboxes = new Map<string, FakeE2B>();
-let hangingHandle: { wait: () => Promise<never>; kill: ReturnType<typeof vi.fn> } | undefined;
+let hangingHandle: { wait: () => Promise<never>; kill: ReturnType<typeof vi.fn>; disconnect?: () => Promise<void> } | undefined;
 let seq = 0;
 
 const sdkError = (name: string, message: string, extra: Record<string, unknown> = {}) => Object.assign(new Error(message), { name, ...extra });
@@ -37,12 +38,17 @@ const killGroup = (child: ChildProcess) => {
 
 class FakeE2B {
   state: "running" | "paused" | "killed" = "running";
+  allowPublicTraffic = true;
   constructor(
     readonly sandboxId: string,
     private envs: Record<string, string> = {},
   ) {}
   private live() {
     if (this.state !== "running") throw sdkError("NotFoundError", `sandbox ${this.sandboxId} is ${this.state}`);
+  }
+  async getInfo() {
+    this.live();
+    return { sandboxId: this.sandboxId, network: { allowPublicTraffic: this.allowPublicTraffic } };
   }
   commands = {
     run: async (cmd: string, opts: any = {}) => {
@@ -69,6 +75,7 @@ class FakeE2B {
       const pid = child.pid ?? 0;
       return {
         pid,
+        disconnect: async () => { disconnects.push(pid); },
         wait: () => {
           let timer: NodeJS.Timeout | undefined;
           const late = new Promise<never>((_, reject) => {
@@ -84,6 +91,10 @@ class FakeE2B {
       };
     },
   };
+  getHost(port: number) {
+    this.live();
+    return `${port}-${this.sandboxId}.e2b.app`;
+  }
   files = {
     write: async (path: string, data: Uint8Array) => {
       this.live();
@@ -137,7 +148,7 @@ const { E2BProvider, E2BCompatBox } = await import("../src/providers/e2b.js");
 const p = () => new E2BProvider("e2b_test");
 
 beforeEach(() => {
-  for (const a of [creates, connects, runs, kills]) a.length = 0;
+  for (const a of [creates, connects, runs, kills, disconnects]) a.length = 0;
   hangingHandle = undefined;
 });
 
@@ -176,6 +187,42 @@ describe("E2BProvider", () => {
     expect(await sbx.exec("printf out; printf err >&2; exit 3")).toMatchObject({ exitCode: 3, stdout: "out", stderr: "err" });
   });
 
+  it("resolves an HTTPS URL and stops a detached command without waiting for it", async () => {
+    const sandbox = await p().create({ ports: [3000] });
+    const box = await p().connect(sandbox.nativeId);
+    const cmd = 'printf "%s" "$TEST_VALUE" > e2b-ready; exec sleep 30';
+    try {
+      const background = await box.start!(cmd, { cwd: root, env: { TEST_VALUE: "ready" } });
+      try {
+        await expect(box.url!(3000)).resolves.toBe(`https://3000-${sandbox.nativeId}.e2b.app`);
+        expect(runs.at(-1)).toEqual({ cmd, opts: { cwd: root, envs: { TEST_VALUE: "ready" }, background: true, timeoutMs: 0 } });
+        expect(disconnects).toHaveLength(1);
+        await vi.waitFor(() => expect(readFileSync(join(root, "e2b-ready"), "utf8")).toBe("ready"));
+      } finally {
+        await background.kill();
+      }
+      expect(kills).toEqual(disconnects);
+      await vi.waitFor(() => expect([...children].some((child) => child.pid === kills[0])).toBe(false));
+      expect(await box.exec("printf alive")).toMatchObject({ stdout: "alive", exitCode: 0 });
+    } finally {
+      await box.kill();
+    }
+  });
+
+  it("reports when the E2B project requires authenticated preview traffic", async () => {
+    const sandbox = await p().create({ ports: [3000] });
+    try {
+      sandboxes.get(sandbox.nativeId)!.allowPublicTraffic = false;
+      const box = await p().connect(sandbox.nativeId);
+      await expect(box.url!(3000)).rejects.toMatchObject({
+        provider: "e2b", status: 403, message: expect.stringContaining("requires authenticated preview traffic"),
+      });
+      await expect(box.exec("printf alive")).resolves.toMatchObject({ stdout: "alive" });
+    } finally {
+      await sandbox.kill();
+    }
+  });
+
   it("rejects with the contract's timeout and kills the handle when wait() never settles", async () => {
     const sbx = await p().create({});
     hangingHandle = { wait: () => new Promise<never>(() => {}), kill: vi.fn(async () => true) };
@@ -183,6 +230,22 @@ describe("E2BProvider", () => {
     await expect(sbx.exec("sleep 60", { timeoutSeconds: 1 })).rejects.toMatchObject({ name: "ProviderError", message: "e2b: command timed out after 1s" });
     expect(Date.now() - t0).toBeLessThan(3000);
     expect(hangingHandle.kill).toHaveBeenCalledTimes(1);
+  });
+
+  it("kills a launched command if detaching its output stream fails", async () => {
+    const box = await p().create({});
+    const kill = vi.fn(async () => true);
+    hangingHandle = {
+      wait: () => new Promise<never>(() => {}),
+      disconnect: async () => { throw new Error("stream could not detach"); },
+      kill,
+    };
+    try {
+      await expect(box.start!("exec sleep 30")).rejects.toMatchObject({ provider: "e2b", message: "e2b: stream could not detach" });
+      expect(kill).toHaveBeenCalledOnce();
+    } finally {
+      await box.kill();
+    }
   });
 
   it("maps the SDK's TimeoutError and other failures to ProviderError labelled e2b", async () => {

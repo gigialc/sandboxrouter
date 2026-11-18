@@ -1,5 +1,5 @@
-import { ProviderError, type ExecOptions, type ExecResult, type Provider, type ProviderId, type ProviderSandbox, type SandboxSpec } from "../types.js";
-import { DEFAULT_EXEC_TIMEOUT_S, optionalImport, timeoutError, toBytes } from "../util.js";
+import { ProviderError, type ExecOptions, type ExecResult, type Provider, type ProviderId, type ProviderProcess, type ProviderSandbox, type SandboxSpec, type StartOptions } from "../types.js";
+import { DEFAULT_EXEC_TIMEOUT_S, errorStatus, optionalImport, timeoutError, toBytes } from "../util.js";
 import type {
   ActionResult,
   ComputerAction,
@@ -42,12 +42,12 @@ export class E2BProvider implements Provider, ComputerProvider {
       metadata: spec.metadata,
     };
     const sbx = spec.image?.e2b ? await Sandbox.create(spec.image.e2b, opts) : await Sandbox.create(opts);
-    return new E2BBox(sbx);
+    return new E2BNativeBox(sbx);
   }
 
   async connect(nativeId: string): Promise<ProviderSandbox> {
     const { Sandbox } = await optionalImport<E2BModule>("e2b", "e2b");
-    return new E2BBox(await Sandbox.connect(nativeId, { apiKey: this.apiKey }));
+    return new E2BNativeBox(await Sandbox.connect(nativeId, { apiKey: this.apiKey }));
   }
 
   /**
@@ -196,6 +196,62 @@ export class E2BBox extends E2BCompatBox {
   /** Snapshot memory and disk. Sandbox.connect (router.get) resumes it. */
   async pause(): Promise<void> {
     await this.sbx.pause();
+  }
+}
+
+/** E2B-style SDK with browser hosts and detached, killable command handles. */
+export interface E2BPreviewSandbox extends E2BLikeSandbox {
+  getHost(port: number): string;
+  getInfo?(): Promise<{ sandboxId?: string; network?: { allowPublicTraffic?: boolean | null } | null }>;
+  commands: {
+    run(
+      cmd: string,
+      opts: Parameters<E2BLikeSandbox["commands"]["run"]>[1],
+    ): Promise<E2BCommandHandle & { disconnect(): Promise<void> }>;
+  };
+}
+
+export class E2BNativeBox extends E2BBox {
+  constructor(private sandbox: E2BPreviewSandbox, provider: ProviderId = "e2b") {
+    super(sandbox, provider);
+  }
+
+  async url(port: number): Promise<string> {
+    const info = await this.sandbox.getInfo?.();
+    if (info?.network?.allowPublicTraffic === false) {
+      throw new ProviderError(this.provider, "this sandbox requires authenticated preview traffic; use a provider or project with browser-accessible previews", 403);
+    }
+    return `https://${this.sandbox.getHost(port)}`;
+  }
+
+  async start(cmd: string, opts: StartOptions = {}): Promise<ProviderProcess> {
+    try {
+      const command = await this.sandbox.commands.run(cmd, {
+        cwd: opts.cwd,
+        envs: opts.env,
+        background: true,
+        timeoutMs: 0,
+      });
+      // Close the local stream while the command keeps running. The kill request is independent.
+      try {
+        await command.disconnect();
+      } catch (err) {
+        await command.kill().catch(() => {});
+        throw err;
+      }
+      return {
+        kill: async () => {
+          try {
+            await command.kill();
+          } catch (err) {
+            const status = errorStatus(err);
+            if (status !== 404) throw new ProviderError(this.provider, err instanceof Error ? err.message : String(err), status);
+          }
+        },
+      };
+    } catch (err) {
+      throw new ProviderError(this.provider, err instanceof Error ? err.message : String(err), errorStatus(err));
+    }
   }
 }
 

@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { CATALOG, fittingSpec, hourlyCost, unfit } from "../src/catalog.js";
 import { EXEC_GRACE_S, Router, parseId } from "../src/router.js";
 import { PUBLISHED } from "../src/published.js";
-import { RouterError } from "../src/types.js";
+import { RouterError, type ProviderProcess } from "../src/types.js";
 import { ALL, FakeProvider } from "./fake.js";
 
 const fakes = (over: Partial<Record<string, ConstructorParameters<typeof FakeProvider>[1]>> = {}) =>
@@ -335,6 +335,77 @@ describe("streaming and pause", () => {
     const r = new Router({ failing: [], providers: fakes() });
     const small = { vcpu: 1, memoryGb: 0.5 };
     expect(r.plan(small, { require: ["pause"] }).filter((c) => !c.skip).map((c) => c.provider)).toEqual(["maritime", "daytona", "e2b"]);
+  });
+
+  it("filters preview and background requirements independently and honours declared port limits", () => {
+    const router = new Router({ providers: fakes(), ledger: false });
+    const provider = ["maritime", "modal", "vercel", "e2b"] as const;
+    const order = (options: { ports?: number[] }, require?: ("ports" | "background")[]) =>
+      router.plan(options, { provider: [...provider], require }).filter((candidate) => !candidate.skip).map((candidate) => candidate.provider);
+    expect(order({ ports: [3000] })).toEqual(["modal", "vercel", "e2b"]);
+    expect(order({}, ["ports", "background"])).toEqual(["vercel", "e2b"]);
+    expect(order({ ports: Array.from({ length: 16 }, (_, i) => 3000 + i) }, ["background"])).toEqual(["e2b"]);
+    expect(unfit("blaxel", { ports: [8080] }, ["background"])).toBe("port 8080 is reserved by the provider");
+    expect(() => router.plan({ ports: [3000, 3000] })).toThrow(/distinct integers/);
+    expect(() => router.plan({ ports: [0] })).toThrow(/distinct integers/);
+  });
+
+  it("uses the routed preview and process handle, retries a failed stop, and leaves the sandbox usable", async () => {
+    const provider = new FakeProvider("e2b");
+    const adapter = await provider.create({});
+    const kill = vi.fn<() => Promise<void>>().mockRejectedValueOnce(new Error("temporarily unavailable")).mockResolvedValue(undefined);
+    adapter.start = vi.fn(async () => ({ kill }));
+    adapter.url = vi.fn((port: number) => `https://${port}-preview.example.test`);
+    const create = vi.spyOn(provider, "create").mockResolvedValue(adapter);
+    const router = new Router({ providers: [provider], ledger: false });
+    const sandbox = await router.create({ ports: [3000] }, { require: ["ports", "background"] });
+    expect(create).toHaveBeenCalledWith({ ports: [3000] });
+    const command = "exec python3 -m http.server 3000";
+    const options = { cwd: "/tmp", env: { MODE: "development" } };
+    const child = await sandbox.start(command, options);
+    expect(adapter.start).toHaveBeenCalledWith(command, options);
+    await expect((await router.get(sandbox.id)).url(3000)).resolves.toBe("https://3000-preview.example.test");
+    await expect(sandbox.url(65536)).rejects.toMatchObject({ code: "bad_request" });
+    await expect(sandbox.start(" ")).rejects.toMatchObject({ code: "bad_request" });
+    await expect(child.kill()).rejects.toThrow("temporarily unavailable");
+    await Promise.all([child.kill(), child.kill()]);
+    await child.kill();
+    expect(kill).toHaveBeenCalledTimes(2);
+    await expect(sandbox.exec("echo alive")).resolves.toMatchObject({ exitCode: 0 });
+    await sandbox.kill();
+  });
+
+  it("rejects unsupported methods and unusable URLs without returning provider internals", async () => {
+    const provider = new FakeProvider("e2b");
+    const router = new Router({ providers: [provider], ledger: false });
+    const sandbox = await router.create();
+    await expect(sandbox.url(3000)).rejects.toMatchObject({ code: "unsupported" });
+    await expect(sandbox.start("sleep 10")).rejects.toMatchObject({ code: "unsupported" });
+    const adapter = await provider.connect(sandbox.nativeId);
+    adapter.url = () => "file:///tmp/private";
+    await expect(sandbox.url(3000)).rejects.toMatchObject({ status: 502, message: "e2b: invalid HTTP preview URL" });
+  });
+
+  it("stops a command that only returns a handle after the start deadline", async () => {
+    const provider = new FakeProvider("e2b");
+    const router = new Router({ providers: [provider], ledger: false });
+    const sandbox = await router.create();
+    const adapter = await provider.connect(sandbox.nativeId);
+    let finish!: (handle: ProviderProcess) => void;
+    adapter.start = () => new Promise((resolve) => { finish = resolve; });
+    const kill = vi.fn(async () => {});
+    vi.useFakeTimers();
+    try {
+      const failure = expect(sandbox.start("sleep 10")).rejects.toMatchObject({ status: 504 });
+      await vi.runOnlyPendingTimersAsync();
+      await failure;
+      finish({ kill });
+      await vi.runAllTicks();
+      await Promise.resolve();
+      expect(kill).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });
 

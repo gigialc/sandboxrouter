@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
-import { ProviderError, type ExecOptions, type ExecResult, type Provider, type ProviderSandbox, type SandboxSpec } from "../types.js";
-import { DEFAULT_EXEC_TIMEOUT_S, optionalImport, timeoutError, toBytes, wrapCommand } from "../util.js";
+import { ProviderError, type ExecOptions, type ExecResult, type Provider, type ProviderProcess, type ProviderSandbox, type SandboxSpec, type StartOptions } from "../types.js";
+import { DEFAULT_EXEC_TIMEOUT_S, errorStatus, optionalImport, timeoutError, toBytes, wrapCommand } from "../util.js";
 import type {
   ActionResult,
   ComputerAction,
@@ -219,6 +219,37 @@ class DaytonaBox implements ProviderSandbox {
     } finally {
       await proc.deleteSession(session).catch(() => {});
     }
+  }
+
+  async url(port: number): Promise<string> {
+    // A port-scoped signed URL works in a browser without revealing a sandbox-wide preview token.
+    return (await this.sbx.getSignedPreviewUrl(port, 3600)).url;
+  }
+
+  async start(cmd: string, opts: StartOptions = {}): Promise<ProviderProcess> {
+    const session = `sbr-${randomUUID()}`;
+    const process = this.sbx.process;
+    try {
+      await process.createSession(session);
+      await process.executeSessionCommand(session, {
+        command: wrapCommand(`(\n${cmd}\n)`, opts),
+        runAsync: true,
+        suppressInputEcho: true,
+      });
+    } catch (err) {
+      await process.deleteSession(session).catch(() => {});
+      throw new ProviderError("daytona", err instanceof Error ? err.message : String(err), errorStatus(err));
+    }
+    return {
+      async kill() {
+        try {
+          await process.deleteSession(session);
+        } catch (err) {
+          const status = errorStatus(err);
+          if (status !== 404) throw new ProviderError("daytona", err instanceof Error ? err.message : String(err), status);
+        }
+      },
+    };
   }
 
   async writeFile(path: string, content: string | Uint8Array): Promise<void> {

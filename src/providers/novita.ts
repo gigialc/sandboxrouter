@@ -1,11 +1,11 @@
 import { ProviderError, type Provider, type ProviderSandbox, type SandboxSpec } from "../types.js";
 import { optionalImport } from "../util.js";
-import { E2BBox, type E2BLikeSandbox } from "./e2b.js";
+import { E2BNativeBox, type E2BPreviewSandbox } from "./e2b.js";
 
 /**
  * Novita AI Agent Sandbox via the official `novita-sandbox` SDK (2.x), a fork of E2B's SDK with
- * the same surface (Sandbox.create/connect, commands.run with onStdout/onStderr, files.read/write,
- * pause, kill), so the E2B box wrapper is reused as-is.
+ * the same surface for creating, running and pausing sandboxes, including getHost and background
+ * command handles, so the E2B box wrapper is reused.
  *
  * Why not the `e2b` SDK with Novita's domain: that was Novita's documented route for its v1
  * cluster (sandbox.novita.ai), but since the 2026-06-08 SDK 2.0 release the E2B-compatible page
@@ -34,9 +34,9 @@ const ID = "novita" as const;
 /** `novita-sandbox` is an optional peer dependency and not installed here, so its types are local. */
 interface NovitaModule {
   Sandbox: {
-    create(template: string, opts: Record<string, unknown>): Promise<E2BLikeSandbox>;
-    create(opts: Record<string, unknown>): Promise<E2BLikeSandbox>;
-    connect(sandboxId: string, opts: Record<string, unknown>): Promise<E2BLikeSandbox>;
+    create(template: string, opts: Record<string, unknown>): Promise<E2BPreviewSandbox>;
+    create(opts: Record<string, unknown>): Promise<E2BPreviewSandbox>;
+    connect(sandboxId: string, opts: Record<string, unknown>): Promise<E2BPreviewSandbox>;
   };
 }
 
@@ -68,7 +68,7 @@ export class NovitaProvider implements Provider {
     const template = spec.image?.novita;
     try {
       const sbx = template ? await Sandbox.create(template, opts) : await Sandbox.create(opts);
-      return new E2BBox(sbx, ID);
+      return new E2BNativeBox(sbx, ID);
     } catch (err: any) {
       throw wrap(err);
     }
@@ -78,7 +78,7 @@ export class NovitaProvider implements Provider {
   async connect(nativeId: string): Promise<ProviderSandbox> {
     const { Sandbox } = await optionalImport<NovitaModule>("novita-sandbox", "novita");
     try {
-      return new E2BBox(await Sandbox.connect(nativeId, this.conn()), ID);
+      return new E2BNativeBox(await Sandbox.connect(nativeId, this.conn()), ID);
     } catch (err: any) {
       throw wrap(err);
     }

@@ -138,7 +138,11 @@ beforeAll(async () => {
       if (m.state !== "running") return notRunning();
       const sse = (req.headers.accept ?? "").includes("text/event-stream");
       const child = spawn("bash", ["-c", body.cmd], { cwd: body.cwd ?? root, env: { ...process.env, ...m.env, ...(body.envs ?? {}) }, detached: true });
-      child.stdin.end(body.stdin ?? "");
+      child.stdin.on("error", (error: NodeJS.ErrnoException) => {
+        // A command can exit without reading its input. Its exit result still applies.
+        if (error.code !== "EPIPE") throw error;
+      });
+      child.stdin.end(body.stdin || undefined);
       let timedOut = false;
       const timer = setTimeout(() => {
         timedOut = true;

@@ -1,5 +1,5 @@
-import { DEFAULT_MEMORY_GB, DEFAULT_VCPU } from "../catalog.js";
-import { ProviderError, type ExecOptions, type ExecResult, type Provider, type ProviderSandbox, type SandboxSpec } from "../types.js";
+import { DEFAULT_MEMORY_GB, DEFAULT_VCPU, info } from "../catalog.js";
+import { ProviderError, type ExecOptions, type ExecResult, type Provider, type ProviderProcess, type ProviderSandbox, type SandboxSpec, type StartOptions } from "../types.js";
 import { DEFAULT_EXEC_TIMEOUT_S, errorStatus, optionalImport, timeoutError, toBytes } from "../util.js";
 
 type BlaxelModule = typeof import("@blaxel/core");
@@ -9,6 +9,7 @@ type BlaxelSandbox = InstanceType<BlaxelModule["SandboxInstance"]>;
 const DEFAULT_IMAGE = "blaxel/base-image:latest";
 /** Blaxel rejects a max-age ttl under 5 minutes. */
 const MIN_TTL_MINUTES = 5;
+const PREVIEW_TTL_MS = 30 * 60_000;
 
 /**
  * Blaxel sandboxes via `@blaxel/core`. Auth: BL_API_KEY + BL_WORKSPACE (or `bl login`).
@@ -17,6 +18,7 @@ const MIN_TTL_MINUTES = 5;
  * wake on the next call. No pause(): archiving is a preview Blaxel enables per workspace (others
  * get 403 "Archiving a sandbox is in preview and is not enabled for this workspace", 2026-11-05).
  * kill() waits until the sandbox is gone, because Blaxel deletes asynchronously.
+ * Preview URLs create private previews on demand and carry a short-lived Blaxel preview token.
  */
 export class BlaxelProvider implements Provider {
   readonly id = "blaxel" as const;
@@ -116,6 +118,55 @@ class BlaxelBox implements ProviderSandbox {
     }
     // A nonzero exit is a result (status "failed"), not an error.
     return { exitCode: r.exitCode, stdout: r.stdout ?? "", stderr: r.stderr ?? "", durationMs: Date.now() - t0 };
+  }
+
+  async url(port: number): Promise<string> {
+    if (info("blaxel").limits.reservedPorts?.includes(port)) throw new ProviderError("blaxel", `port ${port} is reserved`, 400);
+    try {
+      const preview = await this.sbx.previews.createIfNotExists({
+        metadata: { name: `sandboxrouter-${port}` },
+        spec: { port, public: false },
+      });
+      // Never reuse a conflicting preview or turn even a previously created one public.
+      if (preview.spec.port !== port || preview.spec.public === true) {
+        throw new ProviderError("blaxel", `existing preview for port ${port} has different access or routing settings`, 409);
+      }
+      const url = new URL(preview.url);
+      if (url.protocol !== "https:") throw new ProviderError("blaxel", "preview did not return an HTTPS URL");
+      const expiresAt = new Date(Date.now() + PREVIEW_TTL_MS);
+      const token = typeof preview.tokens.createIfExpired === "function"
+        ? await preview.tokens.createIfExpired(expiresAt, 60_000)
+        : await preview.tokens.create(expiresAt);
+      url.searchParams.set("bl_preview_token", token.value);
+      return url.toString();
+    } catch (err) {
+      throw wrap(err);
+    }
+  }
+
+  async start(cmd: string, opts: StartOptions = {}): Promise<ProviderProcess> {
+    try {
+      const process = await this.sbx.process.exec({
+        command: cmd,
+        workingDir: opts.cwd,
+        env: opts.env,
+        waitForCompletion: false,
+        keepAlive: true,
+        timeout: 0,
+      });
+      return {
+        kill: async () => {
+          try {
+            await this.sbx.process.kill(process.pid);
+          } catch (err) {
+            const error = wrap(err);
+            if (error.status !== 404) throw error;
+          }
+        },
+      };
+    } catch (err) {
+      throw wrap(err);
+    }
   }
 
   async writeFile(path: string, content: string | Uint8Array): Promise<void> {

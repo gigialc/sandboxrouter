@@ -1,8 +1,9 @@
 import type { Server } from "node:http";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { Client, ClientError } from "../src/client.js";
 import { Router } from "../src/router.js";
 import { createApp, HttpError } from "../src/server.js";
+import { ProviderError, type ProviderProcess, type StartOptions } from "../src/types.js";
 import { ALL, FakeProvider } from "./fake.js";
 
 const servers: Server[] = [];
@@ -99,6 +100,94 @@ describe("server hooks", () => {
     expect(sbx.listHourlyUsd).toBeGreaterThan(0);
     await expect(sr.create({}, { provider: "daytona", fallback: false })).rejects.toMatchObject({ status: 503, code: "all_failed" });
     expect(failed).toBe(1);
+  });
+
+  it("scopes previews and background handles to their sandbox and retries a failed stop", async () => {
+    const owner = new Map<string, string>();
+    const fake = new FakeProvider("e2b");
+    const create = fake.create.bind(fake);
+    const kill = vi.fn<ProviderProcess["kill"]>()
+      .mockRejectedValueOnce(new ProviderError("e2b", "unavailable", 503))
+      .mockResolvedValue(undefined);
+    const launch = vi.fn(async (_cmd: string, _opts?: StartOptions) => ({ kill }));
+    fake.create = async (spec) => Object.assign(await create(spec), {
+      url: (port: number) => `https://preview.example/${port}`,
+      start: launch,
+    });
+    const base = await start(new Router({ providers: [fake], ledger: false }), undefined, [], {
+      authorize: async (req) => ({ "Bearer a": "alice", "Bearer b": "bob" })[req.headers.authorization ?? ""] ?? null,
+      afterCreate: async (who, sbx) => void owner.set(sbx.id, who as string),
+      owns: async (who, id) => owner.get(id) === who,
+    });
+    const alice = new Client({ baseUrl: base, apiKey: "a" });
+    const bob = new Client({ baseUrl: base, apiKey: "b" });
+
+    const sbx = await alice.create({ ports: [3000] }, { require: ["ports", "background"] });
+    const path = `/v1/sandboxes/${encodeURIComponent(sbx.id)}`;
+    expect(await sbx.url(3000)).toBe("https://preview.example/3000");
+    expect((await alice.request("GET", path + "/ports/3000")).headers.get("cache-control")).toBe("no-store");
+    await expect(sbx.url(0)).rejects.toMatchObject({ status: 400, code: "bad_request" });
+    await expect(bob.sandbox(sbx.id).url(3000)).rejects.toMatchObject({ status: 404 });
+    await expect(bob.sandbox(sbx.id).start("serve")).rejects.toMatchObject({ status: 404 });
+    expect(launch).not.toHaveBeenCalled();
+    await expect(alice.request("POST", path + "/processes", { cmd: "serve", env: [] })).rejects.toMatchObject({ status: 400 });
+    await expect(alice.request("POST", path + "/processes", { cmd: "serve", timeoutSeconds: 5 })).rejects.toMatchObject({ status: 400 });
+    expect(launch).not.toHaveBeenCalled();
+
+    const command = await sbx.start("serve", { cwd: "/app", env: { PORT: "3000" } });
+    expect(launch).toHaveBeenCalledWith("serve", { cwd: "/app", env: { PORT: "3000" } });
+    const commandPath = `${path}/processes/${command.id}`;
+    await expect(bob.request("DELETE", commandPath)).rejects.toMatchObject({ status: 404 });
+    const second = await alice.create();
+    await expect(alice.request("DELETE", commandPath.replace(encodeURIComponent(sbx.id), encodeURIComponent(second.id))))
+      .rejects.toMatchObject({ status: 404 });
+    expect(kill).not.toHaveBeenCalled();
+
+    await expect(command.kill()).rejects.toMatchObject({ status: 503 });
+    await Promise.all([command.kill(), command.kill()]);
+    expect(kill).toHaveBeenCalledTimes(2);
+    expect((await sbx.exec("pwd")).exitCode).toBe(0);
+    await second.kill();
+
+    const another = await sbx.start("serve");
+    const fakeSandbox = fake.live.get(sbx.id.split(":")[1])!;
+    const killSandbox = fakeSandbox.kill.bind(fakeSandbox);
+    fakeSandbox.kill = vi.fn()
+      .mockRejectedValueOnce(new ProviderError("e2b", "unavailable", 503))
+      .mockImplementation(killSandbox);
+    await expect(sbx.kill()).rejects.toMatchObject({ status: 503 });
+    await another.kill();
+    expect(kill).toHaveBeenCalledTimes(3);
+
+    const last = await sbx.start("serve");
+    await sbx.kill();
+    await expect(last.kill()).rejects.toMatchObject({ status: 404 });
+    expect(kill).toHaveBeenCalledTimes(3);
+  });
+
+  it("discards a process started while its sandbox is being deleted", async () => {
+    const fake = new FakeProvider("e2b");
+    const create = fake.create.bind(fake);
+    let markStarted!: () => void;
+    const started = new Promise<void>((resolve) => { markStarted = resolve; });
+    let finishStart!: (process: ProviderProcess) => void;
+    const starting = new Promise<ProviderProcess>((resolve) => { finishStart = resolve; });
+    fake.create = async (spec) => Object.assign(await create(spec), {
+      async start() {
+        markStarted();
+        return starting;
+      },
+    });
+    const base = await start(new Router({ providers: [fake], ledger: false }), "tok");
+    const sbx = await new Client({ baseUrl: base, apiKey: "tok" }).create();
+    const pending = sbx.start("serve");
+    await started;
+    await sbx.kill();
+    const kill = vi.fn(async () => {});
+    const assertion = expect(pending).rejects.toMatchObject({ status: 404 });
+    finishStart({ kill });
+    await assertion;
+    expect(kill).toHaveBeenCalledTimes(1);
   });
 
   it("kills a sandbox that finishes starting after the caller hung up", async () => {
