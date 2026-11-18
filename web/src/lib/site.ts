@@ -132,7 +132,7 @@ export interface UseCase {
   spec: { vcpu?: number; memoryGb?: number; expectedSeconds?: number; timeoutMinutes?: number; cpuUtilization?: number };
   require: string[];
   runSeconds: number;
-  top: { provider: string; name: string; runUsd: number; runHourlyUsd: number; hourlyUsd: number; perSandboxUsd: number; minimumSeconds: number }[];
+  top: { provider: string; name: string; runUsd: number; runHourlyUsd: number; hourlyUsd: number; perSandboxUsd: number; minimumSeconds: number; ownImage?: boolean }[];
 }
 
 export interface CostRow {

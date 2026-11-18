@@ -46,7 +46,7 @@ export function AgentTable() {
       </ResultTable>
       <Footnote>
         Model: {rows[0].model}. Costs estimate sandbox usage. Idle is the share of the session spent waiting on the model.
-        {rows.some((r) => r.provider === "boat") && <> <ConditionalStartFeeNote id="boat" /></>}
+        {" "}<ConditionalStartFeeNote ids={rows.map((r) => r.provider)} />
       </Footnote>
     </div>
   );

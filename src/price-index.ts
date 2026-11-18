@@ -1,4 +1,4 @@
-import { CATALOG } from "./catalog.js";
+import { CATALOG, planOnlyStartFee, withOwnImages } from "./catalog.js";
 import { median } from "./bench-store.js";
 import { Router, rankUsd, runHours } from "./router.js";
 import { VERIFIED } from "./verified.js";
@@ -46,10 +46,13 @@ export function priceIndex(verified: readonly ProviderId[] = Object.keys(VERIFIE
   return INDEX_LINES.map((line) => {
     const hours = runHours(line.spec);
     const costs = router
-      .plan(line.spec, { strategy: "cheapest" })
+      // Every provider at the line's size, including those that need your own image to run it.
+      .plan(withOwnImages(line.spec), { strategy: "cheapest" })
       .filter((c) => !c.skip)
       // What the unit of work costs: a run of `hours`, times how many runs the line counts.
-      .map((c) => ({ provider: c.provider, usd: rankUsd(c, hours) * hours * line.scale }));
+      // Without a fee only one plan pays, like the published tables.
+      .map((c) => ({ provider: c.provider, usd: (rankUsd(c, hours) * hours - planOnlyStartFee(c.provider)) * line.scale }))
+      .sort((a, b) => a.usd - b.usd);
     const best = costs[0];
     const round = (n: number) => Math.round(n * 1e6) / 1e6;
     return {

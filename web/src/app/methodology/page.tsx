@@ -71,7 +71,7 @@ export default function MethodologyPage() {
           <p>
             Where we measured what a provider really bills ({billed.map((p) => p.name).join(", ") || "none yet"}), its price is
             corrected by that ratio. Everywhere else it uses the list price. Estimates exclude disk, network and monthly plans.
-            {" "}<ConditionalStartFeeNote id="boat" />
+            {" "}<ConditionalStartFeeNote ids={["boat", "sail"]} />
           </p>
           <p>
             Hosted charges on our provider accounts use estimated provider compute rates plus {HOSTED_FEE_PCT}% and assume full CPU.

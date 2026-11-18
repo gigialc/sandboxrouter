@@ -1,0 +1,94 @@
+{
+  "tool": "sandboxrouter",
+  "version": "0.14.1",
+  "date": "2026-11-18T20:22:58.672Z",
+  "label": "home-eu",
+  "runs": 3,
+  "spec": {
+    "vcpu": 2,
+    "memoryGb": 4
+  },
+  "task": "v2",
+  "node": "v22.22.0",
+  "platform": "darwin-arm64",
+  "rows": [
+    {
+      "provider": "openscale",
+      "runs": 3,
+      "failures": 0,
+      "createFailures": 0,
+      "commandFailures": 0,
+      "cleanupFailures": 0,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "medianCreateMs": 330,
+      "medianExecMs": 942,
+      "medianReadyMs": 1278,
+      "hourlyUsd": 0.017,
+      "taskOk": 3,
+      "medianTaskReadyMs": 1278,
+      "medianTaskMs": 3588,
+      "taskPhasesMs": {
+        "cpu": 1669,
+        "cores": 785,
+        "disk": 1130
+      },
+      "medianTaskCpuMs": 4500,
+      "medianTaskMaxCoreMs": 2910
+    },
+    {
+      "provider": "e2b",
+      "runs": 3,
+      "failures": 0,
+      "createFailures": 0,
+      "commandFailures": 0,
+      "cleanupFailures": 0,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "medianCreateMs": 606,
+      "medianExecMs": 394,
+      "medianReadyMs": 1001,
+      "hourlyUsd": 0.1656,
+      "taskOk": 3,
+      "medianTaskReadyMs": 1001,
+      "medianTaskMs": 3098,
+      "taskPhasesMs": {
+        "cpu": 1800,
+        "cores": 932,
+        "disk": 305
+      },
+      "medianTaskCpuMs": 4090,
+      "medianTaskMaxCoreMs": 3050
+    },
+    {
+      "provider": "daytona",
+      "runs": 3,
+      "failures": 0,
+      "createFailures": 0,
+      "commandFailures": 0,
+      "cleanupFailures": 0,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "medianCreateMs": 1290,
+      "medianExecMs": 407,
+      "medianReadyMs": 1748,
+      "hourlyUsd": 0.1656,
+      "taskOk": 3,
+      "medianTaskReadyMs": 1748,
+      "medianTaskMs": 844,
+      "taskPhasesMs": {
+        "cpu": 391,
+        "cores": 348,
+        "disk": 98
+      },
+      "medianTaskCpuMs": 15070,
+      "medianTaskMaxCoreMs": 850
+    }
+  ]
+}

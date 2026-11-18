@@ -1,6 +1,6 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { benchmarksPublishable, billingRules, CATALOG, cpuHourlyAtFull, hourlyCost } from "./catalog.js";
+import { benchmarksPublishable, billingRules, CATALOG, cpuHourlyAtFull, hourlyCost, planOnlyStartFee } from "./catalog.js";
 import { BILLED_VS_LIST } from "./billing.js";
 import { AGENT_TASK_VERSION } from "./agent-bench.js";
 import { isCurrentTask, TASK_VERSION, taskByVersion, taskUsd, type PhaseMs } from "./task.js";
@@ -248,7 +248,8 @@ export function taskTable(reports: BenchReport[], version: string = TASK_VERSION
       taskMs: taskMillis,
       phasesMs,
       hourlyUsd,
-      taskUsd: taskUsd(id, size, createMs, taskMillis, cpuMs, ratio, false, maxCoreMs),
+      // A fee only one plan pays (Sail's free plan) is noted beside the table, not counted in it.
+      taskUsd: taskUsd(id, size, createMs, taskMillis, cpuMs, ratio, false, maxCoreMs) - planOnlyStartFee(id),
       reusedUsd: taskUsd(id, size, createMs, taskMillis, cpuMs, ratio, true, maxCoreMs),
       runs,
       ok,
@@ -257,7 +258,7 @@ export function taskTable(reports: BenchReport[], version: string = TASK_VERSION
       ...(cpuMs !== undefined ? { cpuMs } : {}),
       activeCpu: cpuHourlyAtFull(id, size) > 0,
       minimumSeconds: rules.minSeconds,
-      perSandboxUsd: rules.perSandboxUsd,
+      perSandboxUsd: rules.perSandboxUsd - planOnlyStartFee(id),
       measuredAt: xs.map((x) => x.date).sort().at(-1)!,
     }];
   });
@@ -495,6 +496,6 @@ export function agentTable(reports: AgentReport[]) {
     }
   }
   return [...latest.values()]
-    .map(({ row, date, model }) => ({ ...row, name: CATALOG.find((c) => c.id === row.provider)!.name, measuredAt: date, model }))
+    .map(({ row, date, model }) => ({ ...row, ...(row.medianUsd !== undefined ? { medianUsd: Math.max(0, row.medianUsd - planOnlyStartFee(row.provider)) } : {}), name: CATALOG.find((c) => c.id === row.provider)!.name, measuredAt: date, model }))
     .sort((a, b) => b.ok / Math.max(1, b.requested ?? b.runs) - a.ok / Math.max(1, a.requested ?? a.runs) || (a.medianUsd ?? Infinity) - (b.medianUsd ?? Infinity));
 }

@@ -73,7 +73,7 @@ export function PriceIndex({ dark = false }: { dark?: boolean }) {
       })}
       <p className={`mt-3 text-[11px] leading-5 ${muted}`}>
         Estimated direct-provider costs, recorded {first ? `since ${day(first)}` : "when prices change"}.{" "}
-        <ConditionalStartFeeNote id="boat" />{" "}
+        <ConditionalStartFeeNote ids={["boat", "sail"]} />{" "}
         <Link href="/methodology#index" className="underline underline-offset-2">
           How it&apos;s made
         </Link>

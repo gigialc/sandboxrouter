@@ -121,7 +121,7 @@
     }
   },
   "version": "0.14.1",
-  "generatedAt": "2026-11-18T19:56:33.083Z",
+  "generatedAt": "2026-11-18T20:55:30.557Z",
   "shapes": [
     "1x2",
     "2x4",
@@ -2791,6 +2791,7 @@
       "docs": "https://docs.sailresearch.com/sailboxes.md",
       "pricing": {
         "perSandboxUsd": 0.01,
+        "perSandboxPlan": "free",
         "vcpuHour": 0.015,
         "gbHour": 0.008,
         "note": "on what the box uses (CPU time, RAM it holds, disk $0.0007/GiB-h), sampled per second and not rounded up; RAM counts the VM's file cache, up to its memory limit (16 GiB at least), so file-heavy work can hold more than you asked for; paused/sleeping free; $0.01 per new Sailbox on the free plan, waived on Pro and Enterprise",
@@ -3742,27 +3743,27 @@
             "name": "OpenScale Sandboxes",
             "size": {
               "vcpu": 2,
-              "memoryGb": 1
+              "memoryGb": 4
             },
-            "createMs": 1254,
-            "taskMs": 3641,
+            "createMs": 1278,
+            "taskMs": 3588,
             "phasesMs": {
-              "cpu": 1655,
-              "cores": 810,
-              "disk": 1056
+              "cpu": 1669,
+              "cores": 785,
+              "disk": 1130
             },
             "hourlyUsd": 0.013999999999999999,
             "taskUsd": 0.000019444444444444442,
-            "reusedUsd": 0.000014159444444444443,
+            "reusedUsd": 0.000013953333333333332,
             "runs": 3,
             "ok": 3,
             "limited": 0,
             "successRate": 1,
-            "cpuMs": 4470,
+            "cpuMs": 4500,
             "activeCpu": false,
             "minimumSeconds": 0,
             "perSandboxUsd": 0,
-            "measuredAt": "2026-11-17T23:36:05.829Z"
+            "measuredAt": "2026-11-18T20:22:58.672Z"
           },
           {
             "provider": "maritime",
@@ -3795,19 +3796,19 @@
             "provider": "daytona",
             "name": "Daytona",
             "size": {
-              "vcpu": 1,
-              "memoryGb": 1
+              "vcpu": 2,
+              "memoryGb": 4
             },
-            "createMs": 785,
-            "taskMs": 1717,
+            "createMs": 1748,
+            "taskMs": 844,
             "phasesMs": {
-              "cpu": 746,
-              "cores": 879,
-              "disk": 99
+              "cpu": 391,
+              "cores": 348,
+              "disk": 98
             },
             "hourlyUsd": 0.06659999999999999,
             "taskUsd": 0.000055499999999999994,
-            "reusedUsd": 0.0000317645,
+            "reusedUsd": 0.000015614,
             "runs": 3,
             "ok": 3,
             "limited": 0,
@@ -3815,7 +3816,7 @@
             "activeCpu": false,
             "minimumSeconds": 0,
             "perSandboxUsd": 0,
-            "measuredAt": "2026-11-17T23:40:37.832Z"
+            "measuredAt": "2026-11-18T20:22:58.672Z"
           },
           {
             "provider": "northflank",
@@ -3925,6 +3926,33 @@
             "measuredAt": "2026-11-17T23:40:37.832Z"
           },
           {
+            "provider": "sail",
+            "name": "Sailboxes (Sail Research)",
+            "size": {
+              "vcpu": 2,
+              "memoryGb": 4
+            },
+            "createMs": 2891,
+            "taskMs": 6495,
+            "phasesMs": {
+              "cpu": 3449,
+              "cores": 2097,
+              "disk": 885
+            },
+            "hourlyUsd": 0.062,
+            "taskUsd": 0.00011963888888888961,
+            "reusedUsd": 0.00008848333333333333,
+            "runs": 3,
+            "ok": 3,
+            "limited": 0,
+            "successRate": 1,
+            "cpuMs": 7380,
+            "activeCpu": true,
+            "minimumSeconds": 0,
+            "perSandboxUsd": 0,
+            "measuredAt": "2026-11-17T23:36:05.829Z"
+          },
+          {
             "provider": "novita",
             "name": "Novita AI Agent Sandbox",
             "size": {
@@ -4009,27 +4037,27 @@
             "name": "E2B",
             "size": {
               "vcpu": 2,
-              "memoryGb": 0.5
+              "memoryGb": 4
             },
-            "createMs": 820,
-            "taskMs": 3880,
+            "createMs": 1001,
+            "taskMs": 3098,
             "phasesMs": {
-              "cpu": 2249,
-              "cores": 1065,
-              "disk": 314
+              "cpu": 1800,
+              "cores": 932,
+              "disk": 305
             },
             "hourlyUsd": 0.1089,
             "taskUsd": 0.00015125,
-            "reusedUsd": 0.00011737,
+            "reusedUsd": 0.00009371449999999999,
             "runs": 3,
             "ok": 3,
             "limited": 0,
             "successRate": 1,
-            "cpuMs": 4710,
+            "cpuMs": 4090,
             "activeCpu": false,
             "minimumSeconds": 0,
             "perSandboxUsd": 0,
-            "measuredAt": "2026-11-17T23:36:05.829Z"
+            "measuredAt": "2026-11-18T20:22:58.672Z"
           },
           {
             "provider": "agentcore",
@@ -4192,33 +4220,6 @@
             "minimumSeconds": 60,
             "perSandboxUsd": 0,
             "measuredAt": "2026-11-17T23:39:46.957Z"
-          },
-          {
-            "provider": "sail",
-            "name": "Sailboxes (Sail Research)",
-            "size": {
-              "vcpu": 2,
-              "memoryGb": 4
-            },
-            "createMs": 2891,
-            "taskMs": 6495,
-            "phasesMs": {
-              "cpu": 3449,
-              "cores": 2097,
-              "disk": 885
-            },
-            "hourlyUsd": 0.062,
-            "taskUsd": 0.01011963888888889,
-            "reusedUsd": 0.00008848333333333333,
-            "runs": 3,
-            "ok": 3,
-            "limited": 0,
-            "successRate": 1,
-            "cpuMs": 7380,
-            "activeCpu": true,
-            "minimumSeconds": 0,
-            "perSandboxUsd": 0.01,
-            "measuredAt": "2026-11-17T23:36:05.829Z"
           }
         ],
         "outcomes": [
@@ -4457,27 +4458,27 @@
             "name": "OpenScale Sandboxes",
             "size": {
               "vcpu": 2,
-              "memoryGb": 1
+              "memoryGb": 4
             },
-            "createMs": 1453,
-            "taskMs": 103079,
+            "createMs": 1265,
+            "taskMs": 104352,
             "phasesMs": {
-              "cpu": 64568,
-              "cores": 30696,
-              "disk": 7786
+              "cpu": 64932,
+              "cores": 30884,
+              "disk": 8543
             },
             "hourlyUsd": 0.013999999999999999,
-            "taskUsd": 0.00040833333333333325,
-            "reusedUsd": 0.0004008627777777777,
+            "taskUsd": 0.00041222222222222213,
+            "reusedUsd": 0.00040581333333333336,
             "runs": 3,
             "ok": 3,
             "limited": 0,
             "successRate": 1,
-            "cpuMs": 138670,
+            "cpuMs": 138750,
             "activeCpu": false,
             "minimumSeconds": 0,
             "perSandboxUsd": 0,
-            "measuredAt": "2026-11-17T23:49:08.280Z"
+            "measuredAt": "2026-11-18T20:54:36.345Z"
           },
           {
             "provider": "maritime",
@@ -4507,6 +4508,32 @@
             "measuredAt": "2026-11-17T23:49:08.280Z"
           },
           {
+            "provider": "daytona",
+            "name": "Daytona",
+            "size": {
+              "vcpu": 2,
+              "memoryGb": 4
+            },
+            "createMs": 1749,
+            "taskMs": 34769,
+            "phasesMs": {
+              "cpu": 15678,
+              "cores": 15529,
+              "disk": 3593
+            },
+            "hourlyUsd": 0.06659999999999999,
+            "taskUsd": 0.0006845,
+            "reusedUsd": 0.0006432264999999998,
+            "runs": 3,
+            "ok": 3,
+            "limited": 0,
+            "successRate": 1,
+            "activeCpu": false,
+            "minimumSeconds": 0,
+            "perSandboxUsd": 0,
+            "measuredAt": "2026-11-18T20:54:36.345Z"
+          },
+          {
             "provider": "tensorlake",
             "name": "Tensorlake",
             "size": {
@@ -4532,32 +4559,6 @@
             "minimumSeconds": 0,
             "perSandboxUsd": 0,
             "measuredAt": "2026-11-17T23:49:08.280Z"
-          },
-          {
-            "provider": "daytona",
-            "name": "Daytona",
-            "size": {
-              "vcpu": 1,
-              "memoryGb": 1
-            },
-            "createMs": 827,
-            "taskMs": 74989,
-            "phasesMs": {
-              "cpu": 31157,
-              "cores": 37199,
-              "disk": 14420
-            },
-            "hourlyUsd": 0.06659999999999999,
-            "taskUsd": 0.001406,
-            "reusedUsd": 0.0013872965,
-            "runs": 3,
-            "ok": 3,
-            "limited": 0,
-            "successRate": 1,
-            "activeCpu": false,
-            "minimumSeconds": 0,
-            "perSandboxUsd": 0,
-            "measuredAt": "2026-11-18T00:06:52.487Z"
           },
           {
             "provider": "freestyle",
@@ -4645,27 +4646,27 @@
             "name": "E2B",
             "size": {
               "vcpu": 2,
-              "memoryGb": 0.5
+              "memoryGb": 4
             },
-            "createMs": 415,
-            "taskMs": 127979,
+            "createMs": 918,
+            "taskMs": 177765,
             "phasesMs": {
-              "cpu": 75527,
-              "cores": 36875,
-              "disk": 16289
+              "cpu": 108947,
+              "cores": 53248,
+              "disk": 15886
             },
             "hourlyUsd": 0.1089,
-            "taskUsd": 0.00390225,
-            "reusedUsd": 0.00387136475,
+            "taskUsd": 0.005414749999999999,
+            "reusedUsd": 0.0053773912499999995,
             "runs": 3,
             "ok": 3,
             "limited": 0,
             "successRate": 1,
-            "cpuMs": 158230,
+            "cpuMs": 231910,
             "activeCpu": false,
             "minimumSeconds": 0,
             "perSandboxUsd": 0,
-            "measuredAt": "2026-11-17T23:49:08.280Z"
+            "measuredAt": "2026-11-18T20:54:36.345Z"
           },
           {
             "provider": "morph",
@@ -4913,25 +4914,25 @@
             "name": "OpenScale Sandboxes",
             "size": {
               "vcpu": 2,
-              "memoryGb": 1
+              "memoryGb": 4
             },
-            "createMs": 1244,
-            "taskMs": 2226,
+            "createMs": 1280,
+            "taskMs": 2256,
             "phasesMs": {
-              "python": 2226
+              "python": 2256
             },
             "hourlyUsd": 0.013999999999999999,
             "taskUsd": 0.000015555555555555555,
-            "reusedUsd": 0.000008656666666666666,
+            "reusedUsd": 0.000008773333333333331,
             "runs": 3,
             "ok": 3,
             "limited": 0,
             "successRate": 1,
-            "cpuMs": 2140,
+            "cpuMs": 2190,
             "activeCpu": false,
             "minimumSeconds": 0,
             "perSandboxUsd": 0,
-            "measuredAt": "2026-11-17T23:36:51.852Z"
+            "measuredAt": "2026-11-18T20:23:41.167Z"
           },
           {
             "provider": "maritime",
@@ -4959,20 +4960,45 @@
             "measuredAt": "2026-11-17T23:49:48.256Z"
           },
           {
+            "provider": "sail",
+            "name": "Sailboxes (Sail Research)",
+            "size": {
+              "vcpu": 2,
+              "memoryGb": 4
+            },
+            "createMs": 2897,
+            "taskMs": 2343,
+            "phasesMs": {
+              "python": 2343
+            },
+            "hourlyUsd": 0.062,
+            "taskUsd": 0.00006391666666666698,
+            "reusedUsd": 0.000031410000000000006,
+            "runs": 3,
+            "ok": 3,
+            "limited": 0,
+            "successRate": 1,
+            "cpuMs": 2540,
+            "activeCpu": true,
+            "minimumSeconds": 0,
+            "perSandboxUsd": 0,
+            "measuredAt": "2026-11-17T23:36:51.852Z"
+          },
+          {
             "provider": "daytona",
             "name": "Daytona",
             "size": {
-              "vcpu": 1,
-              "memoryGb": 1
+              "vcpu": 2,
+              "memoryGb": 4
             },
-            "createMs": 1057,
-            "taskMs": 1535,
+            "createMs": 1708,
+            "taskMs": 1463,
             "phasesMs": {
-              "python": 1535
+              "python": 1463
             },
             "hourlyUsd": 0.06659999999999999,
-            "taskUsd": 0.000055499999999999994,
-            "reusedUsd": 0.000028397499999999997,
+            "taskUsd": 0.000074,
+            "reusedUsd": 0.000027065499999999997,
             "runs": 3,
             "ok": 3,
             "limited": 0,
@@ -4980,7 +5006,7 @@
             "activeCpu": false,
             "minimumSeconds": 0,
             "perSandboxUsd": 0,
-            "measuredAt": "2026-11-17T23:41:06.827Z"
+            "measuredAt": "2026-11-18T20:23:41.167Z"
           },
           {
             "provider": "agentcore",
@@ -5137,25 +5163,25 @@
             "name": "E2B",
             "size": {
               "vcpu": 2,
-              "memoryGb": 0.5
+              "memoryGb": 4
             },
-            "createMs": 831,
-            "taskMs": 2237,
+            "createMs": 1042,
+            "taskMs": 2177,
             "phasesMs": {
-              "python": 2237
+              "python": 2177
             },
             "hourlyUsd": 0.1089,
             "taskUsd": 0.000121,
-            "reusedUsd": 0.00006766925,
+            "reusedUsd": 0.00006585425,
             "runs": 3,
             "ok": 3,
             "limited": 0,
             "successRate": 1,
-            "cpuMs": 2240,
+            "cpuMs": 2140,
             "activeCpu": false,
             "minimumSeconds": 0,
             "perSandboxUsd": 0,
-            "measuredAt": "2026-11-17T23:36:51.852Z"
+            "measuredAt": "2026-11-18T20:23:41.167Z"
           },
           {
             "provider": "google",
@@ -5281,31 +5307,6 @@
             "minimumSeconds": 60,
             "perSandboxUsd": 0,
             "measuredAt": "2026-11-17T23:40:02.138Z"
-          },
-          {
-            "provider": "sail",
-            "name": "Sailboxes (Sail Research)",
-            "size": {
-              "vcpu": 2,
-              "memoryGb": 4
-            },
-            "createMs": 2897,
-            "taskMs": 2343,
-            "phasesMs": {
-              "python": 2343
-            },
-            "hourlyUsd": 0.062,
-            "taskUsd": 0.010063916666666667,
-            "reusedUsd": 0.000031410000000000006,
-            "runs": 3,
-            "ok": 3,
-            "limited": 0,
-            "successRate": 1,
-            "cpuMs": 2540,
-            "activeCpu": true,
-            "minimumSeconds": 0,
-            "perSandboxUsd": 0.01,
-            "measuredAt": "2026-11-17T23:36:51.852Z"
           }
         ],
         "outcomes": [
@@ -5500,25 +5501,25 @@
             "name": "OpenScale Sandboxes",
             "size": {
               "vcpu": 2,
-              "memoryGb": 1
+              "memoryGb": 4
             },
-            "createMs": 1402,
-            "taskMs": 445,
+            "createMs": 1274,
+            "taskMs": 498,
             "phasesMs": {
-              "download": 445
+              "download": 498
             },
             "hourlyUsd": 0.013999999999999999,
             "taskUsd": 0.000007777777777777777,
-            "reusedUsd": 0.0000017305555555555554,
+            "reusedUsd": 0.000001936666666666666,
             "runs": 3,
             "ok": 3,
             "limited": 0,
             "successRate": 1,
-            "cpuMs": 210,
+            "cpuMs": 200,
             "activeCpu": false,
             "minimumSeconds": 0,
             "perSandboxUsd": 0,
-            "measuredAt": "2026-11-17T23:37:36.070Z"
+            "measuredAt": "2026-11-18T20:24:08.421Z"
           },
           {
             "provider": "maritime",
@@ -5571,53 +5572,78 @@
             "measuredAt": "2026-11-17T23:37:36.070Z"
           },
           {
-            "provider": "e2b",
-            "name": "E2B",
+            "provider": "daytona",
+            "name": "Daytona",
             "size": {
               "vcpu": 2,
-              "memoryGb": 0.5
+              "memoryGb": 4
             },
-            "createMs": 518,
-            "taskMs": 480,
+            "createMs": 1526,
+            "taskMs": 262,
             "phasesMs": {
-              "download": 480
+              "download": 262
             },
-            "hourlyUsd": 0.1089,
-            "taskUsd": 0.00003025,
-            "reusedUsd": 0.00001452,
+            "hourlyUsd": 0.06659999999999999,
+            "taskUsd": 0.000037,
+            "reusedUsd": 0.0000048469999999999995,
             "runs": 3,
             "ok": 3,
             "limited": 0,
             "successRate": 1,
-            "cpuMs": 160,
             "activeCpu": false,
+            "minimumSeconds": 0,
+            "perSandboxUsd": 0,
+            "measuredAt": "2026-11-18T20:24:08.421Z"
+          },
+          {
+            "provider": "sail",
+            "name": "Sailboxes (Sail Research)",
+            "size": {
+              "vcpu": 2,
+              "memoryGb": 4
+            },
+            "createMs": 2862,
+            "taskMs": 1405,
+            "phasesMs": {
+              "download": 1405
+            },
+            "hourlyUsd": 0.062,
+            "taskUsd": 0.00004548611111111073,
+            "reusedUsd": 0.000013530555555555557,
+            "runs": 3,
+            "ok": 3,
+            "limited": 0,
+            "successRate": 1,
+            "cpuMs": 250,
+            "activeCpu": true,
             "minimumSeconds": 0,
             "perSandboxUsd": 0,
             "measuredAt": "2026-11-17T23:37:36.070Z"
           },
           {
-            "provider": "daytona",
-            "name": "Daytona",
+            "provider": "e2b",
+            "name": "E2B",
             "size": {
-              "vcpu": 1,
-              "memoryGb": 1
+              "vcpu": 2,
+              "memoryGb": 4
             },
-            "createMs": 972,
-            "taskMs": 225,
+            "createMs": 1138,
+            "taskMs": 708,
             "phasesMs": {
-              "download": 225
+              "download": 708
             },
-            "hourlyUsd": 0.06659999999999999,
-            "taskUsd": 0.000037,
-            "reusedUsd": 0.0000041624999999999995,
+            "hourlyUsd": 0.1089,
+            "taskUsd": 0.0000605,
+            "reusedUsd": 0.000021417,
             "runs": 3,
             "ok": 3,
             "limited": 0,
             "successRate": 1,
+            "cpuMs": 140,
             "activeCpu": false,
             "minimumSeconds": 0,
             "perSandboxUsd": 0,
-            "measuredAt": "2026-11-17T23:41:25.503Z"
+            "measuredAt": "2026-11-18T20:24:08.421Z"
           },
           {
             "provider": "tensorlake",
@@ -5843,31 +5869,6 @@
             "minimumSeconds": 60,
             "perSandboxUsd": 0,
             "measuredAt": "2026-11-17T23:40:09.779Z"
-          },
-          {
-            "provider": "sail",
-            "name": "Sailboxes (Sail Research)",
-            "size": {
-              "vcpu": 2,
-              "memoryGb": 4
-            },
-            "createMs": 2862,
-            "taskMs": 1405,
-            "phasesMs": {
-              "download": 1405
-            },
-            "hourlyUsd": 0.062,
-            "taskUsd": 0.010045486111111111,
-            "reusedUsd": 0.000013530555555555557,
-            "runs": 3,
-            "ok": 3,
-            "limited": 0,
-            "successRate": 1,
-            "cpuMs": 250,
-            "activeCpu": true,
-            "minimumSeconds": 0,
-            "perSandboxUsd": 0.01,
-            "measuredAt": "2026-11-17T23:37:36.070Z"
           }
         ],
         "outcomes": [
@@ -6088,26 +6089,26 @@
             "name": "OpenScale Sandboxes",
             "size": {
               "vcpu": 2,
-              "memoryGb": 1,
+              "memoryGb": 4,
               "cpuUtilization": 0.1
             },
-            "createMs": 1308,
-            "taskMs": 61649,
+            "createMs": 1505,
+            "taskMs": 61733,
             "phasesMs": {
-              "agent": 61649
+              "agent": 61733
             },
             "hourlyUsd": 0.013999999999999999,
-            "taskUsd": 0.000245,
-            "reusedUsd": 0.00023974611111111108,
+            "taskUsd": 0.0002488888888888889,
+            "reusedUsd": 0.00024007277777777773,
             "runs": 3,
             "ok": 3,
             "limited": 0,
             "successRate": 1,
-            "cpuMs": 1560,
+            "cpuMs": 1820,
             "activeCpu": false,
             "minimumSeconds": 0,
             "perSandboxUsd": 0,
-            "measuredAt": "2026-11-17T23:54:04.615Z"
+            "measuredAt": "2026-11-18T20:33:46.227Z"
           },
           {
             "provider": "maritime",
@@ -6134,6 +6135,32 @@
             "minimumSeconds": 0,
             "perSandboxUsd": 0,
             "measuredAt": "2026-11-17T23:54:45.098Z"
+          },
+          {
+            "provider": "sail",
+            "name": "Sailboxes (Sail Research)",
+            "size": {
+              "vcpu": 2,
+              "memoryGb": 4,
+              "cpuUtilization": 0.1
+            },
+            "createMs": 2294,
+            "taskMs": 61613,
+            "phasesMs": {
+              "agent": 61613
+            },
+            "hourlyUsd": 0.035,
+            "taskUsd": 0.0005908472222222218,
+            "reusedUsd": 0.0005696294444444445,
+            "runs": 3,
+            "ok": 3,
+            "limited": 0,
+            "successRate": 1,
+            "cpuMs": 5270,
+            "activeCpu": true,
+            "minimumSeconds": 0,
+            "perSandboxUsd": 0,
+            "measuredAt": "2026-11-17T23:47:54.312Z"
           },
           {
             "provider": "agentcore",
@@ -6165,18 +6192,18 @@
             "provider": "daytona",
             "name": "Daytona",
             "size": {
-              "vcpu": 1,
-              "memoryGb": 1,
+              "vcpu": 2,
+              "memoryGb": 4,
               "cpuUtilization": 0.1
             },
-            "createMs": 1030,
-            "taskMs": 60821,
+            "createMs": 2080,
+            "taskMs": 60889,
             "phasesMs": {
-              "agent": 60821
+              "agent": 60889
             },
             "hourlyUsd": 0.06659999999999999,
-            "taskUsd": 0.0011469999999999998,
-            "reusedUsd": 0.0011251884999999998,
+            "taskUsd": 0.0011654999999999999,
+            "reusedUsd": 0.0011264464999999999,
             "runs": 3,
             "ok": 3,
             "limited": 0,
@@ -6184,7 +6211,7 @@
             "activeCpu": false,
             "minimumSeconds": 0,
             "perSandboxUsd": 0,
-            "measuredAt": "2026-11-17T23:51:25.110Z"
+            "measuredAt": "2026-11-18T20:33:46.227Z"
           },
           {
             "provider": "cloudflare",
@@ -6269,26 +6296,26 @@
             "name": "E2B",
             "size": {
               "vcpu": 2,
-              "memoryGb": 0.5,
+              "memoryGb": 4,
               "cpuUtilization": 0.1
             },
-            "createMs": 547,
-            "taskMs": 61238,
+            "createMs": 1046,
+            "taskMs": 61202,
             "phasesMs": {
-              "agent": 61238
+              "agent": 61202
             },
             "hourlyUsd": 0.1089,
-            "taskUsd": 0.0018754999999999998,
-            "reusedUsd": 0.0018524494999999999,
+            "taskUsd": 0.00190575,
+            "reusedUsd": 0.0018513604999999998,
             "runs": 3,
             "ok": 3,
             "limited": 0,
             "successRate": 1,
-            "cpuMs": 1450,
+            "cpuMs": 1460,
             "activeCpu": false,
             "minimumSeconds": 0,
             "perSandboxUsd": 0,
-            "measuredAt": "2026-11-17T23:54:04.615Z"
+            "measuredAt": "2026-11-18T20:33:46.227Z"
           },
           {
             "provider": "novita",
@@ -6392,32 +6419,6 @@
             "activeCpu": false,
             "minimumSeconds": 0,
             "perSandboxUsd": 0,
-            "measuredAt": "2026-11-17T23:47:54.312Z"
-          },
-          {
-            "provider": "sail",
-            "name": "Sailboxes (Sail Research)",
-            "size": {
-              "vcpu": 2,
-              "memoryGb": 4,
-              "cpuUtilization": 0.1
-            },
-            "createMs": 2294,
-            "taskMs": 61613,
-            "phasesMs": {
-              "agent": 61613
-            },
-            "hourlyUsd": 0.035,
-            "taskUsd": 0.010590847222222222,
-            "reusedUsd": 0.0005696294444444445,
-            "runs": 3,
-            "ok": 3,
-            "limited": 0,
-            "successRate": 1,
-            "cpuMs": 5270,
-            "activeCpu": true,
-            "minimumSeconds": 0,
-            "perSandboxUsd": 0.01,
             "measuredAt": "2026-11-17T23:47:54.312Z"
           }
         ],
@@ -6585,27 +6586,27 @@
             "name": "OpenScale Sandboxes",
             "size": {
               "vcpu": 2,
-              "memoryGb": 1
+              "memoryGb": 4
             },
-            "createMs": 1435,
-            "taskMs": 21828,
+            "createMs": 1309,
+            "taskMs": 23036,
             "phasesMs": {
-              "fetch": 2554,
-              "install": 18612,
-              "typecheck": 662
+              "fetch": 2646,
+              "install": 19647,
+              "typecheck": 666
             },
             "hourlyUsd": 0.013999999999999999,
-            "taskUsd": 0.00009333333333333333,
-            "reusedUsd": 0.00008488666666666665,
+            "taskUsd": 0.00009722222222222222,
+            "reusedUsd": 0.00008958444444444445,
             "runs": 3,
             "ok": 3,
             "limited": 0,
             "successRate": 1,
-            "cpuMs": 23010,
+            "cpuMs": 24400,
             "activeCpu": false,
             "minimumSeconds": 0,
             "perSandboxUsd": 0,
-            "measuredAt": "2026-11-17T23:47:40.891Z"
+            "measuredAt": "2026-11-18T20:38:14.816Z"
           },
           {
             "provider": "agent37",
@@ -6662,22 +6663,49 @@
             "measuredAt": "2026-11-17T23:51:31.059Z"
           },
           {
+            "provider": "sail",
+            "name": "Sailboxes (Sail Research)",
+            "size": {
+              "vcpu": 2,
+              "memoryGb": 4
+            },
+            "createMs": 2471,
+            "taskMs": 22122,
+            "phasesMs": {
+              "fetch": 2471,
+              "install": 18203,
+              "typecheck": 1377
+            },
+            "hourlyUsd": 0.062,
+            "taskUsd": 0.0003365972222222225,
+            "reusedUsd": 0.000311015,
+            "runs": 3,
+            "ok": 3,
+            "limited": 0,
+            "successRate": 1,
+            "cpuMs": 27450,
+            "activeCpu": true,
+            "minimumSeconds": 0,
+            "perSandboxUsd": 0,
+            "measuredAt": "2026-11-17T23:53:49.019Z"
+          },
+          {
             "provider": "daytona",
             "name": "Daytona",
             "size": {
-              "vcpu": 1,
-              "memoryGb": 1
+              "vcpu": 2,
+              "memoryGb": 4
             },
-            "createMs": 585,
-            "taskMs": 37992,
+            "createMs": 1783,
+            "taskMs": 26613,
             "phasesMs": {
-              "fetch": 2258,
-              "install": 33679,
-              "typecheck": 2683
+              "fetch": 1771,
+              "install": 23848,
+              "typecheck": 1020
             },
             "hourlyUsd": 0.06659999999999999,
-            "taskUsd": 0.0007214999999999998,
-            "reusedUsd": 0.0007028519999999999,
+            "taskUsd": 0.0005365,
+            "reusedUsd": 0.0004923404999999999,
             "runs": 3,
             "ok": 3,
             "limited": 0,
@@ -6685,7 +6713,7 @@
             "activeCpu": false,
             "minimumSeconds": 0,
             "perSandboxUsd": 0,
-            "measuredAt": "2026-11-17T23:45:01.763Z"
+            "measuredAt": "2026-11-18T20:38:14.816Z"
           },
           {
             "provider": "novita",
@@ -6746,27 +6774,27 @@
             "name": "E2B",
             "size": {
               "vcpu": 2,
-              "memoryGb": 0.5
+              "memoryGb": 4
             },
-            "createMs": 919,
-            "taskMs": 32038,
+            "createMs": 1020,
+            "taskMs": 30382,
             "phasesMs": {
-              "fetch": 2163,
-              "install": 29023,
-              "typecheck": 946
+              "fetch": 2732,
+              "install": 26683,
+              "typecheck": 962
             },
             "hourlyUsd": 0.1089,
-            "taskUsd": 0.00099825,
-            "reusedUsd": 0.0009691494999999998,
+            "taskUsd": 0.000968,
+            "reusedUsd": 0.0009190555000000001,
             "runs": 3,
             "ok": 3,
             "limited": 0,
             "successRate": 1,
-            "cpuMs": 31350,
+            "cpuMs": 29260,
             "activeCpu": false,
             "minimumSeconds": 0,
             "perSandboxUsd": 0,
-            "measuredAt": "2026-11-17T23:47:40.891Z"
+            "measuredAt": "2026-11-18T20:38:14.816Z"
           },
           {
             "provider": "morph",
@@ -6901,33 +6929,6 @@
             "activeCpu": false,
             "minimumSeconds": 0,
             "perSandboxUsd": 0,
-            "measuredAt": "2026-11-17T23:53:49.019Z"
-          },
-          {
-            "provider": "sail",
-            "name": "Sailboxes (Sail Research)",
-            "size": {
-              "vcpu": 2,
-              "memoryGb": 4
-            },
-            "createMs": 2471,
-            "taskMs": 22122,
-            "phasesMs": {
-              "fetch": 2471,
-              "install": 18203,
-              "typecheck": 1377
-            },
-            "hourlyUsd": 0.062,
-            "taskUsd": 0.010336597222222223,
-            "reusedUsd": 0.000311015,
-            "runs": 3,
-            "ok": 3,
-            "limited": 0,
-            "successRate": 1,
-            "cpuMs": 27450,
-            "activeCpu": true,
-            "minimumSeconds": 0,
-            "perSandboxUsd": 0.01,
             "measuredAt": "2026-11-17T23:53:49.019Z"
           }
         ],
@@ -7085,13 +7086,24 @@
       "runSeconds": 10,
       "top": [
         {
+          "provider": "openscale",
+          "name": "OpenScale Sandboxes",
+          "runUsd": 0.00004722222222222223,
+          "runHourlyUsd": 0.017,
+          "hourlyUsd": 0.017,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0,
+          "ownImage": true
+        },
+        {
           "provider": "boat",
           "name": "Boat",
           "runUsd": 0.000049999999999999996,
           "runHourlyUsd": 0.018,
           "hourlyUsd": 0.018,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "maritime",
@@ -7100,7 +7112,8 @@
           "runHourlyUsd": 0.022,
           "hourlyUsd": 0.022,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "agent37",
@@ -7109,7 +7122,18 @@
           "runHourlyUsd": 0.03899999999999999,
           "hourlyUsd": 0.0065,
           "perSandboxUsd": 0,
-          "minimumSeconds": 60
+          "minimumSeconds": 60,
+          "ownImage": false
+        },
+        {
+          "provider": "sail",
+          "name": "Sailboxes (Sail Research)",
+          "runUsd": 0.00017222222222222291,
+          "runHourlyUsd": 0.06199999999999983,
+          "hourlyUsd": 0.062,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "northflank",
@@ -7118,7 +7142,8 @@
           "runHourlyUsd": 0.0667,
           "hourlyUsd": 0.0667,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "morph",
@@ -7127,7 +7152,8 @@
           "runHourlyUsd": 0.1,
           "hourlyUsd": 0.1,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "novita",
@@ -7136,7 +7162,8 @@
           "runHourlyUsd": 0.1166,
           "hourlyUsd": 0.1166,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "freestyle",
@@ -7145,7 +7172,8 @@
           "runHourlyUsd": 0.1336,
           "hourlyUsd": 0.1336,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "beam",
@@ -7154,7 +7182,8 @@
           "runHourlyUsd": 0.14,
           "hourlyUsd": 0.14,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "sprites",
@@ -7163,7 +7192,8 @@
           "runHourlyUsd": 0.1645,
           "hourlyUsd": 0.1645,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "blaxel",
@@ -7172,7 +7202,28 @@
           "runHourlyUsd": 0.1656,
           "hourlyUsd": 0.1656,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
+        },
+        {
+          "provider": "daytona",
+          "name": "Daytona",
+          "runUsd": 0.00046,
+          "runHourlyUsd": 0.1656,
+          "hourlyUsd": 0.1656,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0,
+          "ownImage": true
+        },
+        {
+          "provider": "e2b",
+          "name": "E2B",
+          "runUsd": 0.00046,
+          "runHourlyUsd": 0.1656,
+          "hourlyUsd": 0.1656,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0,
+          "ownImage": true
         },
         {
           "provider": "superserve",
@@ -7181,7 +7232,8 @@
           "runHourlyUsd": 0.1656,
           "hourlyUsd": 0.1656,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "tensorlake",
@@ -7190,7 +7242,8 @@
           "runHourlyUsd": 0.2,
           "hourlyUsd": 0.2,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "cloudflare",
@@ -7199,7 +7252,8 @@
           "runHourlyUsd": 0.21600000000000003,
           "hourlyUsd": 0.216,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "agentcore",
@@ -7208,7 +7262,8 @@
           "runHourlyUsd": 0.21680000000000002,
           "hourlyUsd": 0.2168,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "modal",
@@ -7217,7 +7272,8 @@
           "runHourlyUsd": 0.238,
           "hourlyUsd": 0.238,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "lambda",
@@ -7226,7 +7282,8 @@
           "runHourlyUsd": 0.2522,
           "hourlyUsd": 0.2522,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "vercel",
@@ -7235,16 +7292,8 @@
           "runHourlyUsd": 0.7647999999999999,
           "hourlyUsd": 0.3408,
           "perSandboxUsd": 0,
-          "minimumSeconds": 60
-        },
-        {
-          "provider": "sail",
-          "name": "Sailboxes (Sail Research)",
-          "runUsd": 0.010172222222222223,
-          "runHourlyUsd": 3.662,
-          "hourlyUsd": 0.062,
-          "perSandboxUsd": 0.01,
-          "minimumSeconds": 0
+          "minimumSeconds": 60,
+          "ownImage": false
         }
       ]
     },
@@ -7268,7 +7317,18 @@
           "runHourlyUsd": 0.0065,
           "hourlyUsd": 0.0065,
           "perSandboxUsd": 0,
-          "minimumSeconds": 60
+          "minimumSeconds": 60,
+          "ownImage": false
+        },
+        {
+          "provider": "openscale",
+          "name": "OpenScale Sandboxes",
+          "runUsd": 0.0085,
+          "runHourlyUsd": 0.017,
+          "hourlyUsd": 0.017,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0,
+          "ownImage": true
         },
         {
           "provider": "boat",
@@ -7277,7 +7337,8 @@
           "runHourlyUsd": 0.018,
           "hourlyUsd": 0.018,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "maritime",
@@ -7286,16 +7347,18 @@
           "runHourlyUsd": 0.021999999999999995,
           "hourlyUsd": 0.022,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "sail",
           "name": "Sailboxes (Sail Research)",
-          "runUsd": 0.027500000000000004,
-          "runHourlyUsd": 0.05500000000000001,
+          "runUsd": 0.0175,
+          "runHourlyUsd": 0.035,
           "hourlyUsd": 0.035,
-          "perSandboxUsd": 0.01,
-          "minimumSeconds": 0
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "agentcore",
@@ -7304,7 +7367,8 @@
           "runHourlyUsd": 0.0557,
           "hourlyUsd": 0.0557,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "northflank",
@@ -7313,7 +7377,8 @@
           "runHourlyUsd": 0.0667,
           "hourlyUsd": 0.0667,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "cloudflare",
@@ -7322,7 +7387,8 @@
           "runHourlyUsd": 0.0864,
           "hourlyUsd": 0.0864,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "tensorlake",
@@ -7331,7 +7397,8 @@
           "runHourlyUsd": 0.08799999999999998,
           "hourlyUsd": 0.088,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "sprites",
@@ -7340,7 +7407,8 @@
           "runHourlyUsd": 0.0952,
           "hourlyUsd": 0.0952,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "morph",
@@ -7349,7 +7417,8 @@
           "runHourlyUsd": 0.1,
           "hourlyUsd": 0.1,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "vercel",
@@ -7358,7 +7427,8 @@
           "runHourlyUsd": 0.11040000000000001,
           "hourlyUsd": 0.1104,
           "perSandboxUsd": 0,
-          "minimumSeconds": 60
+          "minimumSeconds": 60,
+          "ownImage": false
         },
         {
           "provider": "modal",
@@ -7367,7 +7437,8 @@
           "runHourlyUsd": 0.1138,
           "hourlyUsd": 0.1138,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "novita",
@@ -7376,7 +7447,8 @@
           "runHourlyUsd": 0.1166,
           "hourlyUsd": 0.1166,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "freestyle",
@@ -7385,7 +7457,8 @@
           "runHourlyUsd": 0.1336,
           "hourlyUsd": 0.1336,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "beam",
@@ -7394,7 +7467,8 @@
           "runHourlyUsd": 0.14,
           "hourlyUsd": 0.14,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "blaxel",
@@ -7403,7 +7477,28 @@
           "runHourlyUsd": 0.1656,
           "hourlyUsd": 0.1656,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
+        },
+        {
+          "provider": "daytona",
+          "name": "Daytona",
+          "runUsd": 0.0828,
+          "runHourlyUsd": 0.1656,
+          "hourlyUsd": 0.1656,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0,
+          "ownImage": true
+        },
+        {
+          "provider": "e2b",
+          "name": "E2B",
+          "runUsd": 0.0828,
+          "runHourlyUsd": 0.1656,
+          "hourlyUsd": 0.1656,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0,
+          "ownImage": true
         },
         {
           "provider": "superserve",
@@ -7412,7 +7507,8 @@
           "runHourlyUsd": 0.1656,
           "hourlyUsd": 0.1656,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "lambda",
@@ -7421,7 +7517,8 @@
           "runHourlyUsd": 0.2522,
           "hourlyUsd": 0.2522,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         }
       ]
     },
@@ -7444,7 +7541,18 @@
           "runHourlyUsd": 0.0065,
           "hourlyUsd": 0.0065,
           "perSandboxUsd": 0,
-          "minimumSeconds": 60
+          "minimumSeconds": 60,
+          "ownImage": false
+        },
+        {
+          "provider": "openscale",
+          "name": "OpenScale Sandboxes",
+          "runUsd": 0.068,
+          "runHourlyUsd": 0.017,
+          "hourlyUsd": 0.017,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0,
+          "ownImage": true
         },
         {
           "provider": "boat",
@@ -7453,7 +7561,8 @@
           "runHourlyUsd": 0.018,
           "hourlyUsd": 0.018,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "maritime",
@@ -7462,16 +7571,18 @@
           "runHourlyUsd": 0.021999999999999995,
           "hourlyUsd": 0.022,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "sail",
           "name": "Sailboxes (Sail Research)",
-          "runUsd": 0.258,
-          "runHourlyUsd": 0.0645,
+          "runUsd": 0.248,
+          "runHourlyUsd": 0.062,
           "hourlyUsd": 0.062,
-          "perSandboxUsd": 0.01,
-          "minimumSeconds": 0
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "northflank",
@@ -7480,7 +7591,8 @@
           "runHourlyUsd": 0.0667,
           "hourlyUsd": 0.0667,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "morph",
@@ -7489,7 +7601,8 @@
           "runHourlyUsd": 0.1,
           "hourlyUsd": 0.1,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "novita",
@@ -7498,7 +7611,8 @@
           "runHourlyUsd": 0.1166,
           "hourlyUsd": 0.1166,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "freestyle",
@@ -7507,7 +7621,8 @@
           "runHourlyUsd": 0.1336,
           "hourlyUsd": 0.1336,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "beam",
@@ -7516,7 +7631,8 @@
           "runHourlyUsd": 0.14,
           "hourlyUsd": 0.14,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "sprites",
@@ -7525,7 +7641,8 @@
           "runHourlyUsd": 0.1645,
           "hourlyUsd": 0.1645,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "blaxel",
@@ -7534,7 +7651,28 @@
           "runHourlyUsd": 0.1656,
           "hourlyUsd": 0.1656,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
+        },
+        {
+          "provider": "daytona",
+          "name": "Daytona",
+          "runUsd": 0.6624,
+          "runHourlyUsd": 0.1656,
+          "hourlyUsd": 0.1656,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0,
+          "ownImage": true
+        },
+        {
+          "provider": "e2b",
+          "name": "E2B",
+          "runUsd": 0.6624,
+          "runHourlyUsd": 0.1656,
+          "hourlyUsd": 0.1656,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0,
+          "ownImage": true
         },
         {
           "provider": "superserve",
@@ -7543,7 +7681,8 @@
           "runHourlyUsd": 0.1656,
           "hourlyUsd": 0.1656,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "tensorlake",
@@ -7552,7 +7691,8 @@
           "runHourlyUsd": 0.2,
           "hourlyUsd": 0.2,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "cloudflare",
@@ -7561,7 +7701,8 @@
           "runHourlyUsd": 0.216,
           "hourlyUsd": 0.216,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "agentcore",
@@ -7570,7 +7711,8 @@
           "runHourlyUsd": 0.2168,
           "hourlyUsd": 0.2168,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "modal",
@@ -7579,7 +7721,8 @@
           "runHourlyUsd": 0.238,
           "hourlyUsd": 0.238,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "lambda",
@@ -7588,7 +7731,8 @@
           "runHourlyUsd": 0.2522,
           "hourlyUsd": 0.2522,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "vercel",
@@ -7597,7 +7741,8 @@
           "runHourlyUsd": 0.34080000000000005,
           "hourlyUsd": 0.3408,
           "perSandboxUsd": 0,
-          "minimumSeconds": 60
+          "minimumSeconds": 60,
+          "ownImage": false
         }
       ]
     },
@@ -7614,13 +7759,24 @@
       "runSeconds": 3600,
       "top": [
         {
+          "provider": "openscale",
+          "name": "OpenScale Sandboxes",
+          "runUsd": 0.068,
+          "runHourlyUsd": 0.068,
+          "hourlyUsd": 0.068,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0,
+          "ownImage": true
+        },
+        {
           "provider": "boat",
           "name": "Boat",
           "runUsd": 0.072,
           "runHourlyUsd": 0.072,
           "hourlyUsd": 0.072,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "maritime",
@@ -7629,16 +7785,18 @@
           "runHourlyUsd": 0.08799999999999998,
           "hourlyUsd": 0.088,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "sail",
           "name": "Sailboxes (Sail Research)",
-          "runUsd": 0.258,
-          "runHourlyUsd": 0.258,
+          "runUsd": 0.248,
+          "runHourlyUsd": 0.248,
           "hourlyUsd": 0.248,
-          "perSandboxUsd": 0.01,
-          "minimumSeconds": 0
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "northflank",
@@ -7647,7 +7805,8 @@
           "runHourlyUsd": 0.2666,
           "hourlyUsd": 0.2666,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "morph",
@@ -7656,7 +7815,8 @@
           "runHourlyUsd": 0.4,
           "hourlyUsd": 0.4,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "freestyle",
@@ -7665,7 +7825,8 @@
           "runHourlyUsd": 0.5345,
           "hourlyUsd": 0.5345,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "beam",
@@ -7674,7 +7835,8 @@
           "runHourlyUsd": 0.56,
           "hourlyUsd": 0.56,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "blaxel",
@@ -7683,7 +7845,8 @@
           "runHourlyUsd": 0.6624,
           "hourlyUsd": 0.6624,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "modal",
@@ -7692,7 +7855,8 @@
           "runHourlyUsd": 0.9518,
           "hourlyUsd": 0.9518,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "vercel",
@@ -7701,7 +7865,8 @@
           "runHourlyUsd": 1.3632000000000002,
           "hourlyUsd": 1.3632,
           "perSandboxUsd": 0,
-          "minimumSeconds": 60
+          "minimumSeconds": 60,
+          "ownImage": false
         }
       ]
     },
@@ -7726,7 +7891,18 @@
           "runHourlyUsd": 0.0065,
           "hourlyUsd": 0.0065,
           "perSandboxUsd": 0,
-          "minimumSeconds": 60
+          "minimumSeconds": 60,
+          "ownImage": false
+        },
+        {
+          "provider": "openscale",
+          "name": "OpenScale Sandboxes",
+          "runUsd": 0.0085,
+          "runHourlyUsd": 0.017,
+          "hourlyUsd": 0.017,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0,
+          "ownImage": true
         },
         {
           "provider": "boat",
@@ -7735,7 +7911,8 @@
           "runHourlyUsd": 0.018,
           "hourlyUsd": 0.018,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "maritime",
@@ -7744,16 +7921,18 @@
           "runHourlyUsd": 0.021999999999999995,
           "hourlyUsd": 0.022,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "sail",
           "name": "Sailboxes (Sail Research)",
-          "runUsd": 0.041,
-          "runHourlyUsd": 0.082,
+          "runUsd": 0.031,
+          "runHourlyUsd": 0.062,
           "hourlyUsd": 0.062,
-          "perSandboxUsd": 0.01,
-          "minimumSeconds": 0
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "morph",
@@ -7762,7 +7941,8 @@
           "runHourlyUsd": 0.1,
           "hourlyUsd": 0.1,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "novita",
@@ -7771,7 +7951,8 @@
           "runHourlyUsd": 0.1166,
           "hourlyUsd": 0.1166,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "freestyle",
@@ -7780,7 +7961,28 @@
           "runHourlyUsd": 0.1336,
           "hourlyUsd": 0.1336,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
+        },
+        {
+          "provider": "daytona",
+          "name": "Daytona",
+          "runUsd": 0.0828,
+          "runHourlyUsd": 0.1656,
+          "hourlyUsd": 0.1656,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0,
+          "ownImage": true
+        },
+        {
+          "provider": "e2b",
+          "name": "E2B",
+          "runUsd": 0.0828,
+          "runHourlyUsd": 0.1656,
+          "hourlyUsd": 0.1656,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0,
+          "ownImage": true
         },
         {
           "provider": "superserve",
@@ -7789,7 +7991,8 @@
           "runHourlyUsd": 0.1656,
           "hourlyUsd": 0.1656,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "tensorlake",
@@ -7798,7 +8001,8 @@
           "runHourlyUsd": 0.2,
           "hourlyUsd": 0.2,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "lambda",
@@ -7807,7 +8011,8 @@
           "runHourlyUsd": 0.2522,
           "hourlyUsd": 0.2522,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         }
       ]
     },
@@ -7832,7 +8037,18 @@
           "runHourlyUsd": 0.0065,
           "hourlyUsd": 0.0065,
           "perSandboxUsd": 0,
-          "minimumSeconds": 60
+          "minimumSeconds": 60,
+          "ownImage": false
+        },
+        {
+          "provider": "openscale",
+          "name": "OpenScale Sandboxes",
+          "runUsd": 0.0085,
+          "runHourlyUsd": 0.017,
+          "hourlyUsd": 0.017,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0,
+          "ownImage": true
         },
         {
           "provider": "boat",
@@ -7841,7 +8057,8 @@
           "runHourlyUsd": 0.018,
           "hourlyUsd": 0.018,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "maritime",
@@ -7850,7 +8067,8 @@
           "runHourlyUsd": 0.021999999999999995,
           "hourlyUsd": 0.022,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "northflank",
@@ -7859,7 +8077,8 @@
           "runHourlyUsd": 0.0667,
           "hourlyUsd": 0.0667,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "morph",
@@ -7868,7 +8087,8 @@
           "runHourlyUsd": 0.1,
           "hourlyUsd": 0.1,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "novita",
@@ -7877,7 +8097,8 @@
           "runHourlyUsd": 0.1166,
           "hourlyUsd": 0.1166,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "freestyle",
@@ -7886,7 +8107,8 @@
           "runHourlyUsd": 0.1336,
           "hourlyUsd": 0.1336,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "beam",
@@ -7895,7 +8117,8 @@
           "runHourlyUsd": 0.14,
           "hourlyUsd": 0.14,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "blaxel",
@@ -7904,7 +8127,28 @@
           "runHourlyUsd": 0.1656,
           "hourlyUsd": 0.1656,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
+        },
+        {
+          "provider": "daytona",
+          "name": "Daytona",
+          "runUsd": 0.0828,
+          "runHourlyUsd": 0.1656,
+          "hourlyUsd": 0.1656,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0,
+          "ownImage": true
+        },
+        {
+          "provider": "e2b",
+          "name": "E2B",
+          "runUsd": 0.0828,
+          "runHourlyUsd": 0.1656,
+          "hourlyUsd": 0.1656,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0,
+          "ownImage": true
         },
         {
           "provider": "superserve",
@@ -7913,7 +8157,8 @@
           "runHourlyUsd": 0.1656,
           "hourlyUsd": 0.1656,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "tensorlake",
@@ -7922,7 +8167,8 @@
           "runHourlyUsd": 0.2,
           "hourlyUsd": 0.2,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "modal",
@@ -7931,7 +8177,8 @@
           "runHourlyUsd": 0.238,
           "hourlyUsd": 0.238,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         },
         {
           "provider": "lambda",
@@ -7940,7 +8187,8 @@
           "runHourlyUsd": 0.2522,
           "hourlyUsd": 0.2522,
           "perSandboxUsd": 0,
-          "minimumSeconds": 0
+          "minimumSeconds": 0,
+          "ownImage": false
         }
       ]
     }
@@ -8102,7 +8350,7 @@
           "p95Ms": 4332,
           "p99Ms": 4332,
           "wallMs": 4332,
-          "usd": 0.100341,
+          "usd": 0.0003409999999999941,
           "name": "Sailboxes (Sail Research)",
           "measuredAt": "2026-11-17T18:33:05.397Z",
           "label": "home-eu"
@@ -8289,7 +8537,7 @@
           "p95Ms": 4923,
           "p99Ms": 4956,
           "wallMs": 5168,
-          "usd": 1.003777,
+          "usd": 0.0037769999999999193,
           "name": "Sailboxes (Sail Research)",
           "measuredAt": "2026-11-17T17:02:09.715Z",
           "label": "home-eu"
@@ -8467,6 +8715,26 @@
       "medianUsd": 0.000108458,
       "medianTokens": 7310,
       "name": "Agent37",
+      "measuredAt": "2026-11-18T19:18:35.821Z",
+      "model": "gemini-3.5-flash"
+    },
+    {
+      "provider": "sail",
+      "runs": 5,
+      "requested": 5,
+      "started": 5,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "ok": 5,
+      "medianWallMs": 14234,
+      "medianModelMs": 11312,
+      "medianCpuMs": 1690,
+      "medianTurns": 6,
+      "medianUsd": 0.0001580279999999993,
+      "medianTokens": 8694,
+      "name": "Sailboxes (Sail Research)",
       "measuredAt": "2026-11-18T19:18:35.821Z",
       "model": "gemini-3.5-flash"
     },
@@ -8708,26 +8976,6 @@
       "name": "Vercel Sandbox",
       "measuredAt": "2026-11-18T19:18:35.821Z",
       "model": "gemini-3.5-flash"
-    },
-    {
-      "provider": "sail",
-      "runs": 5,
-      "requested": 5,
-      "started": 5,
-      "size": {
-        "vcpu": 2,
-        "memoryGb": 4
-      },
-      "ok": 5,
-      "medianWallMs": 14234,
-      "medianModelMs": 11312,
-      "medianCpuMs": 1690,
-      "medianTurns": 6,
-      "medianUsd": 0.010158028,
-      "medianTokens": 8694,
-      "name": "Sailboxes (Sail Research)",
-      "measuredAt": "2026-11-18T19:18:35.821Z",
-      "model": "gemini-3.5-flash"
     }
   ],
   "priceIndex": {
@@ -8736,37 +8984,37 @@
         "id": "2x4-hour",
         "label": "2 vCPU / 4 GB, one hour",
         "unit": "per hour",
-        "median": 0.15225,
+        "median": 0.1645,
         "cheapest": {
           "provider": "agent37",
           "name": "Agent37",
           "usd": 0.0065
         },
-        "providers": 18
+        "providers": 21
       },
       {
         "id": "agent-hour",
         "label": "Agent session, one hour at 10% CPU",
         "unit": "per hour",
-        "median": 0.0976,
+        "median": 0.1,
         "cheapest": {
           "provider": "agent37",
           "name": "Agent37",
           "usd": 0.0065
         },
-        "providers": 18
+        "providers": 21
       },
       {
         "id": "calls-1000",
         "label": "1,000 tool calls, 10 s each",
         "unit": "per 1,000",
-        "median": 0.458472,
+        "median": 0.456944,
         "cheapest": {
-          "provider": "boat",
-          "name": "Boat",
-          "usd": 0.05
+          "provider": "openscale",
+          "name": "OpenScale Sandboxes",
+          "usd": 0.047222
         },
-        "providers": 18
+        "providers": 21
       }
     ],
     "history": [
@@ -10262,6 +10510,97 @@
       "providers": 1,
       "ids": [
         "sprites"
+      ]
+    },
+    {
+      "date": "2026-11-18T20:33:46.227Z",
+      "label": "home-eu",
+      "by": null,
+      "platform": "darwin-arm64",
+      "runs": 3,
+      "providers": 3,
+      "ids": [
+        "openscale",
+        "e2b",
+        "daytona"
+      ]
+    },
+    {
+      "date": "2026-11-18T20:24:08.421Z",
+      "label": "home-eu",
+      "by": null,
+      "platform": "darwin-arm64",
+      "runs": 3,
+      "providers": 3,
+      "ids": [
+        "openscale",
+        "e2b",
+        "daytona"
+      ]
+    },
+    {
+      "date": "2026-11-18T20:54:36.345Z",
+      "label": "home-eu",
+      "by": null,
+      "platform": "darwin-arm64",
+      "runs": 3,
+      "providers": 3,
+      "ids": [
+        "openscale",
+        "e2b",
+        "daytona"
+      ]
+    },
+    {
+      "date": "2026-11-18T20:23:41.167Z",
+      "label": "home-eu",
+      "by": null,
+      "platform": "darwin-arm64",
+      "runs": 3,
+      "providers": 3,
+      "ids": [
+        "openscale",
+        "e2b",
+        "daytona"
+      ]
+    },
+    {
+      "date": "2026-11-18T20:38:14.816Z",
+      "label": "home-eu",
+      "by": null,
+      "platform": "darwin-arm64",
+      "runs": 3,
+      "providers": 3,
+      "ids": [
+        "openscale",
+        "e2b",
+        "daytona"
+      ]
+    },
+    {
+      "date": "2026-11-18T20:22:58.672Z",
+      "label": "home-eu",
+      "by": null,
+      "platform": "darwin-arm64",
+      "runs": 3,
+      "providers": 3,
+      "ids": [
+        "openscale",
+        "e2b",
+        "daytona"
+      ]
+    },
+    {
+      "date": "2026-11-18T20:22:06.400Z",
+      "label": "home-eu",
+      "by": null,
+      "platform": "darwin-arm64",
+      "runs": 10,
+      "providers": 3,
+      "ids": [
+        "openscale",
+        "e2b",
+        "daytona"
       ]
     },
     {

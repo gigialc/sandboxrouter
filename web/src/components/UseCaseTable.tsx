@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ConditionalStartFeeNote } from "@/components/ConditionalStartFeeNote";
+import { ConditionalStartFeeNote, hasStartFee } from "@/components/ConditionalStartFeeNote";
 import { BarNum, Footnote, Num, ResultRow, ResultTable, Segmented, Toolbar, barMax, money, perHour } from "@/components/results";
 import { site } from "@/lib/site";
 
@@ -38,6 +38,7 @@ export function UseCaseTable() {
             notes={[
               r.minimumSeconds > u.runSeconds ? `bills at least ${r.minimumSeconds} s` : "",
               r.perSandboxUsd ? `+${money(r.perSandboxUsd)} per sandbox` : "",
+              r.ownImage ? "needs your own image at this size" : "",
             ].filter(Boolean)}
           >
             <BarNum value={r.runUsd} max={max} title={`${r.name}: ${money(r.runUsd)} for one run of ${runLength(u.runSeconds)}`}>
@@ -52,9 +53,7 @@ export function UseCaseTable() {
           {showAll ? "Show fewer" : `Show all ${u.top.length} providers`}
         </button>
       )}
-      {rows.some((r) => r.provider === "boat") && (
-        <Footnote><ConditionalStartFeeNote id="boat" /></Footnote>
-      )}
+      {hasStartFee(rows.map((r) => r.provider)) && <Footnote><ConditionalStartFeeNote ids={rows.map((r) => r.provider)} /></Footnote>}
     </div>
   );
 }

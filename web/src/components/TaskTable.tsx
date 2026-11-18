@@ -120,7 +120,7 @@ export function TaskTable() {
       {rows.length > 0 && <Footnote>
         Rankings divide estimated cost and time by the share of requests that completed. This is a retry estimate.
         {sort === "value" ? " Value is cost times time, each against the median: 1.0 is the median, lower is better." : ""}
-        {mode === "fresh" && rows.some((r) => r.provider === "boat") && <> <ConditionalStartFeeNote id="boat" /></>}
+        {mode === "fresh" && <> <ConditionalStartFeeNote ids={rows.map((r) => r.provider)} /></>}
       </Footnote>}
       {k.outcomes.some((r) => r.completed < r.requested) && (
         <ul className="mt-3 list-disc space-y-1 pl-5 text-[13px] text-muted">
