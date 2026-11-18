@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
+import { pageAlternates } from "@/lib/public-pages";
 import { PageHeader, TableScroll } from "@/components/chrome";
 import { CodeBlock } from "@/components/code";
 import { HOSTED_FEE_PCT, HOSTED_PUBLIC, HOSTED_URL, REPO, REPO_PUBLIC, site } from "@/lib/site";
 
-export const metadata: Metadata = { title: "Docs" };
+export const metadata: Metadata = { alternates: pageAlternates("/docs"), title: "API, SDK and CLI Docs" };
 
 const SECTIONS = [
   ["quickstart", "Quickstart"],
@@ -35,7 +36,7 @@ export default function DocsPage() {
     .join(", ");
   return (
     <div className="px-5 pt-14 sm:px-10">
-      <PageHeader kicker="Docs" title="Use sandboxRouter">
+      <PageHeader kicker="Docs" title="Use the SandboxRouter API">
         One API for {site.providers.filter((p) => !p.local).length} sandbox providers. It picks a provider for each sandbox, falls back when
         one fails, and hands you back the same handle whatever ran it.
       </PageHeader>
@@ -473,7 +474,7 @@ with sr.create(strategy="cheapest") as sbx:
         <p>
           Agents that don&apos;t run code can ask the public MCP server at <code>https://www.sandboxrouter.ai/mcp</code> (Streamable
           HTTP, no sign-in; tools <code>recommend_provider</code>, <code>get_benchmarks</code>, <code>get_provider</code>,{" "}
-          <code>list_providers</code>), read <a href="/benchmarks.json">/benchmarks.json</a>, or read any page as Markdown with{" "}
+          <code>list_providers</code>), read <a href="/benchmarks.json">/benchmarks.json</a>. <a href="/providers.json">/providers.json</a> lists every size and OS. The <a href="/openapi.json">OpenAPI schema</a> describes both feeds. Read public pages as Markdown with{" "}
           <code>Accept: text/markdown</code> or a <code>.md</code> path. <a href="/llms.txt">/llms.txt</a> lists it all.
         </p>
         <CodeBlock title="terminal" code={`claude mcp add --transport http sandboxrouter https://www.sandboxrouter.ai/mcp`} />

@@ -1,4 +1,6 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+import { ORIGIN, pageAlternates } from "@/lib/public-pages";
 import { Button } from "@/components/chrome";
 import { ConditionalStartFeeNote } from "@/components/ConditionalStartFeeNote";
 import { CodeBlock, CodeTabs, InstallChip } from "@/components/code";
@@ -7,7 +9,22 @@ import { PriceIndex } from "@/components/PriceIndex";
 import { ProviderLogo } from "@/components/ProviderName";
 import { BarNum, ResultRow, ResultTable, Num, barMax, money, time } from "@/components/results";
 import { RouteDemo } from "@/components/RouteDemo";
-import { HOSTED_FEE_PCT, HOSTED_PUBLIC, HOSTED_URL, NPM, REPO, REPO_PUBLIC, site } from "@/lib/site";
+import { HOSTED_FEE_PCT, HOSTED_PUBLIC, HOSTED_URL, NPM, NPM_URL, REPO, REPO_PUBLIC, site } from "@/lib/site";
+
+export const metadata: Metadata = { alternates: pageAlternates("/") };
+
+const product = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "@id": `${ORIGIN}/#software`,
+  name: "SandboxRouter",
+  url: ORIGIN,
+  description: "An open-source API, SDK, and CLI for routing AI agent sandboxes across providers, with public pricing and benchmarks.",
+  applicationCategory: "DeveloperApplication",
+  keywords: ["sandbox API", "AI agent sandboxes", "sandbox provider benchmarks"],
+  sameAs: [REPO, NPM_URL],
+  offers: { "@type": "Offer", name: "Open-source SDK", url: NPM_URL, price: 0, priceCurrency: "USD" },
+};
 
 const OWN_KEYS = `import { Router } from "${NPM}";
 
@@ -111,6 +128,7 @@ export default function Home() {
           claim="Route by estimated cost, speed or capability."
           actions={
             <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(product).replace(/</g, "\\u003c") }} />
               <Button href="/docs#routing" primary>
                 How routing works
               </Button>

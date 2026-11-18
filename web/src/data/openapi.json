@@ -1,0 +1,108 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "SandboxRouter public data API",
+    "version": "1.0.0",
+    "description": "Read public sandbox prices, provider capabilities, and benchmark results without authentication."
+  },
+  "servers": [{ "url": "https://www.sandboxrouter.ai" }],
+  "externalDocs": {
+    "description": "Agent documentation, including the read-only MCP server and links to the sandbox execution API docs",
+    "url": "https://www.sandboxrouter.ai/docs#agents"
+  },
+  "paths": {
+    "/providers.json": {
+      "get": {
+        "operationId": "getProviderCatalog",
+        "summary": "Get sandbox and computer provider pricing",
+        "description": "Use this to compare hourly list rates by CPU and memory size, provider billing rules and capabilities, available desktop and phone operating systems, and estimated prices for standard workloads.",
+        "responses": {
+          "200": {
+            "description": "Public provider catalog and price index",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ProviderCatalog" } } }
+          }
+        }
+      }
+    },
+    "/benchmarks.json": {
+      "get": {
+        "operationId": "getBenchmarks",
+        "summary": "Get current sandbox benchmarks and billing evidence",
+        "description": "Use this to compare measured start times, verified job runs, parallel request bursts, and provider billing data. Each group identifies the provider and the benchmark methodology.",
+        "responses": {
+          "200": {
+            "description": "Current benchmark data and field definitions",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Benchmarks" } } }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ProviderCatalog": {
+        "type": "object",
+        "required": ["about", "shapes", "providers", "desktops", "priceIndex"],
+        "properties": {
+          "about": { "type": "object", "description": "Source links, currency, and interpretation of list rates." },
+          "shapes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["id", "label"],
+              "properties": { "id": { "type": "string", "examples": ["2x4"] }, "label": { "type": "string" } }
+            }
+          },
+          "providers": { "type": "array", "items": { "$ref": "#/components/schemas/Provider" } },
+          "desktops": { "type": "array", "description": "Computer providers, available operating systems and prices, and human takeover support.", "items": { "type": "object" } },
+          "priceIndex": {
+            "type": "object",
+            "required": ["lines", "history"],
+            "properties": {
+              "lines": { "type": "array", "description": "Current median and lowest estimates for standard scenarios.", "items": { "type": "object" } },
+              "history": { "type": "array", "description": "Dated snapshots of median and lowest estimates.", "items": { "type": "object" } }
+            }
+          }
+        }
+      },
+      "Provider": {
+        "type": "object",
+        "required": ["id", "name", "page", "markdown", "docs", "local", "billing", "capabilities", "prices"],
+        "properties": {
+          "id": { "type": "string", "examples": ["e2b"] },
+          "name": { "type": "string" },
+          "page": { "type": "string", "format": "uri" },
+          "markdown": { "type": "string", "format": "uri" },
+          "docs": { "type": "string", "format": "uri" },
+          "local": { "type": "boolean", "description": "Runs on the user's own machine." },
+          "billing": { "type": "string", "enum": ["allocated", "active-cpu"] },
+          "capabilities": { "type": "array", "items": { "type": "string" } },
+          "prices": {
+            "type": "object",
+            "description": "Hourly list price keyed by reference shape ID. If unfit contains a reason, that price is unusable for the requested shape. Active CPU rates assume all cores busy.",
+            "additionalProperties": {
+              "type": "object",
+              "required": ["usd", "unfit"],
+              "properties": { "usd": { "type": "number" }, "unfit": { "type": ["string", "null"] } }
+            }
+          }
+        }
+      },
+      "Benchmarks": {
+        "type": "object",
+        "required": ["schema", "dataThrough", "about", "start", "jobs", "load", "useCases", "agent", "bills"],
+        "properties": {
+          "schema": { "type": "integer", "const": 1 },
+          "dataThrough": { "type": "string", "description": "Timestamp of the newest published measurement." },
+          "about": { "type": "object", "description": "Source links, units, and benchmark definitions." },
+          "start": { "type": "object", "description": "Start latency and outcome data keyed by provider ID.", "additionalProperties": { "type": "object" } },
+          "jobs": { "type": "object", "description": "Measured jobs keyed by workload and provider ID.", "additionalProperties": { "type": "object" } },
+          "load": { "type": "array", "description": "Parallel request batches grouped by size and job.", "items": { "type": "object" } },
+          "useCases": { "type": "array", "description": "Modelled cost scenarios, independent of measured workload results.", "items": { "type": "object" } },
+          "agent": { "type": "array", "description": "Verified AI agent workload runs.", "items": { "type": "object" } },
+          "bills": { "type": "object", "description": "Provider usage or estimates and hosted ledger evidence." }
+        }
+      }
+    }
+  }
+}
