@@ -12,7 +12,7 @@ import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
 const root = mkdtempSync(join(tmpdir(), "sbr-beam-"));
 const beamOpts = { token: "", workspaceId: "", gatewayUrl: "https://app.beam.cloud" };
 const configs: Record<string, unknown>[] = [];
-const execs: { cmd: string; opts: any }[] = [];
+const execs: { argv: string[]; opts: any }[] = [];
 const terminated: string[] = [];
 const connected: string[] = [];
 let createError: unknown;
@@ -42,8 +42,8 @@ class FakeProcess {
   private out = new FakeStream();
   private err = new FakeStream();
   private exit: Promise<number>;
-  constructor(cmd: string, opts: any) {
-    this.child = spawn("sh", ["-c", cmd], { cwd: opts?.cwd ?? root, env: { ...process.env, ...(opts?.env ?? {}) } });
+  constructor([program, ...args]: string[], opts: any) {
+    this.child = spawn(program, args, { cwd: opts?.cwd ?? root, env: { ...process.env, ...(opts?.env ?? {}) } });
     this.child.stdout!.on("data", (d) => (this.out.buf += d));
     this.child.stderr!.on("data", (d) => (this.err.buf += d));
     this.exit = new Promise((resolve) =>
@@ -66,9 +66,9 @@ class FakeProcess {
 function instance(id: string) {
   return {
     containerId: id,
-    execShell: async (cmd: string, opts: any) => {
-      execs.push({ cmd, opts });
-      return new FakeProcess(cmd, opts);
+    exec: async (argv: string[], opts: any) => {
+      execs.push({ argv, opts });
+      return new FakeProcess(argv, opts);
     },
     fs: {
       // Like the real upload, this fails when the parent directory is missing.
@@ -175,7 +175,7 @@ describe("BeamProvider", () => {
     const sbx = await p().create({});
     const path = join(root, "nested", "dir", "a file.txt");
     await sbx.writeFile(path, "héllo 'quoted'\n");
-    expect(execs.at(-1)!.cmd).toBe(`mkdir -p '${join(root, "nested", "dir")}'`);
+    expect(execs.at(-1)!.argv).toEqual(["mkdir", "-p", "--", join(root, "nested", "dir")]);
     expect(new TextDecoder().decode(await sbx.readFile(path))).toBe("héllo 'quoted'\n");
 
     const bin = new Uint8Array(4096).map((_, i) => (i * 31) % 256);

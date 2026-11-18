@@ -82,6 +82,8 @@ export { NorthflankProvider } from "./providers/northflank.js";
 export { BoatProvider } from "./providers/boat.js";
 export { ExeDevProvider } from "./providers/exedev.js";
 export { AgentCoreProvider } from "./providers/agentcore.js";
+export { DigitalOceanProvider } from "./providers/digitalocean.js";
+export { GoogleAgentPlatformProvider } from "./providers/google.js";
 export { AzureSessionsProvider } from "./providers/azure.js";
 export { LambdaMicrovmProvider, writeLambdaMicrovmBundle } from "./providers/lambda.js";
 export { AlibabaProvider } from "./providers/alibaba.js";

@@ -32,7 +32,9 @@ export type ProviderId =
   | "superserve"
   | "instabox"
   | "openscale"
-  | "sail";
+  | "sail"
+  | "digitalocean"
+  | "google";
 
 /** Things a caller can require of a provider. The router skips providers that lack one. */
 export type Capability =
@@ -71,7 +73,7 @@ export interface SandboxSpec {
   expectedSeconds?: number;
   /**
    * How busy the CPU will be, 0 to 1 (default 1). Only a pricing hint: providers that bill CPU only
-   * while it's busy (Vercel, Cloudflare, Tensorlake, AgentCore, Sail, Sprites, Deno, Upstash) are priced
+   * while it's busy (Vercel, Cloudflare, Tensorlake, AgentCore, DigitalOcean, Sail, Sprites, Deno, Upstash) are priced
    * at this share of their CPU plus their full memory, never below a provider's CPU floor. An agent that
    * mostly waits on model calls uses about 0.1; a build or test run is close to 1.
    */

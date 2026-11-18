@@ -1,6 +1,6 @@
 # sandboxRouter
 
-**One API for every sandbox.** A free, open-source router for the places an AI agent can run code: Agent37, Alibaba Cloud, AWS (Bedrock AgentCore and Lambda MicroVMs), Azure Container Apps, Beam, Blaxel, Boat, Cloudflare, CodeSandbox, Daytona, Dedalus Machines, Deno, E2B, exe.dev, Fly.io Sprites, Freestyle, HOPX, InstaBox, Koyeb, Maritime, Modal, Morph, Northflank, Novita, OpenScale, Runloop, Sail, Superserve, Tensorlake, Upstash Box and Vercel, plus Docker on your own machine. It picks a provider by price, speed or capability, and falls back to the next one when a provider is down or rate-limited.
+**One API for every sandbox.** A free, open-source router for the places an AI agent can run code: Agent37, Alibaba Cloud, AWS (Bedrock AgentCore and Lambda MicroVMs), Azure Container Apps, Beam, Blaxel, Boat, Cloudflare, CodeSandbox, Daytona, Dedalus Machines, Deno, DigitalOcean Harness Runtime, E2B, exe.dev, Fly.io Sprites, Freestyle, Google Cloud Agent Platform, HOPX, InstaBox, Koyeb, Maritime, Modal, Morph, Northflank, Novita, OpenScale, Runloop, Sail, Superserve, Tensorlake, Upstash Box and Vercel, plus Docker on your own machine. It picks a provider by price, speed or capability, and falls back to the next one when a provider is down or rate-limited.
 
 E2B quickstart (Node 22.19+ and an E2B API key):
 
@@ -56,8 +56,9 @@ List price while running, 2 vCPU / 4 GB, cheapest first; waitlisted sign-ups fol
 | [Morph Cloud](https://sandboxrouter.ai/providers/morph) | $0.100 | none | not run yet | [pricing](https://cloud.morph.so/web/pricing) |
 | [exe.dev](https://sandboxrouter.ai/providers/exedev) | $0.105 | $15/mo | not run yet | [pricing](https://exe.dev/docs/standalone-vms.md) |
 | [Novita AI Agent Sandbox](https://sandboxrouter.ai/providers/novita) | $0.117 | none | passed (2026-11-13) | [pricing](https://docs.novita.ai/guides/sandbox-pricing) |
+| [DigitalOcean Harness Runtime](https://sandboxrouter.ai/providers/digitalocean) | up to $0.126 | none | not run yet | [pricing](https://docs.digitalocean.com/products/managed-agents/agent-harness-runtime/details/pricing/) |
 | [Freestyle](https://sandboxrouter.ai/providers/freestyle) | $0.134 | none | passed (2026-11-13) | [pricing](https://www.freestyle.sh/docs/vms/pricing-and-limits) |
-| [Beam](https://sandboxrouter.ai/providers/beam) | $0.140 | $20/mo (credited) | not run yet | [pricing](https://www.beam.cloud/pricing) |
+| [Beam](https://sandboxrouter.ai/providers/beam) | $0.140 | $20/mo (credited) | passed (2026-11-18) | [pricing](https://www.beam.cloud/pricing) |
 | [CodeSandbox SDK (Together)](https://sandboxrouter.ai/providers/codesandbox) | $0.149 | none | not run yet | [pricing](https://docs.together.ai/docs/together-code-sandbox-legacy) |
 | [Fly.io Sprites](https://sandboxrouter.ai/providers/sprites) | up to $0.164 | none | passed (2026-11-13) | [pricing](https://fly.io/sprites) |
 | [Blaxel](https://sandboxrouter.ai/providers/blaxel) | $0.166 | none | passed (2026-11-13) | [pricing](https://blaxel.ai/pricing) |
@@ -80,10 +81,11 @@ List price while running, 2 vCPU / 4 GB, cheapest first; waitlisted sign-ups fol
 | [Azure Container Apps dynamic sessions](https://sandboxrouter.ai/providers/azure) | skipped (max 1 vCPU) | none | not run yet | [pricing](https://learn.microsoft.com/en-us/azure/container-apps/billing#dynamic-sessions) |
 | [Daytona](https://sandboxrouter.ai/providers/daytona) | skipped (default image is 1 vCPU / 1 GB; a bigger size needs image.daytona) | none | passed (2026-11-13) | [pricing](https://www.daytona.io/pricing) |
 | [Alibaba Cloud Agent Sandbox](https://sandboxrouter.ai/providers/alibaba) | skipped (max 2 GB memory) | none | not run yet | [pricing](https://www.alibabacloud.com/help/en/agent-sandbox/product-overview/billing-overview) |
+| [Google Cloud Agent Platform](https://sandboxrouter.ai/providers/google) | skipped (max 1 vCPU) | none | not run yet | [pricing](https://cloud.google.com/products/gemini-enterprise-agent-platform/pricing) |
 | [E2B](https://sandboxrouter.ai/providers/e2b) | skipped (default image is 2 vCPU / 0.5 GB; a bigger size needs image.e2b) | none | passed (2026-11-13) | [pricing](https://e2b.dev/pricing) |
 | [Docker (local)](https://sandboxrouter.ai/providers/docker) | free | none | passed (2026-11-13) | [pricing](https://docs.docker.com/engine/) |
 
-Checked 2026-11-04 to 2026-11-17.
+Checked 2026-11-04 to 2026-11-18.
 
 ## Install
 

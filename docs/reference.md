@@ -6,12 +6,13 @@ Everything the [README](../README.md) leaves out. The tables marked generated ar
 
 ```bash
 npm i @sandboxrouter/sdk
-# then the SDK of each provider you use (Agent37, Azure, AgentCore, Boat, Cloudflare, Dedalus, exe.dev, Freestyle, InstaBox, Koyeb,
+# then the SDK of each provider you use (Agent37, Azure, AgentCore, Boat, Cloudflare, Dedalus, DigitalOcean, exe.dev, Freestyle, InstaBox, Koyeb,
 # Lambda, Maritime, Sail, Superserve, Upstash and Docker need none; the AWS ones need the signing packages below):
 npm i e2b                       # E2B (also Alibaba Cloud and OpenScale)
 npm i @daytonaio/sdk            # Daytona
 npm i modal                     # Modal
 npm i @vercel/sandbox           # Vercel Sandbox
+npm i google-auth-library       # Google Cloud Agent Platform (Application Default Credentials)
 npm i morphcloud                # Morph Cloud
 npm i @fly/sprites              # Fly.io Sprites (its package asks for Node 24+)
 npm i @blaxel/core              # Blaxel
@@ -31,6 +32,10 @@ Cloudflare sandboxes only run inside a Cloudflare Worker, so you deploy a small 
 
 Three providers need a one-time setup in your cloud account, described at the top of each adapter: Azure needs a Shell session pool ([`src/providers/azure.ts`](../src/providers/azure.ts)), Lambda MicroVMs need an image built from the bundled server ([`src/providers/lambda.ts`](../src/providers/lambda.ts), `writeLambdaMicrovmBundle()`), and AgentCore is opt-in: set `AGENTCORE_CODE_INTERPRETER_ID=aws.codeinterpreter.v1` so plain AWS credentials don't route work there by surprise.
 
+DigitalOcean requires a funded Harness Runtime account and a personal access token with config and session permissions. The adapter starts a shell microVM without an agent harness. Its lifetime setting is the provider's idle pause timeout. Call `kill()` to delete the session and stop storage charges.
+
+Google requires an existing Agent Platform instance and a reusable default shell sandbox template in the same project and region. Set `GOOGLE_SANDBOX_ENGINE` to the instance resource name returned by Google (`projects/PROJECT/locations/REGION/reasoningEngines/INSTANCE`) and `GOOGLE_SANDBOX_TEMPLATE` to the template's full resource name. The adapter uses Application Default Credentials or `GOOGLE_SANDBOX_ACCESS_TOKEN` when set. Outbound access follows the template's network policy.
+
 Set the keys for the providers you want. Providers without keys are skipped.
 
 | Provider | Env |
@@ -48,11 +53,13 @@ Set the keys for the providers you want. Providers without keys are skipped.
 | Daytona | `DAYTONA_API_KEY` |
 | Dedalus Machines | `DEDALUS_API_KEY` |
 | Deno Sandbox | `DENO_DEPLOY_TOKEN` |
+| DigitalOcean Harness Runtime | `DIGITALOCEAN_TOKEN`, or `DIGITALOCEAN_ACCESS_TOKEN` |
 | Docker (local) | none: Docker running locally |
 | E2B | `E2B_API_KEY` |
 | exe.dev | `EXE_TOKEN` |
 | Fly.io Sprites | `SPRITES_TOKEN` |
 | Freestyle | `FREESTYLE_API_KEY` |
+| Google Cloud Agent Platform | `GOOGLE_SANDBOX_ENGINE` + `GOOGLE_SANDBOX_TEMPLATE` |
 | HOPX | `HOPX_API_KEY` |
 | InstaBox | `INSTABOX_API_KEY` |
 | Koyeb Sandboxes | `KOYEB_API_TOKEN` |
@@ -297,8 +304,9 @@ It prints one line per step and exits 1 if any fails. `checkProvider(router, id)
 | Morph Cloud | not run yet | |
 | exe.dev | not run yet | |
 | Novita AI Agent Sandbox | 14/14 passed | 2026-11-13, v0.7.0 |
+| DigitalOcean Harness Runtime | not run yet | |
 | Freestyle | 14/14 passed; note: output arrived only at the end (no live streaming) | 2026-11-13, v0.7.0 |
-| Beam | not run yet | |
+| Beam | 13/13 passed; n/a: pause and resume | 2026-11-18, v0.14.0 |
 | CodeSandbox SDK (Together) | not run yet | |
 | Fly.io Sprites | 13/13 passed; n/a: pause and resume | 2026-11-13, v0.7.0 |
 | Blaxel | 13/13 passed; n/a: pause and resume | 2026-11-13, v0.7.0 |
@@ -321,6 +329,7 @@ It prints one line per step and exits 1 if any fails. `checkProvider(router, id)
 | Azure Container Apps dynamic sessions | not run yet | |
 | Daytona | 14/14 passed | 2026-11-13, v0.7.0 |
 | Alibaba Cloud Agent Sandbox | not run yet | |
+| Google Cloud Agent Platform | not run yet | |
 | E2B | 14/14 passed | 2026-11-13, v0.7.0 |
 | Docker (local) | 14/14 passed | 2026-11-13, v0.7.0 |
 
