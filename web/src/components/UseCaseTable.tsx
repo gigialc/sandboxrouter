@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { ConditionalStartFeeNote, hasStartFee } from "@/components/ConditionalStartFeeNote";
 import { BarNum, Footnote, Num, ResultRow, ResultTable, Segmented, Toolbar, barMax, money, perHour } from "@/components/results";
-import { site } from "@/lib/site";
+import { OWN_IMAGE_NOTE, site } from "@/lib/site";
 
 const plural = (n: number, unit: string) => `${n} ${unit}${n === 1 ? "" : "s"}`;
 const runLength = (s: number) => (s < 60 ? plural(s, "second") : s < 3600 ? plural(Math.round(s / 60), "minute") : plural(Math.round(s / 3600), "hour"));
@@ -28,7 +28,7 @@ export function UseCaseTable() {
       <Toolbar note={`${u.blurb} ${spec.join(" · ")}. ${u.top.length} ${u.top.length === 1 ? "provider fits" : "providers fit"} this request and passed the real-account check.`}>
         <Segmented label="Job" options={site.useCases.map((x) => [x.id, x.title] as const)} value={u.id} onChange={setId} />
       </Toolbar>
-      <ResultTable cols={[{ label: "Est. / 1,000 runs" }, { label: "Per hour", className: "hidden sm:table-cell" }]}>
+      <ResultTable cols={[{ label: "Est. / 1,000 runs" }, { label: "Effective / hour", className: "hidden sm:table-cell" }]}>
         {rows.map((r, i) => (
           <ResultRow
             key={r.provider}
@@ -38,7 +38,7 @@ export function UseCaseTable() {
             notes={[
               r.minimumSeconds > u.runSeconds ? `bills at least ${r.minimumSeconds} s` : "",
               r.perSandboxUsd ? `+${money(r.perSandboxUsd)} per sandbox` : "",
-              r.ownImage ? "needs your own image at this size" : "",
+              r.ownImage ? OWN_IMAGE_NOTE : "",
             ].filter(Boolean)}
           >
             <BarNum value={r.runUsd} max={max} title={`${r.name}: ${money(r.runUsd)} for one run of ${runLength(u.runSeconds)}`}>
@@ -53,7 +53,10 @@ export function UseCaseTable() {
           {showAll ? "Show fewer" : `Show all ${u.top.length} providers`}
         </button>
       )}
-      {hasStartFee(rows.map((r) => r.provider)) && <Footnote><ConditionalStartFeeNote ids={rows.map((r) => r.provider)} /></Footnote>}
+      <Footnote>
+        Effective / hour is the run&apos;s cost divided by its length, so minimum charges and idle CPU billing show up; it is not the list rate.
+        {hasStartFee(rows.map((r) => r.provider)) && <> <ConditionalStartFeeNote ids={rows.map((r) => r.provider)} /></>}
+      </Footnote>
     </div>
   );
 }

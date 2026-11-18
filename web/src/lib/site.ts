@@ -20,14 +20,15 @@ export interface SiteProvider {
   planLabel: string;
   /** Set when the provider's terms forbid publishing benchmarks: no speed, size or bill data is shown. */
   noBenchmarks: null | { clause: string; source: string; checked: string };
-  /** The size the provider's default image gives whatever is asked for; bigger requests need a custom image. */
-  defaultSize: null | { vcpu: number; memoryGb: number };
+  /** The size the provider's default image gives whatever is asked for, and its list price there; bigger requests need a custom image. */
+  defaultSize: null | { vcpu: number; memoryGb: number; usd: number };
   /** Last real-account run: passed, failing, or untested (mock-tested only). */
   live: { status: "passed" | "failing" | "untested"; label: string };
   /** What the provider really billed / the list-price prediction, from a saved cost run; the router ranks by list price x this. */
   billedVsList: null | { ratio: number; date: string };
   computers: string[];
-  prices: Record<Shape, { usd: number; unfit: string | null }>;
+  /** `ownImage`: the default image is smaller, so this size (and this price) needs your own image or template. */
+  prices: Record<Shape, { usd: number; unfit: string | null; ownImage?: boolean }>;
   /** The last saved real-account `check` run, or null when none has been saved. */
   check: null | {
     date: string;
@@ -92,7 +93,7 @@ export interface LoadRow {
   n: number;
   ok: number;
   limited: number;
-  size?: { vcpu: number; memoryGb: number };
+  size: MeasuredSize;
   createFailures?: number;
   commandFailures?: number;
   taskFailures?: number;
@@ -107,6 +108,8 @@ export interface LoadRow {
   label: string | null;
 }
 
+type MeasuredSize = { vcpu: number; memoryGb: number };
+
 export interface AgentRow {
   provider: string;
   name: string;
@@ -114,6 +117,7 @@ export interface AgentRow {
   requested?: number;
   started?: number;
   limited?: number;
+  size?: MeasuredSize;
   ok: number;
   medianWallMs?: number;
   medianModelMs?: number;
@@ -222,6 +226,8 @@ export const site = data as unknown as {
   priceIndex: { lines: IndexLine[]; history: { date: string; lines: Record<string, { median: number; cheapest: number; provider: string }> }[] };
   tasks: { kinds: {
     id: string; title: string; blurb: string; version: string; repeat: number; phases: { id: string; label: string }[];
+    /** The CPU share the rows' hourly price assumes when the job is mostly idle, else null (every core busy). */
+    cpuUtilization: number | null;
     rows: TaskRow[];
     outcomes: { provider: string; name: string; requested: number; completed: number; limited: number; failures: number; taskFailures: number }[];
   }[] };
@@ -255,14 +261,27 @@ export function usd(n: number) {
   return n < 1 ? `$${n.toFixed(3)}` : `$${n.toFixed(2)}`;
 }
 
-/**
- * What to show for a provider at a size it can't take. Providers whose default image is a fixed size
- * (E2B, OpenScale, Daytona) still get a price: the one at the size they really run.
- */
-export function fixedPrice(p: SiteProvider, shape: Shape): null | { usd: number; size: string } {
-  const unfit = p.prices[shape].unfit;
-  if (!unfit || !p.defaultSize || !unfit.startsWith("default image")) return null;
-  return { usd: p.prices[shape].usd, size: `${p.defaultSize.vcpu} vCPU · ${p.defaultSize.memoryGb} GB` };
+/** A measured size as a label, or "" when it is the standard 2 vCPU / 4 GB every table assumes. */
+export function sizeNote(size?: { vcpu: number; memoryGb: number }) {
+  return size && (size.vcpu !== 2 || size.memoryGb !== 4) ? `${size.vcpu} vCPU / ${size.memoryGb} GB` : "";
+}
+
+export const OWN_IMAGE_NOTE = "needs your own image at this size";
+
+/** Whether a provider only runs this size from the customer's own image or template (its default image is smaller). */
+export function needsOwnImage(id: string, size?: { vcpu: number; memoryGb: number }) {
+  const d = provider(id)?.defaultSize;
+  return !!d && !!size && (size.vcpu > d.vcpu || size.memoryGb > d.memoryGb);
+}
+
+/** Providers whose 2 vCPU / 4 GB price needs the customer's own image (E2B, Daytona, OpenScale). */
+export function ownImageProviders(shape: Shape = DEFAULT_SHAPE) {
+  return site.providers.filter((p) => p.prices[shape]?.ownImage);
+}
+
+/** "A, B and C". */
+export function listNames(names: string[]) {
+  return names.length < 2 ? names.join("") : `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`;
 }
 
 export function provider(id: string) {

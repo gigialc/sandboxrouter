@@ -1,13 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { provider } from "@/lib/site";
 
 /**
  * What `create()` does, replayed as terminal lines. Three scenarios, each with different providers in
  * each role, so no provider is always the one that fails or the one that wins. Failures are the kinds the
  * router really handles (your account has no balance, a provider rate-limits you); no timings are shown.
- * Prices are the catalog's list prices at the size the sandbox runs.
+ * Prices are the catalog's list prices at the size the sandbox runs. E2B's is its default image, so its size is shown.
  */
+const e2b = provider("e2b")?.defaultSize;
+const E2B_NOTE = e2b ? `started · $${e2b.usd.toFixed(3)}/hr · ${e2b.vcpu} vCPU / ${e2b.memoryGb} GB` : "started";
 type Line = { kind: "cmd" | "skip" | "ok" | "out"; text: string; note?: string };
 
 const SCENARIOS: { title: string; lines: Line[] }[] = [
@@ -24,7 +27,7 @@ const SCENARIOS: { title: string; lines: Line[] }[] = [
     lines: [
       { kind: "cmd", text: 'sandboxrouter run "python3 -c \'print(6*7)\'"' },
       { kind: "skip", text: "daytona", note: "402 no balance on your account → next" },
-      { kind: "ok", text: "e2b", note: "started · $0.109/hr" },
+      { kind: "ok", text: "e2b", note: E2B_NOTE },
       { kind: "out", text: "42" },
     ],
   },

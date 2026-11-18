@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useState } from "react";
 import { BarNum, Footnote, Num, ResultRow, ResultTable, Segmented, Toolbar, Txt, barMax, perHour, time } from "@/components/results";
-import { CAPABILITY_LABEL, DEFAULT_SHAPE, fixedPrice, ranked, shapeLabel, site, usd, type Shape } from "@/lib/site";
+import { startFeeNote } from "@/components/ConditionalStartFeeNote";
+import { CAPABILITY_LABEL, DEFAULT_SHAPE, OWN_IMAGE_NOTE, ranked, shapeLabel, site, usd, type Shape } from "@/lib/site";
 
 const NEEDS = ["pause", "ports", "background", "gpu", "custom-image"] as const;
 
@@ -12,9 +13,11 @@ export function ProviderTable() {
   const [shape, setShape] = useState<Shape>(DEFAULT_SHAPE);
   const [need, setNeed] = useState<string>("any");
   const [tested, setTested] = useState<"all" | "passed">("all");
-  const speed = new Map(site.leaderboard.map((r) => [r.provider, r.medianCreateMs]));
+  const starts = new Map(site.leaderboard.map((r) => [r.provider, r]));
+  const [shapeVcpu, shapeGb] = shape.split("x").map(Number);
   const has = (p: (typeof site.providers)[number], c: string) => p.capabilities.includes(c);
-  const rows = ranked(shape).filter((p) => (need === "any" || has(p, need)) && (tested === "all" || p.live.status === "passed"));
+  // The real-account filter lists hosted providers only, like its count: local Docker has no account to test.
+  const rows = ranked(shape).filter((p) => (need === "any" || has(p, need)) && (tested === "all" || (!p.local && p.live.status === "passed")));
   const passing = site.providers.filter((p) => !p.local && p.live.status === "passed").length;
   const max = barMax(rows.filter((r) => !r.local && !r.prices[shape].unfit).map((r) => r.prices[shape].usd));
 
@@ -43,7 +46,7 @@ export function ProviderTable() {
         wide
         cols={[
           { label: "Per hour" },
-          { label: "Starts in", className: "hidden sm:table-cell" },
+          { label: "Create call", className: "hidden sm:table-cell" },
           { label: "Plan", left: true, className: "hidden md:table-cell" },
           { label: "Real account", left: true, className: "hidden md:table-cell" },
           { label: "Supports", left: true, className: "hidden lg:table-cell" },
@@ -51,19 +54,22 @@ export function ProviderTable() {
       >
         {rows.map((p, i) => {
           const price = p.prices[shape];
-          const fixed = fixedPrice(p, shape);
+          const d = p.defaultSize;
+          const defaultImage = d ? `${d.vcpu} vCPU · ${d.memoryGb} GB` : "";
+          const start = starts.get(p.id);
+          // The create timing's size, when it isn't the size this table is set to.
+          const startSize = start && (start.size.vcpu !== shapeVcpu || start.size.memoryGb !== shapeGb) ? `${start.size.vcpu} vCPU · ${start.size.memoryGb} GB` : "";
           const notes = [
             p.local ? "opt-in, runs on your machine" : "",
             p.access ? (p.access.status === "waitlist" ? "sign-up waitlisted" : "not taking new accounts") : "",
-            fixed ? `default template is ${fixed.size}` : "",
-            p.pricing.conditionalStartFee ? "extra start fees above plan allowance" : "",
+            price.ownImage ? OWN_IMAGE_NOTE : "",
+            price.ownImage && d ? `default image is ${defaultImage}` : "",
+            p.local ? "" : startFeeNote(p.id),
             p.billing === "active-cpu" ? "CPU billed only while busy" : "",
           ].filter(Boolean);
           return (
             <ResultRow key={p.id} rank={p.local || price.unfit ? 0 : i + 1} id={p.id} name={p.name} notes={notes} dim={!!p.access}>
-              {fixed ? (
-                <Num title={`${p.name}'s default image is ${fixed.size} whatever size you ask for; this is its price at that size.`}>{perHour(fixed.usd)}</Num>
-              ) : price.unfit ? (
+              {price.unfit ? (
                 <Txt className="text-right text-muted">{price.unfit}</Txt>
               ) : p.local ? (
                 <Num>$0</Num>
@@ -71,13 +77,25 @@ export function ProviderTable() {
                 <BarNum
                   value={price.usd}
                   max={max}
-                  title={p.billing === "active-cpu" ? `${p.name}: ${usd(price.usd)} per hour with every core busy; less when idle` : `${p.name}: ${usd(price.usd)} per hour at list price`}
+                  title={
+                    price.ownImage && d
+                      ? `${p.name}: ${usd(price.usd)} per hour at list price from your own image; its default image is ${defaultImage} at ${usd(d.usd)} per hour`
+                      : p.billing === "active-cpu"
+                        ? `${p.name}: ${usd(price.usd)} per hour with every core busy; less when idle`
+                        : `${p.name}: ${usd(price.usd)} per hour at list price`
+                  }
                 >
                   {p.billing === "active-cpu" ? "≤ " : ""}
                   {perHour(price.usd)}
                 </BarNum>
               )}
-              <Num className="hidden sm:table-cell">{speed.get(p.id) ? time(speed.get(p.id)) : "—"}</Num>
+              <Num
+                className="hidden sm:table-cell"
+                title={start?.medianCreateMs ? `Median time for the create call to return, measured at ${start.size.vcpu} vCPU · ${start.size.memoryGb} GB` : undefined}
+              >
+                {start?.medianCreateMs ? time(start.medianCreateMs) : "—"}
+                {start?.medianCreateMs && startSize ? <span className="block font-sans text-[11px] text-muted">at {startSize}</span> : null}
+              </Num>
               <Txt className="hidden md:table-cell" title={p.plan?.note}>
                 {p.planLabel}
               </Txt>
@@ -94,7 +112,9 @@ export function ProviderTable() {
       {rows.length === 0 ? <p className="mt-6 text-[14px] text-muted">No provider matches that yet.</p> : null}
       <Footnote>
         Cheapest first, open sign-ups before waitlisted ones; the router tries ones that passed on a real account first. ≤ means CPU is
-        billed only while busy, so an idle sandbox costs less. &ldquo;Not yet&rdquo; means tested against mocks only.{" "}
+        billed only while busy, so an idle sandbox costs less. Create call is the median time for the create request to return, one
+        request at a time; a size under it means it was measured at that size, not the one selected. &ldquo;Not yet&rdquo; means tested
+        against mocks only. The real-account filter lists hosted providers only, so local Docker is left out.{" "}
         <Link href="/docs#price-table" className="underline decoration-line-2 underline-offset-2 hover:text-ink">
           How to read this table
         </Link>

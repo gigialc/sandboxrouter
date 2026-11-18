@@ -9,7 +9,8 @@ import { Finder } from "@/components/Finder";
 import { LoadTable } from "@/components/LoadTable";
 import { TaskTable } from "@/components/TaskTable";
 import { UseCaseTable } from "@/components/UseCaseTable";
-import { BarNum, Num, ResultRow, ResultTable, barMax, perHour, time } from "@/components/results";
+import { ConditionalStartFeeNote, hasStartFee } from "@/components/ConditionalStartFeeNote";
+import { BarNum, Footnote, Num, ResultRow, ResultTable, barMax, perHour, time } from "@/components/results";
 import { REPO, site } from "@/lib/site";
 
 const description = "Compare sandbox startup and job times, estimated costs, and bills from real provider accounts.";
@@ -50,7 +51,7 @@ export default function BenchmarksPage() {
       <PageHeader kicker="Benchmarks" title="What each sandbox costs, and how it performs">
         Results from real provider accounts. Prices are estimates unless marked as provider billing data.
         <span className="mt-3 block text-[13px] text-muted">
-          Older workload reports, including Modal&apos;s short job, are in the{" "}
+          Older workload reports are in the{" "}
           <a href={`${REPO}/tree/e1a17220f875b6911a85bb8d8c9913ddeff1bf29/results`} className="underline underline-offset-4">
             benchmark archive
           </a>. The current workload rankings use runs with output verification.
@@ -162,6 +163,11 @@ export default function BenchmarksPage() {
           </ResultRow>
         ))}
       </ResultTable>
+      {hasStartFee(rows.map((r) => r.provider)) && (
+        <Footnote>
+          Per hour is the list price at the size shown. <ConditionalStartFeeNote ids={rows.map((r) => r.provider)} what="hourly prices" />
+        </Footnote>
+      )}
       </Section>
             ),
           },

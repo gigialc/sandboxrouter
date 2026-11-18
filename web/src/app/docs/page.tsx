@@ -173,15 +173,15 @@ router.quote({ expectedSeconds: 10 })               // where it would land and w
             <strong>≤:</strong> CPU is billed only while busy, so the price shown is with every core busy and idle work costs less.
           </li>
           <li>
-            <strong>&ldquo;at 2 vCPU · 0.5 GB only&rdquo;:</strong> the provider&apos;s default image runs at that size whatever you
-            ask for; a bigger size needs your own image.
+            <strong>&ldquo;needs your own image at this size&rdquo;:</strong> the provider&apos;s default image is smaller and runs at
+            its own size whatever you ask for. The price shown is for the size selected, from your own image or template.
           </li>
           <li>
             <strong>Plan needed:</strong> the monthly plan required before the API creates sandboxes (&ldquo;credited&rdquo; = paid
             back as usage). For a small project it can cost more than the usage.
           </li>
           <li>
-            <strong>Cold start:</strong> medians from the benchmark reports submitted so far; with few reports, a rough guide.
+            <strong>Create call:</strong> the time for the create request to return; medians from the benchmark reports submitted so far; with few reports, a rough guide.
           </li>
           <li>
             <strong>Real account:</strong> whether the 14-step check has passed on a real account. &ldquo;Not yet&rdquo; means the

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { ConditionalStartFeeNote } from "@/components/ConditionalStartFeeNote";
 import { BarNum, Footnote, Num, ResultRow, ResultTable, Segmented, Toolbar, barMax, money, time } from "@/components/results";
-import { site, type LoadRow } from "@/lib/site";
+import { site, sizeNote, type LoadRow } from "@/lib/site";
 
 /** Estimated cost scaled to 100 successful outcomes. A partial burst does not establish cost at that scale. */
 const per100 = (r: LoadRow) => (r.usd === undefined || !r.ok ? undefined : (r.usd / r.ok) * 100);
@@ -47,6 +47,7 @@ export function LoadTable() {
       >
         {[...full, ...partial].map((r, i) => (
           <ResultRow key={r.provider} rank={i < full.length ? i + 1 : 0} id={r.provider} name={r.name} notes={[
+            sizeNote(r.size),
             `${r.ok}/${r.n} ${k.job === "start" ? "ready" : "completed"}`,
             r.limited ? `${r.limited} reported limit refusals` : "",
             r.createFailures === undefined && r.n - r.ok > r.limited ? `${r.n - r.ok - r.limited} other failures` : "",
@@ -65,6 +66,7 @@ export function LoadTable() {
       <Footnote>
         Readiness ranks and scaled cost require a complete batch. Limit refusals are reported by the benchmark; other failures can have several causes.
         {k.n === 10 && " At ten requests, p99 is the slowest observation."}
+        {k.rows.some((r) => sizeNote(r.size)) && " Batches ran at 2 vCPU / 4 GB unless a size is shown: those providers ran their default image."}
         {" "}<ConditionalStartFeeNote ids={full.map((r) => r.provider)} />
       </Footnote>
     </div>

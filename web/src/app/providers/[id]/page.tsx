@@ -6,7 +6,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CodeBlock } from "@/components/code";
 import { time } from "@/components/results";
-import { CAPABILITY_LABEL, fixedPrice, NPM, PACKAGE, provider, REPO, REPO_PUBLIC, shapeLabel, site, usd } from "@/lib/site";
+import { CAPABILITY_LABEL, NPM, OWN_IMAGE_NOTE, PACKAGE, provider, REPO, REPO_PUBLIC, shapeLabel, site, usd } from "@/lib/site";
 
 const billDollars = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 6 });
 
@@ -39,8 +39,12 @@ await sbx.kill();`;
   const caps = [...p.capabilities, ...(p.computers.length ? ["computers"] : [])];
 
   const lb = site.leaderboard.find((r) => r.provider === p.id);
-  const costs = site.costRuns.filter((r) => r.provider === p.id);
+  // Newest first, so every provider's facts come from its newest run that has them.
+  const costs = site.costRuns.filter((r) => r.provider === p.id).sort((a, b) => b.date.localeCompare(a.date));
+  // The newest run that measured the sandbox's resources, for every provider.
   const sizeRun = costs.find((r) => !r.error && r.delivered);
+  const ownImage = p.capabilities.includes("custom-image");
+  const hasOwnImagePrice = site.shapes.some((s) => p.prices[s].ownImage);
   const size = sizeRun?.delivered;
   const usage = costs.find((r) => !r.error && r.billKind === "provider-usage" && r.billedUsd !== null);
   const estimate = costs.find((r) => !r.error && r.billKind === "provider-estimate" && r.billedUsd !== null);
@@ -64,7 +68,12 @@ await sbx.kill();`;
     if (lb.runs > 0) facts.push(["Ready", `${Math.round(lb.successRate * 100)}%`, "Excluding recorded limit refusals"]);
   }
   if (!hidden && size && sizeRun) {
-    facts.push(["Measured resources", `${size.vcpu} vCPU / ${size.memoryGb} GB`, `Requested ${sizeRun.requested.vcpu} vCPU / ${sizeRun.requested.memoryGb} GB`]);
+    const onDefault = p.defaultSize && size.vcpu === p.defaultSize.vcpu && size.memoryGb === p.defaultSize.memoryGb;
+    facts.push([
+      "Measured resources",
+      `${size.vcpu} vCPU / ${size.memoryGb} GB`,
+      `Requested ${sizeRun.requested.vcpu} vCPU / ${sizeRun.requested.memoryGb} GB${onDefault ? " on the default image" : ""} · ${sizeRun.date.slice(0, 10)}`,
+    ]);
   }
   if (!hidden && bill && bill.billedUsd !== null) {
     const note = [
@@ -101,11 +110,20 @@ await sbx.kill();`;
           {p.access.status === "waitlist" ? "Sign-up is waitlisted" : "Not taking new accounts"}: {p.access.note}. Checked {p.access.checked}.
         </p>
       )}
-      {p.pricing.note && <p className="mt-5 max-w-2xl text-[14px] leading-6 text-ink-2">{p.pricing.note[0].toUpperCase() + p.pricing.note.slice(1)}.</p>}
+      {p.pricing.note && <p className="mt-5 max-w-2xl text-[14px] leading-6 text-ink-2">{p.pricing.note[0].toUpperCase() + p.pricing.note.slice(1).replace(/\.+$/, "")}.</p>}
       {p.defaultSize && (
         <p className="mt-3 max-w-2xl border-l-2 border-accent pl-3 text-[14px] leading-6 text-ink">
-          Always runs at {p.defaultSize.vcpu} vCPU / {p.defaultSize.memoryGb} GB unless you pass your own image (
-          <code className="font-mono text-[12.5px]">image.{p.id}</code>), so the router only sends it work that fits.
+          {ownImage ? (
+            <>
+              The default image runs at {p.defaultSize.vcpu} vCPU / {p.defaultSize.memoryGb} GB whatever size you ask for. A bigger size
+              needs your own image (<code className="font-mono text-[12.5px]">image.{p.id}</code>), so without one the router only sends
+              it work that fits.
+            </>
+          ) : (
+            <>
+              Always runs at {p.defaultSize.vcpu} vCPU / {p.defaultSize.memoryGb} GB, so the router only sends it work that fits.
+            </>
+          )}
         </p>
       )}
 
@@ -114,15 +132,23 @@ await sbx.kill();`;
           <h2 className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted">List price per hour</h2>
           <table className="mt-4 w-full text-[14px]">
             <tbody>
+              {p.defaultSize && hasOwnImagePrice && (
+                <tr className="border-t border-line">
+                  <td className="py-2.5 text-ink-2 tnum">
+                    {p.defaultSize.vcpu} vCPU · {p.defaultSize.memoryGb} GB
+                    <span className="block text-[12px] text-muted">default image</span>
+                  </td>
+                  <td className="py-2.5 text-right align-top font-mono tnum">{usd(p.defaultSize.usd)}</td>
+                </tr>
+              )}
               {site.shapes.map((s) => (
                 <tr key={s} className="border-t border-line">
-                  <td className="py-2.5 text-ink-2 tnum">{shapeLabel(s)}</td>
-                  <td className="py-2.5 text-right font-mono tnum">
-                    {fixedPrice(p, s) ? (
-                      <span className="text-muted">
-                        {usd(fixedPrice(p, s)!.usd)} at {fixedPrice(p, s)!.size} only
-                      </span>
-                    ) : p.prices[s].unfit ? (
+                  <td className="py-2.5 text-ink-2 tnum">
+                    {shapeLabel(s)}
+                    {p.prices[s].ownImage && <span className="block text-[12px] text-muted">{OWN_IMAGE_NOTE}</span>}
+                  </td>
+                  <td className="py-2.5 text-right align-top font-mono tnum">
+                    {p.prices[s].unfit ? (
                       <span className="text-muted">{p.prices[s].unfit}</span>
                     ) : (
                       usd(p.prices[s].usd)

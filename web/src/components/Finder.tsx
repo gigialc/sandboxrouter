@@ -15,7 +15,7 @@ const JOBS: [RecJob, string, string][] = [
   ["repo", "Coding agent on a repo", "Fetch Node and a real TypeScript project, npm ci, typecheck: what a coding agent does first."],
   ["short", "Short CPU job", "One hash, then two concurrent hashes, then a 256 MB disk write."],
   ["download", "Download", "A 53 MB download over HTTPS."],
-  ["start", "Start only", "Start a sandbox and run one command."],
+  ["start", "Start only", ""],
 ];
 // The three jobs shown first: providers differ most in how they bill a short run, idle time and a long run.
 const HEADLINE: readonly RecJob[] = ["agent", "python", "long"];
@@ -102,7 +102,14 @@ export function Finder() {
   const shown = all ? byPrice : byPrice.slice(0, 8);
   const startLabel = batch || HAS_PAIRED_STARTS ? "to first command" : "to create response";
   const timeLabel = job === "start" ? startLabel : "per job";
-  const [, jobLabel, description] = AVAILABLE_JOBS.find(([id]) => id === job) ?? JOBS[0];
+  const [, jobLabel, jobText] = AVAILABLE_JOBS.find(([id]) => id === job) ?? JOBS[0];
+  // "Start only" says which of the two timings the data has, the same way the column and axis do.
+  const startText = batch
+    ? "Start a batch of sandboxes: time from the batch request to each sandbox's first successful command."
+    : HAS_PAIRED_STARTS
+      ? "Start a sandbox and run one command: time to the first command's result."
+      : "Start a sandbox: time for the create call to return. The first command is measured separately.";
+  const description = job === "start" ? startText : jobText;
   const chartLink = new URL("https://www.sandboxrouter.ai/benchmarks#find");
   chartLink.searchParams.set("job", job);
   if (count > 1) chartLink.searchParams.set("count", String(count));
@@ -147,7 +154,7 @@ export function Finder() {
         measuredThrough,
         sourceUrl: chartLink.href,
         note: job === "start"
-          ? "List prices for tested sandbox sizes."
+          ? `List prices for tested sandbox sizes. Time ${startLabel}.` + feeNotes.join("")
           : `${points.length} providers plotted. Time includes startup. Cost per successful job is a retry estimate. The green line connects providers unbeaten on both axes. Sandbox sizes vary.`
             + feeNotes.join(""),
         summaries: answers.map(([label, p, metric]) => ({ label, name: p.name, metric })),
@@ -237,7 +244,7 @@ export function Finder() {
             : " Time combines batch readiness with the measured single-sandbox job time.")}
           {job === "start" ? "" : " Cost per successful run is a retry estimate, including modelled start and minimum charges."}
           {points.some((p) => measuredSize(p.size)) && " Sandbox sizes other than 2 vCPU / 4 GB are shown with their results."}
-          {job !== "start" && <> <ConditionalStartFeeNote ids={points.map((p) => p.provider)} /></>}
+          {" "}<ConditionalStartFeeNote ids={points.map((p) => p.provider)} what={job === "start" ? "hourly prices" : "estimates"} />
         </p>
 
         <table className="mt-8 w-full text-[14px]">
@@ -245,7 +252,7 @@ export function Finder() {
             <tr className="text-left text-[11px] uppercase tracking-[0.12em] text-muted">
               <th className="w-8 py-2 pr-2 font-normal">#</th>
               <th className="py-2 pr-4 font-normal">Provider</th>
-              <th className="py-2 pr-4 font-normal">{job === "start" ? "Median time" : "Time per job"}</th>
+              <th className="py-2 pr-4 font-normal">{job === "start" ? `Median ${startLabel}` : "Time per job"}</th>
               <th className="py-2 pr-4 font-normal">{job === "start" ? "Per hour" : "Per 1,000 jobs"}</th>
               {count > 1 && job !== "start" ? <th className="hidden py-2 pr-4 font-normal sm:table-cell">For {count}</th> : null}
               <th className="hidden py-2 font-normal md:table-cell">Worth knowing</th>

@@ -3,7 +3,7 @@
 // recommend() the SDK uses, so an agent and a person reading the site get the same answer.
 import published from "@/data/published.json";
 import { recommend, type PublishedData, type RecJob, type RecPriority } from "@/lib/recommend";
-import { HOSTED_FEE_PCT, HOSTED_URL, NPM, NPM_URL, REPO, RESULTS_REF, shapeLabel, site } from "@/lib/site";
+import { HOSTED_FEE_PCT, HOSTED_URL, NPM, NPM_URL, OWN_IMAGE_NOTE, REPO, RESULTS_REF, needsOwnImage, shapeLabel, site } from "@/lib/site";
 import { markdownPath, ORIGIN, publicPages } from "@/lib/public-pages";
 
 export const DATA = published as PublishedData;
@@ -20,6 +20,19 @@ const JOB_TEXT: Record<RecJob, string> = {
   repo: "What a coding agent does first: fetch Node 22 and a pinned real TypeScript project, npm ci, typecheck.",
 };
 const LOAD_TEXT = { start: "Start only", rl: "Quick Python runs (the 1 to 2 second Python job each)", agents: "Parallel agents (the agent loop each)" };
+/** The plan-dependent start fees the numbers leave out, as one sentence naming every provider that has one. */
+const START_FEES = Object.entries(DATA.conditionalStartFees ?? {}).sort(([a], [b]) => a.localeCompare(b)).map(([id, fee]) => ({
+  name: site.providers.find((p) => p.id === id)?.name ?? id,
+  amount: fee.minUsd === fee.maxUsd ? `$${fee.minUsd.toFixed(2)}` : `$${fee.minUsd.toFixed(2)}–$${fee.maxUsd.toFixed(2)}`,
+  when: fee.when ?? "above its included allowances",
+  source: fee.source,
+}));
+const START_FEE_TEXT = START_FEES.length
+  ? `Estimates exclude start fees that depend on your plan: ${START_FEES.map((f) => `${f.name} charges ${f.amount} per start ${f.when}`).join("; ")}.`
+  : "";
+const START_FEE_MARKDOWN = START_FEES.length
+  ? `Estimates exclude start fees that depend on your plan: ${START_FEES.map((f) => `[${f.name} charges ${f.amount} per start ${f.when}](${f.source})`).join("; ")}.`
+  : "";
 const BILL_DATA_THROUGH = [
   ...site.costRuns.map((r) => r.settledAt ?? r.date),
   ...site.hostedCosts.map((r) => r.checkedAt ?? r.date),
@@ -35,7 +48,7 @@ export function benchmarksJson() {
       page: `${ORIGIN}/benchmarks`,
       rawResults: `${REPO}/tree/${RESULTS_REF}/results`,
       jobs: JOB_TEXT,
-      units: "Times in milliseconds (…Ms). Costs in US dollars: taskUsd is one job in a new sandbox (start, minimum charge and per-sandbox fee included), reusedUsd one job in a sandbox already running, usdPer100 a burst's estimated cost per 100 sandboxes. Estimates exclude account-specific fees such as Boat's start fees above its included allowances.",
+      units: `Times in milliseconds (…Ms). Costs in US dollars: taskUsd is one job in a new sandbox (start and minimum charge included), reusedUsd one job in a sandbox already running, usdPer100 a burst's estimated cost per 100 sandboxes. ${START_FEE_TEXT} They are listed in conditionalStartFees.`,
       successRate: "For tasks, completed workloads divided by all requests. Create observations exclude recorded limit refusals from that rate.",
       load: "Bursts: n requests, ok verified completions (first command, and workload if applicable), limited reported limit refusals, p50Ms/p99Ms readiness among completions.",
       archive: "The raw results include older workload reports. Only current, verified workloads are ranked in this feed.",
@@ -55,7 +68,7 @@ export function providersJson() {
       page: `${ORIGIN}/providers`,
       methodology: `${ORIGIN}/methodology#pricing`,
       currency: "USD",
-      units: "Sandbox prices are hourly list rates by reference shape. Active CPU rates assume full utilization. Unfit entries identify unsupported shapes. Desktop rates are hourly where available. Price index lines are estimated direct-provider scenario costs.",
+      units: "Sandbox prices are hourly list rates by reference shape. Active CPU rates assume full utilization. Unfit entries identify unsupported shapes. ownImage marks a size above the provider's default image, priced at that size, which needs your own image or template; defaultSize has the default image's size and hourly price. Desktop rates are hourly where available. Price index lines are estimated direct-provider scenario costs.",
     },
     shapes: site.shapes.map((id) => ({ id, label: shapeLabel(id) })),
     providers: site.providers.map((p) => ({
@@ -83,6 +96,8 @@ export function providersJson() {
 
 const secs = (ms?: number) => (ms === undefined ? "n/a" : ms >= 10_000 ? `${(ms / 1000).toFixed(0)} s` : `${(ms / 1000).toFixed(2)} s`);
 const money = (n?: number) => (n === undefined ? "n/a" : n >= 1 ? `$${n.toFixed(2)}` : n >= 0.01 ? `$${n.toFixed(3)}` : `$${n.toPrecision(2)}`);
+/** The size a row was measured at; every table carries it so a smaller machine is never read as 2 vCPU / 4 GB. */
+const sizeCell = (size?: { vcpu: number; memoryGb: number }) => (size ? `${size.vcpu} vCPU / ${size.memoryGb} GB` : "2 vCPU / 4 GB");
 const table = (head: string[], rows: (string | number)[][]) =>
   [`| ${head.join(" | ")} |`, `|${head.map(() => "---").join("|")}|`, ...rows.map((r) => `| ${r.join(" | ")} |`)].join("\n");
 
@@ -95,7 +110,7 @@ export function benchmarksMarkdown(): string {
     "",
     "Task rankings divide estimated time and cost by the share of requests that succeeded. Older workload and real-agent results are available in the raw archive. New rankings require the current verification versions.",
     "",
-    "Estimates exclude account-specific fees. [Boat charges for starts above included allowances](https://docs.boat.dev/limits.md#extra-starts).",
+    START_FEE_MARKDOWN,
     "",
     "## Estimated cost for common scenarios",
   ];
@@ -109,8 +124,8 @@ export function benchmarksMarkdown(): string {
       `${scenario.blurb} ${size}${cpuUtilization === undefined ? "" : `, ${cpuUtilization * 100}% CPU assumed`}.`,
       "",
       table(
-        ["Provider", "Est. per run", "Est. per 1,000 runs"],
-        scenario.top.map((r) => [r.name, money(r.runUsd), money(r.runUsd * 1000)]),
+        ["Provider", "Est. per run", "Est. per 1,000 runs", "Notes"],
+        scenario.top.map((r) => [r.name, money(r.runUsd), money(r.runUsd * 1000), r.ownImage ? OWN_IMAGE_NOTE : ""]),
       ),
     );
   }
@@ -126,8 +141,9 @@ export function benchmarksMarkdown(): string {
       JOB_TEXT[job] + " Each job in its own new sandbox; ranked by best value (cost times time, each against the median).",
       "",
       table(
-        ["#", "Provider", "Time (start + job)", "Cost per job", "Cost per 1,000", "Success", "Runs", "Value score", "Notes"],
-        r.results.map((x) => [x.rank, x.name, secs(x.secondsEach * 1000), money(x.usdEach), money((x.usdEach ?? 0) * 1000), `${Math.round(x.successRate * 100)}%`, x.runs, x.valueScore.toFixed(2), x.notes.join("; ")]),
+        ["#", "Provider", "Size", "Time (start + job)", "Cost per job", "Cost per 1,000", "Success", "Runs", "Value score", "Notes"],
+        r.results.map((x) => [x.rank, x.name, sizeCell(x.size), secs(x.secondsEach * 1000), money(x.usdEach), money((x.usdEach ?? 0) * 1000), `${Math.round(x.successRate * 100)}%`, x.runs, x.valueScore.toFixed(2),
+          [...(needsOwnImage(x.provider, x.size ?? { vcpu: 2, memoryGb: 4 }) ? [OWN_IMAGE_NOTE] : []), ...x.notes].join("; ")]),
       ),
     );
   }
@@ -140,9 +156,10 @@ export function benchmarksMarkdown(): string {
       `A real model (${agent[0].model ?? "Gemini"}) does the same task in a sandbox on each provider, with one shell tool; the result is checked inside the sandbox.`,
       "",
       table(
-        ["Provider", "Done right", "Session", "Sandbox idle", "Cost per session"],
+        ["Provider", "Size", "Done right", "Session", "Sandbox idle", "Cost per session"],
         agent.map((a) => [
           a.name,
+          sizeCell(a.size),
           `${a.ok}/${a.requested ?? a.runs}`,
           secs(a.medianWallMs),
           a.medianWallMs && a.medianModelMs ? `${Math.round((a.medianModelMs / a.medianWallMs) * 100)}%` : "n/a",
@@ -161,8 +178,8 @@ export function benchmarksMarkdown(): string {
       `### ${l.n} at once: ${LOAD_TEXT[l.job]}`,
       "",
       table(
-        ["#", "Provider", "Ready p50", "Ready p99", "Last outcome", "Est. cost per 100"],
-        full.map(([, r], i) => [i + 1, r.name, secs(r.p50Ms), secs(r.p99Ms), secs(r.wallMs), money(r.usdPer100)]),
+        ["#", "Provider", "Size", "Ready p50", "Ready p99", "Last outcome", "Est. cost per 100"],
+        full.map(([, r], i) => [i + 1, r.name, sizeCell(r.size), secs(r.p50Ms), secs(r.p99Ms), secs(r.wallMs), money(r.usdPer100)]),
       ),
     );
     if (rest.length) out.push("", `Incomplete: ${rest.map(([, r]) => `${r.name} (${r.ok} of ${r.n} completed, ${r.limited} reported limit refusals, ${r.n - r.ok - r.limited} other failures)`).join(", ")}.`);
@@ -172,11 +189,11 @@ export function benchmarksMarkdown(): string {
     "",
     "## Start time",
     "",
-    "Median create response, one request at a time. The first command is measured separately.",
+    "Median create response, one request at a time, at the size shown. The first command is measured separately. Per hour is the list price at that size.",
     "",
     table(
-      ["#", "Provider", "Median create", "Success (limits excluded)", "Runs", "Per hour (list)"],
-      start.map((s, i) => [i + 1, s.name, secs(s.medianCreateMs), `${Math.round(s.successRate * 100)}%`, s.runs, money(s.hourlyUsd)]),
+      ["#", "Provider", "Size", "Median create", "Success (limits excluded)", "Runs", "Per hour (list)"],
+      start.map((s, i) => [i + 1, s.name, sizeCell(s.size), secs(s.medianCreateMs), `${Math.round(s.successRate * 100)}%`, s.runs, money(s.hourlyUsd)]),
     ),
     "",
   );
@@ -214,11 +231,11 @@ export function benchmarksMarkdown(): string {
 export function llmsTxt(): string {
   return `# sandboxRouter
 
-> One API for every sandbox provider for AI agents (${site.providers.length} providers: E2B, Daytona, Modal, Vercel Sandbox, Cloudflare and more). Open-source SDK and CLI (${NPM}), an optional hosted key (${HOSTED_URL}, ${HOSTED_FEE_PCT}% fee, or bring your own provider keys for free), and public benchmarks measured on real accounts.
+> One API for every sandbox provider for AI agents (${site.providers.filter((p) => !p.local).length} hosted providers, plus local Docker: E2B, Daytona, Modal, Vercel Sandbox, Cloudflare and more). Open-source SDK and CLI (${NPM}), an optional hosted key (${HOSTED_URL}, ${HOSTED_FEE_PCT}% fee, or bring your own provider keys for free), and public benchmarks measured on real accounts.
 
 ## When to use sandboxRouter
 
-- **Choosing a sandbox provider.** Compare create timings and request bursts. The benchmark archive contains older workload and real-agent results. Workload rankings require the newer verification scripts. Estimates exclude account-specific fees, including Boat's fees above included start allowances.
+- **Choosing a sandbox provider.** Compare create timings and request bursts. The benchmark archive contains older workload and real-agent results. Workload rankings require the newer verification scripts. ${START_FEE_TEXT}
 - **Running agent code in a sandbox.** One API over many providers; if one can't start a sandbox, the next one does: \`npm i ${NPM}\`.
 
 ## How an agent should use it

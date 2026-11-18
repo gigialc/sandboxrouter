@@ -1,6 +1,6 @@
 import { ConditionalStartFeeNote } from "@/components/ConditionalStartFeeNote";
 import Link from "next/link";
-import { site } from "@/lib/site";
+import { listNames, ownImageProviders, site } from "@/lib/site";
 
 const money = (n: number) => (n >= 1 ? `$${n.toFixed(2)}` : n >= 0.01 ? `$${n.toFixed(3)}` : `$${n.toFixed(4)}`);
 const day = (iso: string) => new Date(`${iso}T00:00:00Z`).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
@@ -30,6 +30,7 @@ export function PriceIndex({ dark = false }: { dark?: boolean }) {
   const ink = dark ? "text-white" : "text-ink";
   const muted = dark ? "text-white/55" : "text-muted";
   const line = dark ? "border-white/10" : "border-line";
+  const ownImage = ownImageProviders().map((p) => p.name);
 
   return (
     <div>
@@ -74,6 +75,7 @@ export function PriceIndex({ dark = false }: { dark?: boolean }) {
       <p className={`mt-3 text-[11px] leading-5 ${muted}`}>
         Estimated direct-provider costs, recorded {first ? `since ${day(first)}` : "when prices change"}.{" "}
         <ConditionalStartFeeNote ids={["boat", "sail"]} />{" "}
+        {ownImage.length > 0 && `${listNames(ownImage)} ${ownImage.length > 1 ? "need" : "needs"} your own image at 2 vCPU / 4 GB. `}
         <Link href="/methodology#index" className="underline underline-offset-2">
           How it&apos;s made
         </Link>

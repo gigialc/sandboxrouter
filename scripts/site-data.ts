@@ -1,7 +1,7 @@
 // Generates web/src/data/site.json from the library itself, so the website can't drift from the code.
 // Run from the repo root: node --import tsx scripts/site-data.ts
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
-import { accountStartFees, benchmarksPublishable, billingRules, CATALOG, DEFAULT_MEMORY_GB, DEFAULT_VCPU, hourlyCost, planLabel, planOnlyStartFee, unfit, withOwnImages } from "../src/catalog.js";
+import { accountStartFees, benchmarksPublishable, billingRules, CATALOG, DEFAULT_MEMORY_GB, DEFAULT_VCPU, fittingSpec, hourlyCost, planLabel, planOnlyStartFee, unfit, withOwnImages } from "../src/catalog.js";
 import type { SpreadResult } from "../src/burst.js";
 import { agentTable, aggregate, burstTable, loadAgentReports, loadBursts, loadReports, taskOutcomes, taskTable } from "../src/leaderboard.js";
 import { TASKS } from "../src/task.js";
@@ -25,6 +25,7 @@ const SHAPES = [
   { vcpu: 32, memoryGb: 128 },
 ];
 
+const round4 = (n: number) => Math.round(n * 10000) / 10000;
 const pkg = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
 // Providers whose terms forbid publishing benchmarks are dropped from every report before anything is computed.
 const reports = loadReports("results").map((r) => ({ ...r, rows: r.rows.filter((x) => benchmarksPublishable(x.provider)) }));
@@ -97,7 +98,7 @@ const USE_CASES: { id: string; title: string; blurb: string; spec: SandboxSpec; 
   { id: "quick", title: "Quick tool calls", blurb: "Run a snippet and throw the sandbox away: about 10 seconds.", spec: { vcpu: 2, memoryGb: 4, expectedSeconds: 10 } },
   {
     id: "session",
-    title: "Agent sessions",
+    title: "30-minute agent session",
     blurb: "A coding agent working for 30 minutes, mostly waiting on the model.",
     spec: { vcpu: 2, memoryGb: 4, timeoutMinutes: 30, cpuUtilization: 0.1 },
   },
@@ -189,13 +190,20 @@ const data = {
     plan: c.plan ?? null,
     noBenchmarks: c.noBenchmarks ?? null,
     planLabel: c.local ? "none" : planLabel(c.id),
-    defaultSize: c.defaultSize ? { vcpu: c.defaultSize.vcpu, memoryGb: c.defaultSize.memoryGb } : null,
+    // The default image's size and its list price at that size.
+    defaultSize: c.defaultSize ? { vcpu: c.defaultSize.vcpu, memoryGb: c.defaultSize.memoryGb, usd: round4(hourlyCost(c.id)) } : null,
     check: conformance.get(c.id) ?? null,
     live: liveStatus(rows.get(c.id)!),
     billedVsList: BILLED_VS_LIST[c.id] ?? null,
     computers: Object.keys(computerCatalog().find((d) => d.id === c.id)?.os ?? {}),
     prices: Object.fromEntries(
-      SHAPES.map((s) => [`${s.vcpu}x${s.memoryGb}`, { usd: Math.round(hourlyCost(c.id, s) * 10000) / 10000, unfit: unfit(c.id, s) }]),
+      SHAPES.map((s) => {
+        const reason = unfit(c.id, s);
+        // A size above the default image's, within the provider's limits: priced at that size, which needs your own image.
+        if (reason?.startsWith("default image") && c.capabilities.includes("custom-image") && !unfit(c.id, withOwnImages(s)))
+          return [`${s.vcpu}x${s.memoryGb}`, { usd: round4(hourlyCost(c.id, withOwnImages(s))), unfit: null, ownImage: true }];
+        return [`${s.vcpu}x${s.memoryGb}`, { usd: round4(hourlyCost(c.id, s)), unfit: reason }];
+      }),
     ),
   })),
   checkSteps: CHECK_STEPS,
@@ -205,16 +213,17 @@ const data = {
   tasks: {
     kinds: (
       [
-        ["short", "Short job", "One hash, then two concurrent hashes, then a disk write."],
+        // Titles match the job names in the site's provider finder.
+        ["short", "Short CPU job", "One hash, then two concurrent hashes, then a disk write."],
         ["long", "Long job", "The short job 40 times in a row: minutes of steady work."],
-        ["python", "Python", "A Python script, like a code-interpreter call."],
+        ["python", "Quick Python run", "A Python script, like a code-interpreter call."],
         ["download", "Download", "A 53 MB download from nodejs.org."],
-        ["agent", "Agent loop", "10 turns of a 6 s model wait and a short Python tool call: about a minute, mostly idle."],
-        ["repo", "Real repo", "What a coding agent does first: fetch Node and a real TypeScript project, npm ci, typecheck."],
+        ["agent", "Agent session", "10 turns of a 6 s model wait and a short Python tool call: about a minute, mostly idle."],
+        ["repo", "Coding agent on a repo", "What a coding agent does first: fetch Node and a real TypeScript project, npm ci, typecheck."],
       ] as const
     )
       .map(([id, title, blurb]) => {
-        const { version, repeat, phases } = TASKS[id];
+        const { version, repeat, phases, cpuUtilization } = TASKS[id];
         const selected = benchmarkRows((size) => {
           const completed = new Map(taskTable(reports, version, size).map((row) => [row.provider, row]));
           return taskOutcomes(reports, version, size).map((outcome) => ({
@@ -225,6 +234,8 @@ const data = {
         }, (entry) => entry.row !== undefined);
         return {
           id, title, blurb, version, repeat,
+          // The CPU share the hourly column is priced at, when the job is mostly idle.
+          cpuUtilization: cpuUtilization ?? null,
           phases: phases.map((p) => ({ id: p.id, label: p.label })),
           rows: selected.flatMap(({ row }) => row ? [row] : []).sort((a, b) => a.taskUsd - b.taskUsd),
           outcomes: selected.map(({ outcome }) => outcome),
@@ -244,7 +255,10 @@ const data = {
     ] as const;
     return [10, 100].flatMap((n) =>
       jobs
-        .map((j) => ({ id: `${j.job}-${n}`, n, job: j.job, title: j.title, blurb: `${n} sandboxes at once, ${j.blurb}.`, rows: burstTable(bursts, j.task, n).map((r) => (r.usd !== undefined && planOnlyStartFee(r.provider) ? { ...r, usd: Math.max(0, r.usd - planOnlyStartFee(r.provider) * r.ok) } : r)) }))
+        .map((j) => ({ id: `${j.job}-${n}`, n, job: j.job, title: j.title, blurb: `${n} sandboxes at once, ${j.blurb}.`, rows: burstTable(bursts, j.task, n)
+          .map((r) => (r.usd !== undefined && planOnlyStartFee(r.provider) ? { ...r, usd: Math.max(0, r.usd - planOnlyStartFee(r.provider) * r.ok) } : r))
+          // Reports that didn't record a size ran each provider at the size it takes as-is.
+          .map((r) => ({ ...r, size: r.size ?? fittingSpec(r.provider) })) }))
         .filter((k) => k.rows.length),
     );
   })(),
