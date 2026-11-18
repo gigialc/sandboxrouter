@@ -38,12 +38,17 @@ const killGroup = (child: ChildProcess) => {
 
 class FakeE2B {
   state: "running" | "paused" | "killed" = "running";
+  allowPublicTraffic = true;
   constructor(
     readonly sandboxId: string,
     private envs: Record<string, string> = {},
   ) {}
   private live() {
     if (this.state !== "running") throw sdkError("NotFoundError", `sandbox ${this.sandboxId} is ${this.state}`);
+  }
+  async getInfo() {
+    this.live();
+    return { sandboxId: this.sandboxId, network: { allowPublicTraffic: this.allowPublicTraffic } };
   }
   commands = {
     run: async (cmd: string, opts: any = {}) => {
@@ -189,7 +194,7 @@ describe("E2BProvider", () => {
     try {
       const background = await box.start!(cmd, { cwd: root, env: { TEST_VALUE: "ready" } });
       try {
-        expect(box.url!(3000)).toBe(`https://3000-${sandbox.nativeId}.e2b.app`);
+        await expect(box.url!(3000)).resolves.toBe(`https://3000-${sandbox.nativeId}.e2b.app`);
         expect(runs.at(-1)).toEqual({ cmd, opts: { cwd: root, envs: { TEST_VALUE: "ready" }, background: true, timeoutMs: 0 } });
         expect(disconnects).toHaveLength(1);
         await vi.waitFor(() => expect(readFileSync(join(root, "e2b-ready"), "utf8")).toBe("ready"));
@@ -201,6 +206,20 @@ describe("E2BProvider", () => {
       expect(await box.exec("printf alive")).toMatchObject({ stdout: "alive", exitCode: 0 });
     } finally {
       await box.kill();
+    }
+  });
+
+  it("reports when the E2B project requires authenticated preview traffic", async () => {
+    const sandbox = await p().create({ ports: [3000] });
+    try {
+      sandboxes.get(sandbox.nativeId)!.allowPublicTraffic = false;
+      const box = await p().connect(sandbox.nativeId);
+      await expect(box.url!(3000)).rejects.toMatchObject({
+        provider: "e2b", status: 403, message: expect.stringContaining("requires authenticated preview traffic"),
+      });
+      await expect(box.exec("printf alive")).resolves.toMatchObject({ stdout: "alive" });
+    } finally {
+      await sandbox.kill();
     }
   });
 

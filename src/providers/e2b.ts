@@ -202,6 +202,7 @@ export class E2BBox extends E2BCompatBox {
 /** E2B-style SDK with browser hosts and detached, killable command handles. */
 export interface E2BPreviewSandbox extends E2BLikeSandbox {
   getHost(port: number): string;
+  getInfo?(): Promise<{ sandboxId?: string; network?: { allowPublicTraffic?: boolean | null } | null }>;
   commands: {
     run(
       cmd: string,
@@ -215,8 +216,11 @@ export class E2BNativeBox extends E2BBox {
     super(sandbox, provider);
   }
 
-  url(port: number): string {
-    // E2B's public ingress is sandbox-wide. Resolving a host does not change its network policy.
+  async url(port: number): Promise<string> {
+    const info = await this.sandbox.getInfo?.();
+    if (info?.network?.allowPublicTraffic === false) {
+      throw new ProviderError(this.provider, "this sandbox requires authenticated preview traffic; use a provider or project with browser-accessible previews", 403);
+    }
     return `https://${this.sandbox.getHost(port)}`;
   }
 

@@ -83,7 +83,7 @@ describe("NovitaProvider", () => {
 
   it("shares the native HTTPS port and detached command path", async () => {
     const box = await new NovitaProvider("sk_test").connect("sbx_nov");
-    expect(box.url!(3000)).toBe("https://3000-sbx_nov.sandbox.novita.ai");
+    await expect(box.url!(3000)).resolves.toBe("https://3000-sbx_nov.sandbox.novita.ai");
     const command = await box.start!("exec sleep 30", { cwd: "/tmp", env: { DEMO: "1" } });
     await command.kill();
     expect(sbx.calls).toEqual([

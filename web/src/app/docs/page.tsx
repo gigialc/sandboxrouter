@@ -15,6 +15,7 @@ const SECTIONS = [
   ["streaming", "Streaming output"],
   ["files", "Files"],
   ["pause", "Pause and resume"],
+  ["ports", "Preview URLs and background commands"],
   ["native", "Using a provider's own features"],
   ["computers", "Desktops and phones"],
   ["server", "HTTP server"],
@@ -284,8 +285,9 @@ await sbx.kill();`}
         />
         <p>
           <code>start</code> returns once the provider starts the command. Wait for the application to listen before sharing
-          its URL. Preview visibility and expiry depend on the provider. Deno opens a public preview on demand. Docker URLs
-          are local to the Docker host.
+          its URL. Preview visibility and expiry depend on the provider. E2B uses the project&apos;s ingress policy and reports
+          when authenticated traffic prevents a browser link. Deno opens a public preview on demand. Docker URLs are local
+          to the Docker host.
         </p>
         <p>
           The process handle stops the command tracked by the provider. Launch the server binary directly with <code>exec</code>.

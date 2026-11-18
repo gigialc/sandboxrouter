@@ -335,7 +335,7 @@ const preview = await sbx.url(3000);
 console.log(preview);
 ```
 
-`start` returns when the provider accepts the command. Wait for your service to listen before sharing the link. Preview visibility and expiry depend on the provider. Deno opens a public URL when you call `url`. A signed link can grant access to the service. Docker publishes its previews on the Docker host's loopback address.
+`start` returns when the provider accepts the command. Wait for your service to listen before sharing the link. Preview visibility and expiry depend on the provider. E2B inherits the project's ingress policy. If the sandbox requires authenticated traffic, `url` reports that a browser link is unavailable. Deno opens a public URL when you call `url`. A signed link can grant access to the service. Docker publishes its previews on the Docker host's loopback address.
 
 Call `await server.kill()` to stop the command and keep using the sandbox. Launch the server binary with `exec` so the handle tracks it. Providers can signal only the tracked process when a command spawns children. Call `await sbx.kill()` to release the sandbox and all its processes.
 
