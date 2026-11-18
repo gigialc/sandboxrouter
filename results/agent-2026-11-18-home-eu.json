@@ -1,0 +1,183 @@
+{
+  "tool": "sandboxrouter-agent",
+  "version": "0.14.1",
+  "date": "2026-11-18T19:18:35.821Z",
+  "label": "home-eu",
+  "task": "gemini-primes-v2",
+  "model": "gemini-3.5-flash",
+  "runs": 5,
+  "node": "v22.22.0",
+  "platform": "darwin-arm64",
+  "rows": [
+    {
+      "provider": "openscale",
+      "runs": 5,
+      "requested": 5,
+      "started": 5,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 1
+      },
+      "ok": 5,
+      "medianWallMs": 14730,
+      "medianModelMs": 13210,
+      "medianCpuMs": 190,
+      "medianTurns": 6,
+      "medianUsd": 0.000062222,
+      "medianTokens": 8247
+    },
+    {
+      "provider": "maritime",
+      "runs": 5,
+      "requested": 5,
+      "started": 5,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "ok": 5,
+      "medianWallMs": 12799,
+      "medianModelMs": 12228,
+      "medianCpuMs": 630,
+      "medianTurns": 6,
+      "medianUsd": 0.000091667,
+      "medianTokens": 8036
+    },
+    {
+      "provider": "agent37",
+      "runs": 5,
+      "requested": 5,
+      "started": 5,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "ok": 5,
+      "medianWallMs": 21948,
+      "medianModelMs": 16684,
+      "medianCpuMs": 230,
+      "medianTurns": 6,
+      "medianUsd": 0.000108458,
+      "medianTokens": 7310
+    },
+    {
+      "provider": "e2b",
+      "runs": 5,
+      "requested": 5,
+      "started": 5,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 0.5
+      },
+      "ok": 5,
+      "medianWallMs": 15525,
+      "medianModelMs": 14126,
+      "medianCpuMs": 260,
+      "medianTurns": 6,
+      "medianUsd": 0.000484,
+      "medianTokens": 7602
+    },
+    {
+      "provider": "modal",
+      "runs": 5,
+      "requested": 5,
+      "started": 5,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "ok": 5,
+      "medianWallMs": 14984,
+      "medianModelMs": 13473,
+      "medianCpuMs": 150,
+      "medianTurns": 7,
+      "medianUsd": 0.000533166,
+      "medianTokens": 9536
+    },
+    {
+      "provider": "agentcore",
+      "runs": 5,
+      "requested": 5,
+      "started": 5,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "ok": 5,
+      "medianWallMs": 28032,
+      "medianModelMs": 13202,
+      "medianCpuMs": 14370,
+      "medianTurns": 5,
+      "medianUsd": 0.000663992,
+      "medianTokens": 6468
+    },
+    {
+      "provider": "freestyle",
+      "runs": 5,
+      "requested": 5,
+      "started": 5,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "ok": 5,
+      "medianWallMs": 16934,
+      "medianModelMs": 14630,
+      "medianCpuMs": 870,
+      "medianTurns": 7,
+      "medianUsd": 0.000742333,
+      "medianTokens": 9295
+    },
+    {
+      "provider": "morph",
+      "runs": 5,
+      "requested": 5,
+      "started": 5,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "ok": 5,
+      "medianWallMs": 34607,
+      "medianModelMs": 22883,
+      "medianCpuMs": 8990,
+      "medianTurns": 13,
+      "medianUsd": 0.001,
+      "medianTokens": 26387
+    },
+    {
+      "provider": "vercel",
+      "runs": 5,
+      "requested": 5,
+      "started": 5,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "ok": 5,
+      "medianWallMs": 17897,
+      "medianModelMs": 15451,
+      "medianCpuMs": 220,
+      "medianTurns": 7,
+      "medianUsd": 0.001422578,
+      "medianTokens": 7950
+    },
+    {
+      "provider": "sail",
+      "runs": 5,
+      "requested": 5,
+      "started": 5,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "ok": 5,
+      "medianWallMs": 14234,
+      "medianModelMs": 11312,
+      "medianCpuMs": 1690,
+      "medianTurns": 6,
+      "medianUsd": 0.010158028,
+      "medianTokens": 8694
+    }
+  ]
+}

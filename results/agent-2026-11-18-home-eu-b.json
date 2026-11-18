@@ -1,0 +1,80 @@
+{
+  "tool": "sandboxrouter-agent",
+  "version": "0.14.1",
+  "date": "2026-11-18T19:24:30.346Z",
+  "label": "home-eu",
+  "task": "gemini-primes-v2",
+  "model": "gemini-3.5-flash",
+  "runs": 5,
+  "node": "v22.22.0",
+  "platform": "darwin-arm64",
+  "rows": [
+    {
+      "provider": "cloudflare",
+      "runs": 5,
+      "requested": 5,
+      "started": 5,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "ok": 5,
+      "medianWallMs": 12813,
+      "medianModelMs": 12330,
+      "medianCpuMs": 300,
+      "medianTurns": 6,
+      "medianUsd": 0.0002864,
+      "medianTokens": 7531
+    },
+    {
+      "provider": "daytona",
+      "runs": 5,
+      "requested": 5,
+      "started": 5,
+      "size": {
+        "vcpu": 1,
+        "memoryGb": 1
+      },
+      "ok": 5,
+      "medianWallMs": 15077,
+      "medianModelMs": 10749,
+      "medianTurns": 5,
+      "medianUsd": 0.000296,
+      "medianTokens": 5469
+    },
+    {
+      "provider": "tensorlake",
+      "runs": 5,
+      "requested": 5,
+      "started": 5,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "ok": 5,
+      "medianWallMs": 12798,
+      "medianModelMs": 11908,
+      "medianCpuMs": 210,
+      "medianTurns": 6,
+      "medianUsd": 0.000365696,
+      "medianTokens": 7865
+    },
+    {
+      "provider": "lambda",
+      "runs": 5,
+      "requested": 5,
+      "started": 5,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "ok": 5,
+      "medianWallMs": 14857,
+      "medianModelMs": 12641,
+      "medianCpuMs": 130,
+      "medianTurns": 7,
+      "medianUsd": 0.001331056,
+      "medianTokens": 8309
+    }
+  ]
+}
