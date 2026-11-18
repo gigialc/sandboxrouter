@@ -269,8 +269,9 @@ const again = await router.get(sbx.id);   // e.g. "e2b:iz5sb5a4bt3pmjx7c5ms2"`}
 
         <h2 id="ports">Preview URLs and background commands</h2>
         <p>
-          Declare the ports you plan to serve when creating the sandbox. Use <code>require</code> to select providers that can
-          return a preview URL and start a background command.
+          Use SDK 0.14.0 or later to declare the ports you plan to serve when creating the sandbox. Use <code>require</code> to
+          select providers that can return a preview URL and start a background command. The HTTP endpoints are available
+          on self-hosted servers using the same SDK version.
         </p>
         <CodeBlock
           code={`const sbx = await router.create({ ports: [3000], timeoutMinutes: 10 }, { require: ["ports", "background"] });
