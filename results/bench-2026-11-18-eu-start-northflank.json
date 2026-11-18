@@ -1,0 +1,31 @@
+{
+  "tool": "sandboxrouter",
+  "version": "0.14.1",
+  "date": "2026-11-18T17:47:38.582Z",
+  "label": "home-eu",
+  "runs": 3,
+  "spec": {
+    "vcpu": 0.2,
+    "memoryGb": 0.5
+  },
+  "node": "v22.22.0",
+  "platform": "darwin-arm64",
+  "rows": [
+    {
+      "provider": "northflank",
+      "runs": 3,
+      "failures": 0,
+      "createFailures": 0,
+      "commandFailures": 0,
+      "cleanupFailures": 3,
+      "size": {
+        "vcpu": 0.2,
+        "memoryGb": 0.5
+      },
+      "medianCreateMs": 6704,
+      "medianExecMs": 356,
+      "medianReadyMs": 7033,
+      "hourlyUsd": 0.0074990000000000005
+    }
+  ]
+}

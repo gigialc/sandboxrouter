@@ -216,7 +216,13 @@ export default function Home() {
                 <p className="text-[12px] uppercase tracking-[0.12em] text-muted">Short job · cheapest first</p>
                 <ResultTable cols={[{ label: "Est. / 1,000 runs" }, { label: "Took", className: "hidden sm:table-cell" }]}>
                   {shortRows.map((r, k) => (
-                    <ResultRow key={r.provider} rank={k + 1} id={r.provider} name={r.name.replace(/ \(.*\)$/, "")}>
+                    <ResultRow
+                      key={r.provider}
+                      rank={k + 1}
+                      id={r.provider}
+                      name={r.name.replace(/ \(.*\)$/, "")}
+                      notes={r.size.vcpu !== 2 || r.size.memoryGb !== 4 ? [`${r.size.vcpu} vCPU / ${r.size.memoryGb} GB`] : undefined}
+                    >
                       <BarNum value={r.taskUsd} max={barMax(shortRows.map((x) => x.taskUsd))}>
                         {money(r.taskUsd * 1000)}
                       </BarNum>

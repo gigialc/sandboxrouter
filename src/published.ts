@@ -5,7 +5,7 @@ import type { PublishedData } from "./recommend.js";
 
 export const PUBLISHED: PublishedData = {
   "schema": 1,
-  "dataThrough": "2026-11-18T00:06:52.487Z",
+  "dataThrough": "2026-11-18T17:53:44.923Z",
   "conditionalStartFees": {
     "boat": {
       "minUsd": 0.03,
@@ -16,14 +16,35 @@ export const PUBLISHED: PublishedData = {
   "start": {
     "superserve": {
       "name": "Superserve",
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
       "medianCreateMs": 138,
       "successRate": 1,
       "runs": 100,
       "hourlyUsd": 0.1656,
       "measuredAt": "2026-11-17T16:19:15.367Z"
     },
+    "beam": {
+      "name": "Beam",
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "medianCreateMs": 282,
+      "medianReadyMs": 792,
+      "successRate": 1,
+      "runs": 3,
+      "hourlyUsd": 0.14,
+      "measuredAt": "2026-11-18T17:49:19.514Z"
+    },
     "novita": {
       "name": "Novita AI Agent Sandbox",
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
       "medianCreateMs": 298,
       "successRate": 1,
       "runs": 100,
@@ -32,6 +53,10 @@ export const PUBLISHED: PublishedData = {
     },
     "sprites": {
       "name": "Fly.io Sprites",
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
       "medianCreateMs": 304,
       "successRate": 1,
       "runs": 5,
@@ -40,6 +65,10 @@ export const PUBLISHED: PublishedData = {
     },
     "e2b": {
       "name": "E2B",
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 0.5
+      },
       "medianCreateMs": 326,
       "successRate": 1,
       "runs": 105,
@@ -48,6 +77,10 @@ export const PUBLISHED: PublishedData = {
     },
     "openscale": {
       "name": "OpenScale Sandboxes",
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 1
+      },
       "medianCreateMs": 353,
       "successRate": 1,
       "runs": 105,
@@ -56,6 +89,10 @@ export const PUBLISHED: PublishedData = {
     },
     "vercel": {
       "name": "Vercel Sandbox",
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
       "medianCreateMs": 364,
       "successRate": 1,
       "runs": 100,
@@ -64,6 +101,10 @@ export const PUBLISHED: PublishedData = {
     },
     "daytona": {
       "name": "Daytona",
+      "size": {
+        "vcpu": 1,
+        "memoryGb": 1
+      },
       "medianCreateMs": 369,
       "successRate": 1,
       "runs": 105,
@@ -72,6 +113,10 @@ export const PUBLISHED: PublishedData = {
     },
     "cloudflare": {
       "name": "Cloudflare Sandbox",
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
       "medianCreateMs": 417,
       "successRate": 1,
       "runs": 100,
@@ -80,6 +125,10 @@ export const PUBLISHED: PublishedData = {
     },
     "modal": {
       "name": "Modal",
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
       "medianCreateMs": 470,
       "successRate": 1,
       "runs": 100,
@@ -88,6 +137,10 @@ export const PUBLISHED: PublishedData = {
     },
     "agent37": {
       "name": "Agent37",
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
       "medianCreateMs": 799,
       "successRate": 1,
       "runs": 100,
@@ -96,6 +149,10 @@ export const PUBLISHED: PublishedData = {
     },
     "agentcore": {
       "name": "Amazon Bedrock AgentCore Code Interpreter",
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
       "medianCreateMs": 836,
       "successRate": 1,
       "runs": 100,
@@ -104,14 +161,35 @@ export const PUBLISHED: PublishedData = {
     },
     "maritime": {
       "name": "Maritime",
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
       "medianCreateMs": 1069,
       "successRate": 1,
       "runs": 105,
       "hourlyUsd": 0.022,
       "measuredAt": "2026-11-17T16:19:15.367Z"
     },
+    "morph": {
+      "name": "Morph Cloud",
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "medianCreateMs": 1470,
+      "medianReadyMs": 1992,
+      "successRate": 1,
+      "runs": 3,
+      "hourlyUsd": 0.1,
+      "measuredAt": "2026-11-18T17:44:07.988Z"
+    },
     "boat": {
       "name": "Boat",
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
       "medianCreateMs": 1512,
       "successRate": 1,
       "runs": 5,
@@ -120,6 +198,10 @@ export const PUBLISHED: PublishedData = {
     },
     "tensorlake": {
       "name": "Tensorlake",
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
       "medianCreateMs": 1614,
       "successRate": 1,
       "runs": 100,
@@ -128,14 +210,35 @@ export const PUBLISHED: PublishedData = {
     },
     "freestyle": {
       "name": "Freestyle",
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
       "medianCreateMs": 1946,
       "successRate": 1,
       "runs": 100,
       "hourlyUsd": 0.13362,
       "measuredAt": "2026-11-17T16:19:15.367Z"
     },
+    "google": {
+      "name": "Google Cloud Agent Platform",
+      "size": {
+        "vcpu": 1,
+        "memoryGb": 2
+      },
+      "medianCreateMs": 2456,
+      "medianReadyMs": 2678,
+      "successRate": 1,
+      "runs": 3,
+      "hourlyUsd": 0.10300000000000001,
+      "measuredAt": "2026-11-18T17:53:44.923Z"
+    },
     "sail": {
       "name": "Sailboxes (Sail Research)",
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
       "medianCreateMs": 2543,
       "successRate": 1,
       "runs": 100,
@@ -144,17 +247,38 @@ export const PUBLISHED: PublishedData = {
     },
     "lambda": {
       "name": "AWS Lambda MicroVMs",
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
       "medianCreateMs": 3235,
       "successRate": 1,
       "runs": 90,
       "hourlyUsd": 0.25220016,
       "measuredAt": "2026-11-17T16:19:15.367Z"
+    },
+    "northflank": {
+      "name": "Northflank",
+      "size": {
+        "vcpu": 0.2,
+        "memoryGb": 0.5
+      },
+      "medianCreateMs": 7789,
+      "medianReadyMs": 8191,
+      "successRate": 1,
+      "runs": 3,
+      "hourlyUsd": 0.0074990000000000005,
+      "measuredAt": "2026-11-18T17:51:44.834Z"
     }
   },
   "jobs": {
     "short": {
       "boat": {
         "name": "Boat",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
         "createMs": 1759,
         "taskMs": 987,
         "taskUsd": 0.000014999999999999999,
@@ -167,6 +291,10 @@ export const PUBLISHED: PublishedData = {
       },
       "openscale": {
         "name": "OpenScale Sandboxes",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 1
+        },
         "createMs": 1254,
         "taskMs": 3641,
         "taskUsd": 0.000019444444444444442,
@@ -179,6 +307,10 @@ export const PUBLISHED: PublishedData = {
       },
       "maritime": {
         "name": "Maritime",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
         "createMs": 1371,
         "taskMs": 2093,
         "taskUsd": 0.00002444444444444444,
@@ -191,6 +323,10 @@ export const PUBLISHED: PublishedData = {
       },
       "daytona": {
         "name": "Daytona",
+        "size": {
+          "vcpu": 1,
+          "memoryGb": 1
+        },
         "createMs": 785,
         "taskMs": 1717,
         "taskUsd": 0.000055499999999999994,
@@ -201,8 +337,28 @@ export const PUBLISHED: PublishedData = {
         "limited": 0,
         "measuredAt": "2026-11-17T23:40:37.832Z"
       },
+      "northflank": {
+        "name": "Northflank",
+        "size": {
+          "vcpu": 0.2,
+          "memoryGb": 0.5
+        },
+        "createMs": 8191,
+        "taskMs": 26695,
+        "taskUsd": 0.00007290694444444444,
+        "reusedUsd": 0.00005560716805555556,
+        "successRate": 1,
+        "runs": 3,
+        "ok": 3,
+        "limited": 0,
+        "measuredAt": "2026-11-18T17:51:44.834Z"
+      },
       "tensorlake": {
         "name": "Tensorlake",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
         "createMs": 1870,
         "taskMs": 961,
         "taskUsd": 0.00007488888888888889,
@@ -215,6 +371,10 @@ export const PUBLISHED: PublishedData = {
       },
       "cloudflare": {
         "name": "Cloudflare Sandbox",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
         "createMs": 799,
         "taskMs": 1583,
         "taskUsd": 0.00010699999999999999,
@@ -227,6 +387,10 @@ export const PUBLISHED: PublishedData = {
       },
       "agent37": {
         "name": "Agent37",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
         "createMs": 1747,
         "taskMs": 8980,
         "taskUsd": 0.00010845844748858446,
@@ -240,6 +404,10 @@ export const PUBLISHED: PublishedData = {
       },
       "novita": {
         "name": "Novita AI Agent Sandbox",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
         "createMs": 1279,
         "taskMs": 2166,
         "taskUsd": 0.0001296,
@@ -252,6 +420,10 @@ export const PUBLISHED: PublishedData = {
       },
       "modal": {
         "name": "Modal",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
         "createMs": 1514,
         "taskMs": 427,
         "taskUsd": 0.00013220000000000001,
@@ -264,6 +436,10 @@ export const PUBLISHED: PublishedData = {
       },
       "freestyle": {
         "name": "Freestyle",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
         "createMs": 1713,
         "taskMs": 1782,
         "taskUsd": 0.00014846666666666665,
@@ -276,6 +452,10 @@ export const PUBLISHED: PublishedData = {
       },
       "e2b": {
         "name": "E2B",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 0.5
+        },
         "createMs": 820,
         "taskMs": 3880,
         "taskUsd": 0.00015125,
@@ -288,6 +468,10 @@ export const PUBLISHED: PublishedData = {
       },
       "agentcore": {
         "name": "Amazon Bedrock AgentCore Code Interpreter",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
         "createMs": 1241,
         "taskMs": 2864,
         "taskUsd": 0.00015244166666666663,
@@ -298,8 +482,60 @@ export const PUBLISHED: PublishedData = {
         "limited": 0,
         "measuredAt": "2026-11-17T23:36:05.829Z"
       },
+      "beam": {
+        "name": "Beam",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
+        "createMs": 727,
+        "taskMs": 3676,
+        "taskUsd": 0.00019444444444444446,
+        "reusedUsd": 0.00014295555555555558,
+        "successRate": 1,
+        "runs": 3,
+        "ok": 3,
+        "limited": 0,
+        "measuredAt": "2026-11-18T17:44:19.747Z"
+      },
+      "google": {
+        "name": "Google Cloud Agent Platform",
+        "size": {
+          "vcpu": 1,
+          "memoryGb": 2
+        },
+        "createMs": 2394,
+        "taskMs": 7298,
+        "taskUsd": 0.0002861111111111111,
+        "reusedUsd": 0.0002088038888888889,
+        "successRate": 1,
+        "runs": 3,
+        "ok": 3,
+        "limited": 0,
+        "measuredAt": "2026-11-18T17:49:01.865Z"
+      },
+      "morph": {
+        "name": "Morph Cloud",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
+        "createMs": 1992,
+        "taskMs": 8131,
+        "taskUsd": 0.0003055555555555556,
+        "reusedUsd": 0.00022586111111111111,
+        "successRate": 1,
+        "runs": 3,
+        "ok": 3,
+        "limited": 0,
+        "measuredAt": "2026-11-18T17:44:07.988Z"
+      },
       "lambda": {
         "name": "AWS Lambda MicroVMs",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
         "createMs": 3859,
         "taskMs": 3792,
         "taskUsd": 0.0005604448000000001,
@@ -312,6 +548,10 @@ export const PUBLISHED: PublishedData = {
       },
       "vercel": {
         "name": "Vercel Sandbox",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
         "createMs": 997,
         "taskMs": 3822,
         "taskUsd": 0.0016643555555555553,
@@ -325,6 +565,10 @@ export const PUBLISHED: PublishedData = {
       },
       "sail": {
         "name": "Sailboxes (Sail Research)",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
         "createMs": 2891,
         "taskMs": 6495,
         "taskUsd": 0.01011963888888889,
@@ -340,6 +584,10 @@ export const PUBLISHED: PublishedData = {
     "long": {
       "agent37": {
         "name": "Agent37",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
         "createMs": 1523,
         "taskMs": 170531,
         "taskUsd": 0.0003253753424657534,
@@ -353,6 +601,10 @@ export const PUBLISHED: PublishedData = {
       },
       "openscale": {
         "name": "OpenScale Sandboxes",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 1
+        },
         "createMs": 1453,
         "taskMs": 103079,
         "taskUsd": 0.00040833333333333325,
@@ -365,6 +617,10 @@ export const PUBLISHED: PublishedData = {
       },
       "maritime": {
         "name": "Maritime",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
         "createMs": 1587,
         "taskMs": 74352,
         "taskUsd": 0.0004644444444444444,
@@ -377,6 +633,10 @@ export const PUBLISHED: PublishedData = {
       },
       "tensorlake": {
         "name": "Tensorlake",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
         "createMs": 2081,
         "taskMs": 29445,
         "taskUsd": 0.0013914166666666667,
@@ -389,6 +649,10 @@ export const PUBLISHED: PublishedData = {
       },
       "daytona": {
         "name": "Daytona",
+        "size": {
+          "vcpu": 1,
+          "memoryGb": 1
+        },
         "createMs": 827,
         "taskMs": 74989,
         "taskUsd": 0.001406,
@@ -401,6 +665,10 @@ export const PUBLISHED: PublishedData = {
       },
       "freestyle": {
         "name": "Freestyle",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
         "createMs": 1732,
         "taskMs": 63537,
         "taskUsd": 0.0024496999999999995,
@@ -413,6 +681,10 @@ export const PUBLISHED: PublishedData = {
       },
       "cloudflare": {
         "name": "Cloudflare Sandbox",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
         "createMs": 794,
         "taskMs": 56430,
         "taskUsd": 0.0029064,
@@ -425,6 +697,10 @@ export const PUBLISHED: PublishedData = {
       },
       "modal": {
         "name": "Modal",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
         "createMs": 1169,
         "taskMs": 51095,
         "taskUsd": 0.0035033000000000004,
@@ -437,6 +713,10 @@ export const PUBLISHED: PublishedData = {
       },
       "e2b": {
         "name": "E2B",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 0.5
+        },
         "createMs": 415,
         "taskMs": 127979,
         "taskUsd": 0.00390225,
@@ -449,6 +729,10 @@ export const PUBLISHED: PublishedData = {
       },
       "vercel": {
         "name": "Vercel Sandbox",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
         "createMs": 917,
         "taskMs": 180649,
         "taskUsd": 0.013856533333333332,
@@ -464,6 +748,10 @@ export const PUBLISHED: PublishedData = {
     "python": {
       "openscale": {
         "name": "OpenScale Sandboxes",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 1
+        },
         "createMs": 1244,
         "taskMs": 2226,
         "taskUsd": 0.000015555555555555555,
@@ -476,6 +764,10 @@ export const PUBLISHED: PublishedData = {
       },
       "maritime": {
         "name": "Maritime",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
         "createMs": 1341,
         "taskMs": 1887,
         "taskUsd": 0.00002444444444444444,
@@ -488,6 +780,10 @@ export const PUBLISHED: PublishedData = {
       },
       "daytona": {
         "name": "Daytona",
+        "size": {
+          "vcpu": 1,
+          "memoryGb": 1
+        },
         "createMs": 1057,
         "taskMs": 1535,
         "taskUsd": 0.000055499999999999994,
@@ -500,6 +796,10 @@ export const PUBLISHED: PublishedData = {
       },
       "agentcore": {
         "name": "Amazon Bedrock AgentCore Code Interpreter",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
         "createMs": 1119,
         "taskMs": 1886,
         "taskUsd": 0.00009023055555555555,
@@ -512,6 +812,10 @@ export const PUBLISHED: PublishedData = {
       },
       "cloudflare": {
         "name": "Cloudflare Sandbox",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
         "createMs": 757,
         "taskMs": 1726,
         "taskUsd": 0.00009379999999999998,
@@ -524,6 +828,10 @@ export const PUBLISHED: PublishedData = {
       },
       "novita": {
         "name": "Novita AI Agent Sandbox",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
         "createMs": 1207,
         "taskMs": 1275,
         "taskUsd": 0.0000972,
@@ -536,6 +844,10 @@ export const PUBLISHED: PublishedData = {
       },
       "tensorlake": {
         "name": "Tensorlake",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
         "createMs": 1887,
         "taskMs": 1643,
         "taskUsd": 0.00009816666666666666,
@@ -548,6 +860,10 @@ export const PUBLISHED: PublishedData = {
       },
       "agent37": {
         "name": "Agent37",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
         "createMs": 1399,
         "taskMs": 2988,
         "taskUsd": 0.00010845844748858446,
@@ -559,8 +875,28 @@ export const PUBLISHED: PublishedData = {
         "minimumSeconds": 60,
         "measuredAt": "2026-11-17T23:41:06.827Z"
       },
+      "beam": {
+        "name": "Beam",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
+        "createMs": 850,
+        "taskMs": 1731,
+        "taskUsd": 0.00011666666666666668,
+        "reusedUsd": 0.00006731666666666667,
+        "successRate": 1,
+        "runs": 3,
+        "ok": 3,
+        "limited": 0,
+        "measuredAt": "2026-11-18T17:44:32.822Z"
+      },
       "e2b": {
         "name": "E2B",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 0.5
+        },
         "createMs": 831,
         "taskMs": 2237,
         "taskUsd": 0.000121,
@@ -571,8 +907,28 @@ export const PUBLISHED: PublishedData = {
         "limited": 0,
         "measuredAt": "2026-11-17T23:36:51.852Z"
       },
+      "google": {
+        "name": "Google Cloud Agent Platform",
+        "size": {
+          "vcpu": 1,
+          "memoryGb": 2
+        },
+        "createMs": 2346,
+        "taskMs": 1683,
+        "taskUsd": 0.00014305555555555556,
+        "reusedUsd": 0.00004815250000000001,
+        "successRate": 1,
+        "runs": 3,
+        "ok": 3,
+        "limited": 0,
+        "measuredAt": "2026-11-18T17:49:17.541Z"
+      },
       "freestyle": {
         "name": "Freestyle",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
         "createMs": 1311,
         "taskMs": 1992,
         "taskUsd": 0.00014846666666666665,
@@ -585,6 +941,10 @@ export const PUBLISHED: PublishedData = {
       },
       "modal": {
         "name": "Modal",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
         "createMs": 1178,
         "taskMs": 1786,
         "taskUsd": 0.00019830000000000002,
@@ -597,6 +957,10 @@ export const PUBLISHED: PublishedData = {
       },
       "lambda": {
         "name": "AWS Lambda MicroVMs",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
         "createMs": 2967,
         "taskMs": 2685,
         "taskUsd": 0.0004203336,
@@ -609,6 +973,10 @@ export const PUBLISHED: PublishedData = {
       },
       "vercel": {
         "name": "Vercel Sandbox",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
         "createMs": 640,
         "taskMs": 3277,
         "taskUsd": 0.0016394666666666663,
@@ -622,6 +990,10 @@ export const PUBLISHED: PublishedData = {
       },
       "sail": {
         "name": "Sailboxes (Sail Research)",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
         "createMs": 2897,
         "taskMs": 2343,
         "taskUsd": 0.010063916666666667,
@@ -637,6 +1009,10 @@ export const PUBLISHED: PublishedData = {
     "download": {
       "openscale": {
         "name": "OpenScale Sandboxes",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 1
+        },
         "createMs": 1402,
         "taskMs": 445,
         "taskUsd": 0.000007777777777777777,
@@ -649,6 +1025,10 @@ export const PUBLISHED: PublishedData = {
       },
       "maritime": {
         "name": "Maritime",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
         "createMs": 1282,
         "taskMs": 676,
         "taskUsd": 0.00001222222222222222,
@@ -661,6 +1041,10 @@ export const PUBLISHED: PublishedData = {
       },
       "cloudflare": {
         "name": "Cloudflare Sandbox",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
         "createMs": 568,
         "taskMs": 425,
         "taskUsd": 0.000023199999999999995,
@@ -673,6 +1057,10 @@ export const PUBLISHED: PublishedData = {
       },
       "e2b": {
         "name": "E2B",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 0.5
+        },
         "createMs": 518,
         "taskMs": 480,
         "taskUsd": 0.00003025,
@@ -685,6 +1073,10 @@ export const PUBLISHED: PublishedData = {
       },
       "daytona": {
         "name": "Daytona",
+        "size": {
+          "vcpu": 1,
+          "memoryGb": 1
+        },
         "createMs": 972,
         "taskMs": 225,
         "taskUsd": 0.000037,
@@ -697,6 +1089,10 @@ export const PUBLISHED: PublishedData = {
       },
       "tensorlake": {
         "name": "Tensorlake",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
         "createMs": 1811,
         "taskMs": 286,
         "taskUsd": 0.00006631,
@@ -707,8 +1103,28 @@ export const PUBLISHED: PublishedData = {
         "limited": 0,
         "measuredAt": "2026-11-17T23:37:36.070Z"
       },
+      "beam": {
+        "name": "Beam",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
+        "createMs": 702,
+        "taskMs": 414,
+        "taskUsd": 0.00007777777777777778,
+        "reusedUsd": 0.000016100000000000002,
+        "successRate": 1,
+        "runs": 3,
+        "ok": 3,
+        "limited": 0,
+        "measuredAt": "2026-11-18T17:44:41.265Z"
+      },
       "novita": {
         "name": "Novita AI Agent Sandbox",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
         "createMs": 1307,
         "taskMs": 751,
         "taskUsd": 0.0000972,
@@ -721,6 +1137,10 @@ export const PUBLISHED: PublishedData = {
       },
       "agent37": {
         "name": "Agent37",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
         "createMs": 1550,
         "taskMs": 338,
         "taskUsd": 0.00010845844748858446,
@@ -734,6 +1154,10 @@ export const PUBLISHED: PublishedData = {
       },
       "freestyle": {
         "name": "Freestyle",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
         "createMs": 1077,
         "taskMs": 1341,
         "taskUsd": 0.00011135,
@@ -746,6 +1170,10 @@ export const PUBLISHED: PublishedData = {
       },
       "modal": {
         "name": "Modal",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
         "createMs": 1166,
         "taskMs": 402,
         "taskUsd": 0.00013220000000000001,
@@ -758,6 +1186,10 @@ export const PUBLISHED: PublishedData = {
       },
       "lambda": {
         "name": "AWS Lambda MicroVMs",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
         "createMs": 4030,
         "taskMs": 4438,
         "taskUsd": 0.0006305004,
@@ -770,6 +1202,10 @@ export const PUBLISHED: PublishedData = {
       },
       "vercel": {
         "name": "Vercel Sandbox",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
         "createMs": 641,
         "taskMs": 245,
         "taskUsd": 0.001419733333333333,
@@ -783,6 +1219,10 @@ export const PUBLISHED: PublishedData = {
       },
       "sail": {
         "name": "Sailboxes (Sail Research)",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
         "createMs": 2862,
         "taskMs": 1405,
         "taskUsd": 0.010045486111111111,
@@ -798,6 +1238,10 @@ export const PUBLISHED: PublishedData = {
     "agent": {
       "agent37": {
         "name": "Agent37",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
         "createMs": 1442,
         "taskMs": 60878,
         "taskUsd": 0.00021691689497716892,
@@ -811,6 +1255,10 @@ export const PUBLISHED: PublishedData = {
       },
       "openscale": {
         "name": "OpenScale Sandboxes",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 1
+        },
         "createMs": 1308,
         "taskMs": 61649,
         "taskUsd": 0.000245,
@@ -823,6 +1271,10 @@ export const PUBLISHED: PublishedData = {
       },
       "maritime": {
         "name": "Maritime",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
         "createMs": 1389,
         "taskMs": 61170,
         "taskUsd": 0.000385,
@@ -835,6 +1287,10 @@ export const PUBLISHED: PublishedData = {
       },
       "agentcore": {
         "name": "Amazon Bedrock AgentCore Code Interpreter",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
         "createMs": 1087,
         "taskMs": 60649,
         "taskUsd": 0.0006798388888888888,
@@ -847,6 +1303,10 @@ export const PUBLISHED: PublishedData = {
       },
       "daytona": {
         "name": "Daytona",
+        "size": {
+          "vcpu": 1,
+          "memoryGb": 1
+        },
         "createMs": 1030,
         "taskMs": 60821,
         "taskUsd": 0.0011469999999999998,
@@ -859,6 +1319,10 @@ export const PUBLISHED: PublishedData = {
       },
       "cloudflare": {
         "name": "Cloudflare Sandbox",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
         "createMs": 703,
         "taskMs": 60821,
         "taskUsd": 0.0012613999999999998,
@@ -871,6 +1335,10 @@ export const PUBLISHED: PublishedData = {
       },
       "vercel": {
         "name": "Vercel Sandbox",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
         "createMs": 984,
         "taskMs": 61145,
         "taskUsd": 0.0015586666666666665,
@@ -882,8 +1350,28 @@ export const PUBLISHED: PublishedData = {
         "minimumSeconds": 60,
         "measuredAt": "2026-11-17T23:44:45.227Z"
       },
+      "google": {
+        "name": "Google Cloud Agent Platform",
+        "size": {
+          "vcpu": 1,
+          "memoryGb": 2
+        },
+        "createMs": 2678,
+        "taskMs": 61085,
+        "taskUsd": 0.0018311111111111113,
+        "reusedUsd": 0.0017477097222222222,
+        "successRate": 1,
+        "runs": 3,
+        "ok": 3,
+        "limited": 0,
+        "measuredAt": "2026-11-18T17:53:44.923Z"
+      },
       "e2b": {
         "name": "E2B",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 0.5
+        },
         "createMs": 547,
         "taskMs": 61238,
         "taskUsd": 0.0018754999999999998,
@@ -896,6 +1384,10 @@ export const PUBLISHED: PublishedData = {
       },
       "novita": {
         "name": "Novita AI Agent Sandbox",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
         "createMs": 1196,
         "taskMs": 60777,
         "taskUsd": 0.0020088,
@@ -908,6 +1400,10 @@ export const PUBLISHED: PublishedData = {
       },
       "freestyle": {
         "name": "Freestyle",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
         "createMs": 1080,
         "taskMs": 61466,
         "taskUsd": 0.0023383499999999995,
@@ -918,8 +1414,28 @@ export const PUBLISHED: PublishedData = {
         "limited": 0,
         "measuredAt": "2026-11-17T23:47:54.312Z"
       },
+      "beam": {
+        "name": "Beam",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
+        "createMs": 1122,
+        "taskMs": 61068,
+        "taskUsd": 0.00245,
+        "reusedUsd": 0.002374866666666667,
+        "successRate": 1,
+        "runs": 3,
+        "ok": 3,
+        "limited": 0,
+        "measuredAt": "2026-11-18T17:47:54.680Z"
+      },
       "lambda": {
         "name": "AWS Lambda MicroVMs",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
         "createMs": 3808,
         "taskMs": 62745,
         "taskUsd": 0.0046937252,
@@ -932,6 +1448,10 @@ export const PUBLISHED: PublishedData = {
       },
       "sail": {
         "name": "Sailboxes (Sail Research)",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
         "createMs": 2294,
         "taskMs": 61613,
         "taskUsd": 0.010590847222222222,
@@ -947,6 +1467,10 @@ export const PUBLISHED: PublishedData = {
     "repo": {
       "openscale": {
         "name": "OpenScale Sandboxes",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 1
+        },
         "createMs": 1435,
         "taskMs": 21828,
         "taskUsd": 0.00009333333333333333,
@@ -959,6 +1483,10 @@ export const PUBLISHED: PublishedData = {
       },
       "agent37": {
         "name": "Agent37",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
         "createMs": 1453,
         "taskMs": 23285,
         "taskUsd": 0.00010845844748858446,
@@ -972,6 +1500,10 @@ export const PUBLISHED: PublishedData = {
       },
       "maritime": {
         "name": "Maritime",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
         "createMs": 1297,
         "taskMs": 27946,
         "taskUsd": 0.0001833333333333333,
@@ -984,6 +1516,10 @@ export const PUBLISHED: PublishedData = {
       },
       "daytona": {
         "name": "Daytona",
+        "size": {
+          "vcpu": 1,
+          "memoryGb": 1
+        },
         "createMs": 585,
         "taskMs": 37992,
         "taskUsd": 0.0007214999999999998,
@@ -996,6 +1532,10 @@ export const PUBLISHED: PublishedData = {
       },
       "novita": {
         "name": "Novita AI Agent Sandbox",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
         "createMs": 1216,
         "taskMs": 22053,
         "taskUsd": 0.0007776,
@@ -1008,6 +1548,10 @@ export const PUBLISHED: PublishedData = {
       },
       "cloudflare": {
         "name": "Cloudflare Sandbox",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
         "createMs": 703,
         "taskMs": 20289,
         "taskUsd": 0.0009559999999999998,
@@ -1020,6 +1564,10 @@ export const PUBLISHED: PublishedData = {
       },
       "e2b": {
         "name": "E2B",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 0.5
+        },
         "createMs": 919,
         "taskMs": 32038,
         "taskUsd": 0.00099825,
@@ -1030,8 +1578,28 @@ export const PUBLISHED: PublishedData = {
         "limited": 0,
         "measuredAt": "2026-11-17T23:47:40.891Z"
       },
+      "beam": {
+        "name": "Beam",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
+        "createMs": 792,
+        "taskMs": 24821,
+        "taskUsd": 0.0010111111111111113,
+        "reusedUsd": 0.0009652611111111112,
+        "successRate": 1,
+        "runs": 3,
+        "ok": 3,
+        "limited": 0,
+        "measuredAt": "2026-11-18T17:49:19.514Z"
+      },
       "freestyle": {
         "name": "Freestyle",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
         "createMs": 1048,
         "taskMs": 34319,
         "taskUsd": 0.0013362,
@@ -1044,6 +1612,10 @@ export const PUBLISHED: PublishedData = {
       },
       "vercel": {
         "name": "Vercel Sandbox",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
         "createMs": 990,
         "taskMs": 19088,
         "taskUsd": 0.0024131555555555557,
@@ -1057,6 +1629,10 @@ export const PUBLISHED: PublishedData = {
       },
       "lambda": {
         "name": "AWS Lambda MicroVMs",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
         "createMs": 2974,
         "taskMs": 52252,
         "taskUsd": 0.0039231136,
@@ -1069,6 +1645,10 @@ export const PUBLISHED: PublishedData = {
       },
       "sail": {
         "name": "Sailboxes (Sail Research)",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
         "createMs": 2471,
         "taskMs": 22122,
         "taskUsd": 0.010336597222222223,

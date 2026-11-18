@@ -1,0 +1,41 @@
+{
+  "tool": "sandboxrouter",
+  "version": "0.14.1",
+  "date": "2026-11-18T17:47:54.680Z",
+  "label": "home-eu",
+  "by": "gigialc",
+  "runs": 3,
+  "spec": {
+    "vcpu": 2,
+    "memoryGb": 4
+  },
+  "task": "agent-v2",
+  "node": "v22.22.0",
+  "platform": "darwin-arm64",
+  "rows": [
+    {
+      "provider": "beam",
+      "runs": 3,
+      "failures": 0,
+      "createFailures": 0,
+      "commandFailures": 0,
+      "cleanupFailures": 0,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "medianCreateMs": 338,
+      "medianExecMs": 563,
+      "medianReadyMs": 1122,
+      "hourlyUsd": 0.14,
+      "taskOk": 3,
+      "medianTaskReadyMs": 1122,
+      "medianTaskMs": 61068,
+      "taskPhasesMs": {
+        "agent": 61068
+      },
+      "medianTaskCpuMs": 2200,
+      "medianTaskMaxCoreMs": 310
+    }
+  ]
+}
