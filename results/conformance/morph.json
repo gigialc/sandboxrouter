@@ -1,0 +1,85 @@
+{
+  "tool": "sandboxrouter-check",
+  "version": "0.14.0",
+  "date": "2026-11-18T16:08:07.955Z",
+  "platform": "darwin-arm64",
+  "by": "gigialc",
+  "provider": "morph",
+  "sandboxId": "morph:morphvm_1ossf3bs",
+  "results": [
+    {
+      "step": "create",
+      "ms": 1705,
+      "status": "pass",
+      "detail": "morph:morphvm_1ossf3bs, ~$0.1/hr"
+    },
+    {
+      "step": "exec: stdout, stderr, exit code",
+      "ms": 818,
+      "status": "pass"
+    },
+    {
+      "step": "exec: env and cwd",
+      "ms": 402,
+      "status": "pass"
+    },
+    {
+      "step": "exec: UTF-8 output",
+      "ms": 351,
+      "status": "pass"
+    },
+    {
+      "step": "exec: streaming",
+      "ms": 3359,
+      "status": "pass",
+      "detail": "first output after 330 ms"
+    },
+    {
+      "step": "files: binary round-trip",
+      "ms": 3301,
+      "status": "pass"
+    },
+    {
+      "step": "files: 1 MB round-trip",
+      "ms": 9423,
+      "status": "pass"
+    },
+    {
+      "step": "files: missing file is an error",
+      "ms": 1350,
+      "status": "pass"
+    },
+    {
+      "step": "files: visible to commands",
+      "ms": 3875,
+      "status": "pass"
+    },
+    {
+      "step": "exec: command timeout",
+      "ms": 3288,
+      "status": "pass",
+      "detail": "threw after 3288 ms"
+    },
+    {
+      "step": "exec: timed-out command was stopped",
+      "ms": 6760,
+      "status": "pass"
+    },
+    {
+      "step": "pause and resume",
+      "ms": 8459,
+      "status": "pass"
+    },
+    {
+      "step": "kill",
+      "ms": 826,
+      "status": "pass"
+    },
+    {
+      "step": "killed sandbox is gone",
+      "ms": 146,
+      "status": "pass"
+    }
+  ],
+  "ok": true
+}

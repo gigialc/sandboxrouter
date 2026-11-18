@@ -10,7 +10,7 @@ import { describeConformance } from "./conformance.js";
  * A stand-in for `morphcloud` with the SDK's surface: `new MorphCloudClient({ apiKey })` with
  * `snapshots.list({ digest })` / `create({ imageId, vcpus, memory, diskSize, digest })` / `get()`
  * and `instances.start({ snapshotId, metadata, ttlSeconds, ttlAction, timeout })` / `get()`.
- * Instances have `status`, `exec(["sh", "-c", script], { timeout, onStdout, onStderr })` (the
+ * Instances have `status`, `exec(script, { timeout, onStdout, onStderr })` (the
  * callbacks stream chunks like the SDK's SSE path; `timeout` abandons the request with the SDK's
  * "Command execution timed out" error), `pause()` / `resume()` / `stop()` / `waitUntilReady()`,
  * and `ssh()` returning a NodeSSH-like `execCommand(cmd, { stdin })` → `{ code, stdout, stderr,
@@ -87,8 +87,8 @@ class FakeInstance {
     this.live();
     execs.push({ command, options });
     if (execError) throw execError;
-    const argv = (Array.isArray(command) ? command : ["sh", "-c", command]).map(vmPath);
-    return run(argv, options);
+    const script = Array.isArray(command) ? command.join(" ") : command;
+    return run(["sh", "-c", vmPath(script)], options);
   }
   async pause() {
     this.live();
@@ -221,7 +221,7 @@ describe("MorphProvider", () => {
     const r = await sbx.exec(cmd, { cwd: root, env: { OVER: "new" } });
     expect(r).toMatchObject({ exitCode: 0, stdout: `b new ${root.split("/").pop()}\n` });
     // The whole line is guarded by coreutils `timeout` (or the sh watchdog) and sources the env file first.
-    expect(execs[0].command).toEqual(["sh", "-c", guardTimeout(`[ -r ${ENV_FILE} ] && . ${ENV_FILE}; ${wrapCommand(cmd, { cwd: root, env: { OVER: "new" } })}`, 60)]);
+    expect(execs[0].command).toBe(guardTimeout(`[ -r ${ENV_FILE} ] && . ${ENV_FILE}; ${wrapCommand(cmd, { cwd: root, env: { OVER: "new" } })}`, 60));
     expect(execs[0].options).toEqual({ timeout: 75, onStdout: undefined, onStderr: undefined });
   });
 

@@ -112,8 +112,9 @@ class MorphBox implements ProviderSandbox {
     // and would leave the process running, so it is set past ours as a fallback.
     const script = guardTimeout(`[ -r ${ENV_FILE} ] && . ${ENV_FILE}; ${wrapCommand(cmd, { cwd: opts.cwd, env: opts.env })}`, seconds);
     try {
-      // With callbacks the SDK switches to its SSE endpoint and streams; otherwise one request.
-      const r = await this.inst.exec(["sh", "-c", script], {
+      // Morph joins command array entries into shell text. Pass the complete script so the
+      // timeout guard keeps its quoting on both buffered and streaming requests.
+      const r = await this.inst.exec(script, {
         timeout: seconds + 15,
         onStdout: opts.onStdout,
         onStderr: opts.onStderr,
