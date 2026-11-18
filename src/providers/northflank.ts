@@ -12,6 +12,7 @@ const DEFAULT_IMAGE = "ubuntu:22.04";
 const MIN_EXPIRY_SECONDS = 300;
 const MAX_EXPIRY_SECONDS = 604_800;
 const READY_TIMEOUT_MS = 5 * 60_000;
+const DELETE_TIMEOUT_MS = 60_000;
 
 /**
  * Northflank sandboxes via `@northflank/js-client`. Auth: NORTHFLANK_API_TOKEN plus
@@ -164,7 +165,20 @@ class NorthflankBox implements ProviderSandbox {
   }
 
   async kill(): Promise<void> {
-    await call(() => this.nf.delete.service({ parameters: this.params }));
+    try {
+      await call(() => this.nf.delete.service({ parameters: this.params }));
+      // The delete request acknowledges scheduling. The service can still execute commands
+      // until teardown completes, so keep polling until Northflank reports it gone.
+      const deadline = Date.now() + DELETE_TIMEOUT_MS;
+      for (;;) {
+        await this.info();
+        if (Date.now() >= deadline) throw new ProviderError("northflank", `service ${this.nativeId} did not disappear after deletion`, 504);
+        await sleep(1000);
+      }
+    } catch (err) {
+      if (err instanceof ProviderError && err.status === 404) return;
+      throw err;
+    }
   }
 
   /** One exec session: optional stdin, streamed stdout/stderr, exit code. `expired` is thrown when limitMs passes. */
@@ -203,7 +217,6 @@ class NorthflankBox implements ProviderSandbox {
     let timer: NodeJS.Timeout | undefined;
     const timedOut = new Promise<"timeout">((resolve) => {
       timer = setTimeout(() => resolve("timeout"), limitMs);
-      timer.unref();
     });
     try {
       const res = await Promise.race([session.waitForCommandResult(), failed, timedOut]);
@@ -266,5 +279,6 @@ function plan(vcpu: number, memoryGb: number): string {
 }
 
 function sleep(ms: number) {
-  return new Promise<void>((r) => setTimeout(r, ms).unref());
+  // Keep standalone callers running until the next readiness poll.
+  return new Promise<void>((r) => setTimeout(r, ms));
 }

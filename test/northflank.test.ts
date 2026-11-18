@@ -28,9 +28,10 @@ const contexts: any[] = [];
 const creates: any[] = [];
 const deletes: string[] = [];
 const sessions: { parameters: any; data: any }[] = [];
-const services = new Map<string, { name: string; env?: Record<string, string>; polls: number; expiredAt?: string }>();
+const services = new Map<string, { name: string; env?: Record<string, string>; polls: number; expiredAt?: string; deleting?: boolean }>();
 let startingPolls = 0;
 let failDeploy = false;
+let asyncDeletion = false;
 let createError: { status: number; message: string } | undefined;
 let seq = 0;
 
@@ -98,6 +99,7 @@ vi.mock("@northflank/js-client", () => ({
       service: async ({ parameters }: any) => {
         const svc = services.get(parameters.serviceId);
         if (!svc) return { data: undefined, error: { status: 404, message: "Service not found" } };
+        if (svc.deleting) services.delete(parameters.serviceId);
         const status = ++svc.polls <= startingPolls ? "STARTING" : failDeploy ? "FAILED" : "COMPLETED";
         return { data: { id: parameters.serviceId, name: svc.name, expiredAt: svc.expiredAt, status: { deployment: { status } } } };
       },
@@ -105,7 +107,10 @@ vi.mock("@northflank/js-client", () => ({
     delete = {
       service: async ({ parameters }: any) => {
         deletes.push(parameters.serviceId);
-        if (!services.delete(parameters.serviceId)) return { data: undefined, error: { status: 404, message: "Service not found" } };
+        const svc = services.get(parameters.serviceId);
+        if (!svc) return { data: undefined, error: { status: 404, message: "Service not found" } };
+        if (asyncDeletion) svc.deleting = true;
+        else services.delete(parameters.serviceId);
         return { data: {} };
       },
     };
@@ -128,6 +133,7 @@ beforeEach(() => {
   for (const a of [contexts, creates, deletes, sessions]) a.length = 0;
   startingPolls = 0;
   failDeploy = false;
+  asyncDeletion = false;
   createError = undefined;
 });
 
@@ -220,11 +226,13 @@ describe("NorthflankProvider", () => {
     expect(existsSync(join(root, "deep", "big.bin"))).toBe(true);
   });
 
-  it("kill deletes the service, and no pause is offered", async () => {
+  it("waits for asynchronous service deletion, and no pause is offered", async () => {
+    asyncDeletion = true;
     const sbx = await p().create({});
     expect(sbx.pause).toBeUndefined();
     await sbx.kill();
     expect(deletes).toEqual([sbx.nativeId]);
+    expect(services.has(sbx.nativeId)).toBe(false);
     await expect(sbx.exec("true")).rejects.toMatchObject({ status: 404 });
   });
 });

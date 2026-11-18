@@ -18,6 +18,7 @@ export const VERIFIED: Partial<Record<ProviderId, string>> = {
   maritime: "2026-11-13",
   modal: "2026-11-13",
   morph: "2026-11-18",
+  northflank: "2026-11-18",
   novita: "2026-11-13",
   openscale: "2026-11-13",
   sail: "2026-11-14",
