@@ -301,7 +301,7 @@ It prints one line per step and exits 1 if any fails. `checkProvider(router, id)
 | Maritime | 14/14 passed | 2026-11-13, v0.7.0 |
 | Sailboxes (Sail Research) | 14/14 passed | 2026-11-14, v0.8.0 |
 | Northflank | not run yet | |
-| Morph Cloud | not run yet | |
+| Morph Cloud | 14/14 passed | 2026-11-18, v0.14.0 |
 | exe.dev | not run yet | |
 | Novita AI Agent Sandbox | 14/14 passed | 2026-11-13, v0.7.0 |
 | DigitalOcean Harness Runtime | not run yet | |

@@ -53,7 +53,7 @@ List price while running, 2 vCPU / 4 GB, cheapest first; waitlisted sign-ups fol
 | [Maritime](https://sandboxrouter.ai/providers/maritime) | $0.022 | $20/mo (credited) | passed (2026-11-13) | [pricing](https://maritime.sh/pricing) |
 | [Sailboxes (Sail Research)](https://sandboxrouter.ai/providers/sail) | up to $0.062 | none | passed (2026-11-14) | [pricing](https://docs.sailresearch.com/sailboxes-pricing.md) |
 | [Northflank](https://sandboxrouter.ai/providers/northflank) | $0.067 | none | not run yet | [pricing](https://northflank.com/pricing) |
-| [Morph Cloud](https://sandboxrouter.ai/providers/morph) | $0.100 | none | not run yet | [pricing](https://cloud.morph.so/web/pricing) |
+| [Morph Cloud](https://sandboxrouter.ai/providers/morph) | $0.100 | none | passed (2026-11-18) | [pricing](https://cloud.morph.so/web/pricing) |
 | [exe.dev](https://sandboxrouter.ai/providers/exedev) | $0.105 | $15/mo | not run yet | [pricing](https://exe.dev/docs/standalone-vms.md) |
 | [Novita AI Agent Sandbox](https://sandboxrouter.ai/providers/novita) | $0.117 | none | passed (2026-11-13) | [pricing](https://docs.novita.ai/guides/sandbox-pricing) |
 | [DigitalOcean Harness Runtime](https://sandboxrouter.ai/providers/digitalocean) | up to $0.126 | none | not run yet | [pricing](https://docs.digitalocean.com/products/managed-agents/agent-harness-runtime/details/pricing/) |
