@@ -1,4 +1,4 @@
-import { CATALOG } from "./catalog.js";
+import { CATALOG, planOnlyStartFee } from "./catalog.js";
 import { median } from "./bench-store.js";
 import { Router, rankUsd, runHours } from "./router.js";
 import { VERIFIED } from "./verified.js";
@@ -49,7 +49,9 @@ export function priceIndex(verified: readonly ProviderId[] = Object.keys(VERIFIE
       .plan(line.spec, { strategy: "cheapest" })
       .filter((c) => !c.skip)
       // What the unit of work costs: a run of `hours`, times how many runs the line counts.
-      .map((c) => ({ provider: c.provider, usd: rankUsd(c, hours) * hours * line.scale }));
+      // Without a fee only one plan pays, like the published tables.
+      .map((c) => ({ provider: c.provider, usd: (rankUsd(c, hours) * hours - planOnlyStartFee(c.provider)) * line.scale }))
+      .sort((a, b) => a.usd - b.usd);
     const best = costs[0];
     const round = (n: number) => Math.round(n * 1e6) / 1e6;
     return {

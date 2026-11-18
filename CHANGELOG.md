@@ -2,6 +2,11 @@
 
 All notable changes. Versions follow [semver](https://semver.org/); while the version is 0.x, a minor bump can change the API.
 
+## Unreleased
+
+### Changed
+- **Published prices leave out fees that only one plan pays.** Sail's $0.01 per sandbox applies on its free plan and is waived on paid plans, so the benchmark tables, the price index and `recommend()` now rank Sail without it and note the fee instead, the way they already treat Boat's start fees above its allowance. The router's own estimate (`perSandboxUsd`) is unchanged.
+
 ## 0.12.0 (2026-11-17)
 
 ### Added

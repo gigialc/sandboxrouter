@@ -65,7 +65,7 @@ export function LoadTable() {
       <Footnote>
         Readiness ranks and scaled cost require a complete batch. Limit refusals are reported by the benchmark; other failures can have several causes.
         {k.n === 10 && " At ten requests, p99 is the slowest observation."}
-        {full.some((r) => r.provider === "boat") && <> <ConditionalStartFeeNote id="boat" /></>}
+        {" "}<ConditionalStartFeeNote ids={full.map((r) => r.provider)} />
       </Footnote>
     </div>
   );

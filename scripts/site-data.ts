@@ -1,7 +1,7 @@
 // Generates web/src/data/site.json from the library itself, so the website can't drift from the code.
 // Run from the repo root: node --import tsx scripts/site-data.ts
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
-import { benchmarksPublishable, billingRules, CATALOG, DEFAULT_MEMORY_GB, DEFAULT_VCPU, hourlyCost, planLabel, unfit } from "../src/catalog.js";
+import { accountStartFees, benchmarksPublishable, billingRules, CATALOG, DEFAULT_MEMORY_GB, DEFAULT_VCPU, hourlyCost, planLabel, planOnlyStartFee, unfit } from "../src/catalog.js";
 import type { SpreadResult } from "../src/burst.js";
 import { agentTable, aggregate, burstTable, loadAgentReports, loadBursts, loadReports, taskOutcomes, taskTable } from "../src/leaderboard.js";
 import { TASKS } from "../src/task.js";
@@ -122,12 +122,14 @@ const useCases = USE_CASES.map((u) => {
     .map((c) => ({
       provider: c.provider,
       name: names.get(c.provider) ?? c.provider,
-      runUsd: rankUsd(c, hours) * hours,
-      runHourlyUsd: rankUsd(c, hours),
+      // A fee only one plan pays is left out and noted, like start fees above an allowance.
+      runUsd: rankUsd(c, hours) * hours - planOnlyStartFee(c.provider),
+      runHourlyUsd: rankUsd(c, hours) - planOnlyStartFee(c.provider) / hours,
       hourlyUsd: c.estimatedHourlyUsd,
-      perSandboxUsd: c.perSandboxUsd ?? 0,
+      perSandboxUsd: (c.perSandboxUsd ?? 0) - planOnlyStartFee(c.provider),
       minimumSeconds: billingRules(c.provider).minSeconds,
-    }));
+    }))
+    .sort((a, b) => a.runUsd - b.runUsd);
   return { id: u.id, title: u.title, blurb: u.blurb, spec: u.spec, require: u.require ?? [], runSeconds: Math.round(hours * 3600), top };
 });
 
@@ -240,7 +242,7 @@ const data = {
     ] as const;
     return [10, 100].flatMap((n) =>
       jobs
-        .map((j) => ({ id: `${j.job}-${n}`, n, job: j.job, title: j.title, blurb: `${n} sandboxes at once, ${j.blurb}.`, rows: burstTable(bursts, j.task, n) }))
+        .map((j) => ({ id: `${j.job}-${n}`, n, job: j.job, title: j.title, blurb: `${n} sandboxes at once, ${j.blurb}.`, rows: burstTable(bursts, j.task, n).map((r) => (r.usd !== undefined && planOnlyStartFee(r.provider) ? { ...r, usd: Math.max(0, r.usd - planOnlyStartFee(r.provider) * r.ok) } : r)) }))
         .filter((k) => k.rows.length),
     );
   })(),
@@ -273,9 +275,7 @@ const seen = <T extends { measuredAt: string }>(x: T) => (dates.push(x.measuredA
 const published: PublishedData = {
   schema: 1,
   dataThrough: "",
-  conditionalStartFees: Object.fromEntries(CATALOG.flatMap((c) =>
-    c.pricing.conditionalStartFee ? [[c.id, c.pricing.conditionalStartFee]] : [],
-  )),
+  conditionalStartFees: accountStartFees(),
   start: Object.fromEntries(
     data.leaderboard
       .filter((r) => r.medianCreateMs !== undefined)

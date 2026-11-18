@@ -103,7 +103,11 @@ export function Finder() {
   const chartLink = new URL("https://www.sandboxrouter.ai/benchmarks#find");
   chartLink.searchParams.set("job", job);
   if (count > 1) chartLink.searchParams.set("count", String(count));
-  const boatFee = points.some((p) => p.provider === "boat") ? DATA.conditionalStartFees?.boat : undefined;
+  const feeNotes = points.filter((p) => DATA.conditionalStartFees?.[p.provider]).map((p) => {
+    const fee = DATA.conditionalStartFees![p.provider];
+    const amount = fee.minUsd === fee.maxUsd ? `$${fee.minUsd.toFixed(2)}` : `$${fee.minUsd.toFixed(2)}–$${fee.maxUsd.toFixed(2)}`;
+    return ` ${p.name}'s estimate excludes ${amount} per start ${fee.when ?? "above allowance"}.`;
+  });
   const answers: [string, Point, string][] = [
     ["Cheapest", cheapest, `${money(cheapest.y)} ${unit}`],
     ["Fastest", fastest, `${secs(fastest.secondsEach)} ${timeLabel}`],
@@ -142,7 +146,7 @@ export function Finder() {
         note: job === "start"
           ? "List prices for tested sandbox sizes."
           : `${points.length} providers plotted. Time includes startup. Cost per successful job is a retry estimate. The green line connects providers unbeaten on both axes. Sandbox sizes vary.`
-            + (boatFee ? ` Boat's estimate excludes $${boatFee.minUsd.toFixed(2)}–$${boatFee.maxUsd.toFixed(2)} per start above allowance.` : ""),
+            + feeNotes.join(""),
         summaries: answers.map(([label, p, metric]) => ({ label, name: p.name, metric })),
       });
       setSharing("PNG download started.");
@@ -225,7 +229,7 @@ export function Finder() {
             : " Time combines batch readiness with the measured single-sandbox job time.")}
           {job === "start" ? "" : " Cost per successful run is a retry estimate, including modelled start and minimum charges."}
           {points.some((p) => measuredSize(p.size)) && " Sandbox sizes other than 2 vCPU / 4 GB are shown with their results."}
-          {job !== "start" && boatFee && <> <ConditionalStartFeeNote id="boat" /></>}
+          {job !== "start" && <> <ConditionalStartFeeNote ids={points.map((p) => p.provider)} /></>}
         </p>
 
         <table className="mt-8 w-full text-[14px]">

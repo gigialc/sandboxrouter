@@ -18,8 +18,13 @@ export interface ProviderInfo {
     incrementSeconds?: number;
     /** A fixed charge per sandbox created, USD, on top of running time. */
     perSandboxUsd?: number;
-    /** Start fees above a provider's included allowance. Estimates exclude these account-specific charges. */
-    conditionalStartFee?: { minUsd: number; maxUsd: number; source: string };
+    /**
+     * The plan `perSandboxUsd` applies on, where the provider's paid plans waive it. The router still counts the
+     * fee; published tables leave it out and note it, the way they treat `conditionalStartFee`.
+     */
+    perSandboxPlan?: string;
+    /** Start fees above a provider's included allowance. Estimates exclude these account-specific charges. `when` says when they apply. */
+    conditionalStartFee?: { minUsd: number; maxUsd: number; source: string; when?: string };
     /**
      * Active-CPU billing only: the share of the allocated CPU billed even when idle (Tensorlake bills at
      * least 20%). Default 0.
@@ -578,6 +583,7 @@ ENTRIES.push(
     name: "Sailboxes (Sail Research)",
     pricing: {
       perSandboxUsd: 0.01,
+      perSandboxPlan: "free",
       vcpuHour: 0.015,
       gbHour: 0.008,
       note: "on what the box uses (CPU time, RAM it holds, disk $0.0007/GiB-h), sampled per second and not rounded up; RAM counts the VM's file cache, up to its memory limit (16 GiB at least), so file-heavy work can hold more than you asked for; paused/sleeping free; $0.01 per new Sailbox on the free plan, waived on Pro and Enterprise",
@@ -853,6 +859,22 @@ export function vercelSandboxSize(spec: SandboxSpec) {
   // Vercel supports one vCPU or an even vCPU count.
   const vcpu = Math.min(8, needed <= 1 ? 1 : Math.ceil(needed / 2) * 2);
   return { vcpu, memoryGb: vcpu * 2 };
+}
+
+/** The per-sandbox fee a provider charges only on one plan (Sail's free plan), else 0. Published tables leave it out. */
+export function planOnlyStartFee(id: ProviderId): number {
+  const p = CATALOG.find((c) => c.id === id)?.pricing;
+  return p?.perSandboxPlan ? (p.perSandboxUsd ?? 0) : 0;
+}
+
+/** Every start fee that depends on the customer's account or plan, which published estimates exclude. */
+export function accountStartFees(): Record<string, { minUsd: number; maxUsd: number; source: string; when?: string }> {
+  return Object.fromEntries(CATALOG.flatMap((c): [string, { minUsd: number; maxUsd: number; source: string; when?: string }][] => {
+    if (c.pricing.conditionalStartFee) return [[c.id, c.pricing.conditionalStartFee]];
+    if (c.pricing.perSandboxPlan && c.pricing.perSandboxUsd)
+      return [[c.id, { minUsd: c.pricing.perSandboxUsd, maxUsd: c.pricing.perSandboxUsd, source: c.pricing.source, when: `on its ${c.pricing.perSandboxPlan} plan` }]];
+    return [];
+  }));
 }
 
 /** How a provider turns running time into a bill: minimum, rounding and fixed per-sandbox charge. */

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ORIGIN, pageAlternates } from "@/lib/public-pages";
 import { Button } from "@/components/chrome";
-import { ConditionalStartFeeNote } from "@/components/ConditionalStartFeeNote";
+import { ConditionalStartFeeNote, hasStartFee } from "@/components/ConditionalStartFeeNote";
 import { CodeBlock, CodeTabs, InstallChip } from "@/components/code";
 import { Feature } from "@/components/Feature";
 import { PriceIndex } from "@/components/PriceIndex";
@@ -230,8 +230,8 @@ export default function Home() {
                     </ResultRow>
                   ))}
                 </ResultTable>
-                {shortRows.some((r) => r.provider === "boat") && (
-                  <p className="mt-3 text-[12px] leading-5 text-muted"><ConditionalStartFeeNote id="boat" /></p>
+                {hasStartFee(shortRows.map((r) => r.provider)) && (
+                  <p className="mt-3 text-[12px] leading-5 text-muted"><ConditionalStartFeeNote ids={shortRows.map((r) => r.provider)} /></p>
                 )}
               </div>
             }

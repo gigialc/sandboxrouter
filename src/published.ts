@@ -11,6 +11,12 @@ export const PUBLISHED: PublishedData = {
       "minUsd": 0.03,
       "maxUsd": 0.07,
       "source": "https://docs.boat.dev/limits.md#extra-starts"
+    },
+    "sail": {
+      "minUsd": 0.01,
+      "maxUsd": 0.01,
+      "source": "https://docs.sailresearch.com/sailboxes-pricing.md",
+      "when": "on its free plan"
     }
   },
   "start": {
@@ -402,6 +408,22 @@ export const PUBLISHED: PublishedData = {
         "minimumSeconds": 60,
         "measuredAt": "2026-11-17T23:40:37.832Z"
       },
+      "sail": {
+        "name": "Sailboxes (Sail Research)",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
+        "createMs": 2891,
+        "taskMs": 6495,
+        "taskUsd": 0.00011963888888888961,
+        "reusedUsd": 0.00008848333333333333,
+        "successRate": 1,
+        "runs": 3,
+        "ok": 3,
+        "limited": 0,
+        "measuredAt": "2026-11-17T23:36:05.829Z"
+      },
       "novita": {
         "name": "Novita AI Agent Sandbox",
         "size": {
@@ -562,23 +584,6 @@ export const PUBLISHED: PublishedData = {
         "limited": 0,
         "minimumSeconds": 60,
         "measuredAt": "2026-11-17T23:39:46.957Z"
-      },
-      "sail": {
-        "name": "Sailboxes (Sail Research)",
-        "size": {
-          "vcpu": 2,
-          "memoryGb": 4
-        },
-        "createMs": 2891,
-        "taskMs": 6495,
-        "taskUsd": 0.01011963888888889,
-        "reusedUsd": 0.00008848333333333333,
-        "successRate": 1,
-        "runs": 3,
-        "ok": 3,
-        "limited": 0,
-        "perSandboxUsd": 0.01,
-        "measuredAt": "2026-11-17T23:36:05.829Z"
       }
     },
     "long": {
@@ -842,6 +847,22 @@ export const PUBLISHED: PublishedData = {
         "limited": 0,
         "measuredAt": "2026-11-17T23:41:06.827Z"
       },
+      "sail": {
+        "name": "Sailboxes (Sail Research)",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
+        "createMs": 2897,
+        "taskMs": 2343,
+        "taskUsd": 0.00006391666666666698,
+        "reusedUsd": 0.000031410000000000006,
+        "successRate": 1,
+        "runs": 3,
+        "ok": 3,
+        "limited": 0,
+        "measuredAt": "2026-11-17T23:36:51.852Z"
+      },
       "agentcore": {
         "name": "Amazon Bedrock AgentCore Code Interpreter",
         "size": {
@@ -1035,23 +1056,6 @@ export const PUBLISHED: PublishedData = {
         "limited": 0,
         "minimumSeconds": 60,
         "measuredAt": "2026-11-17T23:40:02.138Z"
-      },
-      "sail": {
-        "name": "Sailboxes (Sail Research)",
-        "size": {
-          "vcpu": 2,
-          "memoryGb": 4
-        },
-        "createMs": 2897,
-        "taskMs": 2343,
-        "taskUsd": 0.010063916666666667,
-        "reusedUsd": 0.000031410000000000006,
-        "successRate": 1,
-        "runs": 3,
-        "ok": 3,
-        "limited": 0,
-        "perSandboxUsd": 0.01,
-        "measuredAt": "2026-11-17T23:36:51.852Z"
       }
     },
     "download": {
@@ -1134,6 +1138,22 @@ export const PUBLISHED: PublishedData = {
         "ok": 3,
         "limited": 0,
         "measuredAt": "2026-11-17T23:41:25.503Z"
+      },
+      "sail": {
+        "name": "Sailboxes (Sail Research)",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
+        "createMs": 2862,
+        "taskMs": 1405,
+        "taskUsd": 0.00004548611111111073,
+        "reusedUsd": 0.000013530555555555557,
+        "successRate": 1,
+        "runs": 3,
+        "ok": 3,
+        "limited": 0,
+        "measuredAt": "2026-11-17T23:37:36.070Z"
       },
       "tensorlake": {
         "name": "Tensorlake",
@@ -1280,23 +1300,6 @@ export const PUBLISHED: PublishedData = {
         "limited": 0,
         "minimumSeconds": 60,
         "measuredAt": "2026-11-17T23:40:09.779Z"
-      },
-      "sail": {
-        "name": "Sailboxes (Sail Research)",
-        "size": {
-          "vcpu": 2,
-          "memoryGb": 4
-        },
-        "createMs": 2862,
-        "taskMs": 1405,
-        "taskUsd": 0.010045486111111111,
-        "reusedUsd": 0.000013530555555555557,
-        "successRate": 1,
-        "runs": 3,
-        "ok": 3,
-        "limited": 0,
-        "perSandboxUsd": 0.01,
-        "measuredAt": "2026-11-17T23:37:36.070Z"
       }
     },
     "agent": {
@@ -1348,6 +1351,22 @@ export const PUBLISHED: PublishedData = {
         "ok": 3,
         "limited": 0,
         "measuredAt": "2026-11-17T23:54:45.098Z"
+      },
+      "sail": {
+        "name": "Sailboxes (Sail Research)",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
+        "createMs": 2294,
+        "taskMs": 61613,
+        "taskUsd": 0.0005908472222222218,
+        "reusedUsd": 0.0005696294444444445,
+        "successRate": 1,
+        "runs": 3,
+        "ok": 3,
+        "limited": 0,
+        "measuredAt": "2026-11-17T23:47:54.312Z"
       },
       "agentcore": {
         "name": "Amazon Bedrock AgentCore Code Interpreter",
@@ -1509,23 +1528,6 @@ export const PUBLISHED: PublishedData = {
         "ok": 3,
         "limited": 0,
         "measuredAt": "2026-11-17T23:47:54.312Z"
-      },
-      "sail": {
-        "name": "Sailboxes (Sail Research)",
-        "size": {
-          "vcpu": 2,
-          "memoryGb": 4
-        },
-        "createMs": 2294,
-        "taskMs": 61613,
-        "taskUsd": 0.010590847222222222,
-        "reusedUsd": 0.0005696294444444445,
-        "successRate": 1,
-        "runs": 3,
-        "ok": 3,
-        "limited": 0,
-        "perSandboxUsd": 0.01,
-        "measuredAt": "2026-11-17T23:47:54.312Z"
       }
     },
     "repo": {
@@ -1577,6 +1579,22 @@ export const PUBLISHED: PublishedData = {
         "ok": 3,
         "limited": 0,
         "measuredAt": "2026-11-17T23:51:31.059Z"
+      },
+      "sail": {
+        "name": "Sailboxes (Sail Research)",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
+        "createMs": 2471,
+        "taskMs": 22122,
+        "taskUsd": 0.0003365972222222225,
+        "reusedUsd": 0.000311015,
+        "successRate": 1,
+        "runs": 3,
+        "ok": 3,
+        "limited": 0,
+        "measuredAt": "2026-11-17T23:53:49.019Z"
       },
       "daytona": {
         "name": "Daytona",
@@ -1722,23 +1740,6 @@ export const PUBLISHED: PublishedData = {
         "ok": 3,
         "limited": 0,
         "measuredAt": "2026-11-17T23:53:49.019Z"
-      },
-      "sail": {
-        "name": "Sailboxes (Sail Research)",
-        "size": {
-          "vcpu": 2,
-          "memoryGb": 4
-        },
-        "createMs": 2471,
-        "taskMs": 22122,
-        "taskUsd": 0.010336597222222223,
-        "reusedUsd": 0.000311015,
-        "successRate": 1,
-        "runs": 3,
-        "ok": 3,
-        "limited": 0,
-        "perSandboxUsd": 0.01,
-        "measuredAt": "2026-11-17T23:53:49.019Z"
       }
     }
   },
@@ -1865,7 +1866,7 @@ export const PUBLISHED: PublishedData = {
           "p50Ms": 4036,
           "p99Ms": 4332,
           "wallMs": 4332,
-          "usdPer100": 1.00341,
+          "usdPer100": 0.00341,
           "measuredAt": "2026-11-17T18:33:05.397Z"
         },
         "openscale": {
@@ -2011,7 +2012,7 @@ export const PUBLISHED: PublishedData = {
           "p50Ms": 4465,
           "p99Ms": 4956,
           "wallMs": 5168,
-          "usdPer100": 1.003777,
+          "usdPer100": 0.003777,
           "measuredAt": "2026-11-17T17:02:09.715Z"
         },
         "openscale": {

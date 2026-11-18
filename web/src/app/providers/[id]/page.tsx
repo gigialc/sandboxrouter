@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { pageAlternates } from "@/lib/public-pages";
-import { ConditionalStartFeeNote } from "@/components/ConditionalStartFeeNote";
+import { ConditionalStartFeeNote, hasStartFee } from "@/components/ConditionalStartFeeNote";
 import { ProviderLogo } from "@/components/ProviderName";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -144,7 +144,7 @@ await sbx.kill();`;
               <>
                 <dt className="text-muted">Billing</dt>
                 <dd>{p.billing === "active-cpu" ? "CPU only while busy; shown with every core busy" : "the size you ask for, while it runs"}</dd>
-                {p.pricing.conditionalStartFee && (
+                {hasStartFee([p.id]) && (
                   <>
                     <dt className="text-muted">Start fees</dt>
                     <dd><ConditionalStartFeeNote id={p.id} /></dd>

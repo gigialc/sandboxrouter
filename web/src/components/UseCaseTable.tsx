@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ConditionalStartFeeNote } from "@/components/ConditionalStartFeeNote";
+import { ConditionalStartFeeNote, hasStartFee } from "@/components/ConditionalStartFeeNote";
 import { BarNum, Footnote, Num, ResultRow, ResultTable, Segmented, Toolbar, barMax, money, perHour } from "@/components/results";
 import { site } from "@/lib/site";
 
@@ -52,9 +52,7 @@ export function UseCaseTable() {
           {showAll ? "Show fewer" : `Show all ${u.top.length} providers`}
         </button>
       )}
-      {rows.some((r) => r.provider === "boat") && (
-        <Footnote><ConditionalStartFeeNote id="boat" /></Footnote>
-      )}
+      {hasStartFee(rows.map((r) => r.provider)) && <Footnote><ConditionalStartFeeNote ids={rows.map((r) => r.provider)} /></Footnote>}
     </div>
   );
 }
