@@ -18,5 +18,25 @@
         "provider": "boat"
       }
     }
+  },
+  {
+    "date": "2026-11-18",
+    "lines": {
+      "2x4-hour": {
+        "median": 0.16505,
+        "cheapest": 0.0065,
+        "provider": "agent37"
+      },
+      "agent-hour": {
+        "median": 0.1028,
+        "cheapest": 0.0065,
+        "provider": "agent37"
+      },
+      "calls-1000": {
+        "median": 0.46,
+        "cheapest": 0.05,
+        "provider": "boat"
+      }
+    }
   }
 ]
