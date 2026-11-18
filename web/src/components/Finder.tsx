@@ -94,7 +94,9 @@ export function Finder() {
   const value = points[0];
   if (!value) return null;
   const unit = job === "start" ? "per hour" : "per 1,000 jobs";
-  const shown = all ? points : points.slice(0, 8);
+  // The table lists the cheapest first, so the price column reads in order; the best-value pick is in the tiles above.
+  const byPrice = [...points].sort((a, b) => a.y - b.y || a.secondsEach - b.secondsEach);
+  const shown = all ? byPrice : byPrice.slice(0, 8);
   const startLabel = batch || HAS_PAIRED_STARTS ? "to first command" : "to create response";
   const timeLabel = job === "start" ? startLabel : "per job";
   const [, jobLabel, description] = AVAILABLE_JOBS.find(([id]) => id === job) ?? JOBS[0];
@@ -238,9 +240,9 @@ export function Finder() {
             </tr>
           </thead>
           <tbody>
-            {shown.map((p) => (
+            {shown.map((p, i) => (
               <tr key={p.provider} className="group border-t border-line">
-                <td className="py-2.5 pr-2 font-mono text-[12px] text-muted">{p.rank}</td>
+                <td className="py-2.5 pr-2 font-mono text-[12px] text-muted">{i + 1}</td>
                 <td className="py-2.5 pr-4">
                   <ProviderName id={p.provider} name={p.name}>
                     {p.frontier ? <span className="text-[11px] text-accent-ink">best deal</span> : null}
@@ -261,7 +263,7 @@ export function Finder() {
           </button>
         ) : null}
         <p className="mt-6 text-[12px] leading-5 text-muted">
-          Value rankings combine cost and time, each compared with the median.{" "}
+          Cheapest first. The best-value pick combines cost and time, each compared with the median.{" "}
           <a href="/benchmarks.json" className="underline underline-offset-4 hover:text-ink">Current benchmark data</a>.
         </p>
       </div>
