@@ -1,0 +1,64 @@
+{
+  "tool": "sandboxrouter",
+  "version": "0.13.0",
+  "date": "2026-11-17T23:54:04.615Z",
+  "label": "home-eu",
+  "runs": 3,
+  "spec": {
+    "vcpu": 2,
+    "memoryGb": 4
+  },
+  "task": "agent-v2",
+  "node": "v22.22.0",
+  "platform": "darwin-arm64",
+  "rows": [
+    {
+      "provider": "openscale",
+      "runs": 3,
+      "failures": 0,
+      "createFailures": 0,
+      "commandFailures": 0,
+      "cleanupFailures": 0,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 1
+      },
+      "medianCreateMs": 323,
+      "medianExecMs": 923,
+      "medianReadyMs": 1308,
+      "hourlyUsd": 0.013999999999999999,
+      "taskOk": 3,
+      "medianTaskReadyMs": 1308,
+      "medianTaskMs": 61649,
+      "taskPhasesMs": {
+        "agent": 61649
+      },
+      "medianTaskCpuMs": 1560,
+      "medianTaskMaxCoreMs": 1490
+    },
+    {
+      "provider": "e2b",
+      "runs": 3,
+      "failures": 0,
+      "createFailures": 0,
+      "commandFailures": 0,
+      "cleanupFailures": 0,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 0.5
+      },
+      "medianCreateMs": 374,
+      "medianExecMs": 175,
+      "medianReadyMs": 547,
+      "hourlyUsd": 0.1089,
+      "taskOk": 3,
+      "medianTaskReadyMs": 547,
+      "medianTaskMs": 61238,
+      "taskPhasesMs": {
+        "agent": 61238
+      },
+      "medianTaskCpuMs": 1450,
+      "medianTaskMaxCoreMs": 910
+    }
+  ]
+}

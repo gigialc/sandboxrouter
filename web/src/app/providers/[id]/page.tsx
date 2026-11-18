@@ -4,7 +4,10 @@ import { ProviderLogo } from "@/components/ProviderName";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CodeBlock } from "@/components/code";
+import { time } from "@/components/results";
 import { CAPABILITY_LABEL, fixedPrice, NPM, PACKAGE, provider, REPO, REPO_PUBLIC, shapeLabel, site, usd } from "@/lib/site";
+
+const billDollars = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 6 });
 
 export function generateStaticParams() {
   return site.providers.map((p) => ({ id: p.id }));
@@ -34,53 +37,46 @@ await sbx.exec("uname -a", { onStdout: (c) => process.stdout.write(c) });
 await sbx.kill();`;
   const caps = [...p.capabilities, ...(p.computers.length ? ["computers"] : [])];
 
-  // What has been measured on real accounts, and what's still missing.
   const lb = site.leaderboard.find((r) => r.provider === p.id);
-  const reports = site.submissions.filter((s) => s.ids.includes(p.id));
   const costs = site.costRuns.filter((r) => r.provider === p.id);
-  const cost = costs.find((r) => !r.error) ?? costs[0];
-  const noBillingApi = !!cost?.billSource?.startsWith("no billing");
-  const billed = cost && cost.billedUsd !== null && cost.predictedUsd ? { usd: cost.billedUsd, list: cost.predictedUsd } : null;
+  const sizeRun = costs.find((r) => !r.error && r.delivered);
+  const size = sizeRun?.delivered;
+  const usage = costs.find((r) => !r.error && r.billKind === "provider-usage" && r.billedUsd !== null);
+  const estimate = costs.find((r) => !r.error && r.billKind === "provider-estimate" && r.billedUsd !== null);
+  const bill = usage ?? estimate;
+  const noBillingApi = costs.some((r) => r.billSource?.startsWith("no billing"));
   const total = site.checkSteps.length - (p.check?.skipped.length ?? 0);
-  const hidden = p.noBenchmarks ? "not published" : null;
+  const hidden = Boolean(p.noBenchmarks);
   const credit = (by: string | null) => (by ? ` by @${by}` : "");
-  const facts: [string, string, string][] = [
-    [
-      "Real-account check",
-      p.check ? `${p.check.passed} / ${total} steps` : "not run yet",
-      p.check ? `${p.check.date.slice(0, 10)}${credit(p.check.by)}` : "tested against a mock of its API only",
-    ],
-    [
-      "Cold start",
-      hidden ?? (lb?.medianCreateMs ? `${lb.medianCreateMs.toLocaleString("en-US")} ms` : "not measured"),
-      hidden ? "see the note below" : lb ? `median, ${reports.length} location${reports.length === 1 ? "" : "s"}` : "no benchmark run yet",
-    ],
-    [
-      "Succeeded",
-      hidden ?? (lb ? `${Math.round(lb.successRate * 100)}%` : "not measured"),
-      hidden ? "see the note below" : lb ? "of benchmark sandboxes" : "no benchmark run yet",
-    ],
-    [
-      "Size you get",
-      hidden ?? (cost?.delivered ? `${cost.delivered.vcpu} vCPU / ${cost.delivered.memoryGb} GB` : "not measured"),
-      hidden ? "see the note below" : cost?.delivered ? `asked for ${cost.requested.vcpu} vCPU / ${cost.requested.memoryGb} GB` : "no cost run yet",
-    ],
-    [
-      "Billed vs list price",
-      hidden ?? (billed ? `${Math.round((billed.usd / billed.list) * 100)}%` : cost?.error ? "run failed" : noBillingApi ? "no billing API" : "not measured"),
-      hidden
-        ? "see the note below"
-        : billed
-        ? `$${billed.usd.toFixed(4)} billed, $${billed.list.toFixed(4)} at list, ${cost!.date.slice(0, 10)}${credit(cost!.by)}`
-        : cost
-          ? cost.date.slice(0, 10)
-          : "no cost run yet",
-    ],
-  ];
+  const facts: [string, string, string][] = [];
+  if (p.check) {
+    facts.push(["Real-account check", `${p.check.passed} / ${total} steps`, `${p.check.date.slice(0, 10)}${credit(p.check.by)}`]);
+  }
+  if (!hidden && lb) {
+    if (lb.medianCreateMs !== undefined) facts.push(["Median create", time(lb.medianCreateMs), `${lb.runs} requests, ${lb.measuredAt.slice(0, 10)}`]);
+    if (lb.runs > 0) facts.push(["Ready", `${Math.round(lb.successRate * 100)}%`, "Excluding recorded limit refusals"]);
+  }
+  if (!hidden && size && sizeRun) {
+    facts.push(["Measured resources", `${size.vcpu} vCPU / ${size.memoryGb} GB`, `Requested ${sizeRun.requested.vcpu} vCPU / ${sizeRun.requested.memoryGb} GB`]);
+  }
+  if (!hidden && bill && bill.billedUsd !== null) {
+    const note = [
+      bill.predictedUsd === null ? null : `${billDollars.format(bill.predictedUsd)} list estimate`,
+      bill.billResolutionUsd ? `${billDollars.format(bill.billResolutionUsd)} reporting increments` : null,
+      `${bill.date.slice(0, 10)}${credit(bill.by)}`,
+    ].filter(Boolean).join(" · ");
+    facts.push([usage ? "Provider-reported usage" : "Provider estimate", billDollars.format(bill.billedUsd), note]);
+  }
+  const gaps = [
+    !p.check ? "a real-account check" : null,
+    !hidden && lb?.medianCreateMs === undefined ? "startup timing" : null,
+    !hidden && !size ? "delivered resources" : null,
+    !hidden && !usage && !noBillingApi ? "provider usage charges" : null,
+  ].filter(Boolean);
   const help = [
     ...(p.live.status !== "passed" ? [`npx ${NPM} check --provider ${p.id} --save --by YOUR_GITHUB_USERNAME`] : []),
-    ...(!lb && !hidden ? [`npx ${NPM} bench --provider ${p.id} --runs 5 --share --label "your city or cloud region" --by YOUR_GITHUB_USERNAME`] : []),
-    ...(!billed && !noBillingApi && !hidden ? [`npx ${NPM} cost run --provider ${p.id} --minutes 10 --by YOUR_GITHUB_USERNAME`] : []),
+    ...(lb?.medianCreateMs === undefined && !hidden ? [`npx ${NPM} bench --provider ${p.id} --runs 5 --share --label "your city or cloud region" --by YOUR_GITHUB_USERNAME`] : []),
+    ...((!size || (!usage && !noBillingApi)) && !hidden ? [`npx ${NPM} cost run --provider ${p.id} --minutes 10 --by YOUR_GITHUB_USERNAME`] : []),
   ];
 
   return (
@@ -183,15 +179,24 @@ await sbx.kill();`;
       {!p.local && (
         <section className="mt-12">
           <h2 className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted">Measured on real accounts</h2>
-          <dl className="mt-4 grid grid-cols-2 gap-px border border-line bg-line sm:grid-cols-3 lg:grid-cols-5">
-            {facts.map(([k, v, sub]) => (
-              <div key={k} className="bg-bg p-4">
-                <dt className="text-[11px] uppercase tracking-[0.12em] text-muted">{k}</dt>
-                <dd className={`mt-2 font-mono text-[15px] tnum ${/^(not |no |run failed)/.test(v) ? "text-muted" : "text-ink"}`}>{v}</dd>
-                <dd className="mt-1 text-[13px] leading-6 text-ink-2">{sub}</dd>
-              </div>
-            ))}
-          </dl>
+          {facts.length > 0 && (
+            <dl className="mt-4 grid grid-cols-[repeat(auto-fit,minmax(10rem,1fr))] gap-px border border-line bg-line">
+              {facts.map(([k, v, sub]) => (
+                <div key={k} className="bg-bg p-4">
+                  <dt className="text-[11px] uppercase tracking-[0.12em] text-muted">{k}</dt>
+                  <dd className="mt-2 font-mono text-[15px] tnum text-ink">{v}</dd>
+                  <dd className="mt-1 text-[13px] leading-6 text-ink-2">{sub}</dd>
+                </div>
+              ))}
+            </dl>
+          )}
+          {gaps.length > 0 && <p className="mt-4 max-w-2xl text-[13px] text-muted">Awaiting results for {gaps.join(", ")}.</p>}
+          {!hidden && lb?.runs === 0 && (
+            <p className="mt-3 max-w-2xl text-[13px] text-muted">All startup requests were refused by the test account limit.</p>
+          )}
+          {!hidden && noBillingApi && !usage && (
+            <p className="mt-3 max-w-2xl text-[13px] text-muted">The cost run had no billing API to query. A provider dashboard or invoice can supply usage charges.</p>
+          )}
           {p.noBenchmarks && (
             <p className="mt-4 max-w-2xl text-[14px] leading-6 text-ink-2">
               Speed, size and billing results for {p.name} aren&apos;t published here:{" "}
@@ -206,8 +211,7 @@ await sbx.kill();`;
             <div className="mt-6 border-l-2 border-accent pl-4">
               <h3 className="text-[15px] text-ink">Help verify {p.name}</h3>
               <p className="mt-2 max-w-2xl text-[14px] leading-6 text-ink-2">
-                Have a {p.name} account? These run real sandboxes on it, for a few cents at most, and write result files that fill in
-                the blanks above. Results never include your keys.
+                Have a {p.name} account? These commands start real sandboxes and write result files. Provider charges may apply. Results never include your keys.
                 {REPO_PUBLIC
                   ? " Run them in a clone of the repo and open a pull request with the files: CI checks every file for keys and impossible numbers, and a maintainer reviews each one before it shows here."
                   : ""}
@@ -220,10 +224,9 @@ await sbx.kill();`;
         </section>
       )}
 
-      <section className="mt-12">
-        <h2 className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted">Real-account check, step by step</h2>
-        {p.check ? (
-          <>
+      {p.check && (
+        <section className="mt-12">
+          <h2 className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted">Real-account check, step by step</h2>
             <p className="mt-4 text-[13px] text-ink-2">
               {p.check.passed} of {total} steps passed on a real account, {p.check.date.slice(0, 10)} (v{p.check.version})
               {credit(p.check.by)}.
@@ -244,13 +247,8 @@ await sbx.kill();`;
                 );
               })}
             </ul>
-          </>
-        ) : (
-          <p className="mt-4 max-w-2xl text-[14px] leading-6 text-ink-2">
-            Not run on a real account yet; the adapter is tested against a mock of {p.name}&apos;s API.
-          </p>
-        )}
-      </section>
+        </section>
+      )}
 
       <div className="mt-12 grid grid-cols-1 gap-4">
         <CodeBlock title="setup" code={setup} />

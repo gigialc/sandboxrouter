@@ -1,0 +1,32 @@
+{
+  "tool": "sandboxrouter-cost",
+  "version": "0.13.0",
+  "date": "2026-11-17T23:42:25.726Z",
+  "minutes": 1,
+  "load": false,
+  "by": "gigialc",
+  "entries": [
+    {
+      "provider": "modal",
+      "requested": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "listUsdHour": 0.23796,
+      "startedAt": "2026-11-17T23:41:25.607Z",
+      "endedAt": "2026-11-17T23:42:25.726Z",
+      "delivered": {
+        "vcpu": 1,
+        "memoryMb": 4096
+      },
+      "seconds": 60,
+      "predictedUsd": 0.003966,
+      "bill": {
+        "usd": 0.003304,
+        "kind": "provider-usage",
+        "source": "Modal App.sandboxes.stats: tagged sandbox cost before credits or reservations",
+        "at": "2026-11-17T23:42:26.468Z"
+      }
+    }
+  ]
+}

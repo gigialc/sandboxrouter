@@ -149,7 +149,37 @@ export interface CostRow {
   billedUsd: number | null;
   billedSeconds: number | null;
   billSource: string | null;
+  billKind: "provider-usage" | "provider-estimate" | null;
+  billResolutionUsd: number | null;
+  settledAt: string | null;
+  file: string;
   error: string | null;
+}
+
+export interface HostedCostRow {
+  provider: string;
+  name: string;
+  date: string;
+  file: string;
+  requested: { vcpu: number; memoryGb: number };
+  size: { vcpu: number; memoryGb: number };
+  expectedSeconds: number;
+  runtimeSeconds: number;
+  quoteUsd: number;
+  quoteAtRecordedRuntimeUsd?: number;
+  chargeUsd: number;
+  balanceDeltaUsd: number;
+  keySpendDeltaUsd?: number;
+  minimumSeconds?: number;
+  minimumCovers?: "all" | "memory";
+  incrementSeconds?: number;
+  feePct: number;
+  checkedAt?: string;
+  createMs?: number;
+  commandMs?: number;
+  belowQuotedCapRejected?: boolean;
+  commandVerified: true;
+  deleted: true;
 }
 
 export interface SiteDesktop {
@@ -197,10 +227,13 @@ export const site = data as unknown as {
   }[] };
   useCases: UseCase[];
   costRuns: CostRow[];
+  hostedCosts: HostedCostRow[];
   submissions: { date: string; label: string | null; by: string | null; platform: string; runs: number; providers: number; ids: string[] }[];
 };
 
 export const REPO = "https://github.com/gigialc/sandboxrouter";
+const deployedCommit = process.env.VERCEL_GIT_COMMIT_SHA ?? "";
+export const RESULTS_REF = /^[a-f0-9]{40}$/.test(deployedCommit) ? deployedCommit : "main";
 /** The repo is public (since 2026-11-07). Set to false to hide GitHub links and "open a PR" wording, e.g. while a repo is private. */
 export const REPO_PUBLIC = true;
 /** The hosted key: one sandboxrouter API key, prepaid credit, sandboxes on sandboxrouter's own provider accounts. */

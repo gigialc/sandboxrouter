@@ -22,10 +22,18 @@ export function LoadTable() {
   const full = k.rows.filter((r) => r.ok === r.n).sort((a, b) => (a.p50Ms ?? Infinity) - (b.p50Ms ?? Infinity));
   const partial = k.rows.filter((r) => r.ok < r.n).sort((a, b) => a.name.localeCompare(b.name));
   const max = barMax(full.map((r) => r.p50Ms ?? 0));
+  const dates = [...new Set(k.rows.map((r) => r.measuredAt.slice(0, 10)))].sort();
+  const measured = dates.length > 1 ? `${dates[0]} to ${dates.at(-1)}` : dates[0];
 
   return (
     <div>
-      <Toolbar note={`${k.blurb} Readiness is measured from the batch request to the first successful command on each sandbox.`}>
+      <Toolbar note={
+        <>
+          {full.length} of {k.rows.length} tested providers completed all {k.n} requests{measured ? `, measured ${measured}` : ""}.{" "}
+          {k.job === "start" ? "Start-only batches ended after the first successful command." : "Completions require verified workload output."}{" "}
+          Readiness is measured from the batch request to the first successful command on each sandbox.
+        </>
+      }>
         <Segmented label="At once" options={sizes.map((s) => [s, String(s)] as const)} value={n} onChange={setN} />
         <Segmented label="Job" options={jobs.map((x) => [x.job, x.title] as const)} value={k.job} onChange={setJob} />
       </Toolbar>

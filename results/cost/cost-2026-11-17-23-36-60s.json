@@ -1,0 +1,69 @@
+{
+  "tool": "sandboxrouter-cost",
+  "version": "0.13.0",
+  "date": "2026-11-17T23:36:48.305Z",
+  "minutes": 1,
+  "load": true,
+  "by": "gigialc",
+  "entries": [
+    {
+      "provider": "agent37",
+      "requested": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "listUsdHour": 0.006520547945205479,
+      "startedAt": "2026-11-17T23:35:47.230Z",
+      "delivered": {
+        "vcpu": 2,
+        "memoryMb": 4096
+      },
+      "deliveredUsdHour": 0.006521,
+      "endedAt": "2026-11-17T23:36:47.738Z",
+      "seconds": 61,
+      "predictedUsd": 0.00011,
+      "bill": {
+        "usd": 0.000109,
+        "kind": "provider-usage",
+        "seconds": 60,
+        "source": "agent37 /v1/usage total_micros (billed in whole minutes: 1 awake)",
+        "at": "2026-11-17T23:36:48.306Z"
+      }
+    },
+    {
+      "provider": "maritime",
+      "requested": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "listUsdHour": 0.022,
+      "startedAt": "2026-11-17T23:35:47.244Z",
+      "delivered": {
+        "vcpu": 2,
+        "memoryMb": 3939
+      },
+      "deliveredUsdHour": 0.021578,
+      "endedAt": "2026-11-17T23:36:48.305Z",
+      "seconds": 61,
+      "predictedUsd": 0.000373,
+      "bill": {
+        "usd": 0,
+        "kind": "provider-usage",
+        "resolutionUsd": 0.01,
+        "seconds": 60,
+        "source": "maritime metered-usage (integer cents; no usage plan on this account)",
+        "at": "2026-11-17T23:36:48.491Z"
+      }
+    },
+    {
+      "provider": "daytona",
+      "requested": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "listUsdHour": 0.06659999999999999,
+      "startedAt": "2026-11-17T23:35:47.244Z",
+      "error": "Fixed default sandbox shape cannot satisfy the requested 2 vCPU / 4 GB"
+    }
+  ]
+}

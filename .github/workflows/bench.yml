@@ -1,8 +1,7 @@
 name: bench
 # Every Wednesday: run the benchmarks from GitHub's own runners (US), so results don't come from one laptop
-# in one place. Only providers that passed the real-account check; a provider whose every run fails on the
-# account (key, credit, a limit) is left out of the report, and bench writes none if the network drops. Commits the
-# reports to results/, where the website picks them up.
+# in one place. Only providers that passed the real-account check. Bench records account refusals separately
+# and rejects a report when multiple providers fail on the network. Publish raw reports and their site data together.
 on:
   schedule:
     - cron: "37 9 * * 3"
@@ -29,9 +28,12 @@ jobs:
         run: |
           P=$(node --import tsx -e 'import("./src/verified.ts").then((m) => console.log(Object.keys(m.VERIFIED).join(",")))')
           day=$(date -u +%F)
+          report_dir="$RUNNER_TEMP/benchmark-reports"
+          mkdir -p "$report_dir"
           for job in short agent; do
             npx tsx src/cli.ts bench --provider "$P" --runs 3 --task --job "$job" --parallel 4 \
-              --share --label "GitHub Actions, US" --by github-actions --out "results/bench-$day-gha-us-$job.json" || true
+              --share --label "GitHub Actions, US" --by github-actions \
+              --out "$report_dir/bench-$day-gha-us-$job-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT.json" || true
           done
         env:
           AGENT37_API_KEY: ${{ secrets.AGENT37_API_KEY }}
@@ -84,8 +86,22 @@ jobs:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       - name: Save the reports
         run: |
-          npm run -s results:check
+          shopt -s nullglob
+          reports=("$RUNNER_TEMP/benchmark-reports/"*.json)
+          if (( ${#reports[@]} == 0 )); then exit 0; fi
           git config user.name "bench"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add results/
-          git diff --cached --quiet || (git commit -m "bench: GitHub Actions, US, $(date -u +%F)" && git push)
+          for attempt in 1 2 3; do
+            # A long run can overlap another push. Rebuild against the latest results on each attempt.
+            git fetch origin "$GITHUB_REF"
+            git switch --detach FETCH_HEAD
+            cp "${reports[@]}" results/
+            git diff --exit-code --stat -- results/
+            if [ -z "$(git status --porcelain -- results/)" ]; then exit 0; fi
+            npm run -s results:check
+            npm run -s site:data
+            git add -- results/ src/published.ts web/src/data/site.json web/src/data/published.json web/src/lib/recommend.ts
+            git commit -m "bench: GitHub Actions, US, $(date -u +%F)"
+            if git push origin "HEAD:$GITHUB_REF"; then exit 0; fi
+          done
+          exit 1

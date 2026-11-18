@@ -3,7 +3,7 @@
 // recommend() the SDK uses, so an agent and a person reading the site get the same answer.
 import published from "@/data/published.json";
 import { recommend, type PublishedData, type RecJob, type RecPriority } from "@/lib/recommend";
-import { HOSTED_FEE_PCT, HOSTED_URL, NPM, REPO, site } from "@/lib/site";
+import { HOSTED_FEE_PCT, HOSTED_URL, NPM, REPO, RESULTS_REF, site } from "@/lib/site";
 
 export const ORIGIN = "https://www.sandboxrouter.ai";
 export const DATA = published as PublishedData;
@@ -20,24 +20,30 @@ const JOB_TEXT: Record<RecJob, string> = {
   repo: "What a coding agent does first: fetch Node 22 and a pinned real TypeScript project, npm ci, typecheck.",
 };
 const LOAD_TEXT = { start: "Start only", rl: "Quick Python runs (the 1 to 2 second Python job each)", agents: "Parallel agents (the agent loop each)" };
+const BILL_DATA_THROUGH = [
+  ...site.costRuns.map((r) => r.settledAt ?? r.date),
+  ...site.hostedCosts.map((r) => r.checkedAt ?? r.date),
+].sort().at(-1) ?? null;
 
 /** /benchmarks.json: the published numbers, with what they mean. */
 export function benchmarksJson() {
   return {
     ...DATA,
     about: {
-      what: "Sandbox provider create timings, request bursts, and workload results that meet the current verification requirements.",
+      what: "Sandbox provider create timings, request bursts, verified workload results, and billing evidence.",
       methodology: `${ORIGIN}/methodology`,
       page: `${ORIGIN}/benchmarks`,
-      rawResults: `${REPO}/tree/main/results`,
+      rawResults: `${REPO}/tree/${RESULTS_REF}/results`,
       jobs: JOB_TEXT,
       units: "Times in milliseconds (…Ms). Costs in US dollars: taskUsd is one job in a new sandbox (start, minimum charge and per-sandbox fee included), reusedUsd one job in a sandbox already running, usdPer100 a burst's estimated cost per 100 sandboxes. Estimates exclude account-specific fees such as Boat's start fees above its included allowances.",
       successRate: "For tasks, completed workloads divided by all requests. Create observations exclude recorded limit refusals from that rate.",
       load: "Bursts: n requests, ok verified completions (first command, and workload if applicable), limited reported limit refusals, p50Ms/p99Ms readiness among completions.",
       archive: "The raw results include older workload reports. Only current, verified workloads are ranked in this feed.",
-      recommend: `Rank these for a job with the MCP tool recommend_provider at ${ORIGIN}/mcp, \`npx ${NPM} recommend\`, or recommend() from ${NPM}.`,
+      bills: "Vendor metered usage and provider estimates are typed separately. Hosted charges are SandboxRouter credit debits. USD values preserve up to six decimals. Where present, billResolutionUsd is the source's precision.",
+      recommend: `Rank the current benchmark data with the MCP tool recommend_provider at ${ORIGIN}/mcp. The npm CLI uses the benchmark snapshot bundled with its installed version.`,
     },
     agent: site.agent,
+    bills: { dataThrough: BILL_DATA_THROUGH, provider: site.costRuns, hosted: site.hostedCosts },
   };
 }
 
@@ -51,7 +57,7 @@ export function benchmarksMarkdown(): string {
   const out: string[] = [
     "# sandboxRouter benchmarks",
     "",
-    `Sandbox providers measured on real accounts. Data through ${DATA.dataThrough.slice(0, 10)}. How it's measured: ${ORIGIN}/methodology. Machine-readable: ${ORIGIN}/benchmarks.json. Raw results: ${REPO}/tree/main/results.`,
+    `Sandbox providers measured on real accounts. Data through ${DATA.dataThrough.slice(0, 10)}. How it's measured: ${ORIGIN}/methodology. Machine-readable: ${ORIGIN}/benchmarks.json. Raw results: ${REPO}/tree/${RESULTS_REF}/results.`,
     "",
     "Task rankings divide estimated time and cost by the share of requests that succeeded. Older workload and real-agent results are available in the raw archive. New rankings require the current verification versions.",
     "",
@@ -124,6 +130,33 @@ export function benchmarksMarkdown(): string {
     ),
     "",
   );
+  const usage = site.costRuns.filter((r) => !r.error && r.billKind === "provider-usage");
+  const billLink = (file: string) => `[record](${REPO}/blob/${RESULTS_REF}/results/cost/${encodeURIComponent(file)})`;
+  const billUsd = (n: number | null, resolution?: number | null) => n === null ? "—" : `$${n.toFixed(resolution === 0.01 ? 2 : 6)}`;
+  if (usage.length) out.push(
+    "## Provider-reported usage",
+    "",
+    "The list estimate uses end-to-end time. A whole-cent zero lacks the precision to test a sub-cent estimate.",
+    "",
+    table(
+      ["Provider", "Date (UTC)", "Wall time", "List estimate", "Reported usage", "Report precision", "Evidence"],
+      usage.map((r) => [r.name, r.date.slice(0, 10), r.seconds === null ? "—" : `${r.seconds} s`,
+        billUsd(r.predictedUsd), billUsd(r.billedUsd, r.billResolutionUsd), r.billResolutionUsd === 0.01 ? "Whole cents" : "—", billLink(r.file)]),
+    ),
+    "",
+  );
+  if (site.hostedCosts.length) out.push(
+    "## SandboxRouter hosted charges",
+    "",
+    "These are debits from a funded SandboxRouter key. Runtime quotes use the observed elapsed time.",
+    "",
+    table(
+      ["Provider", "Original duration", "Recorded runtime", "Original quote", "Runtime quote", "Ledger debit", "Evidence"],
+      site.hostedCosts.map((r) => [r.name, `${r.expectedSeconds} s`, `${r.runtimeSeconds} s`, billUsd(r.quoteUsd),
+        billUsd(r.quoteAtRecordedRuntimeUsd ?? null), billUsd(r.chargeUsd), billLink(r.file)]),
+    ),
+    "",
+  );
   return out.join("\n");
 }
 
@@ -141,7 +174,7 @@ export function llmsTxt(): string {
 ## How an agent should use it
 
 - **Ask which provider for a job:** MCP endpoint \`${ORIGIN}/mcp\` (Streamable HTTP, no auth), tool \`recommend_provider\` with \`job\` (${JOBS.join(", ")}), \`count\` (sandboxes at once), \`priority\` (${PRIORITIES.join(", ")}). Or \`npx ${NPM} recommend --job python --count 100\`, or \`recommend()\` from the SDK.
-- **Read the numbers:** ${ORIGIN}/benchmarks.json (stable schema, field meanings under \`about\`). Raw results for every run: ${REPO}/tree/main/results
+- **Read the numbers:** ${ORIGIN}/benchmarks.json (stable schema, field meanings under \`about\`). Raw results for every run: ${REPO}/tree/${RESULTS_REF}/results
 - **Read any page as Markdown:** send \`Accept: text/markdown\`, or add \`.md\` to the path (for example ${ORIGIN}/benchmarks.md).
 - The SDK's routing already uses these published start times when you haven't benchmarked yourself.
 
@@ -239,10 +272,10 @@ export const MCP_TOOLS = [
   },
   {
     name: "get_benchmarks",
-    description: "The published benchmark numbers: start time, cost and time per job, bursts at once, and the real-agent test. Same data as /benchmarks.json.",
+    description: "The published benchmark numbers: start time, cost and time per job, bursts at once, real-agent tests, and billing evidence. Same data as /benchmarks.json.",
     inputSchema: {
       type: "object",
-      properties: { section: { type: "string", enum: ["start", "jobs", "load", "agent", "all"], description: "Default all." } },
+      properties: { section: { type: "string", enum: ["start", "jobs", "load", "agent", "bills", "all"], description: "Default all." } },
       additionalProperties: false,
     },
   },
@@ -277,7 +310,8 @@ export function callTool(name: string, args: Json): Json {
     const all = benchmarksJson() as unknown as Json;
     if (section === "all") return all;
     if (section === "agent") return { agent: site.agent, dataThrough: DATA.dataThrough };
-    if (!["start", "jobs", "load"].includes(section)) throw new ToolError("section must be one of start, jobs, load, agent, all");
+    if (section === "bills") return { bills: all.bills, dataThrough: BILL_DATA_THROUGH, about: all.about };
+    if (!["start", "jobs", "load"].includes(section)) throw new ToolError("section must be one of start, jobs, load, agent, bills, all");
     return { [section]: all[section], dataThrough: DATA.dataThrough, about: all.about };
   }
   if (name === "get_provider") {

@@ -5,7 +5,7 @@ import { site } from "@/lib/site";
 export function Sources() {
   const cloud = site.providers.filter((p) => !p.local);
   const passed = cloud.filter((p) => p.live.status === "passed").length;
-  const billed = new Set(site.costRuns.filter((r) => r.billedUsd !== null).map((r) => r.provider)).size;
+  const billed = new Set(site.costRuns.filter((r) => !r.error && r.billKind === "provider-usage").map((r) => r.provider)).size;
   const oldest = cloud.map((p) => p.pricing.checked).sort()[0];
   const items = [
     {
@@ -20,7 +20,7 @@ export function Sources() {
       title: "Bills are measured",
       body: (
         <>
-          Real sandboxes, then the provider&apos;s own billing API: {billed} so far, on{" "}
+          {billed} providers have sandbox-level usage amounts reported by their billing APIs. See the evidence on{" "}
           <Link href="/benchmarks#real-cost" className="underline decoration-line-2 underline-offset-2 hover:text-ink">
             the benchmarks page
           </Link>

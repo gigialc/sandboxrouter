@@ -1,0 +1,115 @@
+{
+  "tool": "sandboxrouter-hosted-ledger",
+  "date": "2026-11-17T23:37:40.938Z",
+  "keySpendDeltaUsd": 0.009050,
+  "entries": [
+    {
+      "provider": "vercel",
+      "requested": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "expectedSeconds": 10,
+      "runtimeSeconds": 10.772,
+      "quoteUsd": 0.002242,
+      "quoteAtRecordedRuntimeUsd": 0.002299,
+      "chargeUsd": 0.002299,
+      "balanceDeltaUsd": 0.002299,
+      "minimumSeconds": 60,
+      "minimumCovers": "memory",
+      "incrementSeconds": 1,
+      "feePct": 5.5,
+      "belowQuotedCapRejected": true,
+      "checkedAt": "2026-11-17T23:37:55.462Z",
+      "createMs": 1896,
+      "commandMs": 465,
+      "commandVerified": true,
+      "deleted": true
+    },
+    {
+      "provider": "vercel",
+      "requested": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "expectedSeconds": 65,
+      "runtimeSeconds": 65.812,
+      "quoteUsd": 0.006492,
+      "quoteAtRecordedRuntimeUsd": 0.006578,
+      "chargeUsd": 0.006578,
+      "balanceDeltaUsd": 0.006578,
+      "minimumSeconds": 60,
+      "minimumCovers": "memory",
+      "incrementSeconds": 1,
+      "feePct": 5.5,
+      "belowQuotedCapRejected": true,
+      "checkedAt": "2026-11-17T23:39:03.654Z",
+      "createMs": 554,
+      "commandMs": 462,
+      "commandVerified": true,
+      "deleted": true
+    },
+    {
+      "provider": "agent37",
+      "requested": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "expectedSeconds": 5,
+      "runtimeSeconds": 5.573,
+      "quoteUsd": 0.000115,
+      "quoteAtRecordedRuntimeUsd": 0.000115,
+      "chargeUsd": 0.000115,
+      "balanceDeltaUsd": 0.000115,
+      "minimumSeconds": 60,
+      "minimumCovers": "all",
+      "incrementSeconds": 60,
+      "feePct": 5.5,
+      "belowQuotedCapRejected": true,
+      "checkedAt": "2026-11-17T23:39:56.659Z",
+      "createMs": 976,
+      "commandMs": 782,
+      "commandVerified": true,
+      "deleted": true
+    },
+    {
+      "provider": "maritime",
+      "requested": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "expectedSeconds": 8,
+      "runtimeSeconds": 8.987,
+      "quoteUsd": 5.2e-05,
+      "quoteAtRecordedRuntimeUsd": 5.8e-05,
+      "chargeUsd": 5.8e-05,
+      "balanceDeltaUsd": 5.8e-05,
+      "minimumSeconds": 0,
+      "minimumCovers": "all",
+      "incrementSeconds": 1,
+      "feePct": 5.5,
+      "belowQuotedCapRejected": true,
+      "checkedAt": "2026-11-17T23:40:08.626Z",
+      "createMs": 1478,
+      "commandMs": 914,
+      "commandVerified": true,
+      "deleted": true
+    }
+  ]
+}

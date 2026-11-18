@@ -29,13 +29,18 @@ describe("billing rules", () => {
   });
 
   it("takes a fixed per-sandbox charge out before measuring billed against list", () => {
-    // Sail's saved 10-minute run: $0.015138 billed, $0.01 of it the creation charge.
+    // A metered charge includes the fixed start fee. Short runs and estimates cannot calibrate the rate.
     writeFileSync(
       join(dir, "run.json"),
       JSON.stringify({
         tool: "sandboxrouter-cost",
         date: "2026-11-06T19:13:00Z",
-        entries: [{ provider: "sail", predictedUsd: 0.010385, bill: { usd: 0.015138, source: "sail /sailboxes/spend" } }],
+        load: true,
+        entries: [
+          { provider: "sail", seconds: 600, predictedUsd: 0.010385, bill: { usd: 0.015138, kind: "provider-usage", source: "metered usage" } },
+          { provider: "daytona", seconds: 600, predictedUsd: 0.010385, bill: { usd: 0.015138, kind: "provider-estimate", source: "estimate" } },
+          { provider: "agent37", seconds: 60, predictedUsd: 0.00011, bill: { usd: 0.000109, kind: "provider-usage", source: "metered usage" } },
+        ],
       }),
     );
     expect(billedVsList(dir)).toEqual([{ provider: "sail", ratio: 0.495, date: "2026-11-06" }]);

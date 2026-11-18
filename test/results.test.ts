@@ -56,6 +56,27 @@ describe("validateResult", () => {
     expect(validateResult(cost(), NOW)).toEqual([]);
   });
 
+  it("keeps hosted ledger checks numeric, sanitised and complete", () => {
+    const entry = {
+      provider: "vercel", requested: { vcpu: 2, memoryGb: 4 }, size: { vcpu: 2, memoryGb: 4 },
+      expectedSeconds: 10, runtimeSeconds: 10.2, quoteUsd: 0.002242,
+      quoteAtRecordedRuntimeUsd: 0.002267, chargeUsd: 0.002267, balanceDeltaUsd: 0.002267,
+      feePct: 5.5, commandVerified: true, deleted: true,
+    };
+    const format = { tool: "sandboxrouter-hosted-ledger", date: "2026-11-06T10:00:00Z", entries: [entry] };
+    expect(validateResult(format, NOW)).toEqual([]);
+    expect(validateResult({ ...format, entries: [{ ...entry, keyId: "private", deleted: false }] }, NOW)).toEqual([
+      "hosted ledger entries must contain only public billing fields",
+      "vercel: command output and deletion must be verified",
+    ]);
+    expect(validateResult({ ...format, account: "private", entries: [
+      { ...entry, size: { ...entry.size, allocationId: "private" } },
+    ] }, NOW)).toEqual([
+      "hosted ledger reports must contain only public billing fields",
+      "vercel: sandbox sizes must contain only vcpu and memoryGb",
+    ]);
+  });
+
   it("refuses unknown formats and providers", () => {
     expect(validateResult([], NOW)[0]).toMatch(/not a result file/);
     expect(validateResult({ tool: "other" }, NOW)[0]).toMatch(/unknown tool/);

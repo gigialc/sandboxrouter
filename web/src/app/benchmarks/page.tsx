@@ -3,6 +3,7 @@ import { PageHeader } from "@/components/chrome";
 import Link from "next/link";
 import { AgentTable } from "@/components/AgentTable";
 import { BenchTabs } from "@/components/BenchTabs";
+import { BillTable } from "@/components/BillTable";
 import { Finder } from "@/components/Finder";
 import { LoadTable } from "@/components/LoadTable";
 import { TaskTable } from "@/components/TaskTable";
@@ -12,7 +13,6 @@ import { REPO, site } from "@/lib/site";
 
 export const metadata: Metadata = { title: "Benchmarks" };
 
-const cents = (n: number | null) => (n === null ? "n/a" : n === 0 ? "$0" : `$${n < 0.01 ? n.toFixed(4) : n.toFixed(3)}`);
 const shortDay = (iso: string) => new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
 /** One section: its title, one line, a link to how it's measured, then its table. */
 function Section({ id, title, how, children, line }: { id: string; title: string; how: string; line: React.ReactNode; children: React.ReactNode }) {
@@ -33,13 +33,9 @@ const day = (iso: string) => new Date(iso).toLocaleDateString("en-US", { year: "
 
 export default function BenchmarksPage() {
   const rows = site.leaderboard;
-  const subs = [...site.submissions].sort((a, b) => b.date.localeCompare(a.date));
+  const timedStarts = rows.filter((r) => r.medianCreateMs !== undefined);
+  const latestStart = timedStarts.map((r) => r.measuredAt).sort().at(-1);
   const maxCreate = barMax(rows.map((r) => r.medianCreateMs ?? 0));
-  const costs = site.costRuns.filter((r) => !r.error && r.billedUsd !== null && r.billedUsd > 0);
-  // A fixed charge per sandbox isn't running time: shown apart, and taken out of the ratio the router uses.
-  const feeOf = (id: string) => site.providers.find((p) => p.id === id)?.pricing.perSandboxUsd ?? 0;
-  const vsList = (r: (typeof costs)[number]) =>
-    r.predictedUsd ? `${Math.round((((r.billedUsd ?? 0) - feeOf(r.provider)) / r.predictedUsd) * 100)}%` : "n/a";
 
   return (
     <div className="px-5 sm:px-10 pt-14">
@@ -49,7 +45,7 @@ export default function BenchmarksPage() {
           Older workload reports, including Modal&apos;s short job, are in the{" "}
           <a href={`${REPO}/tree/e1a17220f875b6911a85bb8d8c9913ddeff1bf29/results`} className="underline underline-offset-4">
             benchmark archive
-          </a>. The current workload rankings require new runs with output verification.
+          </a>. The current workload rankings use runs with output verification.
         </span>
         <span className="mt-3 block text-[13px] text-muted">
           For agents:{" "}
@@ -80,7 +76,7 @@ export default function BenchmarksPage() {
                   id: "task",
                   label: "Real jobs",
                   content: (
-        <Section id="task" title="Real work" how="jobs" line="The same job across tested providers, from a short burst of CPU to installing a real repo, with costs estimated from measured times.">
+        <Section id="task" title="Real work" how="jobs" line="Workloads with verified output. Cost estimates use measured runtimes and provider pricing.">
           {site.tasks.kinds.length > 0 ? <TaskTable /> :
             <p className="mt-4 text-[13px] text-muted">No results have been published with the new workload checks yet.</p>}
         </Section>
@@ -120,7 +116,7 @@ export default function BenchmarksPage() {
         id="speed"
         title="Start time"
         how="speed"
-        line={`${rows.length} providers${subs[0] ? `, last reported run ${day(subs[0].date)}` : ""}. Each row shows the provider's create response and command round trip as separate measurements.`}
+        line={`${timedStarts.length} providers with a create timing${latestStart ? `, latest included timing ${day(latestStart)}` : ""}. Create response and command round trip are measured separately.`}
       >
 
       <ResultTable
@@ -134,21 +130,23 @@ export default function BenchmarksPage() {
         {rows.map((r, i) => (
           <ResultRow
             key={r.provider}
-            rank={i + 1}
+            rank={r.medianCreateMs === undefined ? 0 : i + 1}
             id={r.provider}
             name={r.name}
             notes={[
               r.size.vcpu !== 2 || r.size.memoryGb !== 4 ? `${r.size.vcpu} vCPU / ${r.size.memoryGb} GB` : "",
-              r.runs < 20 ? `only ${r.runs} runs` : "",
+              r.runs === 0 ? "All requests refused by the test account limit" : `${r.runs} requests excluding limit refusals`,
             ].filter(Boolean)}
           >
-            <BarNum value={r.medianCreateMs ?? 0} max={maxCreate} title={`${r.name}: median create response ${time(r.medianCreateMs)} over ${r.runs} runs, measured ${shortDay(r.measuredAt)}`}>
-              {time(r.medianCreateMs)}
-            </BarNum>
+            {r.medianCreateMs === undefined ? <Num>—</Num> : (
+              <BarNum value={r.medianCreateMs} max={maxCreate} title={`${r.name}: median create response ${time(r.medianCreateMs)} across ${r.runs} requests excluding limit refusals, measured ${shortDay(r.measuredAt)}`}>
+                {time(r.medianCreateMs)}
+              </BarNum>
+            )}
             <Num className="hidden sm:table-cell" title="Median round trip of one command, once started">
               {time(r.medianExecMs)}
             </Num>
-            <Num className="hidden md:table-cell">{Math.round(r.successRate * 100)}%</Num>
+            <Num className="hidden md:table-cell">{r.runs > 0 ? `${Math.round(r.successRate * 100)}%` : "—"}</Num>
             <Num>{perHour(r.hourlyUsd)}</Num>
           </ResultRow>
         ))}
@@ -157,41 +155,15 @@ export default function BenchmarksPage() {
             ),
           },
 
-          ...(costs.length > 0
-            ? [
-                {
-                  id: "real-cost",
-                  label: "Real bills",
-                  content: (
-        <Section id="real-cost" title="Bills" how="bills" line="What providers actually billed for a sandbox run for a fixed time, read from their own billing APIs.">
-          <ResultTable
-            ranked={false}
-            cols={[
-              { label: "Ran", className: "hidden sm:table-cell" },
-              { label: "List price said" },
-              { label: "Billed" },
-              { label: "Running time vs list", className: "hidden md:table-cell" },
-            ]}
-          >
-            {costs.map((r) => (
-              <ResultRow
-                key={`${r.date}-${r.provider}`}
-                id={r.provider}
-                name={r.name}
-                notes={[shortDay(r.date), feeOf(r.provider) ? `billed includes a ${cents(feeOf(r.provider))} start fee` : ""].filter(Boolean)}
-              >
-                <Num className="hidden sm:table-cell">{r.seconds === null ? "n/a" : `${Math.round(r.seconds / 60)} min`}</Num>
-                <Num>{cents(r.predictedUsd)}</Num>
-                <Num strong>{cents(r.billedUsd)}</Num>
-                <Num className="hidden md:table-cell">{vsList(r)}</Num>
-              </ResultRow>
-            ))}
-          </ResultTable>
-        </Section>
-                  ),
-                },
-              ]
-            : []),
+          {
+            id: "real-cost",
+            label: "Real bills",
+            content: (
+              <Section id="real-cost" title="Bills" how="bills" line="Compare the list estimate with metered sandbox usage and recorded hosted charges.">
+                <BillTable />
+              </Section>
+            ),
+          },
         ]}
       />
 

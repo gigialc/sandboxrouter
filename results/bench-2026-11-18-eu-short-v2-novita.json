@@ -1,0 +1,42 @@
+{
+  "tool": "sandboxrouter",
+  "version": "0.13.0",
+  "date": "2026-11-17T23:43:41.482Z",
+  "label": "home-eu",
+  "runs": 3,
+  "spec": {
+    "vcpu": 2,
+    "memoryGb": 4
+  },
+  "task": "v2",
+  "node": "v22.22.0",
+  "platform": "darwin-arm64",
+  "rows": [
+    {
+      "provider": "novita",
+      "runs": 3,
+      "failures": 0,
+      "createFailures": 0,
+      "commandFailures": 0,
+      "cleanupFailures": 0,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "medianCreateMs": 634,
+      "medianExecMs": 586,
+      "medianReadyMs": 1279,
+      "hourlyUsd": 0.11664,
+      "taskOk": 3,
+      "medianTaskReadyMs": 1279,
+      "medianTaskMs": 2166,
+      "taskPhasesMs": {
+        "cpu": 1321,
+        "cores": 613,
+        "disk": 245
+      },
+      "medianTaskCpuMs": 2810,
+      "medianTaskMaxCoreMs": 2080
+    }
+  ]
+}

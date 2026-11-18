@@ -9,8 +9,8 @@ import { AGENT_TASK_VERSION } from "./agent-bench.js";
  * Checks for the files people submit to results/: bench reports, saved `check` runs and `cost` runs.
  *
  * Submissions are self-reported, so nothing here can prove a number is real. What it can do is keep
- * the obvious problems out before a maintainer reviews the PR: files that aren't one of the three
- * formats, unknown providers, impossible numbers, anything that looks like a key, and labels that
+ * the obvious problems out before a maintainer reviews the PR: unsupported formats, unknown
+ * providers, impossible numbers, anything that looks like a key, and labels that
  * look like a home address or an email. CI runs it on every push and pull request
  * (`npm run results:check`), and on a pull request it also refuses edits to someone else's bench
  * report: a new run is a new file.
@@ -255,12 +255,55 @@ export function validateResult(j: any, now = Date.now()): string[] {
       if (e?.seconds !== undefined && !isNum(e.seconds, 0, 2 * 24 * 3600)) out.push(`${e?.provider}: seconds is out of range`);
       if (e?.predictedUsd !== undefined && !isNum(e.predictedUsd, 0, 1000)) out.push(`${e?.provider}: predictedUsd is out of range`);
       if (e?.bill?.usd !== undefined && !isNum(e.bill.usd, 0, 1000)) out.push(`${e?.provider}: bill.usd is out of range`);
+      if (e?.bill?.kind !== undefined && !["provider-usage", "provider-estimate"].includes(e.bill.kind)) {
+        out.push(`${e?.provider}: invalid billing evidence kind`);
+      }
+      if (e?.bill?.resolutionUsd !== undefined && !isNum(e.bill.resolutionUsd, 0.000001, 1)) {
+        out.push(`${e?.provider}: billing resolution is out of range`);
+      }
       if (e?.delivered && !(isNum(e.delivered.vcpu, 0.1, 1024) && isNum(e.delivered.memoryMb, 64, 4_194_304))) {
         out.push(`${e?.provider}: delivered size is out of range`);
       }
     }
+  } else if (j.tool === "sandboxrouter-hosted-ledger") {
+    add(checkDate(j.date, now));
+    const runFields = new Set(["tool", "date", "entries", "keySpendDeltaUsd"]);
+    if (Object.keys(j).some((key) => !runFields.has(key))) out.push("hosted ledger reports must contain only public billing fields");
+    if (j.keySpendDeltaUsd !== undefined && !isNum(j.keySpendDeltaUsd, 0, 1000)) out.push("invalid total key spend delta");
+    if (!Array.isArray(j.entries) || !j.entries.length) out.push("entries is empty");
+    const fields = new Set([
+      "provider", "requested", "size", "expectedSeconds", "runtimeSeconds", "quoteUsd", "chargeUsd", "quoteAtRecordedRuntimeUsd",
+      "balanceDeltaUsd", "keySpendDeltaUsd", "minimumSeconds", "minimumCovers", "incrementSeconds",
+      "feePct", "checkedAt", "createMs", "commandMs", "belowQuotedCapRejected", "commandVerified", "deleted",
+    ]);
+    for (const e of Array.isArray(j.entries) ? j.entries : []) {
+      provider(e?.provider, "entry provider");
+      if (noBench(e?.provider)) out.push(`${e.provider}: ${NO_BENCH}`);
+      if (Object.keys(e ?? {}).some((key) => !fields.has(key))) out.push("hosted ledger entries must contain only public billing fields");
+      if (![e?.requested, e?.size].every((size) => isSize(size) && Object.keys(size).length === 2)) {
+        out.push(`${e?.provider}: sandbox sizes must contain only vcpu and memoryGb`);
+      }
+      for (const key of ["expectedSeconds", "runtimeSeconds"] as const) {
+        if (!isNum(e?.[key], 0, 24 * 3600)) out.push(`${e?.provider}: invalid ${key}`);
+      }
+      for (const key of ["quoteUsd", "chargeUsd", "balanceDeltaUsd"] as const) {
+        if (!isNum(e?.[key], 0, 1000)) out.push(`${e?.provider}: invalid ${key}`);
+      }
+      if (e?.keySpendDeltaUsd !== undefined && !isNum(e.keySpendDeltaUsd, 0, 1000)) out.push(`${e.provider}: invalid keySpendDeltaUsd`);
+      if (e?.quoteAtRecordedRuntimeUsd !== undefined && !isNum(e.quoteAtRecordedRuntimeUsd, 0, 1000)) out.push(`${e.provider}: invalid runtime quote`);
+      if (e?.minimumSeconds !== undefined && !isNum(e.minimumSeconds, 0, 24 * 3600)) out.push(`${e.provider}: invalid minimumSeconds`);
+      if (e?.minimumCovers !== undefined && !["all", "memory"].includes(e.minimumCovers)) out.push(`${e.provider}: invalid minimumCovers`);
+      if (e?.incrementSeconds !== undefined && !isNum(e.incrementSeconds, 1, 24 * 3600)) out.push(`${e.provider}: invalid incrementSeconds`);
+      if (!isNum(e?.feePct, 0, 100)) out.push(`${e?.provider}: invalid feePct`);
+      if (e?.checkedAt !== undefined) add(checkDate(e.checkedAt, now));
+      for (const key of ["createMs", "commandMs"] as const) {
+        if (e?.[key] !== undefined && !isNum(e[key], 0, MAX_MS)) out.push(`${e.provider}: invalid ${key}`);
+      }
+      if (e?.belowQuotedCapRejected !== undefined && typeof e.belowQuotedCapRejected !== "boolean") out.push(`${e.provider}: invalid cap check`);
+      if (e?.commandVerified !== true || e?.deleted !== true) out.push(`${e?.provider}: command output and deletion must be verified`);
+    }
   } else {
-    out.push(`unknown tool "${String(j.tool)}": expected a bench report, a burst report, a spread report, an agent report, a saved check or a cost run`);
+    out.push(`unknown tool "${String(j.tool)}": expected a benchmark report, saved check, cost run or hosted ledger check`);
   }
   return out;
 }

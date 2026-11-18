@@ -1,0 +1,42 @@
+{
+  "tool": "sandboxrouter",
+  "version": "0.13.0",
+  "date": "2026-11-17T23:41:34.251Z",
+  "label": "home-eu",
+  "runs": 3,
+  "spec": {
+    "vcpu": 2,
+    "memoryGb": 4
+  },
+  "task": "repo-v2",
+  "node": "v22.22.0",
+  "platform": "darwin-arm64",
+  "rows": [
+    {
+      "provider": "vercel",
+      "runs": 3,
+      "failures": 0,
+      "createFailures": 0,
+      "commandFailures": 0,
+      "cleanupFailures": 0,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "medianCreateMs": 705,
+      "medianExecMs": 260,
+      "medianReadyMs": 990,
+      "hourlyUsd": 0.3408,
+      "taskOk": 3,
+      "medianTaskReadyMs": 990,
+      "medianTaskMs": 19088,
+      "taskPhasesMs": {
+        "fetch": 1890,
+        "install": 16458,
+        "typecheck": 740
+      },
+      "medianTaskCpuMs": 25110,
+      "medianTaskMaxCoreMs": 14060
+    }
+  ]
+}
