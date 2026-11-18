@@ -5,7 +5,7 @@ import { useState } from "react";
 import { BarNum, Footnote, Num, ResultRow, ResultTable, Segmented, Toolbar, Txt, barMax, perHour, time } from "@/components/results";
 import { CAPABILITY_LABEL, DEFAULT_SHAPE, fixedPrice, ranked, shapeLabel, site, usd, type Shape } from "@/lib/site";
 
-const NEEDS = ["pause", "gpu", "custom-image"] as const;
+const NEEDS = ["pause", "ports", "background", "gpu", "custom-image"] as const;
 
 /** Every provider's list price at a size, cheapest first, in the same table style as the benchmarks. */
 export function ProviderTable() {

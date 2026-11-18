@@ -1,8 +1,8 @@
 import { CATALOG } from "./catalog.js";
-import { RouterError, type RouteOptions, type SandboxSpec, type Strategy } from "./types.js";
+import { RouterError, type RouteOptions, type SandboxSpec, type StartOptions, type Strategy } from "./types.js";
 
 /** Every key a SandboxSpec can have. Anything else in a request is a mistake (e.g. "memory" for "memoryGb"). */
-export const SPEC_KEYS = ["vcpu", "memoryGb", "gpu", "env", "timeoutMinutes", "expectedSeconds", "cpuUtilization", "image", "metadata"] as const;
+export const SPEC_KEYS = ["vcpu", "memoryGb", "gpu", "env", "ports", "timeoutMinutes", "expectedSeconds", "cpuUtilization", "image", "metadata"] as const;
 /** Every key RouteOptions can have. */
 export const ROUTE_KEYS = ["provider", "strategy", "fallback", "require", "createTimeoutSeconds", "deadlineSeconds", "maxHourlyUsd"] as const;
 export const STRATEGIES: readonly Strategy[] = ["default", "balanced", "verified", "cheapest", "fastest"];
@@ -12,6 +12,19 @@ const positive = (v: unknown) => typeof v === "number" && Number.isFinite(v) && 
 /** How a bad value is shown: numbers as-is (NaN, Infinity), anything else as JSON. */
 const show = (v: unknown) => (typeof v === "number" ? String(v) : JSON.stringify(v));
 const stringMap = (v: unknown) => typeof v === "object" && v !== null && !Array.isArray(v) && Object.values(v).every((x) => typeof x === "string");
+
+export function isPort(value: unknown): value is number {
+  return typeof value === "number" && Number.isInteger(value) && value >= 1 && value <= 65535;
+}
+
+export function validateStart(cmd: unknown, opts: StartOptions = {}): asserts cmd is string {
+  if (typeof cmd !== "string" || !cmd.trim() || cmd.includes("\0")) throw bad("cmd must be a non-empty command string");
+  if (!opts || typeof opts !== "object" || Array.isArray(opts) || Object.keys(opts).some((key) => key !== "cwd" && key !== "env")) {
+    throw bad("background command options are cwd and env");
+  }
+  if (opts.cwd !== undefined && (typeof opts.cwd !== "string" || !opts.cwd || opts.cwd.includes("\0"))) throw bad("cwd must be a non-empty path string");
+  if (opts.env !== undefined && !stringMap(opts.env)) throw bad("env must be an object of strings");
+}
 
 /**
  * Throws RouterError("bad_request") for a spec or route a provider couldn't make sense of: sizes and
@@ -26,6 +39,9 @@ export function validate(spec: SandboxSpec = {}, route: RouteOptions = {}): void
     throw bad(`cpuUtilization must be more than 0 and at most 1, got ${show(spec.cpuUtilization)}`);
   }
   if (spec.gpu !== undefined && (typeof spec.gpu !== "string" || !spec.gpu)) throw bad(`gpu must be a GPU type such as "T4", got ${JSON.stringify(spec.gpu)}`);
+  if (spec.ports !== undefined && (!Array.isArray(spec.ports) || ![...spec.ports].every(isPort) || new Set(spec.ports).size !== spec.ports.length)) {
+    throw bad("ports must be an array of distinct integers from 1 to 65535");
+  }
   for (const k of ["env", "image", "metadata"] as const) {
     if (spec[k] !== undefined && !stringMap(spec[k])) throw bad(`${k} must be an object of strings`);
   }

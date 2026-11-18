@@ -59,6 +59,10 @@ class FakeSandbox {
     if (!c) throw new Error(`Command ${cmdId} not found in session ${session}`);
     return c;
   }
+  async getSignedPreviewUrl(port: number, seconds: number) {
+    calls.push(["getSignedPreviewUrl", this.id, port, seconds]);
+    return { url: `https://${port}-signed-${this.id}.preview.test`, token: "signed" };
+  }
 
   process = {
     createSession: async (session: string) => {
@@ -262,6 +266,43 @@ describe("DaytonaProvider", () => {
     expect(created[2].autoStopInterval).toBe(1);
     createError = new Error("Insufficient resources in the organization's quota");
     await expect(p().create({})).rejects.toThrow(/quota/);
+  });
+
+  it("returns the port-scoped signed preview URL for a reconnected sandbox", async () => {
+    const created = await p().create({ ports: [3000] });
+    try {
+      const box = await p().connect(created.nativeId);
+      await expect(box.url!(3000)).resolves.toBe(`https://3000-signed-${box.nativeId}.preview.test`);
+      expect(sdk("getSignedPreviewUrl")).toEqual([[box.nativeId, 3000, 3600]]);
+    } finally {
+      await created.kill();
+    }
+  });
+
+  it("starts a command in a private detached session and stops it without stopping the sandbox", async () => {
+    const box = await p().create({});
+    try {
+      const background = await box.start!('printf "%s" "$TEST_VALUE" > daytona-ready; exec sleep 30', {
+        cwd: root,
+        env: { TEST_VALUE: "ready" },
+      });
+      try {
+        await vi.waitFor(() => expect(readFileSync(join(root, "daytona-ready"), "utf8")).toBe("ready"));
+      } finally {
+        await background.kill();
+      }
+      const session = sdk("createSession")[0][1];
+      expect(sdk("executeSessionCommand")).toEqual([[session, {
+        command: expect.stringContaining("exec sleep 30"),
+        runAsync: true,
+        suppressInputEcho: true,
+      }]]);
+      expect(sdk("deleteSession")).toEqual([[box.nativeId, session]]);
+      expect((await box.exec("printf alive")).stdout).toBe("alive");
+      expect(sdk("stop")).toEqual([]);
+    } finally {
+      await box.kill();
+    }
   });
 
   it("deletes a sandbox Daytona created but couldn't start, found by its per-create tag", async () => {

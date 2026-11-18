@@ -8,6 +8,7 @@ import { DEFAULT_EXEC_TIMEOUT_S, dirname, guardTimeout, killedByTimeout, shq, ti
  * Local sandboxes in Docker containers, through the `docker` CLI. Free and needs no account, so it
  * is good for development and tests. A container shares your machine's kernel: it is weaker
  * isolation than a cloud micro-VM, so don't point untrusted code at it with secrets mounted.
+ * Requested ports get a free loopback port on the Docker host, reachable only on that host.
  * Never chosen automatically; route to it with { provider: "docker" }.
  */
 export class DockerProvider implements Provider {
@@ -41,6 +42,7 @@ export class DockerProvider implements Provider {
       "--memory",
       `${Math.round((spec.memoryGb ?? DEFAULT_MEMORY_GB) * 1024)}m`,
     ];
+    for (const port of spec.ports ?? []) args.push("--publish", `127.0.0.1::${port}`);
     for (const [k, v] of Object.entries(spec.env ?? {})) args.push("-e", `${k}=${v}`);
     for (const [k, v] of Object.entries(spec.metadata ?? {})) args.push("--label", `${k}=${v}`);
     // The container's main process is a timer: it exits at the lifetime and --rm removes it.
@@ -80,6 +82,20 @@ class DockerBox implements ProviderSandbox {
       if (r.timedOut || killedByTimeout(r.code ?? -1, r.ms, seconds)) throw timeoutError("docker", seconds);
       return { exitCode: r.code ?? -1, stdout: r.stdout, stderr: r.stderr, durationMs: r.ms };
     });
+  }
+
+  async url(port: number): Promise<string> {
+    const r = await run(this.bin, ["port", this.nativeId, `${port}/tcp`]);
+    if (r.code !== 0 && containerAbsent(r.stderr)) throw new ProviderError("docker", `no container ${this.nativeId}`, 404);
+    if (r.code !== 0 && !/no public port/i.test(r.stderr)) {
+      throw new ProviderError("docker", `docker port failed: ${r.stderr.trim().slice(0, 300)}`);
+    }
+    const match = /^127\.0\.0\.1:(\d+)\s*$/m.exec(r.stdout);
+    const mapped = Number(match?.[1]);
+    if (!Number.isInteger(mapped) || mapped < 1 || mapped > 65535) {
+      throw new ProviderError("docker", `port ${port} has no loopback mapping; include it in the sandbox's ports at creation`, 400);
+    }
+    return `http://127.0.0.1:${mapped}`;
   }
 
   async writeFile(path: string, content: string | Uint8Array): Promise<void> {

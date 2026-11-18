@@ -280,6 +280,8 @@ export function ranked(shape: Shape = DEFAULT_SHAPE) {
 
 export const CAPABILITY_LABEL: Record<string, string> = {
   pause: "Pause",
+  ports: "Preview URLs",
+  background: "Background commands",
   gpu: "GPU",
   "custom-image": "Custom image",
   computers: "Desktops",

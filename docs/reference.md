@@ -113,9 +113,9 @@ await p.pause();
 // Ids are portable across processes: "provider:nativeId"
 const again = await router.get(a.id);
 
-// Anything the router doesn't cover (ports, background processes, snapshots): the provider SDK's own
-// object. Undefined for providers driven over plain HTTP; use a.nativeId with their API instead.
-if (a.provider === "e2b") console.log((a.native as import("e2b").Sandbox).getHost(3000));
+// For provider-specific features such as snapshots, use the connected provider SDK object.
+// On providers driven over plain HTTP, use a.nativeId with the provider API.
+if (a.provider === "e2b") console.log((a.native as import("e2b").Sandbox).sandboxId);
 
 // Dry run: who would be tried, in what order, and why anything is skipped
 console.table(router.plan({ vcpu: 32 }));
@@ -324,6 +324,21 @@ It prints one line per step and exits 1 if any fails. `checkProvider(router, id)
 | E2B | 14/14 passed | 2026-11-13, v0.7.0 |
 | Docker (local) | 14/14 passed | 2026-11-13, v0.7.0 |
 
+## Preview URLs and background commands
+
+`ports` declares the HTTP ports your application will listen on. Declaring any port requires the `ports` capability, which you can also select explicitly. Add `background` when you need a process handle as well as a preview URL. Vercel, Modal and Docker require the declaration at creation. Providers with dynamic previews can resolve or open a port on demand.
+
+```ts
+const sbx = await router.create({ ports: [3000], timeoutMinutes: 10 }, { require: ["ports", "background"] });
+const server = await sbx.start("exec python3 -m http.server 3000 --bind 0.0.0.0", { cwd: "/tmp" });
+const preview = await sbx.url(3000);
+console.log(preview);
+```
+
+`start` returns when the provider accepts the command. Wait for your service to listen before sharing the link. Preview visibility and expiry depend on the provider. Deno opens a public URL when you call `url`. A signed link can grant access to the service. Docker publishes its previews on the Docker host's loopback address.
+
+Call `await server.kill()` to stop the command and keep using the sandbox. Launch the server binary with `exec` so the handle tracks it. Providers can signal only the tracked process when a command spawns children. Call `await sbx.kill()` to release the sandbox and all its processes.
+
 ## HTTP API
 
 ```bash
@@ -335,8 +350,11 @@ SANDBOXROUTER_TOKEN=secret npx @sandboxrouter/sdk serve
 | `GET` | `/v1/providers` | |
 | `POST` | `/v1/route` | same as create; returns the candidate order |
 | `POST` | `/v1/quote` | same as create; returns `router.quote()`: the provider a create would use and the run's estimated cost |
-| `POST` | `/v1/sandboxes` | `{ vcpu, memoryGb, gpu, env, timeoutMinutes, expectedSeconds, cpuUtilization, image, metadata, provider, strategy, fallback, createTimeoutSeconds, deadlineSeconds, require, maxHourlyUsd }`. Other fields are refused. Answers `{ id, provider, size, estimatedHourlyUsd, listHourlyUsd, attempts }` |
+| `POST` | `/v1/sandboxes` | `{ vcpu, memoryGb, gpu, env, ports, timeoutMinutes, expectedSeconds, cpuUtilization, image, metadata, provider, strategy, fallback, createTimeoutSeconds, deadlineSeconds, require, maxHourlyUsd }`. Other fields are refused. Answers `{ id, provider, size, estimatedHourlyUsd, listHourlyUsd, attempts }` |
 | `POST` | `/v1/sandboxes/:id/exec` | `{ cmd, cwd, env, timeoutSeconds, stream }`. With `stream: true` the answer is `text/event-stream`: `stdout` and `stderr` events, then `result` |
+| `GET` | `/v1/sandboxes/:id/ports/:port` | Returns `{ url }` |
+| `POST` | `/v1/sandboxes/:id/processes` | `{ cmd, cwd, env }`. Returns `201 { id }` |
+| `DELETE` | `/v1/sandboxes/:id/processes/:processId` | Stops the command and returns `{ id, killed: true }` |
 | `POST` | `/v1/sandboxes/:id/pause` | |
 | `PUT` | `/v1/sandboxes/:id/files?path=` | raw bytes |
 | `GET` | `/v1/sandboxes/:id/files?path=` | |
@@ -359,6 +377,8 @@ curl -s localhost:8787/v1/sandboxes -H "Authorization: Bearer secret" \
 Errors are `{ error, code, attempts }` (see [Errors](#errors)). On a single server process, send `Idempotency-Key: <unique string>` on `POST /v1/sandboxes` or `/v1/computers`. While the original request is cached, the same key and request body return its first result (with `Idempotent-Replayed: true`). An in-progress retry waits and a different body returns 422. The cache keeps up to 10,000 requests for up to 24 hours and resets on restart. A failed create is removed from the cache. With a key, a disconnected caller has 2 minutes to retry before the server tries to clean up its sandbox. Without a key, the server attempts cleanup as soon as the interrupted create completes.
 
 From TypeScript: `client.create(spec, route, { idempotencyKey })`. From Python: `create(idempotency_key=...)`. Provider keys stay on the server. Clients only hold `SANDBOXROUTER_TOKEN`. The server binds to `127.0.0.1` by default. Both `--cors` and a public `--host` require `SANDBOXROUTER_TOKEN`.
+
+The self-hosted clients provide the same `sbx.start(...)`, process `kill()`, and `sbx.url(port)` methods. Process handles belong to the sandbox and the API server instance that started them. After an API server restart, delete the sandbox to clean up its processes.
 
 ### TypeScript client
 

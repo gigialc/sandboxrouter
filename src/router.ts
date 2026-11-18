@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { accessLabel, billedCpuShare, billingRules, CATALOG, cpuHourlyAtFull, DEFAULT_MEMORY_GB, DEFAULT_VCPU, fixedSize, hourlyCost, info, unfit, vercelSandboxSize, type ProviderInfo } from "./catalog.js";
 import {
   type ComputerRoute,
@@ -15,7 +16,7 @@ import { Ledger, defaultLedgerFile } from "./ledger.js";
 import { DEFAULT_EXEC_TIMEOUT_S, LIMIT_ERROR, SETUP_ERRORS, errorStatus, timeoutError, withDeadline } from "./util.js";
 import { BILLED_VS_LIST } from "./billing.js";
 import { FAILING, VERIFIED } from "./verified.js";
-import { validate } from "./validate.js";
+import { isPort, validate, validateStart } from "./validate.js";
 import { DaytonaProvider } from "./providers/daytona.js";
 import { E2BProvider } from "./providers/e2b.js";
 import { MaritimeProvider } from "./providers/maritime.js";
@@ -65,7 +66,9 @@ import {
   type ProviderId,
   type ProviderSandbox,
   type RouteOptions,
+  type SandboxProcess,
   type SandboxSpec,
+  type StartOptions,
 } from "./types.js";
 
 /** vCPUs and memory a sandbox gets. */
@@ -697,10 +700,9 @@ export class RoutedSandbox {
   }
 
   /**
-   * The provider SDK's own sandbox object, for what the router doesn't cover: ports, background processes,
-   * snapshots, anything else the provider has. Narrow it with the provider's own type, e.g.
-   * `if (sbx.provider === "e2b") (sbx.native as import("e2b").Sandbox).getHost(3000)`. Undefined for providers
-   * driven over plain HTTP (use `nativeId` with their API). Calls made through it aren't routed or tracked.
+   * The provider SDK's own sandbox object for provider-specific features such as snapshots. Narrow it
+   * with the provider's own type. Undefined for providers driven over plain HTTP (use `nativeId` with
+   * their API). Calls made through it aren't routed or tracked.
    */
   get native(): unknown {
     return this.box.native;
@@ -715,6 +717,38 @@ export class RoutedSandbox {
   exec(cmd: string, opts: ExecOptions = {}): Promise<ExecResult> {
     const seconds = opts.timeoutSeconds ?? DEFAULT_EXEC_TIMEOUT_S;
     return withDeadline(this.box.exec(cmd, opts), (seconds + EXEC_GRACE_S) * 1000, () => timeoutError(this.provider, seconds));
+  }
+
+  /** Get the provider's HTTP preview URL for a service listening on this port. */
+  async url(port: number): Promise<string> {
+    if (!isPort(port)) throw new RouterError("port must be an integer from 1 to 65535", [], "bad_request");
+    if (!this.box.url) throw new RouterError(`${this.provider} does not support port URLs; create with require: ["ports"]`, [], "unsupported");
+    const preview = await this.box.url(port);
+    if (!/^https?:\/\//i.test(preview) || !URL.canParse(preview)) {
+      throw new ProviderError(this.provider, "invalid HTTP preview URL", 502);
+    }
+    return preview;
+  }
+
+  /** Start a command and return a handle that stops it without stopping the sandbox. */
+  async start(cmd: string, opts: StartOptions = {}): Promise<SandboxProcess> {
+    validateStart(cmd, opts);
+    if (!this.box.start) throw new RouterError(`${this.provider} does not support background commands; create with require: ["background"]`, [], "unsupported");
+    const pending = this.box.start(cmd, opts);
+    const handle = await withDeadline(pending, (DEFAULT_EXEC_TIMEOUT_S + EXEC_GRACE_S) * 1000, () => {
+      // The caller has no handle if the provider answers after the start deadline.
+      void pending.then((late) => late.kill()).catch(() => {});
+      return new ProviderError(this.provider, "background command start timed out", 504);
+    });
+    let stopping: Promise<void> | undefined;
+    return {
+      id: randomUUID(),
+      kill: () => stopping ??= Promise.resolve().then(() => handle.kill()).catch((error: unknown) => {
+        if (errorStatus(error) === 404) return;
+        stopping = undefined;
+        throw error;
+      }),
+    };
   }
 
   writeFile(path: string, content: string | Uint8Array): Promise<void> {

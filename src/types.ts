@@ -38,6 +38,8 @@ export type ProviderId =
 export type Capability =
   | "gpu" // GPU attached to the sandbox
   | "pause" // pause() keeps the sandbox's disk; the next call or router.get() resumes it
+  | "ports" // URL for an HTTP server listening inside the sandbox
+  | "background" // Start and stop a command independently of exec()
   | "custom-image"; // start from your own image/template via spec.image
 
 /** What the caller wants. Every field is optional; providers map it to their own knobs. */
@@ -55,6 +57,8 @@ export interface SandboxSpec {
   gpu?: string;
   /** Env vars set for every command. */
   env?: Record<string, string>;
+  /** HTTP ports to make available for previews. Some providers need these when the sandbox is created. */
+  ports?: number[];
   /** Hard lifetime in minutes (default 30). */
   timeoutMinutes?: number;
   /**
@@ -147,6 +151,18 @@ export interface ExecResult {
   durationMs: number;
 }
 
+/** A background command uses the sandbox lifetime and returns once the provider starts it. */
+export type StartOptions = Pick<ExecOptions, "cwd" | "env">;
+
+export interface ProviderProcess {
+  kill(): Promise<void>;
+}
+
+/** A background command started by a routed sandbox. */
+export interface SandboxProcess extends ProviderProcess {
+  readonly id: string;
+}
+
 /** A live sandbox as one provider sees it. Adapters implement this. */
 export interface ProviderSandbox {
   readonly nativeId: string;
@@ -161,6 +177,10 @@ export interface ProviderSandbox {
   kill(): Promise<void>;
   /** Present only on adapters with the "pause" capability. */
   pause?(): Promise<void>;
+  /** Present on adapters with the "ports" capability. */
+  url?(port: number): string | Promise<string>;
+  /** Present on adapters with the "background" capability. */
+  start?(cmd: string, opts?: StartOptions): Promise<ProviderProcess>;
 }
 
 export interface Provider {

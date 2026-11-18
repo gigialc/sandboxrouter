@@ -19,7 +19,7 @@ import urllib.request
 from dataclasses import dataclass, field
 from typing import Any, Callable, Iterator, Optional
 
-__all__ = ["Client", "Sandbox", "Computer", "ExecResult", "SandboxRouterError"]
+__all__ = ["Client", "Sandbox", "SandboxProcess", "Computer", "ExecResult", "SandboxRouterError"]
 __version__ = "0.1.0"
 
 
@@ -57,6 +57,7 @@ _SPEC_KEYS = {
     "cpu_utilization": "cpuUtilization",
     "image": "image",
     "metadata": "metadata",
+    "ports": "ports",
     "provider": "provider",
     "strategy": "strategy",
     "fallback": "fallback",
@@ -122,7 +123,7 @@ class Client:
         return self._json("POST", "/v1/quote", _camel(spec))
 
     def create(self, idempotency_key: Optional[str] = None, **spec: Any) -> "Sandbox":
-        """Start a sandbox. Spec: vcpu, memory_gb, gpu, env, timeout_minutes, expected_seconds, image, metadata.
+        """Start a sandbox. Spec: vcpu, memory_gb, gpu, env, timeout_minutes, expected_seconds, image, metadata, ports.
         Routing: provider (str or list), strategy ("balanced" | "verified" | "cheapest" | "fastest"; default
         balanced: cheapest real cost, speed breaks near-ties), fallback (True, False or "any"),
         create_timeout_seconds, deadline_seconds, require, max_hourly_usd (skip providers that would cost more per hour for this run).
@@ -210,6 +211,21 @@ class Sandbox:
                     raise SandboxRouterError(502, payload.get("error", data))
         raise SandboxRouterError(502, "stream ended before the command finished")
 
+    def url(self, port: int) -> str:
+        """Get the HTTP preview URL. Some providers need ports declared at creation."""
+        path = self._p(f"/ports/{urllib.parse.quote(str(port), safe='')}")
+        return self.client._json("GET", path)["url"]
+
+    def start(self, cmd: str, cwd: Optional[str] = None, env: Optional[dict[str, str]] = None) -> "SandboxProcess":
+        """Start a background command and return a handle to stop it."""
+        body: dict[str, Any] = {"cmd": cmd}
+        if cwd is not None:
+            body["cwd"] = cwd
+        if env is not None:
+            body["env"] = env
+        result = self.client._json("POST", self._p("/processes"), body)
+        return SandboxProcess(self, result["id"])
+
     def write_file(self, path: str, content) -> None:
         data = content.encode() if isinstance(content, str) else bytes(content)
         self.client._bytes("PUT", self._p(f"/files?path={urllib.parse.quote(path)}"), data)
@@ -231,6 +247,23 @@ class Sandbox:
 
     def __exit__(self, *exc) -> None:
         self.kill()
+
+
+class SandboxProcess:
+    """A background command registered by the HTTP server for this sandbox."""
+
+    def __init__(self, sandbox: Sandbox, process_id: str):
+        self._sandbox = sandbox
+        self.id = process_id
+        self._stopped = False
+
+    def kill(self) -> None:
+        """Stop this command, leaving the sandbox running."""
+        if self._stopped:
+            return
+        path = self._sandbox._p(f"/processes/{urllib.parse.quote(self.id, safe='')}")
+        self._sandbox.client._json("DELETE", path)
+        self._stopped = True
 
 
 class Computer:

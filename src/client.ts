@@ -1,5 +1,5 @@
 import type { Candidate, Quote, Size } from "./router.js";
-import type { Attempt, ExecOptions, ExecResult, RouteOptions, RouterErrorCode, SandboxSpec } from "./types.js";
+import type { Attempt, Capability, ExecOptions, ExecResult, RouteOptions, RouterErrorCode, SandboxProcess, SandboxSpec, StartOptions } from "./types.js";
 
 /**
  * Client for the sandboxrouter HTTP API: the hosted service (one key, prepaid credits) or your own
@@ -50,7 +50,7 @@ export class Client {
   }
 
   /** Providers this server can route to, with prices at the default size. */
-  async providers(): Promise<{ id: string; configured: boolean; estimatedHourlyUsd: number; listHourlyUsd: number; size: Size }[]> {
+  async providers(): Promise<{ id: string; configured: boolean; estimatedHourlyUsd: number; listHourlyUsd: number; size: Size; capabilities?: Capability[] }[]> {
     return (await this.json<{ providers: any[] }>("GET", "/v1/providers")).providers;
   }
 
@@ -159,6 +159,27 @@ export class RemoteSandbox {
       }
     }
     throw new ClientError(502, "stream ended before the command finished");
+  }
+
+  /** Get the HTTP preview URL. Some providers need the port declared when creating the sandbox. */
+  async url(port: number): Promise<string> {
+    const response = await this.client.request("GET", this.path(`/ports/${encodeURIComponent(String(port))}`));
+    return ((await response.json()) as { url: string }).url;
+  }
+
+  /** Start a background command. The returned process can be killed without killing its sandbox. */
+  async start(cmd: string, opts: StartOptions = {}): Promise<SandboxProcess> {
+    const response = await this.client.request("POST", this.path("/processes"), { ...opts, cmd });
+    const { id } = (await response.json()) as { id: string };
+    const path = this.path(`/processes/${encodeURIComponent(id)}`);
+    let stopping: Promise<void> | undefined;
+    return {
+      id,
+      kill: () => stopping ??= this.client.request("DELETE", path).then(() => {}).catch((err) => {
+        stopping = undefined;
+        throw err;
+      }),
+    };
   }
 
   async writeFile(path: string, content: string | Uint8Array): Promise<void> {

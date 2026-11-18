@@ -3,9 +3,9 @@ import { createServer, type IncomingMessage, type ServerResponse } from "node:ht
 import { CATALOG } from "./catalog.js";
 import { Router, type RoutedSandbox } from "./router.js";
 import { splitComputerRequest, type ComputerSpec, type RoutedComputer } from "./computers.js";
-import { ProviderError, RouterError, type RouteOptions, type RouterErrorCode, type SandboxSpec } from "./types.js";
+import { ProviderError, RouterError, type RouteOptions, type RouterErrorCode, type SandboxProcess, type SandboxSpec } from "./types.js";
 import { errorStatus } from "./util.js";
-import { splitRequest } from "./validate.js";
+import { isPort, splitRequest, validateStart } from "./validate.js";
 
 /**
  * Hooks for running this API for many users (accounts, billing, per-user sandboxes). With none set,
@@ -63,11 +63,14 @@ export interface ServerHooks {
  *   GET    /v1/providers
  *   POST   /v1/route                      dry run: which providers would be tried, in order
  *   POST   /v1/quote                      where a create would land and what the run would cost
- *   POST   /v1/sandboxes                  { vcpu, memoryGb, ..., provider, strategy, fallback, require, createTimeoutSeconds }
+ *   POST   /v1/sandboxes                  { vcpu, memoryGb, ports, ..., provider, strategy, fallback, require, createTimeoutSeconds }
  *   POST   /v1/sandboxes/:id/exec         { cmd, cwd, env, timeoutSeconds, stream }
  *          stream: true answers text/event-stream: `stdout`/`stderr` events (JSON string chunks),
  *          then one `result` event (the ExecResult), or an `error` event
  *   POST   /v1/sandboxes/:id/pause        keeps the disk; the next call resumes it
+ *   GET    /v1/sandboxes/:id/ports/:port  { url }
+ *   POST   /v1/sandboxes/:id/processes    { cmd, cwd, env } -> { id }
+ *   DELETE /v1/sandboxes/:id/processes/:processId
  *   PUT    /v1/sandboxes/:id/files?path=  raw body
  *   GET    /v1/sandboxes/:id/files?path=  raw body
  *   DELETE /v1/sandboxes/:id
@@ -103,6 +106,29 @@ export function createApp(
     return got.length === expected.length && timingSafeEqual(got, expected);
   };
   const live = new Map<string, RoutedSandbox>();
+  type ProcessEntry = { handle: SandboxProcess; stopping?: Promise<void> };
+  type ProcessScope = { entries: Map<string, ProcessEntry>; starting: number };
+  // IDs and handles are local to this server. A process can only be stopped under its sandbox ID.
+  const processes = new Map<string, ProcessScope>();
+  const clearSandbox = (id: string) => {
+    live.delete(id);
+    processes.delete(id);
+  };
+  const dropEmptyScope = (id: string, scope: ProcessScope) => {
+    if (scope.starting === 0 && scope.entries.size === 0 && processes.get(id) === scope) processes.delete(id);
+  };
+  const stopProcess = (id: string, scope: ProcessScope, entry: ProcessEntry) => {
+    entry.stopping ??= (async () => {
+      try {
+        await entry.handle.kill();
+      } catch (err) {
+        if (errorStatus(err) !== 404) throw err;
+      }
+      scope.entries.delete(entry.handle.id);
+      dropEmptyScope(id, scope);
+    })().finally(() => { entry.stopping = undefined; });
+    return entry.stopping;
+  };
   const computersOn = hooks.computers ?? !hooks.authorize;
 
   /**
@@ -191,9 +217,13 @@ export function createApp(
     if (parts[0] !== "v1") return json(res, 404, { error: "not found" });
     const router = hooks.routerFor ? await hooks.routerFor(caller) : defaultRouter;
 
-    const box = async (id: string) => {
+    const checkOwns = async (id: string) => {
       if (hooks.owns && !(await hooks.owns(caller, id))) throw new HttpError(404, "no such sandbox");
-      return live.get(id) ?? router.get(id);
+    };
+    const resolveSandbox = (id: string) => live.get(id) ?? router.get(id);
+    const box = async (id: string) => {
+      await checkOwns(id);
+      return resolveSandbox(id);
     };
 
     // GET /v1/providers
@@ -266,7 +296,12 @@ export function createApp(
           },
           discard: async () => {
             live.delete(made.id);
-            await made.kill().catch(() => {});
+            try {
+              await made.kill();
+              processes.delete(made.id);
+            } catch (err) {
+              if (errorStatus(err) === 404) processes.delete(made.id);
+            }
             await hooks.afterKill?.(caller, made.id);
           },
         };
@@ -275,6 +310,60 @@ export function createApp(
 
     const id = parts[2] ? decodeURIComponent(parts[2]) : "";
     if (!id) return json(res, 404, { error: "not found" });
+
+    // A preview URL can contain a provider credential. The API returns it as data without proxying it.
+    if (req.method === "GET" && parts[3] === "ports" && parts.length === 5) {
+      res.setHeader("Cache-Control", "no-store");
+      const port = Number(parts[4]);
+      if (!/^[1-9]\d*$/.test(parts[4]) || !isPort(port)) {
+        throw new RouterError("port must be an integer from 1 to 65535", [], "bad_request");
+      }
+      return json(res, 200, { url: await (await box(id)).url(port) });
+    }
+
+    if (req.method === "POST" && parts[3] === "processes" && parts.length === 4) {
+      res.setHeader("Cache-Control", "no-store");
+      const body = await readJson(req);
+      if (!body || typeof body !== "object" || Array.isArray(body)) {
+        throw new RouterError("a background process takes cmd, cwd and env", [], "bad_request");
+      }
+      const { cmd, ...opts } = body;
+      validateStart(cmd, opts);
+      await checkOwns(id);
+      const scope = processes.get(id) ?? { entries: new Map(), starting: 0 };
+      processes.set(id, scope);
+      scope.starting++;
+      try {
+        const sbx = await resolveSandbox(id);
+        if (processes.get(id) !== scope) throw new HttpError(404, "no such sandbox");
+        const handle = await sbx.start(cmd, opts);
+        // A concurrent sandbox deletion discards the scope. An interrupted client has no process
+        // ID to stop, so try to stop the process rather than leave it running without a handle.
+        const deleted = processes.get(id) !== scope;
+        const entry = { handle };
+        if (!deleted) scope.entries.set(handle.id, entry);
+        if (deleted || res.destroyed || !res.writable) {
+          await stopProcess(id, scope, entry);
+          if (deleted) throw new HttpError(404, "no such sandbox");
+          return;
+        }
+        return json(res, 201, { id: handle.id });
+      } finally {
+        scope.starting--;
+        dropEmptyScope(id, scope);
+      }
+    }
+
+    if (req.method === "DELETE" && parts[3] === "processes" && parts.length === 5) {
+      res.setHeader("Cache-Control", "no-store");
+      await checkOwns(id);
+      const processId = parts[4];
+      const scope = processes.get(id);
+      const entry = scope?.entries.get(processId);
+      if (!scope || !entry) throw new HttpError(404, "no such process in this sandbox");
+      await stopProcess(id, scope, entry);
+      return json(res, 200, { id: processId, killed: true });
+    }
 
     // POST /v1/sandboxes/:id/exec
     if (req.method === "POST" && parts[3] === "exec") {
@@ -327,14 +416,14 @@ export function createApp(
       } catch (err) {
         // Already gone at the provider: that's what the caller wanted.
         if (!(err instanceof HttpError) && errorStatus(err) === 404) {
-          live.delete(id);
+          clearSandbox(id);
           await hooks.afterKill?.(caller, id);
           return json(res, 200, { id, killed: true });
         }
         if (!(err instanceof HttpError)) await hooks.afterKill?.(caller, id, { error: err as Error });
         throw err;
       }
-      live.delete(id);
+      clearSandbox(id);
       await hooks.afterKill?.(caller, id);
       return json(res, 200, { id, killed: true });
     }

@@ -38,9 +38,10 @@ class FakeCommand {
   private chunks: { stream: "stdout" | "stderr"; data: string }[] = [];
   private closed = false;
   private done: Promise<number>;
+  private child: ChildProcess;
   constructor(params: any, sandboxEnv: Record<string, string>) {
     if (params.cwd && !existsSync(params.cwd)) throw new Error(`cwd ${params.cwd}: no such file or directory`);
-    const child = spawn(params.cmd, params.args ?? [], { cwd: params.cwd ?? root, env: { ...process.env, ...sandboxEnv, ...(params.env ?? {}) }, detached: true });
+    const child = this.child = spawn(params.cmd, params.args ?? [], { cwd: params.cwd ?? root, env: { ...process.env, ...sandboxEnv, ...(params.env ?? {}) }, detached: true });
     children.add(child);
     const push = (stream: "stdout" | "stderr") => (d: Buffer) => {
       this[stream === "stdout" ? "out" : "err"] += d;
@@ -74,6 +75,11 @@ class FakeCommand {
   }
   stdout = async () => (await this.done, this.out);
   stderr = async () => (await this.done, this.err);
+  async kill(signal: string) {
+    expect(signal).toBe("SIGKILL");
+    killGroup(this.child);
+    await this.done;
+  }
 }
 
 class FakeSandbox {
@@ -84,6 +90,7 @@ class FakeSandbox {
     private env: Record<string, string>,
     // Like the real SDK: a persistent sandbox (the default) starts again on the next call after stop().
     private persistent = true,
+    private ports: number[] = [],
   ) {}
   private live() {
     if (this.deleted) throw new Error(`Sandbox ${this.name} was deleted`);
@@ -96,6 +103,11 @@ class FakeSandbox {
     if (runError) throw runError;
     const cmd = new FakeCommand(params, this.env);
     return params.detached ? cmd : cmd.wait();
+  }
+  domain(port: number): string {
+    this.live();
+    if (!this.ports.includes(port)) throw new Error(`No route for port ${port}`);
+    return `https://${this.name}-${port}.vercel.run`;
   }
   async writeFiles(files: { path: string; content: Buffer }[]) {
     this.live();
@@ -124,7 +136,7 @@ vi.mock("@vercel/sandbox", () => ({
     create: async (params: any) => {
       creates.push(params);
       if (params.token !== "vt_test") throw Object.assign(new Error("Unauthorized: invalid token"), { status: 401 });
-      const sbx = new FakeSandbox(`sbx_${sandboxes.size + 1}`, params.env ?? {}, params.persistent ?? true);
+      const sbx = new FakeSandbox(`sbx_${sandboxes.size + 1}`, params.env ?? {}, params.persistent ?? true, params.ports);
       sandboxes.set(sbx.name, sbx);
       return sbx;
     },
@@ -212,6 +224,36 @@ describe("VercelProvider", () => {
     expect(events).toEqual(["out:one", "err:two"]);
     expect(s).toMatchObject({ exitCode: 4, stdout: "one\n", stderr: "two\n" });
     expect(runs.at(-1)).toMatchObject({ detached: true, timeoutMs: 60_000 });
+  });
+
+  it("maps declared ports through create and resolves their domains after reconnect", async () => {
+    const created = await p().create({ ports: [3000, 8080] });
+    try {
+      expect(creates[0].ports).toEqual([3000, 8080]);
+      const again = await p().connect(created.nativeId);
+      expect(again.url!(8080)).toBe(`https://${created.nativeId}-8080.vercel.run`);
+      expect(() => again.url!(9000)).toThrow("port 9000 was not requested");
+    } finally {
+      await created.kill();
+    }
+  });
+
+  it("starts a long-running command without an exec deadline and kills only that command", async () => {
+    const sbx = await p().create({});
+    const cmd = 'printf "%s" "$TEST_VALUE" > vercel-ready; exec sleep 30';
+    try {
+      const background = await sbx.start!(cmd, { cwd: root, env: { TEST_VALUE: "ready" } });
+      try {
+        expect(runs.at(-1)).toEqual({ cmd: "sh", args: ["-c", cmd], cwd: root, env: { TEST_VALUE: "ready" }, detached: true });
+        await vi.waitFor(() => expect(readFileSync(join(root, "vercel-ready"), "utf8")).toBe("ready"));
+      } finally {
+        await background.kill();
+      }
+      expect((await sbx.exec("printf alive")).stdout).toBe("alive");
+      expect(deleted).toEqual([]);
+    } finally {
+      await sbx.kill();
+    }
   });
 
   it("reports the SIGKILL at the deadline as the contract's timeout, in both modes", async () => {

@@ -22,6 +22,9 @@ const ttls: any[] = [];
 const execs: any[] = [];
 const archived: string[] = [];
 const deleted: string[] = [];
+const previewCreates: any[] = [];
+const tokenExpiresAt: Date[] = [];
+const processKills: string[] = [];
 const children = new Set<ChildProcess>();
 const sandboxes = new Map<string, FakeSandbox>();
 let killEarly = false;
@@ -40,6 +43,8 @@ const fail = (status: number, detail: string) => Object.assign(new Error(`Sandbo
 class FakeSandbox {
   status: string = "DEPLOYED";
   metadata: { name: string; labels?: Record<string, string> };
+  running = new Map<string, ChildProcess>();
+  records = new Map<string, { port: number; public: boolean; url: string }>();
   constructor(
     name: string,
     readonly cfg: any,
@@ -61,15 +66,20 @@ class FakeSandbox {
         const child = spawn("sh", ["-c", request.command], { cwd: request.workingDir ?? root, env: { ...process.env, ...envs, ...(request.env ?? {}) }, detached: true });
         children.add(child);
         const pid = String(++pids);
+        this.running.set(pid, child);
         let stdout = "";
         let stderr = "";
         child.stdout.on("data", (d) => ((stdout += d), onStdout?.(String(d))));
         child.stderr.on("data", (d) => ((stderr += d), onStderr?.(String(d))));
         let killed = false;
-        const timer = setTimeout(() => ((killed = true), killGroup(child)), killEarly ? 100 : (request.timeout ?? 3600) * 1000);
+        const timer = request.timeout === 0
+          ? undefined
+          : setTimeout(() => ((killed = true), killGroup(child)), killEarly ? 100 : (request.timeout ?? 3600) * 1000);
+        if (!request.waitForCompletion) child.on("spawn", () => resolve({ pid, status: "running" }));
         child.on("close", (code) => {
           clearTimeout(timer);
           children.delete(child);
+          this.running.delete(pid);
           if (killed && timeoutAs422) return reject(fail(422, `process timed out after ${request.timeout} seconds`));
           const status = killed ? "killed" : code === 0 ? "completed" : "failed";
           resolve({ pid, name: request.name ?? pid, command: request.command, status, exitCode: code ?? 137, stdout, stderr, logs: stdout + stderr, workingDir: request.workingDir ?? "/", startedAt: "", completedAt: "" });
@@ -78,6 +88,30 @@ class FakeSandbox {
     },
     wait: async () => {
       throw new Error("not reached: exec waits for completion");
+    },
+    kill: async (pid: string) => {
+      processKills.push(pid);
+      const child = this.running.get(pid);
+      if (!child) throw fail(404, "process not found");
+      killGroup(child);
+    },
+  };
+  previews = {
+    createIfNotExists: async (req: any) => {
+      previewCreates.push(req);
+      const name = req.metadata.name;
+      if (!this.records.has(name)) this.records.set(name, { ...req.spec, url: "https://preview.bl.run/?tag=app" });
+      const spec = this.records.get(name)!;
+      return {
+        url: spec.url,
+        spec,
+        tokens: {
+          create: async (expiresAt: Date) => {
+            tokenExpiresAt.push(expiresAt);
+            return { value: "preview+token" };
+          },
+        },
+      };
     },
   };
   fs = {
@@ -142,6 +176,7 @@ const p = () => new BlaxelProvider("bl_test", "ws_test");
 
 beforeEach(() => {
   creates.length = ttls.length = execs.length = archived.length = deleted.length = 0;
+  previewCreates.length = tokenExpiresAt.length = processKills.length = 0;
   killEarly = false;
   timeoutAs422 = false;
 });
@@ -184,6 +219,39 @@ describe("BlaxelProvider", () => {
     expect(execs[0]).toEqual({ command: `echo "$BASE $OVER $(basename "$PWD")"; echo err >&2`, workingDir: root, env: { OVER: "new" }, timeout: 7, waitForCompletion: true });
     expect((await sbx.exec("exit 3")).exitCode).toBe(3);
     expect(execs[1]).toMatchObject({ workingDir: undefined, env: undefined, timeout: 60 });
+  });
+
+  it("creates a private browser preview only on request, including after reconnecting", async () => {
+    const prov = p();
+    const sbx = await prov.create({ ports: [3000] });
+    expect(previewCreates).toHaveLength(0);
+    const before = Date.now();
+    const reattached = await prov.connect(sbx.nativeId);
+    const url = new URL(await reattached.url!(3000));
+    expect(url.searchParams.get("tag")).toBe("app");
+    expect(url.searchParams.get("bl_preview_token")).toBe("preview+token");
+    expect(previewCreates).toEqual([{ metadata: { name: "sandboxrouter-3000" }, spec: { port: 3000, public: false } }]);
+    expect(tokenExpiresAt[0].getTime()).toBeGreaterThanOrEqual(before + 30 * 60_000);
+    await expect(sbx.url!(8080)).rejects.toMatchObject({ status: 400 });
+    (sbx.native as FakeSandbox).records.set("sandboxrouter-3000", { port: 3000, public: true, url: "https://public.bl.run" });
+    await expect(sbx.url!(3000)).rejects.toMatchObject({ status: 409 });
+    expect(tokenExpiresAt).toHaveLength(1);
+    await sbx.kill();
+  });
+
+  it("starts a native long-running process without waiting and only kills the process handle", async () => {
+    const sbx = await p().create({});
+    const cmd = "sleep 30";
+    const run = await sbx.start!(cmd, { cwd: root, env: { MODE: "dev" } });
+    const pid = String(pids);
+    try {
+      expect((sbx.native as FakeSandbox).running.has(pid)).toBe(true);
+      expect(execs[0]).toEqual({ command: cmd, workingDir: root, env: { MODE: "dev" }, waitForCompletion: false, keepAlive: true, timeout: 0 });
+    } finally {
+      await run.kill();
+      await sbx.kill();
+    }
+    expect(processKills).toEqual([pid]);
   });
 
   it("reads status killed as the timeout at the deadline, and as an error before it", async () => {

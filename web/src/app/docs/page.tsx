@@ -121,6 +121,7 @@ router.create(spec, { strategy: "verified" })      // providers that passed the 
 router.create(spec, { provider: ["e2b", "modal"] }) // try these, in this order
 router.create({ gpu: "A10G" })                      // only GPU-capable providers are tried
 router.create(spec, { require: ["pause"] })         // only providers that can pause
+router.create({ ports: [3000] }, { require: ["ports", "background"] })
 router.create({ expectedSeconds: 10 })              // rank by what a 10 s run is really billed
 router.create({ cpuUtilization: 0.1 })              // an agent mostly waiting on the model: active-CPU providers cost less
 router.create(spec, { maxHourlyUsd: 0.03 })        // skip providers that would cost more per hour for this run
@@ -266,21 +267,35 @@ await sbx.pause();
 const again = await router.get(sbx.id);   // e.g. "e2b:iz5sb5a4bt3pmjx7c5ms2"`}
         />
 
-        <h2 id="native">Using a provider&apos;s own features</h2>
+        <h2 id="ports">Preview URLs and background commands</h2>
         <p>
-          The router provides commands, files and cleanup, plus pause where supported. For anything else (a public URL for a port,
-          background processes, snapshots, volumes), <code>sbx.native</code> is the provider SDK&apos;s own sandbox object,
-          already connected. There&apos;s no second login and no reconnecting by id.
+          Declare the ports you plan to serve when creating the sandbox. Use <code>require</code> to select providers that can
+          return a preview URL and start a background command.
         </p>
         <CodeBlock
-          code={`const sbx = await router.create();
-await sbx.exec("nohup npm run dev > /tmp/dev.log 2>&1 &");
+          code={`const sbx = await router.create({ ports: [3000], timeoutMinutes: 10 }, { require: ["ports", "background"] });
+const server = await sbx.start("exec python3 -m http.server 3000 --bind 0.0.0.0", { cwd: "/tmp" });
+console.log(await sbx.url(3000));
 
-if (sbx.provider === "e2b") {
-  const e2b = sbx.native as import("e2b").Sandbox;   // the provider's own type
-  console.log("https://" + e2b.getHost(3000));
-}`}
+// After you finish with the preview:
+await server.kill();
+await sbx.kill();`}
         />
+        <p>
+          <code>start</code> returns once the provider starts the command. Wait for the application to listen before sharing
+          its URL. Preview visibility and expiry depend on the provider. Deno opens a public preview on demand. Docker URLs
+          are local to the Docker host.
+        </p>
+        <p>
+          The process handle stops the command tracked by the provider. Launch the server binary directly with <code>exec</code>.
+          Kill the sandbox to clean up all child processes.
+        </p>
+
+        <h2 id="native">Using a provider&apos;s own features</h2>
+        <p>
+          For provider-specific features such as snapshots or volumes, <code>sbx.native</code> gives you the connected sandbox
+          object from the provider SDK.
+        </p>
         <ul>
           <li>
             <b>Which providers.</b> Those the router drives through their own SDK: Beam, Blaxel, Daytona, Deno, E2B, Fly.io
@@ -345,9 +360,12 @@ SANDBOXROUTER_TOKEN=secret npx @sandboxrouter/sdk serve --cors https://your-site
               {[
                 ["GET /v1/providers", ""],
                 ["POST /v1/route", "same as create; returns the candidate order"],
-                ["POST /v1/sandboxes", "{ vcpu, memoryGb, gpu, env, timeoutMinutes, expectedSeconds, cpuUtilization, image, provider, strategy, fallback, createTimeoutSeconds, require, maxHourlyUsd }"],
+                ["POST /v1/sandboxes", "{ vcpu, memoryGb, gpu, env, ports, timeoutMinutes, expectedSeconds, cpuUtilization, image, provider, strategy, fallback, createTimeoutSeconds, require, maxHourlyUsd }"],
                 ["POST /v1/quote", "same body as create: the provider it would use and the run's estimated cost, nothing started"],
                 ["POST /v1/sandboxes/:id/exec", "{ cmd, cwd, env, timeoutSeconds, stream }"],
+                ["GET /v1/sandboxes/:id/ports/:port", "Preview URL"],
+                ["POST /v1/sandboxes/:id/processes", "{ cmd, cwd, env }"],
+                ["DELETE /v1/sandboxes/:id/processes/:processId", ""],
                 ["PUT /v1/sandboxes/:id/files?path=", "raw bytes"],
                 ["GET /v1/sandboxes/:id/files?path=", ""],
                 ["POST /v1/sandboxes/:id/pause", ""],

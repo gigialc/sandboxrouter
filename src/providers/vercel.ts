@@ -1,6 +1,6 @@
 import { vercelSandboxSize } from "../catalog.js";
-import { ProviderError, type ExecOptions, type ExecResult, type Provider, type ProviderSandbox, type SandboxSpec } from "../types.js";
-import { DEFAULT_EXEC_TIMEOUT_S, killedByTimeout, optionalImport, timeoutError, toBytes, wrapCommand } from "../util.js";
+import { ProviderError, type ExecOptions, type ExecResult, type Provider, type ProviderProcess, type ProviderSandbox, type SandboxSpec, type StartOptions } from "../types.js";
+import { DEFAULT_EXEC_TIMEOUT_S, errorStatus, killedByTimeout, optionalImport, timeoutError, toBytes, wrapCommand } from "../util.js";
 
 type VercelModule = typeof import("@vercel/sandbox");
 type VercelSandbox = Awaited<ReturnType<VercelModule["Sandbox"]["get"]>>;
@@ -34,6 +34,7 @@ export class VercelProvider implements Provider {
       resources: { vcpus },
       env: spec.env,
       tags: spec.metadata,
+      ...(spec.ports?.length ? { ports: spec.ports } : {}),
       // v3 keeps sandboxes by default and restarts a stopped one on the next command; a router
       // sandbox is single-use, so nothing should outlive kill().
       persistent: false,
@@ -91,6 +92,41 @@ class VercelBox implements ProviderSandbox {
       if (err instanceof ProviderError) throw err;
       if (err?.name === "TimeoutError" || err?.name === "AbortError") throw timeoutError("vercel", seconds);
       throw new ProviderError("vercel", err?.message ?? String(err));
+    }
+  }
+
+  url(port: number): string {
+    try {
+      return this.sbx.domain(port);
+    } catch (err) {
+      if (err instanceof Error && err.message === `No route for port ${port}`) {
+        throw new ProviderError("vercel", `port ${port} was not requested when this sandbox was created`, 400);
+      }
+      throw err;
+    }
+  }
+
+  async start(cmd: string, opts: StartOptions = {}): Promise<ProviderProcess> {
+    try {
+      const command = await this.sbx.runCommand({
+        cmd: "sh",
+        args: ["-c", cmd],
+        cwd: opts.cwd,
+        env: opts.env,
+        detached: true,
+      });
+      return {
+        async kill() {
+          try {
+            await command.kill("SIGKILL");
+          } catch (err) {
+            const status = errorStatus(err);
+            if (status !== 404) throw new ProviderError("vercel", err instanceof Error ? err.message : String(err), status);
+          }
+        },
+      };
+    } catch (err) {
+      throw new ProviderError("vercel", err instanceof Error ? err.message : String(err), errorStatus(err));
     }
   }
 

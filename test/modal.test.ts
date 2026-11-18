@@ -51,6 +51,7 @@ class FakeSandbox {
   constructor(
     readonly sandboxId: string,
     private env: Record<string, string>,
+    private encryptedPorts: number[] = [],
   ) {}
   private live() {
     if (!this.alive) throw new Error(`Sandbox ${this.sandboxId} has already been terminated`);
@@ -79,6 +80,10 @@ class FakeSandbox {
     );
     return { stdout: textStream(child.stdout!, exit), stderr: textStream(child.stderr!, exit), wait: () => exit };
   }
+  async tunnels() {
+    this.live();
+    return Object.fromEntries(this.encryptedPorts.map((port) => [port, { url: `https://${this.sandboxId}-${port}.modal.host` }]));
+  }
   filesystem = {
     writeBytes: async (data: Uint8Array, path: string) => {
       this.live();
@@ -105,7 +110,7 @@ vi.mock("modal", () => ({
       create: async (app: any, image: any, params: any) => {
         creates.push({ app, image, params });
         if (params.gpu === "none-such") throw new Error("Invalid GPU type: none-such");
-        const sb = new FakeSandbox(`sb-${sandboxes.size + 1}`, params.env ?? {});
+        const sb = new FakeSandbox(`sb-${sandboxes.size + 1}`, params.env ?? {}, params.encryptedPorts);
         sandboxes.set(sb.sandboxId, sb);
         return sb;
       },
@@ -170,6 +175,19 @@ describe("ModalProvider", () => {
     expect(execs[0]).toEqual({ command: ["sh", "-c", `echo "$BASE $OVER $(basename "$PWD")"; echo err >&2`], params: { workdir: root, env: { OVER: "new" }, timeoutMs: 7000 } });
     expect((await sbx.exec("exit 3")).exitCode).toBe(3);
     expect(execs[1].params).toEqual({ workdir: undefined, env: undefined, timeoutMs: 60_000 });
+  });
+
+  it("opens only requested encrypted tunnels and can resolve them after reconnect", async () => {
+    const created = await p().create({ ports: [3000] });
+    try {
+      expect(creates[0].params.encryptedPorts).toEqual([3000]);
+      const sbx = await p().connect(created.nativeId);
+      await expect(sbx.url!(3000)).resolves.toBe(`https://${created.nativeId}-3000.modal.host`);
+      await expect(sbx.url!(3001)).rejects.toMatchObject({ name: "ProviderError", status: 400 });
+      expect(sbx.start).toBeUndefined();
+    } finally {
+      await created.kill();
+    }
   });
 
   it("treats a signal death at the deadline as the timeout, whether reported as 137 or negative", async () => {
