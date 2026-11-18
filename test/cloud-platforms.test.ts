@@ -22,22 +22,24 @@ let failDoSession = false;
 let failGoogleRead = false;
 
 function runShell(command: string, cwd: string | undefined, timeout: number) {
-  return new Promise<{ stdout: string; stderr: string; code: number; duration: number }>((resolve, reject) => {
+  return new Promise<{ stdout: string; stderr: string; code: number; duration: number; timedOut: boolean }>((resolve, reject) => {
     const start = Date.now();
     const child = spawn("sh", ["-c", command], { cwd: cwd ?? root, detached: true });
     let stdout = "";
     let stderr = "";
+    let timedOut = false;
     child.stdout.setEncoding("utf8").on("data", (s) => { stdout += s; });
     child.stderr.setEncoding("utf8").on("data", (s) => { stderr += s; });
     const timer = setTimeout(() => {
       if (child.pid) {
+        timedOut = true;
         try { process.kill(-child.pid, "SIGKILL"); } catch { /* already exited */ }
       }
     }, timeout * 1000);
     child.on("error", (error) => { clearTimeout(timer); reject(error); });
     child.on("close", (code) => {
       clearTimeout(timer);
-      resolve({ stdout, stderr, code: code ?? 137, duration: Date.now() - start });
+      resolve({ stdout, stderr, code: code ?? 137, duration: Date.now() - start, timedOut });
     });
   });
 }
@@ -117,6 +119,11 @@ async function handler(req: IncomingMessage, res: ServerResponse) {
       const input = body.inputs.find((c: { mimeType: string }) => c.mimeType === "application/json");
       const decoded = JSON.parse(Buffer.from(input.data, "base64").toString());
       const result = await runShell(decoded.command, decoded.cwd, decoded.timeout);
+      if (result.timedOut) {
+        const message = 'Execution Failed. Error: DEADLINE_EXCEEDED on URL `https://shell.test/exec`. Error Details: ' +
+          JSON.stringify({ detail: `command exceeded ${decoded.timeout}s and was killed` });
+        return send(400, { error: { status: "INVALID_ARGUMENT", message } });
+      }
       const json = JSON.stringify({ stdout: result.stdout, stderr: result.stderr, returncode: result.code, duration_ms: result.duration });
       return send(200, { outputs: [{ mimeType: "application/json", data: Buffer.from(json).toString("base64") }] });
     }

@@ -15,6 +15,7 @@ export const VERIFIED: Partial<Record<ProviderId, string>> = {
   e2b: "2026-11-13",
   sprites: "2026-11-13",
   freestyle: "2026-11-13",
+  google: "2026-11-18",
   maritime: "2026-11-13",
   modal: "2026-11-13",
   morph: "2026-11-18",

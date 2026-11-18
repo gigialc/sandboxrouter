@@ -81,7 +81,7 @@ List price while running, 2 vCPU / 4 GB, cheapest first; waitlisted sign-ups fol
 | [Azure Container Apps dynamic sessions](https://sandboxrouter.ai/providers/azure) | skipped (max 1 vCPU) | none | not run yet | [pricing](https://learn.microsoft.com/en-us/azure/container-apps/billing#dynamic-sessions) |
 | [Daytona](https://sandboxrouter.ai/providers/daytona) | skipped (default image is 1 vCPU / 1 GB; a bigger size needs image.daytona) | none | passed (2026-11-13) | [pricing](https://www.daytona.io/pricing) |
 | [Alibaba Cloud Agent Sandbox](https://sandboxrouter.ai/providers/alibaba) | skipped (max 2 GB memory) | none | not run yet | [pricing](https://www.alibabacloud.com/help/en/agent-sandbox/product-overview/billing-overview) |
-| [Google Cloud Agent Platform](https://sandboxrouter.ai/providers/google) | skipped (max 1 vCPU) | none | not run yet | [pricing](https://cloud.google.com/products/gemini-enterprise-agent-platform/pricing) |
+| [Google Cloud Agent Platform](https://sandboxrouter.ai/providers/google) | skipped (max 1 vCPU) | none | passed (2026-11-18) | [pricing](https://cloud.google.com/products/gemini-enterprise-agent-platform/pricing) |
 | [E2B](https://sandboxrouter.ai/providers/e2b) | skipped (default image is 2 vCPU / 0.5 GB; a bigger size needs image.e2b) | none | passed (2026-11-13) | [pricing](https://e2b.dev/pricing) |
 | [Docker (local)](https://sandboxrouter.ai/providers/docker) | free | none | passed (2026-11-13) | [pricing](https://docs.docker.com/engine/) |
 

@@ -1,0 +1,83 @@
+{
+  "tool": "sandboxrouter-check",
+  "version": "0.14.0",
+  "date": "2026-11-18T17:03:07.857Z",
+  "platform": "darwin-arm64",
+  "by": "gigialc",
+  "provider": "google",
+  "ok": true,
+  "results": [
+    {
+      "step": "create",
+      "ms": 6783,
+      "status": "pass"
+    },
+    {
+      "step": "exec: stdout, stderr, exit code",
+      "ms": 745,
+      "status": "pass"
+    },
+    {
+      "step": "exec: env and cwd",
+      "ms": 194,
+      "status": "pass"
+    },
+    {
+      "step": "exec: UTF-8 output",
+      "ms": 555,
+      "status": "pass"
+    },
+    {
+      "step": "exec: streaming",
+      "ms": 3237,
+      "status": "info",
+      "detail": "output arrived only at the end (no live streaming)"
+    },
+    {
+      "step": "files: binary round-trip",
+      "ms": 1021,
+      "status": "pass"
+    },
+    {
+      "step": "files: 1 MB round-trip",
+      "ms": 12919,
+      "status": "pass"
+    },
+    {
+      "step": "files: missing file is an error",
+      "ms": 188,
+      "status": "pass"
+    },
+    {
+      "step": "files: visible to commands",
+      "ms": 1257,
+      "status": "pass"
+    },
+    {
+      "step": "exec: command timeout",
+      "ms": 4721,
+      "status": "pass",
+      "detail": "threw after 4721 ms"
+    },
+    {
+      "step": "exec: timed-out command was stopped",
+      "ms": 9842,
+      "status": "pass"
+    },
+    {
+      "step": "pause and resume",
+      "ms": 16051,
+      "status": "pass"
+    },
+    {
+      "step": "kill",
+      "ms": 332,
+      "status": "pass"
+    },
+    {
+      "step": "killed sandbox is gone",
+      "ms": 226,
+      "status": "pass"
+    }
+  ]
+}
