@@ -77,6 +77,7 @@ Route flags:  --provider e2b[,modal,...]  --strategy balanced|verified|cheapest|
               --max-price USD (per hour, for this run: skip providers that would cost more)
               --no-fallback  --fallback-any (also on setup errors like a bad key)
               --create-timeout SEC (per provider, default 120)  --require gpu,custom-image
+              --image e2b=TEMPLATE,daytona=IMAGE (a provider's own image or template; lifts a default image's fixed size)
 
 Keys: one env var group per provider; "sandboxrouter providers" lists them and shows which are set.
 --by puts your GitHub username on a saved result, so the website can credit it.`;
@@ -108,6 +109,7 @@ const { values, positionals } = parseArgs({
     reuse: { type: "boolean" },
     spread: { type: "boolean" },
     setup: { type: "string" },
+    image: { type: "string" },
     seconds: { type: "string" },
     even: { type: "boolean" },
     parallel: { type: "string" },
@@ -154,6 +156,8 @@ const spec: SandboxSpec = {
   timeoutMinutes: num(values.timeout),
   expectedSeconds: num(values.expect),
   cpuUtilization: num(values.cpu),
+  // --image e2b=my-template,daytona=debian:12 : a provider's own image or template, which also lifts its default image's fixed size.
+  ...(values.image ? { image: Object.fromEntries(values.image.split(",").map((pair) => pair.split(/=(.*)/s).slice(0, 2).map((x) => x.trim()))) } : {}),
 };
 const providers = list(values.provider) as ProviderId[] | undefined;
 const by = (() => {

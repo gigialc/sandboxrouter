@@ -5,7 +5,7 @@ import type { PublishedData } from "./recommend.js";
 
 export const PUBLISHED: PublishedData = {
   "schema": 1,
-  "dataThrough": "2026-11-18T18:15:10.682Z",
+  "dataThrough": "2026-11-18T20:54:36.345Z",
   "conditionalStartFees": {
     "boat": {
       "minUsd": 0.03,
@@ -299,17 +299,17 @@ export const PUBLISHED: PublishedData = {
         "name": "OpenScale Sandboxes",
         "size": {
           "vcpu": 2,
-          "memoryGb": 1
+          "memoryGb": 4
         },
-        "createMs": 1254,
-        "taskMs": 3641,
+        "createMs": 1278,
+        "taskMs": 3588,
         "taskUsd": 0.000019444444444444442,
-        "reusedUsd": 0.000014159444444444443,
+        "reusedUsd": 0.000013953333333333332,
         "successRate": 1,
         "runs": 3,
         "ok": 3,
         "limited": 0,
-        "measuredAt": "2026-11-17T23:36:05.829Z"
+        "measuredAt": "2026-11-18T20:22:58.672Z"
       },
       "maritime": {
         "name": "Maritime",
@@ -330,18 +330,18 @@ export const PUBLISHED: PublishedData = {
       "daytona": {
         "name": "Daytona",
         "size": {
-          "vcpu": 1,
-          "memoryGb": 1
+          "vcpu": 2,
+          "memoryGb": 4
         },
-        "createMs": 785,
-        "taskMs": 1717,
+        "createMs": 1748,
+        "taskMs": 844,
         "taskUsd": 0.000055499999999999994,
-        "reusedUsd": 0.0000317645,
+        "reusedUsd": 0.000015614,
         "successRate": 1,
         "runs": 3,
         "ok": 3,
         "limited": 0,
-        "measuredAt": "2026-11-17T23:40:37.832Z"
+        "measuredAt": "2026-11-18T20:22:58.672Z"
       },
       "northflank": {
         "name": "Northflank",
@@ -476,17 +476,17 @@ export const PUBLISHED: PublishedData = {
         "name": "E2B",
         "size": {
           "vcpu": 2,
-          "memoryGb": 0.5
+          "memoryGb": 4
         },
-        "createMs": 820,
-        "taskMs": 3880,
+        "createMs": 1001,
+        "taskMs": 3098,
         "taskUsd": 0.00015125,
-        "reusedUsd": 0.00011737,
+        "reusedUsd": 0.00009371449999999999,
         "successRate": 1,
         "runs": 3,
         "ok": 3,
         "limited": 0,
-        "measuredAt": "2026-11-17T23:36:05.829Z"
+        "measuredAt": "2026-11-18T20:22:58.672Z"
       },
       "agentcore": {
         "name": "Amazon Bedrock AgentCore Code Interpreter",
@@ -608,17 +608,17 @@ export const PUBLISHED: PublishedData = {
         "name": "OpenScale Sandboxes",
         "size": {
           "vcpu": 2,
-          "memoryGb": 1
+          "memoryGb": 4
         },
-        "createMs": 1453,
-        "taskMs": 103079,
-        "taskUsd": 0.00040833333333333325,
-        "reusedUsd": 0.0004008627777777777,
+        "createMs": 1265,
+        "taskMs": 104352,
+        "taskUsd": 0.00041222222222222213,
+        "reusedUsd": 0.00040581333333333336,
         "successRate": 1,
         "runs": 3,
         "ok": 3,
         "limited": 0,
-        "measuredAt": "2026-11-17T23:49:08.280Z"
+        "measuredAt": "2026-11-18T20:54:36.345Z"
       },
       "maritime": {
         "name": "Maritime",
@@ -636,6 +636,22 @@ export const PUBLISHED: PublishedData = {
         "limited": 0,
         "measuredAt": "2026-11-17T23:49:08.280Z"
       },
+      "daytona": {
+        "name": "Daytona",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
+        "createMs": 1749,
+        "taskMs": 34769,
+        "taskUsd": 0.0006845,
+        "reusedUsd": 0.0006432264999999998,
+        "successRate": 1,
+        "runs": 3,
+        "ok": 3,
+        "limited": 0,
+        "measuredAt": "2026-11-18T20:54:36.345Z"
+      },
       "tensorlake": {
         "name": "Tensorlake",
         "size": {
@@ -651,22 +667,6 @@ export const PUBLISHED: PublishedData = {
         "ok": 3,
         "limited": 0,
         "measuredAt": "2026-11-17T23:49:08.280Z"
-      },
-      "daytona": {
-        "name": "Daytona",
-        "size": {
-          "vcpu": 1,
-          "memoryGb": 1
-        },
-        "createMs": 827,
-        "taskMs": 74989,
-        "taskUsd": 0.001406,
-        "reusedUsd": 0.0013872965,
-        "successRate": 1,
-        "runs": 3,
-        "ok": 3,
-        "limited": 0,
-        "measuredAt": "2026-11-18T00:06:52.487Z"
       },
       "freestyle": {
         "name": "Freestyle",
@@ -720,17 +720,17 @@ export const PUBLISHED: PublishedData = {
         "name": "E2B",
         "size": {
           "vcpu": 2,
-          "memoryGb": 0.5
+          "memoryGb": 4
         },
-        "createMs": 415,
-        "taskMs": 127979,
-        "taskUsd": 0.00390225,
-        "reusedUsd": 0.00387136475,
+        "createMs": 918,
+        "taskMs": 177765,
+        "taskUsd": 0.005414749999999999,
+        "reusedUsd": 0.0053773912499999995,
         "successRate": 1,
         "runs": 3,
         "ok": 3,
         "limited": 0,
-        "measuredAt": "2026-11-17T23:49:08.280Z"
+        "measuredAt": "2026-11-18T20:54:36.345Z"
       },
       "morph": {
         "name": "Morph Cloud",
@@ -803,17 +803,17 @@ export const PUBLISHED: PublishedData = {
         "name": "OpenScale Sandboxes",
         "size": {
           "vcpu": 2,
-          "memoryGb": 1
+          "memoryGb": 4
         },
-        "createMs": 1244,
-        "taskMs": 2226,
+        "createMs": 1280,
+        "taskMs": 2256,
         "taskUsd": 0.000015555555555555555,
-        "reusedUsd": 0.000008656666666666666,
+        "reusedUsd": 0.000008773333333333331,
         "successRate": 1,
         "runs": 3,
         "ok": 3,
         "limited": 0,
-        "measuredAt": "2026-11-17T23:36:51.852Z"
+        "measuredAt": "2026-11-18T20:23:41.167Z"
       },
       "maritime": {
         "name": "Maritime",
@@ -831,22 +831,6 @@ export const PUBLISHED: PublishedData = {
         "limited": 0,
         "measuredAt": "2026-11-17T23:49:48.256Z"
       },
-      "daytona": {
-        "name": "Daytona",
-        "size": {
-          "vcpu": 1,
-          "memoryGb": 1
-        },
-        "createMs": 1057,
-        "taskMs": 1535,
-        "taskUsd": 0.000055499999999999994,
-        "reusedUsd": 0.000028397499999999997,
-        "successRate": 1,
-        "runs": 3,
-        "ok": 3,
-        "limited": 0,
-        "measuredAt": "2026-11-17T23:41:06.827Z"
-      },
       "sail": {
         "name": "Sailboxes (Sail Research)",
         "size": {
@@ -862,6 +846,22 @@ export const PUBLISHED: PublishedData = {
         "ok": 3,
         "limited": 0,
         "measuredAt": "2026-11-17T23:36:51.852Z"
+      },
+      "daytona": {
+        "name": "Daytona",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
+        "createMs": 1708,
+        "taskMs": 1463,
+        "taskUsd": 0.000074,
+        "reusedUsd": 0.000027065499999999997,
+        "successRate": 1,
+        "runs": 3,
+        "ok": 3,
+        "limited": 0,
+        "measuredAt": "2026-11-18T20:23:41.167Z"
       },
       "agentcore": {
         "name": "Amazon Bedrock AgentCore Code Interpreter",
@@ -964,17 +964,17 @@ export const PUBLISHED: PublishedData = {
         "name": "E2B",
         "size": {
           "vcpu": 2,
-          "memoryGb": 0.5
+          "memoryGb": 4
         },
-        "createMs": 831,
-        "taskMs": 2237,
+        "createMs": 1042,
+        "taskMs": 2177,
         "taskUsd": 0.000121,
-        "reusedUsd": 0.00006766925,
+        "reusedUsd": 0.00006585425,
         "successRate": 1,
         "runs": 3,
         "ok": 3,
         "limited": 0,
-        "measuredAt": "2026-11-17T23:36:51.852Z"
+        "measuredAt": "2026-11-18T20:23:41.167Z"
       },
       "google": {
         "name": "Google Cloud Agent Platform",
@@ -1063,17 +1063,17 @@ export const PUBLISHED: PublishedData = {
         "name": "OpenScale Sandboxes",
         "size": {
           "vcpu": 2,
-          "memoryGb": 1
+          "memoryGb": 4
         },
-        "createMs": 1402,
-        "taskMs": 445,
+        "createMs": 1274,
+        "taskMs": 498,
         "taskUsd": 0.000007777777777777777,
-        "reusedUsd": 0.0000017305555555555554,
+        "reusedUsd": 0.000001936666666666666,
         "successRate": 1,
         "runs": 3,
         "ok": 3,
         "limited": 0,
-        "measuredAt": "2026-11-17T23:37:36.070Z"
+        "measuredAt": "2026-11-18T20:24:08.421Z"
       },
       "maritime": {
         "name": "Maritime",
@@ -1107,37 +1107,21 @@ export const PUBLISHED: PublishedData = {
         "limited": 0,
         "measuredAt": "2026-11-17T23:37:36.070Z"
       },
-      "e2b": {
-        "name": "E2B",
-        "size": {
-          "vcpu": 2,
-          "memoryGb": 0.5
-        },
-        "createMs": 518,
-        "taskMs": 480,
-        "taskUsd": 0.00003025,
-        "reusedUsd": 0.00001452,
-        "successRate": 1,
-        "runs": 3,
-        "ok": 3,
-        "limited": 0,
-        "measuredAt": "2026-11-17T23:37:36.070Z"
-      },
       "daytona": {
         "name": "Daytona",
         "size": {
-          "vcpu": 1,
-          "memoryGb": 1
+          "vcpu": 2,
+          "memoryGb": 4
         },
-        "createMs": 972,
-        "taskMs": 225,
+        "createMs": 1526,
+        "taskMs": 262,
         "taskUsd": 0.000037,
-        "reusedUsd": 0.0000041624999999999995,
+        "reusedUsd": 0.0000048469999999999995,
         "successRate": 1,
         "runs": 3,
         "ok": 3,
         "limited": 0,
-        "measuredAt": "2026-11-17T23:41:25.503Z"
+        "measuredAt": "2026-11-18T20:24:08.421Z"
       },
       "sail": {
         "name": "Sailboxes (Sail Research)",
@@ -1154,6 +1138,22 @@ export const PUBLISHED: PublishedData = {
         "ok": 3,
         "limited": 0,
         "measuredAt": "2026-11-17T23:37:36.070Z"
+      },
+      "e2b": {
+        "name": "E2B",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
+        "createMs": 1138,
+        "taskMs": 708,
+        "taskUsd": 0.0000605,
+        "reusedUsd": 0.000021417,
+        "successRate": 1,
+        "runs": 3,
+        "ok": 3,
+        "limited": 0,
+        "measuredAt": "2026-11-18T20:24:08.421Z"
       },
       "tensorlake": {
         "name": "Tensorlake",
@@ -1324,17 +1324,17 @@ export const PUBLISHED: PublishedData = {
         "name": "OpenScale Sandboxes",
         "size": {
           "vcpu": 2,
-          "memoryGb": 1
+          "memoryGb": 4
         },
-        "createMs": 1308,
-        "taskMs": 61649,
-        "taskUsd": 0.000245,
-        "reusedUsd": 0.00023974611111111108,
+        "createMs": 1505,
+        "taskMs": 61733,
+        "taskUsd": 0.0002488888888888889,
+        "reusedUsd": 0.00024007277777777773,
         "successRate": 1,
         "runs": 3,
         "ok": 3,
         "limited": 0,
-        "measuredAt": "2026-11-17T23:54:04.615Z"
+        "measuredAt": "2026-11-18T20:33:46.227Z"
       },
       "maritime": {
         "name": "Maritime",
@@ -1387,18 +1387,18 @@ export const PUBLISHED: PublishedData = {
       "daytona": {
         "name": "Daytona",
         "size": {
-          "vcpu": 1,
-          "memoryGb": 1
+          "vcpu": 2,
+          "memoryGb": 4
         },
-        "createMs": 1030,
-        "taskMs": 60821,
-        "taskUsd": 0.0011469999999999998,
-        "reusedUsd": 0.0011251884999999998,
+        "createMs": 2080,
+        "taskMs": 60889,
+        "taskUsd": 0.0011654999999999999,
+        "reusedUsd": 0.0011264464999999999,
         "successRate": 1,
         "runs": 3,
         "ok": 3,
         "limited": 0,
-        "measuredAt": "2026-11-17T23:51:25.110Z"
+        "measuredAt": "2026-11-18T20:33:46.227Z"
       },
       "cloudflare": {
         "name": "Cloudflare Sandbox",
@@ -1453,17 +1453,17 @@ export const PUBLISHED: PublishedData = {
         "name": "E2B",
         "size": {
           "vcpu": 2,
-          "memoryGb": 0.5
+          "memoryGb": 4
         },
-        "createMs": 547,
-        "taskMs": 61238,
-        "taskUsd": 0.0018754999999999998,
-        "reusedUsd": 0.0018524494999999999,
+        "createMs": 1046,
+        "taskMs": 61202,
+        "taskUsd": 0.00190575,
+        "reusedUsd": 0.0018513604999999998,
         "successRate": 1,
         "runs": 3,
         "ok": 3,
         "limited": 0,
-        "measuredAt": "2026-11-17T23:54:04.615Z"
+        "measuredAt": "2026-11-18T20:33:46.227Z"
       },
       "novita": {
         "name": "Novita AI Agent Sandbox",
@@ -1535,17 +1535,17 @@ export const PUBLISHED: PublishedData = {
         "name": "OpenScale Sandboxes",
         "size": {
           "vcpu": 2,
-          "memoryGb": 1
+          "memoryGb": 4
         },
-        "createMs": 1435,
-        "taskMs": 21828,
-        "taskUsd": 0.00009333333333333333,
-        "reusedUsd": 0.00008488666666666665,
+        "createMs": 1309,
+        "taskMs": 23036,
+        "taskUsd": 0.00009722222222222222,
+        "reusedUsd": 0.00008958444444444445,
         "successRate": 1,
         "runs": 3,
         "ok": 3,
         "limited": 0,
-        "measuredAt": "2026-11-17T23:47:40.891Z"
+        "measuredAt": "2026-11-18T20:38:14.816Z"
       },
       "agent37": {
         "name": "Agent37",
@@ -1599,18 +1599,18 @@ export const PUBLISHED: PublishedData = {
       "daytona": {
         "name": "Daytona",
         "size": {
-          "vcpu": 1,
-          "memoryGb": 1
+          "vcpu": 2,
+          "memoryGb": 4
         },
-        "createMs": 585,
-        "taskMs": 37992,
-        "taskUsd": 0.0007214999999999998,
-        "reusedUsd": 0.0007028519999999999,
+        "createMs": 1783,
+        "taskMs": 26613,
+        "taskUsd": 0.0005365,
+        "reusedUsd": 0.0004923404999999999,
         "successRate": 1,
         "runs": 3,
         "ok": 3,
         "limited": 0,
-        "measuredAt": "2026-11-17T23:45:01.763Z"
+        "measuredAt": "2026-11-18T20:38:14.816Z"
       },
       "novita": {
         "name": "Novita AI Agent Sandbox",
@@ -1648,17 +1648,17 @@ export const PUBLISHED: PublishedData = {
         "name": "E2B",
         "size": {
           "vcpu": 2,
-          "memoryGb": 0.5
+          "memoryGb": 4
         },
-        "createMs": 919,
-        "taskMs": 32038,
-        "taskUsd": 0.00099825,
-        "reusedUsd": 0.0009691494999999998,
+        "createMs": 1020,
+        "taskMs": 30382,
+        "taskUsd": 0.000968,
+        "reusedUsd": 0.0009190555000000001,
         "successRate": 1,
         "runs": 3,
         "ok": 3,
         "limited": 0,
-        "measuredAt": "2026-11-17T23:47:40.891Z"
+        "measuredAt": "2026-11-18T20:38:14.816Z"
       },
       "morph": {
         "name": "Morph Cloud",

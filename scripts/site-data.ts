@@ -1,7 +1,7 @@
 // Generates web/src/data/site.json from the library itself, so the website can't drift from the code.
 // Run from the repo root: node --import tsx scripts/site-data.ts
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
-import { accountStartFees, benchmarksPublishable, billingRules, CATALOG, DEFAULT_MEMORY_GB, DEFAULT_VCPU, hourlyCost, planLabel, planOnlyStartFee, unfit } from "../src/catalog.js";
+import { accountStartFees, benchmarksPublishable, billingRules, CATALOG, DEFAULT_MEMORY_GB, DEFAULT_VCPU, hourlyCost, planLabel, planOnlyStartFee, unfit, withOwnImages } from "../src/catalog.js";
 import type { SpreadResult } from "../src/burst.js";
 import { agentTable, aggregate, burstTable, loadAgentReports, loadBursts, loadReports, taskOutcomes, taskTable } from "../src/leaderboard.js";
 import { TASKS } from "../src/task.js";
@@ -117,7 +117,7 @@ const ranker = new Router({ providers: Object.keys(VERIFIED).map((id) => stub(id
 const useCases = USE_CASES.map((u) => {
   const hours = runHours(u.spec);
   const top = ranker
-    .plan(u.spec, { strategy: "cheapest", require: u.require })
+    .plan(withOwnImages(u.spec), { strategy: "cheapest", require: u.require })
     .filter((c) => !c.skip)
     .map((c) => ({
       provider: c.provider,
@@ -128,6 +128,8 @@ const useCases = USE_CASES.map((u) => {
       hourlyUsd: c.estimatedHourlyUsd,
       perSandboxUsd: (c.perSandboxUsd ?? 0) - planOnlyStartFee(c.provider),
       minimumSeconds: billingRules(c.provider).minSeconds,
+      // Its default image is smaller: this size needs your own image or template.
+      ownImage: CATALOG.find((x) => x.id === c.provider)?.defaultSize !== undefined,
     }))
     .sort((a, b) => a.runUsd - b.runUsd);
   return { id: u.id, title: u.title, blurb: u.blurb, spec: u.spec, require: u.require ?? [], runSeconds: Math.round(hours * 3600), top };

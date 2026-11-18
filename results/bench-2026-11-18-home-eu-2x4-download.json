@@ -1,0 +1,88 @@
+{
+  "tool": "sandboxrouter",
+  "version": "0.14.1",
+  "date": "2026-11-18T20:24:08.421Z",
+  "label": "home-eu",
+  "runs": 3,
+  "spec": {
+    "vcpu": 2,
+    "memoryGb": 4
+  },
+  "task": "download-v2",
+  "node": "v22.22.0",
+  "platform": "darwin-arm64",
+  "rows": [
+    {
+      "provider": "openscale",
+      "runs": 3,
+      "failures": 0,
+      "createFailures": 0,
+      "commandFailures": 0,
+      "cleanupFailures": 0,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "medianCreateMs": 326,
+      "medianExecMs": 948,
+      "medianReadyMs": 1274,
+      "hourlyUsd": 0.017,
+      "taskOk": 3,
+      "medianTaskReadyMs": 1274,
+      "medianTaskMs": 498,
+      "taskPhasesMs": {
+        "download": 498
+      },
+      "medianTaskCpuMs": 200,
+      "medianTaskMaxCoreMs": 180
+    },
+    {
+      "provider": "e2b",
+      "runs": 3,
+      "failures": 0,
+      "createFailures": 0,
+      "commandFailures": 0,
+      "cleanupFailures": 0,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "medianCreateMs": 567,
+      "medianExecMs": 486,
+      "medianReadyMs": 1138,
+      "hourlyUsd": 0.1656,
+      "taskOk": 3,
+      "medianTaskReadyMs": 1138,
+      "medianTaskMs": 708,
+      "taskPhasesMs": {
+        "download": 708
+      },
+      "medianTaskCpuMs": 140,
+      "medianTaskMaxCoreMs": 80
+    },
+    {
+      "provider": "daytona",
+      "runs": 3,
+      "failures": 0,
+      "createFailures": 0,
+      "commandFailures": 0,
+      "cleanupFailures": 0,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "medianCreateMs": 1124,
+      "medianExecMs": 401,
+      "medianReadyMs": 1526,
+      "hourlyUsd": 0.1656,
+      "taskOk": 3,
+      "medianTaskReadyMs": 1526,
+      "medianTaskMs": 262,
+      "taskPhasesMs": {
+        "download": 262
+      },
+      "medianTaskCpuMs": 2960,
+      "medianTaskMaxCoreMs": 270
+    }
+  ]
+}

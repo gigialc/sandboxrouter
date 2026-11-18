@@ -38,6 +38,7 @@ export function UseCaseTable() {
             notes={[
               r.minimumSeconds > u.runSeconds ? `bills at least ${r.minimumSeconds} s` : "",
               r.perSandboxUsd ? `+${money(r.perSandboxUsd)} per sandbox` : "",
+              r.ownImage ? "needs your own image at this size" : "",
             ].filter(Boolean)}
           >
             <BarNum value={r.runUsd} max={max} title={`${r.name}: ${money(r.runUsd)} for one run of ${runLength(u.runSeconds)}`}>

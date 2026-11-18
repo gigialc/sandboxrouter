@@ -914,6 +914,15 @@ export function fixedSize(id: ProviderId, spec: SandboxSpec = {}): { vcpu: numbe
   return d && !spec.image?.[id] ? { vcpu: d.vcpu, memoryGb: d.memoryGb } : null;
 }
 
+/**
+ * The spec with a stand-in image for every provider whose default image fixes its size, so price tables can
+ * compare them at the asked size. Starting one for real needs your own image or template built at that size.
+ */
+export function withOwnImages(spec: SandboxSpec): SandboxSpec {
+  const image = Object.fromEntries(CATALOG.filter((c) => c.defaultSize).map((c) => [c.id, "your-image"]));
+  return { ...spec, image: { ...image, ...spec.image } };
+}
+
 /** A spec this provider can take as-is: its default size if it has one, else the router default. */
 export function fittingSpec(id: ProviderId): { vcpu: number; memoryGb: number } {
   return fixedSize(id) ?? { vcpu: DEFAULT_VCPU, memoryGb: DEFAULT_MEMORY_GB };

@@ -1,0 +1,63 @@
+{
+  "tool": "sandboxrouter",
+  "version": "0.14.1",
+  "date": "2026-11-18T20:22:06.400Z",
+  "label": "home-eu",
+  "runs": 10,
+  "spec": {
+    "vcpu": 2,
+    "memoryGb": 4
+  },
+  "node": "v22.22.0",
+  "platform": "darwin-arm64",
+  "rows": [
+    {
+      "provider": "openscale",
+      "runs": 10,
+      "failures": 0,
+      "createFailures": 0,
+      "commandFailures": 0,
+      "cleanupFailures": 0,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "medianCreateMs": 325,
+      "medianExecMs": 948,
+      "medianReadyMs": 1275,
+      "hourlyUsd": 0.017
+    },
+    {
+      "provider": "e2b",
+      "runs": 10,
+      "failures": 0,
+      "createFailures": 0,
+      "commandFailures": 0,
+      "cleanupFailures": 0,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "medianCreateMs": 601,
+      "medianExecMs": 395,
+      "medianReadyMs": 1018,
+      "hourlyUsd": 0.1656
+    },
+    {
+      "provider": "daytona",
+      "runs": 10,
+      "failures": 0,
+      "createFailures": 0,
+      "commandFailures": 0,
+      "cleanupFailures": 0,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "medianCreateMs": 1226,
+      "medianExecMs": 426,
+      "medianReadyMs": 1629,
+      "hourlyUsd": 0.1656
+    }
+  ]
+}
