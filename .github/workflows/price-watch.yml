@@ -10,6 +10,7 @@ permissions:
   issues: write
 jobs:
   watch:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -23,12 +24,10 @@ jobs:
           node --import tsx scripts/price-watch.ts --update --md > report.md
           echo "status=$?" >> "$GITHUB_OUTPUT"
           cat report.md
-      - name: Save the new baseline
+      - name: Publish changed baseline for review
         run: |
-          git config user.name "price-watch"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add scripts/price-watch.json
-          git diff --cached --quiet || (git commit -m "price-watch: baseline for $(date -u +%F)" && git push)
+          bash scripts/publish-report.sh price-watch "price-watch: baseline for $(date -u +%F)"
       - name: Open or update the price issue
         if: steps.check.outputs.status != '0'
         env:

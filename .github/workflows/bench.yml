@@ -1,7 +1,7 @@
 name: bench
 # Every Wednesday: run the benchmarks from GitHub's own runners (US), so results don't come from one laptop
 # in one place. Only providers that passed the real-account check. Bench records account refusals separately
-# and rejects a report when multiple providers fail on the network. Publish raw reports and their site data together.
+# and rejects a report when multiple providers fail on the network. Stage raw reports and their site data together for review.
 on:
   schedule:
     - cron: "37 9 * * 3"
@@ -13,6 +13,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   bench:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:
@@ -84,24 +85,18 @@ jobs:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
           VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-      - name: Save the reports
+      - name: Publish reports for review
         run: |
           shopt -s nullglob
           reports=("$RUNNER_TEMP/benchmark-reports/"*.json)
           if (( ${#reports[@]} == 0 )); then exit 0; fi
-          git config user.name "bench"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          for attempt in 1 2 3; do
-            # A long run can overlap another push. Rebuild against the latest results on each attempt.
-            git fetch origin "$GITHUB_REF"
-            git switch --detach FETCH_HEAD
-            cp "${reports[@]}" results/
-            git diff --exit-code --stat -- results/
-            if [ -z "$(git status --porcelain -- results/)" ]; then exit 0; fi
-            npm run -s results:check
-            npm run -s site:data
-            git add -- results/ src/published.ts web/src/data/site.json web/src/data/published.json web/src/lib/recommend.ts
-            git commit -m "bench: GitHub Actions, US, $(date -u +%F)"
-            if git push origin "HEAD:$GITHUB_REF"; then exit 0; fi
-          done
-          exit 1
+          # Collection can overlap a merge. Generate the review commit from the latest main.
+          git fetch origin refs/heads/main
+          git switch --detach FETCH_HEAD
+          cp "${reports[@]}" results/
+          git diff --exit-code --stat -- results/
+          if [ -z "$(git status --porcelain -- results/)" ]; then exit 0; fi
+          npm run -s results:check
+          npm run -s site:data
+          git add -- results/ src/published.ts web/src/data/site.json web/src/data/published.json web/src/lib/recommend.ts
+          bash scripts/publish-report.sh bench "bench: GitHub Actions, US, $(date -u +%F)"

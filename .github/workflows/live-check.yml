@@ -14,6 +14,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   check:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
@@ -131,18 +132,15 @@ jobs:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
           VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-      - name: Save results when they changed
+      - name: Publish changed results for review
         if: always()
         run: |
           # Commit only when a step's result changed, not for every new date.
           if ! node --import tsx scripts/conformance-changed.ts; then echo "no result changed"; exit 0; fi
           node --import tsx scripts/readme-tables.ts --write
           npm run site:data
-          git config user.name "live-check"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add results/conformance README.md docs/reference.md src/verified.ts web/src/data/site.json
-          git commit -m "live-check: results for $(date -u +%F)"
-          git push
+          bash scripts/publish-report.sh live-check "live-check: results for $(date -u +%F)"
       # The email: a comment on one open "Nightly live check" issue, which GitHub mails to the owner.
       # Only when something needs a look (or it all passes again after an alarm), so silence means fine.
       # Its contents are already public in results/conformance; no keys or account details go in it.
