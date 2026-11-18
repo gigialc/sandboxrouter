@@ -173,7 +173,8 @@ describe("routing", () => {
 
   it("re-ranks when the size changes the price order", () => {
     // Vercel fixes memory at 2 GB/vCPU, Morph bills whole MCUs: ordering follows each shape's real price
-    const r = new Router({ failing: [], providers: fakes(), verified: [] });
+    // published: false keeps this to price alone: near-ties are otherwise broken by published start times.
+    const r = new Router({ failing: [], providers: fakes(), verified: [], published: false });
     for (const spec of [{ vcpu: 1, memoryGb: 2 }, { vcpu: 8, memoryGb: 16 }, { vcpu: 2, memoryGb: 8 }]) {
       const prices = r.plan(spec).map((c) => c.estimatedHourlyUsd);
       expect(prices).toEqual([...prices].sort((a, b) => a - b));

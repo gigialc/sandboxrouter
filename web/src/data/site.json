@@ -121,7 +121,7 @@
     }
   },
   "version": "0.15.1",
-  "generatedAt": "2026-11-18T21:53:44.777Z",
+  "generatedAt": "2026-11-18T22:42:16.825Z",
   "shapes": [
     "1x2",
     "2x4",
@@ -1062,7 +1062,8 @@
       "planLabel": "none",
       "defaultSize": {
         "vcpu": 1,
-        "memoryGb": 1
+        "memoryGb": 1,
+        "usd": 0.0666
       },
       "check": {
         "date": "2026-11-13T22:00:07.101Z",
@@ -1100,16 +1101,19 @@
       ],
       "prices": {
         "1x2": {
-          "usd": 0.0666,
-          "unfit": "default image is 1 vCPU / 1 GB; a bigger size needs image.daytona"
+          "usd": 0.0828,
+          "unfit": null,
+          "ownImage": true
         },
         "2x4": {
-          "usd": 0.0666,
-          "unfit": "default image is 1 vCPU / 1 GB; a bigger size needs image.daytona"
+          "usd": 0.1656,
+          "unfit": null,
+          "ownImage": true
         },
         "4x8": {
-          "usd": 0.0666,
-          "unfit": "default image is 1 vCPU / 1 GB; a bigger size needs image.daytona"
+          "usd": 0.3312,
+          "unfit": null,
+          "ownImage": true
         },
         "8x16": {
           "usd": 0.0666,
@@ -1451,7 +1455,8 @@
       "planLabel": "none",
       "defaultSize": {
         "vcpu": 2,
-        "memoryGb": 0.5
+        "memoryGb": 0.5,
+        "usd": 0.1089
       },
       "check": {
         "date": "2026-11-13T22:00:41.598Z",
@@ -1489,16 +1494,19 @@
       ],
       "prices": {
         "1x2": {
-          "usd": 0.1089,
-          "unfit": "default image is 2 vCPU / 0.5 GB; a bigger size needs image.e2b"
+          "usd": 0.0828,
+          "unfit": null,
+          "ownImage": true
         },
         "2x4": {
-          "usd": 0.1089,
-          "unfit": "default image is 2 vCPU / 0.5 GB; a bigger size needs image.e2b"
+          "usd": 0.1656,
+          "unfit": null,
+          "ownImage": true
         },
         "4x8": {
-          "usd": 0.1089,
-          "unfit": "default image is 2 vCPU / 0.5 GB; a bigger size needs image.e2b"
+          "usd": 0.3312,
+          "unfit": null,
+          "ownImage": true
         },
         "8x16": {
           "usd": 0.1089,
@@ -1799,7 +1807,8 @@
       "planLabel": "none",
       "defaultSize": {
         "vcpu": 1,
-        "memoryGb": 2
+        "memoryGb": 2,
+        "usd": 0.103
       },
       "check": {
         "date": "2026-11-18T17:03:07.857Z",
@@ -2646,7 +2655,8 @@
       "planLabel": "none",
       "defaultSize": {
         "vcpu": 2,
-        "memoryGb": 1
+        "memoryGb": 1,
+        "usd": 0.014
       },
       "check": {
         "date": "2026-11-13T22:01:44.283Z",
@@ -2682,20 +2692,24 @@
       "computers": [],
       "prices": {
         "1x2": {
-          "usd": 0.014,
-          "unfit": "default image is 2 vCPU / 1 GB; a bigger size needs image.openscale"
+          "usd": 0.0085,
+          "unfit": null,
+          "ownImage": true
         },
         "2x4": {
-          "usd": 0.014,
-          "unfit": "default image is 2 vCPU / 1 GB; a bigger size needs image.openscale"
+          "usd": 0.017,
+          "unfit": null,
+          "ownImage": true
         },
         "4x8": {
-          "usd": 0.014,
-          "unfit": "default image is 2 vCPU / 1 GB; a bigger size needs image.openscale"
+          "usd": 0.034,
+          "unfit": null,
+          "ownImage": true
         },
         "8x16": {
-          "usd": 0.014,
-          "unfit": "default image is 2 vCPU / 1 GB; a bigger size needs image.openscale"
+          "usd": 0.068,
+          "unfit": null,
+          "ownImage": true
         },
         "16x32": {
           "usd": 0.014,
@@ -3430,34 +3444,20 @@
       "measuredAt": "2026-11-11T21:29:12.572Z"
     },
     {
-      "provider": "e2b",
-      "name": "E2B",
-      "submissions": 2,
-      "medianCreateMs": 326,
-      "medianExecMs": 171,
-      "successRate": 1,
-      "runs": 105,
-      "hourlyUsd": 0.1089,
-      "size": {
-        "vcpu": 2,
-        "memoryGb": 0.5
-      },
-      "measuredAt": "2026-11-17T16:19:15.367Z"
-    },
-    {
       "provider": "openscale",
       "name": "OpenScale Sandboxes",
-      "submissions": 2,
-      "medianCreateMs": 353,
-      "medianExecMs": 1021,
+      "submissions": 1,
+      "medianCreateMs": 323,
+      "medianExecMs": 948,
+      "medianReadyMs": 1290,
       "successRate": 1,
-      "runs": 105,
-      "hourlyUsd": 0.013999999999999999,
+      "runs": 100,
+      "hourlyUsd": 0.017,
       "size": {
         "vcpu": 2,
-        "memoryGb": 1
+        "memoryGb": 4
       },
-      "measuredAt": "2026-11-17T16:19:15.367Z"
+      "measuredAt": "2026-11-18T22:34:03.877Z"
     },
     {
       "provider": "vercel",
@@ -3471,21 +3471,6 @@
       "size": {
         "vcpu": 2,
         "memoryGb": 4
-      },
-      "measuredAt": "2026-11-17T16:19:15.367Z"
-    },
-    {
-      "provider": "daytona",
-      "name": "Daytona",
-      "submissions": 2,
-      "medianCreateMs": 369,
-      "medianExecMs": 405,
-      "successRate": 1,
-      "runs": 105,
-      "hourlyUsd": 0.06659999999999999,
-      "size": {
-        "vcpu": 1,
-        "memoryGb": 1
       },
       "measuredAt": "2026-11-17T16:19:15.367Z"
     },
@@ -3518,6 +3503,22 @@
         "memoryGb": 4
       },
       "measuredAt": "2026-11-17T16:19:15.367Z"
+    },
+    {
+      "provider": "e2b",
+      "name": "E2B",
+      "submissions": 1,
+      "medianCreateMs": 559,
+      "medianExecMs": 385,
+      "medianReadyMs": 953,
+      "successRate": 1,
+      "runs": 100,
+      "hourlyUsd": 0.1656,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "measuredAt": "2026-11-18T22:34:03.877Z"
     },
     {
       "provider": "agent37",
@@ -3563,6 +3564,22 @@
         "memoryGb": 4
       },
       "measuredAt": "2026-11-17T16:19:15.367Z"
+    },
+    {
+      "provider": "daytona",
+      "name": "Daytona",
+      "submissions": 1,
+      "medianCreateMs": 1200,
+      "medianExecMs": 406,
+      "medianReadyMs": 1619,
+      "successRate": 1,
+      "runs": 100,
+      "hourlyUsd": 0.1656,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "measuredAt": "2026-11-18T22:34:03.877Z"
     },
     {
       "provider": "morph",
@@ -3692,10 +3709,11 @@
     "kinds": [
       {
         "id": "short",
-        "title": "Short job",
+        "title": "Short CPU job",
         "blurb": "One hash, then two concurrent hashes, then a disk write.",
         "version": "v2",
         "repeat": 1,
+        "cpuUtilization": null,
         "phases": [
           {
             "id": "cpu",
@@ -3731,7 +3749,7 @@
             "runs": 3,
             "ok": 2,
             "limited": 1,
-            "successRate": 0.6666666666666666,
+            "successRate": 1,
             "cpuMs": 1115,
             "activeCpu": false,
             "minimumSeconds": 0,
@@ -4411,6 +4429,7 @@
         "blurb": "The short job 40 times in a row: minutes of steady work.",
         "version": "v2-long",
         "repeat": 40,
+        "cpuUtilization": null,
         "phases": [
           {
             "id": "cpu",
@@ -4898,10 +4917,11 @@
       },
       {
         "id": "python",
-        "title": "Python",
+        "title": "Quick Python run",
         "blurb": "A Python script, like a code-interpreter call.",
         "version": "python-v2",
         "repeat": 1,
+        "cpuUtilization": null,
         "phases": [
           {
             "id": "python",
@@ -5489,6 +5509,7 @@
         "blurb": "A 53 MB download from nodejs.org.",
         "version": "download-v2",
         "repeat": 1,
+        "cpuUtilization": null,
         "phases": [
           {
             "id": "download",
@@ -6047,10 +6068,11 @@
       },
       {
         "id": "agent",
-        "title": "Agent loop",
+        "title": "Agent session",
         "blurb": "10 turns of a 6 s model wait and a short Python tool call: about a minute, mostly idle.",
         "version": "agent-v2",
         "repeat": 1,
+        "cpuUtilization": 0.1,
         "phases": [
           {
             "id": "agent",
@@ -6562,10 +6584,11 @@
       },
       {
         "id": "repo",
-        "title": "Real repo",
+        "title": "Coding agent on a repo",
         "blurb": "What a coding agent does first: fetch Node and a real TypeScript project, npm ci, typecheck.",
         "version": "repo-v2",
         "repeat": 1,
+        "cpuUtilization": null,
         "phases": [
           {
             "id": "fetch",
@@ -7299,7 +7322,7 @@
     },
     {
       "id": "session",
-      "title": "Agent sessions",
+      "title": "30-minute agent session",
       "blurb": "A coding agent working for 30 minutes, mostly waiting on the model.",
       "spec": {
         "vcpu": 2,
@@ -8213,7 +8236,11 @@
           "usd": 0.00072,
           "name": "Cloudflare Sandbox",
           "measuredAt": "2026-11-17T18:33:05.397Z",
-          "label": "home-eu"
+          "label": "home-eu",
+          "size": {
+            "vcpu": 2,
+            "memoryGb": 4
+          }
         },
         {
           "provider": "daytona",
@@ -8227,7 +8254,11 @@
           "usd": 0.000185,
           "name": "Daytona",
           "measuredAt": "2026-11-17T18:33:05.397Z",
-          "label": "home-eu"
+          "label": "home-eu",
+          "size": {
+            "vcpu": 1,
+            "memoryGb": 1
+          }
         },
         {
           "provider": "vercel",
@@ -8241,7 +8272,11 @@
           "usd": 0.0568,
           "name": "Vercel Sandbox",
           "measuredAt": "2026-11-17T18:33:05.397Z",
-          "label": "home-eu"
+          "label": "home-eu",
+          "size": {
+            "vcpu": 2,
+            "memoryGb": 4
+          }
         },
         {
           "provider": "agentcore",
@@ -8255,7 +8290,11 @@
           "usd": 0.001265,
           "name": "Amazon Bedrock AgentCore Code Interpreter",
           "measuredAt": "2026-11-17T18:33:05.397Z",
-          "label": "home-eu"
+          "label": "home-eu",
+          "size": {
+            "vcpu": 2,
+            "memoryGb": 4
+          }
         },
         {
           "provider": "novita",
@@ -8269,7 +8308,11 @@
           "usd": 0.000324,
           "name": "Novita AI Agent Sandbox",
           "measuredAt": "2026-11-17T18:50:42.003Z",
-          "label": "home-eu"
+          "label": "home-eu",
+          "size": {
+            "vcpu": 2,
+            "memoryGb": 4
+          }
         },
         {
           "provider": "agent37",
@@ -8283,7 +8326,11 @@
           "usd": 0.001085,
           "name": "Agent37",
           "measuredAt": "2026-11-17T18:33:05.397Z",
-          "label": "home-eu"
+          "label": "home-eu",
+          "size": {
+            "vcpu": 2,
+            "memoryGb": 4
+          }
         },
         {
           "provider": "maritime",
@@ -8297,7 +8344,11 @@
           "usd": 0.000134,
           "name": "Maritime",
           "measuredAt": "2026-11-17T18:33:05.397Z",
-          "label": "home-eu"
+          "label": "home-eu",
+          "size": {
+            "vcpu": 2,
+            "memoryGb": 4
+          }
         },
         {
           "provider": "e2b",
@@ -8311,7 +8362,11 @@
           "usd": 0.000363,
           "name": "E2B",
           "measuredAt": "2026-11-17T18:33:05.397Z",
-          "label": "home-eu"
+          "label": "home-eu",
+          "size": {
+            "vcpu": 2,
+            "memoryGb": 0.5
+          }
         },
         {
           "provider": "tensorlake",
@@ -8325,7 +8380,11 @@
           "usd": 0.001111,
           "name": "Tensorlake",
           "measuredAt": "2026-11-17T18:33:05.397Z",
-          "label": "home-eu"
+          "label": "home-eu",
+          "size": {
+            "vcpu": 2,
+            "memoryGb": 4
+          }
         },
         {
           "provider": "freestyle",
@@ -8339,7 +8398,11 @@
           "usd": 0.001114,
           "name": "Freestyle",
           "measuredAt": "2026-11-17T18:33:05.397Z",
-          "label": "home-eu"
+          "label": "home-eu",
+          "size": {
+            "vcpu": 2,
+            "memoryGb": 4
+          }
         },
         {
           "provider": "sail",
@@ -8353,7 +8416,11 @@
           "usd": 0.0003409999999999941,
           "name": "Sailboxes (Sail Research)",
           "measuredAt": "2026-11-17T18:33:05.397Z",
-          "label": "home-eu"
+          "label": "home-eu",
+          "size": {
+            "vcpu": 2,
+            "memoryGb": 4
+          }
         },
         {
           "provider": "openscale",
@@ -8367,7 +8434,11 @@
           "usd": 0.000696,
           "name": "OpenScale Sandboxes",
           "measuredAt": "2026-11-17T18:33:05.397Z",
-          "label": "home-eu"
+          "label": "home-eu",
+          "size": {
+            "vcpu": 2,
+            "memoryGb": 1
+          }
         },
         {
           "provider": "modal",
@@ -8381,7 +8452,11 @@
           "usd": 0.001124,
           "name": "Modal",
           "measuredAt": "2026-11-17T18:33:05.397Z",
-          "label": "home-eu"
+          "label": "home-eu",
+          "size": {
+            "vcpu": 2,
+            "memoryGb": 4
+          }
         },
         {
           "provider": "lambda",
@@ -8395,7 +8470,11 @@
           "usd": 0.00056,
           "name": "AWS Lambda MicroVMs",
           "measuredAt": "2026-11-17T18:33:05.397Z",
-          "label": "home-eu"
+          "label": "home-eu",
+          "size": {
+            "vcpu": 2,
+            "memoryGb": 4
+          }
         },
         {
           "provider": "boat",
@@ -8405,7 +8484,11 @@
           "wallMs": 1694,
           "name": "Boat",
           "measuredAt": "2026-11-17T18:33:05.397Z",
-          "label": "home-eu"
+          "label": "home-eu",
+          "size": {
+            "vcpu": 2,
+            "memoryGb": 4
+          }
         },
         {
           "provider": "superserve",
@@ -8415,7 +8498,11 @@
           "wallMs": 3573,
           "name": "Superserve",
           "measuredAt": "2026-11-17T18:33:05.397Z",
-          "label": "home-eu"
+          "label": "home-eu",
+          "size": {
+            "vcpu": 2,
+            "memoryGb": 4
+          }
         }
       ]
     },
@@ -8470,7 +8557,11 @@
           "usd": 0.01434,
           "name": "Cloudflare Sandbox",
           "measuredAt": "2026-11-17T17:02:09.715Z",
-          "label": "home-eu"
+          "label": "home-eu",
+          "size": {
+            "vcpu": 2,
+            "memoryGb": 4
+          }
         },
         {
           "provider": "agentcore",
@@ -8484,7 +8575,11 @@
           "usd": 0.012044,
           "name": "Amazon Bedrock AgentCore Code Interpreter",
           "measuredAt": "2026-11-17T17:02:09.715Z",
-          "label": "home-eu"
+          "label": "home-eu",
+          "size": {
+            "vcpu": 2,
+            "memoryGb": 4
+          }
         },
         {
           "provider": "novita",
@@ -8498,7 +8593,11 @@
           "usd": 0.005994,
           "name": "Novita AI Agent Sandbox",
           "measuredAt": "2026-11-17T17:02:09.715Z",
-          "label": "home-eu"
+          "label": "home-eu",
+          "size": {
+            "vcpu": 2,
+            "memoryGb": 4
+          }
         },
         {
           "provider": "tensorlake",
@@ -8512,7 +8611,11 @@
           "usd": 0.013,
           "name": "Tensorlake",
           "measuredAt": "2026-11-17T17:02:09.715Z",
-          "label": "home-eu"
+          "label": "home-eu",
+          "size": {
+            "vcpu": 2,
+            "memoryGb": 4
+          }
         },
         {
           "provider": "modal",
@@ -8526,7 +8629,11 @@
           "usd": 0.01322,
           "name": "Modal",
           "measuredAt": "2026-11-17T17:02:09.715Z",
-          "label": "home-eu"
+          "label": "home-eu",
+          "size": {
+            "vcpu": 2,
+            "memoryGb": 4
+          }
         },
         {
           "provider": "sail",
@@ -8540,7 +8647,11 @@
           "usd": 0.0037769999999999193,
           "name": "Sailboxes (Sail Research)",
           "measuredAt": "2026-11-17T17:02:09.715Z",
-          "label": "home-eu"
+          "label": "home-eu",
+          "size": {
+            "vcpu": 2,
+            "memoryGb": 4
+          }
         },
         {
           "provider": "openscale",
@@ -8554,7 +8665,11 @@
           "usd": 0.000891,
           "name": "OpenScale Sandboxes",
           "measuredAt": "2026-11-17T17:02:09.715Z",
-          "label": "home-eu"
+          "label": "home-eu",
+          "size": {
+            "vcpu": 2,
+            "memoryGb": 1
+          }
         },
         {
           "provider": "vercel",
@@ -8568,7 +8683,11 @@
           "usd": 0.47144,
           "name": "Vercel Sandbox",
           "measuredAt": "2026-11-17T17:02:09.715Z",
-          "label": "home-eu"
+          "label": "home-eu",
+          "size": {
+            "vcpu": 2,
+            "memoryGb": 4
+          }
         },
         {
           "provider": "maritime",
@@ -8582,7 +8701,11 @@
           "usd": 0.002554,
           "name": "Maritime",
           "measuredAt": "2026-11-17T17:02:09.715Z",
-          "label": "home-eu"
+          "label": "home-eu",
+          "size": {
+            "vcpu": 2,
+            "memoryGb": 4
+          }
         },
         {
           "provider": "e2b",
@@ -8596,7 +8719,11 @@
           "usd": 0.002571,
           "name": "E2B",
           "measuredAt": "2026-11-17T17:02:09.715Z",
-          "label": "home-eu"
+          "label": "home-eu",
+          "size": {
+            "vcpu": 2,
+            "memoryGb": 0.5
+          }
         },
         {
           "provider": "freestyle",
@@ -8610,7 +8737,11 @@
           "usd": 0.008648,
           "name": "Freestyle",
           "measuredAt": "2026-11-17T17:02:09.715Z",
-          "label": "home-eu"
+          "label": "home-eu",
+          "size": {
+            "vcpu": 2,
+            "memoryGb": 4
+          }
         },
         {
           "provider": "agent37",
@@ -8624,7 +8755,11 @@
           "usd": 0.003688,
           "name": "Agent37",
           "measuredAt": "2026-11-17T17:02:09.715Z",
-          "label": "home-eu"
+          "label": "home-eu",
+          "size": {
+            "vcpu": 2,
+            "memoryGb": 4
+          }
         },
         {
           "provider": "daytona",
@@ -8638,7 +8773,11 @@
           "usd": 0.000204,
           "name": "Daytona",
           "measuredAt": "2026-11-17T17:02:09.715Z",
-          "label": "home-eu"
+          "label": "home-eu",
+          "size": {
+            "vcpu": 1,
+            "memoryGb": 1
+          }
         },
         {
           "provider": "lambda",
@@ -8652,7 +8791,11 @@
           "usd": 0.00056,
           "name": "AWS Lambda MicroVMs",
           "measuredAt": "2026-11-17T17:02:09.715Z",
-          "label": "home-eu"
+          "label": "home-eu",
+          "size": {
+            "vcpu": 2,
+            "memoryGb": 4
+          }
         }
       ]
     }
@@ -10510,6 +10653,19 @@
       "providers": 1,
       "ids": [
         "sprites"
+      ]
+    },
+    {
+      "date": "2026-11-18T22:34:03.877Z",
+      "label": "home-eu",
+      "by": null,
+      "platform": "darwin-arm64",
+      "runs": 100,
+      "providers": 3,
+      "ids": [
+        "openscale",
+        "e2b",
+        "daytona"
       ]
     },
     {

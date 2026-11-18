@@ -163,8 +163,9 @@ export default function LearnPage() {
             </li>
             <li>
               <strong>The fine print decides short jobs</strong>: minimum charges (Agent37 and CodeSandbox bill at least a minute;
-              Vercel&apos;s minute covers memory only), billing steps (per second or per minute), per-sandbox fees (Sail adds $0.01
-              each), floors (Tensorlake bills at least 20% CPU), plus disk, data out and monthly plans.
+              Vercel&apos;s minute covers memory only), billing steps (per second or per minute), start fees that depend on your plan (Sail
+              charges $0.01 per start on its free plan, Boat charges for starts above its allowance; our numbers leave these out and
+              note them), floors (Tensorlake bills at least 20% CPU), plus disk, data out and monthly plans.
             </li>
           </ul>
           <p>

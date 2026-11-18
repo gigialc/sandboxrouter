@@ -9,7 +9,7 @@ import { PriceIndex } from "@/components/PriceIndex";
 import { ProviderLogo } from "@/components/ProviderName";
 import { BarNum, ResultRow, ResultTable, Num, barMax, money, time } from "@/components/results";
 import { RouteDemo } from "@/components/RouteDemo";
-import { HOSTED_FEE_PCT, HOSTED_PUBLIC, HOSTED_URL, NPM, NPM_URL, REPO, REPO_PUBLIC, site } from "@/lib/site";
+import { HOSTED_FEE_PCT, HOSTED_PUBLIC, HOSTED_URL, NPM, NPM_URL, OWN_IMAGE_NOTE, REPO, REPO_PUBLIC, needsOwnImage, site, sizeNote } from "@/lib/site";
 
 export const metadata: Metadata = { alternates: pageAlternates("/") };
 
@@ -49,7 +49,8 @@ const HTTP = `curl ${HOSTED_URL}/v1/sandboxes \\
 export default function Home() {
   const cloud = site.providers.filter((p) => !p.local);
   const passed = cloud.filter((p) => p.live.status === "passed");
-  const desktops = cloud.filter((p) => p.computers.length).length;
+  // The same list the Providers page's desktop table shows.
+  const desktops = site.desktops.length;
   // Prefer tested providers in the hero strip, with Vercel in the former Sprites slot.
   const short = (n: string) => n.replace(/ \(.*\)$/, "");
   const stripOrder = [...passed, ...cloud.filter((p) => p.live.status !== "passed").sort((a, b) => a.name.localeCompare(b.name))]
@@ -65,8 +66,11 @@ export default function Home() {
   const scale = site.scale;
   const day = (iso: string) => new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
   const fastest = short_ && [...short_.rows].sort((a, b) => a.taskMs - b.taskMs)[0];
-  const cheapestTask = short_?.rows[0];
-  const shortRows = short_?.rows.slice(0, 6) ?? [];
+  // Cost per successful run, like the Real jobs tab and the finder.
+  const perOk = (r: { taskUsd: number; successRate: number }) => r.taskUsd / Math.max(r.successRate, 0.01);
+  const shortByCost = [...(short_?.rows ?? [])].sort((a, b) => perOk(a) - perOk(b));
+  const cheapestTask = shortByCost[0];
+  const shortRows = shortByCost.slice(0, 6);
 
   return (
     <div className="px-5 sm:px-10">
@@ -200,11 +204,11 @@ export default function Home() {
             points={[
               {
                 title: "The fastest isn't the cheapest",
-                body: `On the short job, ${cheapestTask.name} had the lowest estimated cost before account-specific fees, at $${(cheapestTask.taskUsd * 1000).toFixed(3)} per 1,000 runs. ${fastest.name} finished fastest after startup (${time(fastest.taskMs)}) and ranks #${short_.rows.findIndex((r) => r.provider === fastest.provider) + 1} of ${short_.rows.length} on cost.`,
+                body: `On the short job, ${cheapestTask.name} had the lowest estimated cost before account-specific fees, at $${(perOk(cheapestTask) * 1000).toFixed(3)} per 1,000 successful runs. ${fastest.name} finished fastest after startup (${time(fastest.taskMs)}) and ranks #${shortByCost.findIndex((r) => r.provider === fastest.provider) + 1} of ${shortByCost.length} on cost.`,
               },
               {
                 title: "Real jobs, real accounts",
-                body: `We measured the short job on real accounts across ${short_.rows.length} providers. The benchmarks also cover starts under load, Python jobs, repo setup and an agent session.`,
+                body: `We measured the short job on real accounts. ${short_.rows.length} providers completed it. The benchmarks also cover starts under load, Python jobs, repo setup and an agent session.`,
               },
               {
                 title: "Estimated costs",
@@ -213,20 +217,20 @@ export default function Home() {
             ]}
             visual={
               <div className="overflow-x-auto border border-line p-5 sm:p-8">
-                <p className="text-[12px] uppercase tracking-[0.12em] text-muted">Short job · cheapest first</p>
-                <ResultTable cols={[{ label: "Est. / 1,000 runs" }, { label: "Took", className: "hidden sm:table-cell" }]}>
+                <p className="text-[12px] uppercase tracking-[0.12em] text-muted">{short_.title} · cheapest first</p>
+                <ResultTable cols={[{ label: "Est. / 1,000 runs" }, { label: "Time incl. start", className: "hidden sm:table-cell" }]}>
                   {shortRows.map((r, k) => (
                     <ResultRow
                       key={r.provider}
                       rank={k + 1}
                       id={r.provider}
                       name={r.name.replace(/ \(.*\)$/, "")}
-                      notes={r.size.vcpu !== 2 || r.size.memoryGb !== 4 ? [`${r.size.vcpu} vCPU / ${r.size.memoryGb} GB`] : undefined}
+                      notes={[sizeNote(r.size), needsOwnImage(r.provider, r.size) ? OWN_IMAGE_NOTE : ""].filter(Boolean)}
                     >
-                      <BarNum value={r.taskUsd} max={barMax(shortRows.map((x) => x.taskUsd))}>
-                        {money(r.taskUsd * 1000)}
+                      <BarNum value={perOk(r)} max={barMax(shortRows.map(perOk))}>
+                        {money(perOk(r) * 1000)}
                       </BarNum>
-                      <Num className="hidden sm:table-cell">{time(r.taskMs)}</Num>
+                      <Num className="hidden sm:table-cell">{time(r.createMs + r.taskMs)}</Num>
                     </ResultRow>
                   ))}
                 </ResultTable>

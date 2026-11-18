@@ -173,11 +173,11 @@ export default function MethodologyPage() {
             The comparison records limit refusals, start failures and workload failures separately.
           </p>
           <p>
-            Each job is priced two ways: in a <strong>new sandbox</strong> (its start, minimum charge and per-sandbox fee count
+            Each job is priced two ways: in a <strong>new sandbox</strong> (its start and minimum charge count
             every time) and in <strong>one sandbox for all jobs</strong> (only the job&apos;s own time counts), since agents often
             reuse a sandbox for many calls. Each step is timed from the test machine, minus the sandbox&apos;s own round trip for an empty command, so network
             distance mostly drops out. We apply published rates and modelled minimums, billing steps and per-sandbox fees
-            to those times. The estimates assume starts remain within included allowances.
+            to those times. Start fees that depend on your plan (Sail&apos;s $0.01 on its free plan, Boat&apos;s above its allowance) are left out and noted.
           </p>
           <p>
             Providers that bill active CPU are charged for the CPU time the job really used, plus memory for the whole run. It is
@@ -234,7 +234,8 @@ export default function MethodologyPage() {
             <li>Most prices come from pricing pages, not invoices.</li>
             {noBench.length > 0 && (
               <li>
-                {noBench.join(", ")}&apos;s terms don&apos;t allow publishing benchmarks, so they&apos;re left out of every benchmark.
+                No measured results are published for {noBench.join(", ")}: {noBench.length > 1 ? "their" : "its"} terms don&apos;t allow
+                it. {noBench.length > 1 ? "They appear" : "It appears"} only in list-price estimates.
               </li>
             )}
           </ul>
