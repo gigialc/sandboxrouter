@@ -5,7 +5,7 @@ import type { PublishedData } from "./recommend.js";
 
 export const PUBLISHED: PublishedData = {
   "schema": 1,
-  "dataThrough": "2026-11-18T17:53:44.923Z",
+  "dataThrough": "2026-11-18T18:00:22.162Z",
   "conditionalStartFees": {
     "boat": {
       "minUsd": 0.03,
@@ -32,12 +32,12 @@ export const PUBLISHED: PublishedData = {
         "vcpu": 2,
         "memoryGb": 4
       },
-      "medianCreateMs": 282,
-      "medianReadyMs": 792,
+      "medianCreateMs": 256,
+      "medianReadyMs": 708,
       "successRate": 1,
       "runs": 3,
       "hourlyUsd": 0.14,
-      "measuredAt": "2026-11-18T17:49:19.514Z"
+      "measuredAt": "2026-11-18T18:00:22.162Z"
     },
     "novita": {
       "name": "Novita AI Agent Sandbox",
@@ -177,12 +177,12 @@ export const PUBLISHED: PublishedData = {
         "vcpu": 2,
         "memoryGb": 4
       },
-      "medianCreateMs": 1470,
-      "medianReadyMs": 1992,
+      "medianCreateMs": 1236,
+      "medianReadyMs": 1967,
       "successRate": 1,
       "runs": 3,
       "hourlyUsd": 0.1,
-      "measuredAt": "2026-11-18T17:44:07.988Z"
+      "measuredAt": "2026-11-18T17:57:59.751Z"
     },
     "boat": {
       "name": "Boat",
@@ -226,12 +226,12 @@ export const PUBLISHED: PublishedData = {
         "vcpu": 1,
         "memoryGb": 2
       },
-      "medianCreateMs": 2456,
-      "medianReadyMs": 2678,
+      "medianCreateMs": 2517,
+      "medianReadyMs": 2777,
       "successRate": 1,
       "runs": 3,
       "hourlyUsd": 0.10300000000000001,
-      "measuredAt": "2026-11-18T17:53:44.923Z"
+      "measuredAt": "2026-11-18T17:54:56.745Z"
     },
     "sail": {
       "name": "Sailboxes (Sail Research)",
@@ -727,6 +727,38 @@ export const PUBLISHED: PublishedData = {
         "limited": 0,
         "measuredAt": "2026-11-17T23:49:08.280Z"
       },
+      "morph": {
+        "name": "Morph Cloud",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
+        "createMs": 2022,
+        "taskMs": 209904,
+        "taskUsd": 0.00588888888888889,
+        "reusedUsd": 0.005830666666666667,
+        "successRate": 1,
+        "runs": 3,
+        "ok": 3,
+        "limited": 0,
+        "measuredAt": "2026-11-18T17:55:00.043Z"
+      },
+      "beam": {
+        "name": "Beam",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
+        "createMs": 708,
+        "taskMs": 205793,
+        "taskUsd": 0.008050000000000002,
+        "reusedUsd": 0.008003061111111112,
+        "successRate": 1,
+        "runs": 3,
+        "ok": 3,
+        "limited": 0,
+        "measuredAt": "2026-11-18T18:00:22.162Z"
+      },
       "vercel": {
         "name": "Vercel Sandbox",
         "size": {
@@ -1118,6 +1150,22 @@ export const PUBLISHED: PublishedData = {
         "ok": 3,
         "limited": 0,
         "measuredAt": "2026-11-18T17:44:41.265Z"
+      },
+      "morph": {
+        "name": "Morph Cloud",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
+        "createMs": 2030,
+        "taskMs": 520,
+        "taskUsd": 0.00008333333333333334,
+        "reusedUsd": 0.000014444444444444446,
+        "successRate": 1,
+        "runs": 3,
+        "ok": 3,
+        "limited": 0,
+        "measuredAt": "2026-11-18T17:55:29.358Z"
       },
       "novita": {
         "name": "Novita AI Agent Sandbox",
@@ -1577,6 +1625,22 @@ export const PUBLISHED: PublishedData = {
         "ok": 3,
         "limited": 0,
         "measuredAt": "2026-11-17T23:47:40.891Z"
+      },
+      "morph": {
+        "name": "Morph Cloud",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
+        "createMs": 1967,
+        "taskMs": 33693,
+        "taskUsd": 0.001,
+        "reusedUsd": 0.0009359166666666666,
+        "successRate": 1,
+        "runs": 3,
+        "ok": 3,
+        "limited": 0,
+        "measuredAt": "2026-11-18T17:57:59.751Z"
       },
       "beam": {
         "name": "Beam",
