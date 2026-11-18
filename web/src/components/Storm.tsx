@@ -1,6 +1,6 @@
 "use client";
 
-// The launch page's storm, in 3D. Golden dunes under a slate-blue storm, and on them one sandbox per provider
+// The front page's storm, in 3D. Golden dunes under a slate-blue storm, and on them one sandbox per provider
 // we've timed: a dark basin of sand with the provider's name on its side and a blue light under its rim that is
 // brighter the better the router ranks it. A bolt forms in the clouds and strikes the router's pick; its sand
 // fuses to glass. The others light up afterwards, each as much later as its measured start is slower: thunder.
@@ -1158,8 +1158,8 @@ export function Storm({ towers, modes, providerCount, measuredOn }: { towers: St
             <Link href="/docs#quickstart" className="bg-[#ff8a3d] px-4 py-2.5 text-[#0c0a09] hover:bg-[#ffe9c4]">
               Get started ↗
             </Link>
-            <Link href="/" className="border border-[#f4e6c8]/35 px-4 py-2.5 hover:border-[#f4e6c8]">
-              The full site
+            <Link href="/providers" className="border border-[#f4e6c8]/35 px-4 py-2.5 hover:border-[#f4e6c8]">
+              Providers
             </Link>
             <Link href="/benchmarks" className="border border-[#f4e6c8]/35 px-4 py-2.5 hover:border-[#f4e6c8]">
               Benchmarks

@@ -45,12 +45,12 @@ export function Nav() {
               <a href={`${HOSTED_URL}/auth/github`} className="hidden hover:text-ink sm:block">
                 Sign in
               </a>
-              <a href={`${HOSTED_URL}/dashboard`} className="rounded-full bg-ink px-4 py-1.5 text-[13px] font-medium text-bg hover:bg-ink-2">
+              <a href={`${HOSTED_URL}/dashboard`} className="bg-ink px-3.5 py-1.5 font-mono text-[11px] uppercase tracking-[0.1em] text-bg hover:bg-ink-2">
                 Sign up
               </a>
             </>
           ) : (
-            <Link href="/docs#quickstart" className="rounded-full bg-ink px-4 py-1.5 text-[13px] font-medium text-bg hover:bg-ink-2">
+            <Link href="/docs#quickstart" className="bg-ink px-3.5 py-1.5 font-mono text-[11px] uppercase tracking-[0.1em] text-bg hover:bg-ink-2">
               Quickstart
             </Link>
           )}
@@ -95,14 +95,14 @@ export function Tag({ children }: { children: React.ReactNode }) {
 }
 
 export function Button({ href, children, primary = false }: { href: string; children: React.ReactNode; primary?: boolean }) {
-  const cls = primary ? "bg-accent text-white hover:bg-accent-ink" : "border border-line-2 bg-bg text-ink hover:bg-panel";
+  const cls = primary ? "bg-accent text-bg hover:bg-accent-ink" : "border border-line-2 bg-bg text-ink hover:border-ink";
   const external = href.startsWith("http");
   return external ? (
-    <a href={href} className={`inline-flex h-9 items-center rounded-full px-4 text-[13px] font-medium ${cls}`}>
+    <a href={href} className={`inline-flex h-9 items-center px-4 font-mono text-[11.5px] uppercase tracking-[0.1em] ${cls}`}>
       {children}
     </a>
   ) : (
-    <Link href={href} className={`inline-flex h-9 items-center rounded-full px-4 text-[13px] font-medium ${cls}`}>
+    <Link href={href} className={`inline-flex h-9 items-center px-4 font-mono text-[11.5px] uppercase tracking-[0.1em] ${cls}`}>
       {children}
     </Link>
   );

@@ -54,7 +54,7 @@ export function HomeContent({ hero = true }: { hero?: boolean }) {
         {REPO_PUBLIC && (
           <a
             href={REPO}
-            className="mb-8 inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-line px-3.5 py-1.5 text-[12.5px] text-ink-2 hover:border-line-2 hover:text-ink"
+            className="mb-8 inline-flex items-center gap-2 whitespace-nowrap border border-line px-3.5 py-1.5 text-[12.5px] text-ink-2 hover:border-line-2 hover:text-ink"
           >
             <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden />
             Open source, MIT licensed

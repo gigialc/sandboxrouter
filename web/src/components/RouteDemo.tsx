@@ -76,7 +76,7 @@ export function RouteDemo() {
         <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-white/55">{sc.title}</span>
         <span className="flex gap-1.5" aria-hidden>
           {SCENARIOS.map((_, j) => (
-            <span key={j} className={`h-1.5 w-1.5 rounded-full ${j === s ? "bg-[#2fbf7f]" : "bg-white/20"}`} />
+            <span key={j} className={`h-1.5 w-1.5 rounded-full ${j === s ? "bg-[#ff8a3d]" : "bg-white/20"}`} />
           ))}
         </span>
       </div>
@@ -98,7 +98,7 @@ export function RouteDemo() {
             )}
             {l.kind === "ok" && (
               <>
-                <span className="text-[#2fbf7f]">› </span>
+                <span className="text-[#ff8a3d]">› </span>
                 <span className="inline-block w-24 text-white">{l.text}</span>
                 <span className="text-white/55">{l.note}</span>
               </>
