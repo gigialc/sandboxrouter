@@ -20,7 +20,7 @@ npm i @tensorlakeai/tensorlake  # Tensorlake
 npm i @runloop/api-client       # Runloop
 npm i @hopx-ai/sdk              # HOPX
 npm i @northflank/js-client     # Northflank
-npm i @beamcloud/beam-js        # Beam
+npm i @beamcloud/beam-js        # Beam (its package asks for TypeScript 5; on TypeScript 6+ add --legacy-peer-deps)
 npm i @codesandbox/sdk          # CodeSandbox
 npm i @deno/sandbox             # Deno Sandbox
 npm i novita-sandbox            # Novita

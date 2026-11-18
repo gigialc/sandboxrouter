@@ -1,0 +1,47 @@
+{
+  "tool": "sandboxrouter-agent",
+  "version": "0.14.1",
+  "date": "2026-11-18T19:56:18.541Z",
+  "label": "home-eu",
+  "task": "gemini-primes-v2",
+  "model": "gemini-3.5-flash",
+  "runs": 5,
+  "node": "v22.22.0",
+  "platform": "darwin-arm64",
+  "rows": [
+    {
+      "provider": "novita",
+      "runs": 5,
+      "requested": 5,
+      "started": 5,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "ok": 5,
+      "medianWallMs": 15358,
+      "medianModelMs": 13899,
+      "medianCpuMs": 480,
+      "medianTurns": 7,
+      "medianUsd": 0.0005184,
+      "medianTokens": 9052
+    },
+    {
+      "provider": "beam",
+      "runs": 5,
+      "requested": 5,
+      "started": 5,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "ok": 5,
+      "medianWallMs": 13797,
+      "medianModelMs": 11656,
+      "medianCpuMs": 340,
+      "medianTurns": 6,
+      "medianUsd": 0.000583333,
+      "medianTokens": 7422
+    }
+  ]
+}
