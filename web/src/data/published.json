@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "dataThrough": "2026-11-18T18:15:10.682Z",
+  "dataThrough": "2026-11-18T18:30:37.719Z",
   "conditionalStartFees": {
     "boat": {
       "minUsd": 0.03,
@@ -16,10 +16,10 @@
         "memoryGb": 4
       },
       "medianCreateMs": 138,
-      "successRate": 1,
-      "runs": 100,
+      "successRate": 0.970873786407767,
+      "runs": 103,
       "hourlyUsd": 0.1656,
-      "measuredAt": "2026-11-17T16:19:15.367Z"
+      "measuredAt": "2026-11-18T18:30:37.719Z"
     },
     "beam": {
       "name": "Beam",
@@ -28,11 +28,10 @@
         "memoryGb": 4
       },
       "medianCreateMs": 256,
-      "medianReadyMs": 708,
-      "successRate": 1,
-      "runs": 3,
+      "successRate": 0.5,
+      "runs": 6,
       "hourlyUsd": 0.14,
-      "measuredAt": "2026-11-18T18:00:22.162Z"
+      "measuredAt": "2026-11-18T18:30:37.719Z"
     },
     "novita": {
       "name": "Novita AI Agent Sandbox",
@@ -41,10 +40,10 @@
         "memoryGb": 4
       },
       "medianCreateMs": 298,
-      "successRate": 1,
-      "runs": 100,
+      "successRate": 0.970873786407767,
+      "runs": 103,
       "hourlyUsd": 0.11664,
-      "measuredAt": "2026-11-17T16:19:15.367Z"
+      "measuredAt": "2026-11-18T18:30:37.719Z"
     },
     "sprites": {
       "name": "Fly.io Sprites",
@@ -53,10 +52,10 @@
         "memoryGb": 4
       },
       "medianCreateMs": 304,
-      "successRate": 1,
-      "runs": 5,
+      "successRate": 0.625,
+      "runs": 8,
       "hourlyUsd": 0.16449999999999998,
-      "measuredAt": "2026-11-11T21:29:12.572Z"
+      "measuredAt": "2026-11-18T18:30:37.719Z"
     },
     "e2b": {
       "name": "E2B",
@@ -64,11 +63,11 @@
         "vcpu": 2,
         "memoryGb": 0.5
       },
-      "medianCreateMs": 326,
+      "medianCreateMs": 320,
       "successRate": 1,
-      "runs": 105,
+      "runs": 108,
       "hourlyUsd": 0.1089,
-      "measuredAt": "2026-11-17T16:19:15.367Z"
+      "measuredAt": "2026-11-18T18:30:37.719Z"
     },
     "openscale": {
       "name": "OpenScale Sandboxes",
@@ -76,11 +75,23 @@
         "vcpu": 2,
         "memoryGb": 1
       },
-      "medianCreateMs": 353,
+      "medianCreateMs": 350,
       "successRate": 1,
-      "runs": 105,
+      "runs": 108,
       "hourlyUsd": 0.013999999999999999,
-      "measuredAt": "2026-11-17T16:19:15.367Z"
+      "measuredAt": "2026-11-18T18:30:37.719Z"
+    },
+    "daytona": {
+      "name": "Daytona",
+      "size": {
+        "vcpu": 1,
+        "memoryGb": 1
+      },
+      "medianCreateMs": 363,
+      "successRate": 1,
+      "runs": 108,
+      "hourlyUsd": 0.06659999999999999,
+      "measuredAt": "2026-11-18T18:30:37.719Z"
     },
     "vercel": {
       "name": "Vercel Sandbox",
@@ -89,22 +100,10 @@
         "memoryGb": 4
       },
       "medianCreateMs": 364,
-      "successRate": 1,
-      "runs": 100,
+      "successRate": 0.970873786407767,
+      "runs": 103,
       "hourlyUsd": 0.3408,
-      "measuredAt": "2026-11-17T16:19:15.367Z"
-    },
-    "daytona": {
-      "name": "Daytona",
-      "size": {
-        "vcpu": 1,
-        "memoryGb": 1
-      },
-      "medianCreateMs": 369,
-      "successRate": 1,
-      "runs": 105,
-      "hourlyUsd": 0.06659999999999999,
-      "measuredAt": "2026-11-17T16:19:15.367Z"
+      "measuredAt": "2026-11-18T18:30:37.719Z"
     },
     "cloudflare": {
       "name": "Cloudflare Sandbox",
@@ -113,10 +112,10 @@
         "memoryGb": 4
       },
       "medianCreateMs": 417,
-      "successRate": 1,
-      "runs": 100,
+      "successRate": 0.970873786407767,
+      "runs": 103,
       "hourlyUsd": 0.21599999999999997,
-      "measuredAt": "2026-11-17T16:19:15.367Z"
+      "measuredAt": "2026-11-18T18:30:37.719Z"
     },
     "modal": {
       "name": "Modal",
@@ -125,10 +124,10 @@
         "memoryGb": 4
       },
       "medianCreateMs": 470,
-      "successRate": 1,
-      "runs": 100,
+      "successRate": 0.970873786407767,
+      "runs": 103,
       "hourlyUsd": 0.23796,
-      "measuredAt": "2026-11-17T16:19:15.367Z"
+      "measuredAt": "2026-11-18T18:30:37.719Z"
     },
     "agent37": {
       "name": "Agent37",
@@ -137,10 +136,10 @@
         "memoryGb": 4
       },
       "medianCreateMs": 799,
-      "successRate": 1,
-      "runs": 100,
+      "successRate": 0.970873786407767,
+      "runs": 103,
       "hourlyUsd": 0.006520547945205479,
-      "measuredAt": "2026-11-17T16:19:15.367Z"
+      "measuredAt": "2026-11-18T18:30:37.719Z"
     },
     "agentcore": {
       "name": "Amazon Bedrock AgentCore Code Interpreter",
@@ -148,11 +147,11 @@
         "vcpu": 2,
         "memoryGb": 4
       },
-      "medianCreateMs": 836,
+      "medianCreateMs": 807,
       "successRate": 1,
-      "runs": 100,
+      "runs": 103,
       "hourlyUsd": 0.2168,
-      "measuredAt": "2026-11-17T16:19:15.367Z"
+      "measuredAt": "2026-11-18T18:30:37.719Z"
     },
     "maritime": {
       "name": "Maritime",
@@ -160,11 +159,11 @@
         "vcpu": 2,
         "memoryGb": 4
       },
-      "medianCreateMs": 1069,
+      "medianCreateMs": 1091,
       "successRate": 1,
-      "runs": 105,
+      "runs": 108,
       "hourlyUsd": 0.022,
-      "measuredAt": "2026-11-17T16:19:15.367Z"
+      "measuredAt": "2026-11-18T18:30:37.719Z"
     },
     "morph": {
       "name": "Morph Cloud",
@@ -173,11 +172,10 @@
         "memoryGb": 4
       },
       "medianCreateMs": 1236,
-      "medianReadyMs": 1967,
-      "successRate": 1,
-      "runs": 3,
+      "successRate": 0.5,
+      "runs": 6,
       "hourlyUsd": 0.1,
-      "measuredAt": "2026-11-18T17:57:59.751Z"
+      "measuredAt": "2026-11-18T18:30:37.719Z"
     },
     "boat": {
       "name": "Boat",
@@ -186,10 +184,10 @@
         "memoryGb": 4
       },
       "medianCreateMs": 1512,
-      "successRate": 1,
-      "runs": 5,
+      "successRate": 0.625,
+      "runs": 8,
       "hourlyUsd": 0.018,
-      "measuredAt": "2026-11-17T16:19:15.367Z"
+      "measuredAt": "2026-11-18T18:30:37.719Z"
     },
     "tensorlake": {
       "name": "Tensorlake",
@@ -198,10 +196,10 @@
         "memoryGb": 4
       },
       "medianCreateMs": 1614,
-      "successRate": 1,
-      "runs": 100,
+      "successRate": 0.970873786407767,
+      "runs": 103,
       "hourlyUsd": 0.2,
-      "measuredAt": "2026-11-17T16:19:15.367Z"
+      "measuredAt": "2026-11-18T18:30:37.719Z"
     },
     "freestyle": {
       "name": "Freestyle",
@@ -210,10 +208,22 @@
         "memoryGb": 4
       },
       "medianCreateMs": 1946,
-      "successRate": 1,
-      "runs": 100,
+      "successRate": 0.970873786407767,
+      "runs": 103,
       "hourlyUsd": 0.13362,
-      "measuredAt": "2026-11-17T16:19:15.367Z"
+      "measuredAt": "2026-11-18T18:30:37.719Z"
+    },
+    "sail": {
+      "name": "Sailboxes (Sail Research)",
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "medianCreateMs": 2033,
+      "successRate": 1,
+      "runs": 103,
+      "hourlyUsd": 0.062,
+      "measuredAt": "2026-11-18T18:30:37.719Z"
     },
     "google": {
       "name": "Google Cloud Agent Platform",
@@ -222,23 +232,10 @@
         "memoryGb": 2
       },
       "medianCreateMs": 2300,
-      "medianReadyMs": 2602,
-      "successRate": 1,
-      "runs": 3,
+      "successRate": 0.5,
+      "runs": 6,
       "hourlyUsd": 0.10300000000000001,
-      "measuredAt": "2026-11-18T18:15:10.682Z"
-    },
-    "sail": {
-      "name": "Sailboxes (Sail Research)",
-      "size": {
-        "vcpu": 2,
-        "memoryGb": 4
-      },
-      "medianCreateMs": 2543,
-      "successRate": 1,
-      "runs": 100,
-      "hourlyUsd": 0.062,
-      "measuredAt": "2026-11-17T16:19:15.367Z"
+      "measuredAt": "2026-11-18T18:30:37.719Z"
     },
     "lambda": {
       "name": "AWS Lambda MicroVMs",
@@ -246,11 +243,11 @@
         "vcpu": 2,
         "memoryGb": 4
       },
-      "medianCreateMs": 3235,
+      "medianCreateMs": 2948,
       "successRate": 1,
-      "runs": 90,
+      "runs": 93,
       "hourlyUsd": 0.25220016,
-      "measuredAt": "2026-11-17T16:19:15.367Z"
+      "measuredAt": "2026-11-18T18:30:37.719Z"
     },
     "northflank": {
       "name": "Northflank",
@@ -278,11 +275,11 @@
         "taskMs": 987,
         "taskUsd": 0.000014999999999999999,
         "reusedUsd": 0.000004934999999999999,
-        "successRate": 0.6666666666666666,
-        "runs": 3,
+        "successRate": 0.3333333333333333,
+        "runs": 6,
         "ok": 2,
         "limited": 1,
-        "measuredAt": "2026-11-17T23:36:05.829Z"
+        "measuredAt": "2026-11-18T18:24:05.030Z"
       },
       "openscale": {
         "name": "OpenScale Sandboxes",
@@ -290,15 +287,15 @@
           "vcpu": 2,
           "memoryGb": 1
         },
-        "createMs": 1254,
-        "taskMs": 3641,
+        "createMs": 1294,
+        "taskMs": 3590,
         "taskUsd": 0.000019444444444444442,
-        "reusedUsd": 0.000014159444444444443,
+        "reusedUsd": 0.00001396111111111111,
         "successRate": 1,
-        "runs": 3,
-        "ok": 3,
+        "runs": 6,
+        "ok": 6,
         "limited": 0,
-        "measuredAt": "2026-11-17T23:36:05.829Z"
+        "measuredAt": "2026-11-18T18:24:05.030Z"
       },
       "maritime": {
         "name": "Maritime",
@@ -306,15 +303,15 @@
           "vcpu": 2,
           "memoryGb": 4
         },
-        "createMs": 1371,
-        "taskMs": 2093,
+        "createMs": 1618,
+        "taskMs": 2111,
         "taskUsd": 0.00002444444444444444,
-        "reusedUsd": 0.000012790555555555555,
+        "reusedUsd": 0.000012900555555555557,
         "successRate": 1,
-        "runs": 3,
-        "ok": 3,
+        "runs": 6,
+        "ok": 6,
         "limited": 0,
-        "measuredAt": "2026-11-17T23:49:34.784Z"
+        "measuredAt": "2026-11-18T18:24:05.030Z"
       },
       "daytona": {
         "name": "Daytona",
@@ -322,15 +319,15 @@
           "vcpu": 1,
           "memoryGb": 1
         },
-        "createMs": 785,
-        "taskMs": 1717,
+        "createMs": 728,
+        "taskMs": 1486,
         "taskUsd": 0.000055499999999999994,
-        "reusedUsd": 0.0000317645,
+        "reusedUsd": 0.000027490999999999998,
         "successRate": 1,
-        "runs": 3,
-        "ok": 3,
+        "runs": 6,
+        "ok": 6,
         "limited": 0,
-        "measuredAt": "2026-11-17T23:40:37.832Z"
+        "measuredAt": "2026-11-18T18:24:05.030Z"
       },
       "northflank": {
         "name": "Northflank",
@@ -358,11 +355,11 @@
         "taskMs": 961,
         "taskUsd": 0.00007488888888888889,
         "reusedUsd": 0.000040905555555555554,
-        "successRate": 1,
-        "runs": 3,
+        "successRate": 0.5,
+        "runs": 6,
         "ok": 3,
         "limited": 0,
-        "measuredAt": "2026-11-17T23:36:05.829Z"
+        "measuredAt": "2026-11-18T18:24:05.030Z"
       },
       "cloudflare": {
         "name": "Cloudflare Sandbox",
@@ -374,11 +371,11 @@
         "taskMs": 1583,
         "taskUsd": 0.00010699999999999999,
         "reusedUsd": 0.00007866,
-        "successRate": 1,
-        "runs": 3,
+        "successRate": 0.5,
+        "runs": 6,
         "ok": 3,
         "limited": 0,
-        "measuredAt": "2026-11-17T23:36:05.829Z"
+        "measuredAt": "2026-11-18T18:24:05.030Z"
       },
       "agent37": {
         "name": "Agent37",
@@ -390,12 +387,12 @@
         "taskMs": 8980,
         "taskUsd": 0.00010845844748858446,
         "reusedUsd": 0.00001623261430745814,
-        "successRate": 1,
-        "runs": 3,
+        "successRate": 0.5,
+        "runs": 6,
         "ok": 3,
         "limited": 0,
         "minimumSeconds": 60,
-        "measuredAt": "2026-11-17T23:40:37.832Z"
+        "measuredAt": "2026-11-18T18:24:05.030Z"
       },
       "novita": {
         "name": "Novita AI Agent Sandbox",
@@ -407,11 +404,11 @@
         "taskMs": 2166,
         "taskUsd": 0.0001296,
         "reusedUsd": 0.00007017839999999999,
-        "successRate": 1,
-        "runs": 3,
+        "successRate": 0.5,
+        "runs": 6,
         "ok": 3,
         "limited": 0,
-        "measuredAt": "2026-11-17T23:43:41.482Z"
+        "measuredAt": "2026-11-18T18:24:05.030Z"
       },
       "modal": {
         "name": "Modal",
@@ -423,11 +420,27 @@
         "taskMs": 427,
         "taskUsd": 0.00013220000000000001,
         "reusedUsd": 0.0000282247,
-        "successRate": 1,
-        "runs": 3,
+        "successRate": 0.5,
+        "runs": 6,
         "ok": 3,
         "limited": 0,
-        "measuredAt": "2026-11-17T23:36:05.829Z"
+        "measuredAt": "2026-11-18T18:24:05.030Z"
+      },
+      "agentcore": {
+        "name": "Amazon Bedrock AgentCore Code Interpreter",
+        "size": {
+          "vcpu": 2,
+          "memoryGb": 4
+        },
+        "createMs": 1080,
+        "taskMs": 2884,
+        "taskUsd": 0.0001421902777777778,
+        "reusedUsd": 0.00013047227777777777,
+        "successRate": 1,
+        "runs": 6,
+        "ok": 6,
+        "limited": 0,
+        "measuredAt": "2026-11-18T18:24:05.030Z"
       },
       "freestyle": {
         "name": "Freestyle",
@@ -439,11 +452,11 @@
         "taskMs": 1782,
         "taskUsd": 0.00014846666666666665,
         "reusedUsd": 0.0000661419,
-        "successRate": 1,
-        "runs": 3,
+        "successRate": 0.5,
+        "runs": 6,
         "ok": 3,
         "limited": 0,
-        "measuredAt": "2026-11-17T23:36:05.829Z"
+        "measuredAt": "2026-11-18T18:24:05.030Z"
       },
       "e2b": {
         "name": "E2B",
@@ -451,31 +464,15 @@
           "vcpu": 2,
           "memoryGb": 0.5
         },
-        "createMs": 820,
-        "taskMs": 3880,
+        "createMs": 645,
+        "taskMs": 4157,
         "taskUsd": 0.00015125,
-        "reusedUsd": 0.00011737,
+        "reusedUsd": 0.00012574924999999998,
         "successRate": 1,
-        "runs": 3,
-        "ok": 3,
+        "runs": 6,
+        "ok": 6,
         "limited": 0,
-        "measuredAt": "2026-11-17T23:36:05.829Z"
-      },
-      "agentcore": {
-        "name": "Amazon Bedrock AgentCore Code Interpreter",
-        "size": {
-          "vcpu": 2,
-          "memoryGb": 4
-        },
-        "createMs": 1241,
-        "taskMs": 2864,
-        "taskUsd": 0.00015244166666666663,
-        "reusedUsd": 0.00013001366666666664,
-        "successRate": 1,
-        "runs": 3,
-        "ok": 3,
-        "limited": 0,
-        "measuredAt": "2026-11-17T23:36:05.829Z"
+        "measuredAt": "2026-11-18T18:24:05.030Z"
       },
       "beam": {
         "name": "Beam",
@@ -487,11 +484,11 @@
         "taskMs": 3676,
         "taskUsd": 0.00019444444444444446,
         "reusedUsd": 0.00014295555555555558,
-        "successRate": 1,
-        "runs": 3,
+        "successRate": 0.5,
+        "runs": 6,
         "ok": 3,
         "limited": 0,
-        "measuredAt": "2026-11-18T17:44:19.747Z"
+        "measuredAt": "2026-11-18T18:24:05.030Z"
       },
       "google": {
         "name": "Google Cloud Agent Platform",
@@ -503,11 +500,11 @@
         "taskMs": 7298,
         "taskUsd": 0.0002861111111111111,
         "reusedUsd": 0.0002088038888888889,
-        "successRate": 1,
-        "runs": 3,
+        "successRate": 0.5,
+        "runs": 6,
         "ok": 3,
         "limited": 0,
-        "measuredAt": "2026-11-18T17:49:01.865Z"
+        "measuredAt": "2026-11-18T18:24:05.030Z"
       },
       "morph": {
         "name": "Morph Cloud",
@@ -519,11 +516,11 @@
         "taskMs": 8131,
         "taskUsd": 0.0003055555555555556,
         "reusedUsd": 0.00022586111111111111,
-        "successRate": 1,
-        "runs": 3,
+        "successRate": 0.5,
+        "runs": 6,
         "ok": 3,
         "limited": 0,
-        "measuredAt": "2026-11-18T17:44:07.988Z"
+        "measuredAt": "2026-11-18T18:24:05.030Z"
       },
       "lambda": {
         "name": "AWS Lambda MicroVMs",
@@ -531,15 +528,15 @@
           "vcpu": 2,
           "memoryGb": 4
         },
-        "createMs": 3859,
-        "taskMs": 3792,
+        "createMs": 3767,
+        "taskMs": 3912,
         "taskUsd": 0.0005604448000000001,
-        "reusedUsd": 0.00026565083519999996,
+        "reusedUsd": 0.0002740575072,
         "successRate": 1,
-        "runs": 3,
-        "ok": 3,
+        "runs": 6,
+        "ok": 6,
         "limited": 0,
-        "measuredAt": "2026-11-17T23:36:05.829Z"
+        "measuredAt": "2026-11-18T18:24:05.030Z"
       },
       "vercel": {
         "name": "Vercel Sandbox",
@@ -551,12 +548,12 @@
         "taskMs": 3822,
         "taskUsd": 0.0016643555555555553,
         "reusedUsd": 0.0003410515555555555,
-        "successRate": 1,
-        "runs": 3,
+        "successRate": 0.5,
+        "runs": 6,
         "ok": 3,
         "limited": 0,
         "minimumSeconds": 60,
-        "measuredAt": "2026-11-17T23:39:46.957Z"
+        "measuredAt": "2026-11-18T18:24:05.030Z"
       },
       "sail": {
         "name": "Sailboxes (Sail Research)",
@@ -564,16 +561,16 @@
           "vcpu": 2,
           "memoryGb": 4
         },
-        "createMs": 2891,
-        "taskMs": 6495,
-        "taskUsd": 0.01011963888888889,
-        "reusedUsd": 0.00008848333333333333,
+        "createMs": 2255,
+        "taskMs": 5808,
+        "taskUsd": 0.010109666666666666,
+        "reusedUsd": 0.00008129333333333333,
         "successRate": 1,
-        "runs": 3,
-        "ok": 3,
+        "runs": 6,
+        "ok": 6,
         "limited": 0,
         "perSandboxUsd": 0.01,
-        "measuredAt": "2026-11-17T23:36:05.829Z"
+        "measuredAt": "2026-11-18T18:24:05.030Z"
       }
     },
     "long": {
@@ -1305,12 +1302,12 @@
         "taskMs": 60878,
         "taskUsd": 0.00021691689497716892,
         "reusedUsd": 0.00011004555610350075,
-        "successRate": 1,
-        "runs": 3,
+        "successRate": 0.5,
+        "runs": 6,
         "ok": 3,
         "limited": 0,
         "minimumSeconds": 60,
-        "measuredAt": "2026-11-17T23:51:25.110Z"
+        "measuredAt": "2026-11-18T18:30:37.719Z"
       },
       "openscale": {
         "name": "OpenScale Sandboxes",
@@ -1318,15 +1315,15 @@
           "vcpu": 2,
           "memoryGb": 1
         },
-        "createMs": 1308,
-        "taskMs": 61649,
-        "taskUsd": 0.000245,
-        "reusedUsd": 0.00023974611111111108,
+        "createMs": 1304,
+        "taskMs": 61703,
+        "taskUsd": 0.0002488888888888889,
+        "reusedUsd": 0.0002399561111111111,
         "successRate": 1,
-        "runs": 3,
-        "ok": 3,
+        "runs": 6,
+        "ok": 6,
         "limited": 0,
-        "measuredAt": "2026-11-17T23:54:04.615Z"
+        "measuredAt": "2026-11-18T18:30:37.719Z"
       },
       "maritime": {
         "name": "Maritime",
@@ -1334,15 +1331,15 @@
           "vcpu": 2,
           "memoryGb": 4
         },
-        "createMs": 1389,
-        "taskMs": 61170,
+        "createMs": 1521,
+        "taskMs": 61111,
         "taskUsd": 0.000385,
-        "reusedUsd": 0.00037381666666666665,
+        "reusedUsd": 0.00037345611111111107,
         "successRate": 1,
-        "runs": 3,
-        "ok": 3,
+        "runs": 6,
+        "ok": 6,
         "limited": 0,
-        "measuredAt": "2026-11-17T23:54:45.098Z"
+        "measuredAt": "2026-11-18T18:30:37.719Z"
       },
       "agentcore": {
         "name": "Amazon Bedrock AgentCore Code Interpreter",
@@ -1350,15 +1347,15 @@
           "vcpu": 2,
           "memoryGb": 4
         },
-        "createMs": 1087,
-        "taskMs": 60649,
-        "taskUsd": 0.0006798388888888888,
-        "reusedUsd": 0.0006656533888888889,
+        "createMs": 1005,
+        "taskMs": 60657,
+        "taskUsd": 0.0006812062499999999,
+        "reusedUsd": 0.00066710475,
         "successRate": 1,
-        "runs": 3,
-        "ok": 3,
+        "runs": 6,
+        "ok": 6,
         "limited": 0,
-        "measuredAt": "2026-11-17T23:47:54.312Z"
+        "measuredAt": "2026-11-18T18:30:37.719Z"
       },
       "daytona": {
         "name": "Daytona",
@@ -1366,15 +1363,15 @@
           "vcpu": 1,
           "memoryGb": 1
         },
-        "createMs": 1030,
-        "taskMs": 60821,
+        "createMs": 850,
+        "taskMs": 60744,
         "taskUsd": 0.0011469999999999998,
-        "reusedUsd": 0.0011251884999999998,
+        "reusedUsd": 0.001123764,
         "successRate": 1,
-        "runs": 3,
-        "ok": 3,
+        "runs": 6,
+        "ok": 6,
         "limited": 0,
-        "measuredAt": "2026-11-17T23:51:25.110Z"
+        "measuredAt": "2026-11-18T18:30:37.719Z"
       },
       "cloudflare": {
         "name": "Cloudflare Sandbox",
@@ -1386,11 +1383,11 @@
         "taskMs": 60821,
         "taskUsd": 0.0012613999999999998,
         "reusedUsd": 0.0012378199999999995,
-        "successRate": 1,
-        "runs": 3,
+        "successRate": 0.5,
+        "runs": 6,
         "ok": 3,
         "limited": 0,
-        "measuredAt": "2026-11-17T23:47:54.312Z"
+        "measuredAt": "2026-11-18T18:30:37.719Z"
       },
       "vercel": {
         "name": "Vercel Sandbox",
@@ -1402,12 +1399,12 @@
         "taskMs": 61145,
         "taskUsd": 0.0015586666666666665,
         "reusedUsd": 0.001514971111111111,
-        "successRate": 1,
-        "runs": 3,
+        "successRate": 0.5,
+        "runs": 6,
         "ok": 3,
         "limited": 0,
         "minimumSeconds": 60,
-        "measuredAt": "2026-11-17T23:44:45.227Z"
+        "measuredAt": "2026-11-18T18:30:37.719Z"
       },
       "google": {
         "name": "Google Cloud Agent Platform",
@@ -1419,11 +1416,11 @@
         "taskMs": 61085,
         "taskUsd": 0.0018311111111111113,
         "reusedUsd": 0.0017477097222222222,
-        "successRate": 1,
-        "runs": 3,
+        "successRate": 0.5,
+        "runs": 6,
         "ok": 3,
         "limited": 0,
-        "measuredAt": "2026-11-18T17:53:44.923Z"
+        "measuredAt": "2026-11-18T18:30:37.719Z"
       },
       "e2b": {
         "name": "E2B",
@@ -1431,15 +1428,15 @@
           "vcpu": 2,
           "memoryGb": 0.5
         },
-        "createMs": 547,
-        "taskMs": 61238,
+        "createMs": 430,
+        "taskMs": 61265,
         "taskUsd": 0.0018754999999999998,
-        "reusedUsd": 0.0018524494999999999,
+        "reusedUsd": 0.00185326625,
         "successRate": 1,
-        "runs": 3,
-        "ok": 3,
+        "runs": 6,
+        "ok": 6,
         "limited": 0,
-        "measuredAt": "2026-11-17T23:54:04.615Z"
+        "measuredAt": "2026-11-18T18:30:37.719Z"
       },
       "novita": {
         "name": "Novita AI Agent Sandbox",
@@ -1451,11 +1448,11 @@
         "taskMs": 60777,
         "taskUsd": 0.0020088,
         "reusedUsd": 0.0019691748,
-        "successRate": 1,
-        "runs": 3,
+        "successRate": 0.5,
+        "runs": 6,
         "ok": 3,
         "limited": 0,
-        "measuredAt": "2026-11-17T23:47:54.312Z"
+        "measuredAt": "2026-11-18T18:30:37.719Z"
       },
       "freestyle": {
         "name": "Freestyle",
@@ -1467,11 +1464,11 @@
         "taskMs": 61466,
         "taskUsd": 0.0023383499999999995,
         "reusedUsd": 0.0022814130333333334,
-        "successRate": 1,
-        "runs": 3,
+        "successRate": 0.5,
+        "runs": 6,
         "ok": 3,
         "limited": 0,
-        "measuredAt": "2026-11-17T23:47:54.312Z"
+        "measuredAt": "2026-11-18T18:30:37.719Z"
       },
       "beam": {
         "name": "Beam",
@@ -1483,11 +1480,11 @@
         "taskMs": 61068,
         "taskUsd": 0.00245,
         "reusedUsd": 0.002374866666666667,
-        "successRate": 1,
-        "runs": 3,
+        "successRate": 0.5,
+        "runs": 6,
         "ok": 3,
         "limited": 0,
-        "measuredAt": "2026-11-18T17:47:54.680Z"
+        "measuredAt": "2026-11-18T18:30:37.719Z"
       },
       "lambda": {
         "name": "AWS Lambda MicroVMs",
@@ -1495,15 +1492,15 @@
           "vcpu": 2,
           "memoryGb": 4
         },
-        "createMs": 3808,
-        "taskMs": 62745,
-        "taskUsd": 0.0046937252,
-        "reusedUsd": 0.004395638622,
+        "createMs": 3271,
+        "taskMs": 62543,
+        "taskUsd": 0.0046236696,
+        "reusedUsd": 0.0043814873908,
         "successRate": 1,
-        "runs": 3,
-        "ok": 3,
+        "runs": 6,
+        "ok": 6,
         "limited": 0,
-        "measuredAt": "2026-11-17T23:47:54.312Z"
+        "measuredAt": "2026-11-18T18:30:37.719Z"
       },
       "sail": {
         "name": "Sailboxes (Sail Research)",
@@ -1511,16 +1508,16 @@
           "vcpu": 2,
           "memoryGb": 4
         },
-        "createMs": 2294,
-        "taskMs": 61613,
-        "taskUsd": 0.010590847222222222,
-        "reusedUsd": 0.0005696294444444445,
+        "createMs": 1952,
+        "taskMs": 61553,
+        "taskUsd": 0.010589159722222222,
+        "reusedUsd": 0.0005674086111111111,
         "successRate": 1,
-        "runs": 3,
-        "ok": 3,
+        "runs": 6,
+        "ok": 6,
         "limited": 0,
         "perSandboxUsd": 0.01,
-        "measuredAt": "2026-11-17T23:47:54.312Z"
+        "measuredAt": "2026-11-18T18:30:37.719Z"
       }
     },
     "repo": {
