@@ -197,13 +197,26 @@ class GoogleBox implements ProviderSandbox {
     const t0 = Date.now();
     const seconds = Math.max(1, Math.ceil(opts.timeoutSeconds ?? DEFAULT_EXEC_TIMEOUT_S));
     const cmd = wrapCommand(command, { env: { ...this.env, ...opts.env } });
-    const result = await this.provider.request<{ outputs?: Chunk[] }>("POST", `${this.nativeId}/:execute`, {
-      inputs: [
-        dataChunk("application/x.sandbox-request-uri", "/exec"),
-        dataChunk("application/x.sandbox-request-port", "8080"),
-        dataChunk("application/json", JSON.stringify({ command: cmd, cwd: opts.cwd, timeout: seconds })),
-      ],
-    }, (seconds + 15) * 1000);
+    const inputs = [
+      dataChunk("application/x.sandbox-request-uri", "/exec"),
+      dataChunk("application/x.sandbox-request-port", "8080"),
+      dataChunk("application/json", JSON.stringify({ command: cmd, cwd: opts.cwd, timeout: seconds })),
+    ];
+    let result: { outputs?: Chunk[] };
+    try {
+      result = await this.provider.request("POST", `${this.nativeId}/:execute`, { inputs }, (seconds + 15) * 1000);
+    } catch (err) {
+      // Agent Platform wraps confirmed guest command kills in a 400 DEADLINE_EXCEEDED response.
+      if (
+        err instanceof ProviderError &&
+        err.status === 400 &&
+        /\bDEADLINE_EXCEEDED\b/.test(err.message) &&
+        /\bcommand exceeded \d+(?:\.\d+)?s and was killed\b/i.test(err.message)
+      ) {
+        throw timeoutError(ID, seconds);
+      }
+      throw err;
+    }
 
     const out = result.outputs?.find((chunk) => chunk.data)?.data;
     if (!out) throw new ProviderError(ID, "shell sandbox returned no output");

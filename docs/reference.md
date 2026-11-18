@@ -329,7 +329,7 @@ It prints one line per step and exits 1 if any fails. `checkProvider(router, id)
 | Azure Container Apps dynamic sessions | not run yet | |
 | Daytona | 14/14 passed | 2026-11-13, v0.7.0 |
 | Alibaba Cloud Agent Sandbox | not run yet | |
-| Google Cloud Agent Platform | not run yet | |
+| Google Cloud Agent Platform | 14/14 passed; note: output arrived only at the end (no live streaming) | 2026-11-18, v0.14.0 |
 | E2B | 14/14 passed | 2026-11-13, v0.7.0 |
 | Docker (local) | 14/14 passed | 2026-11-13, v0.7.0 |
 
