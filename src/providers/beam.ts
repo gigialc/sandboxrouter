@@ -1,6 +1,6 @@
 import { DEFAULT_MEMORY_GB, DEFAULT_VCPU } from "../catalog.js";
 import { ProviderError, type ExecOptions, type ExecResult, type Provider, type ProviderSandbox, type SandboxSpec } from "../types.js";
-import { DEFAULT_EXEC_TIMEOUT_S, dirname, optionalImport, shq, timeoutError, toBytes } from "../util.js";
+import { DEFAULT_EXEC_TIMEOUT_S, dirname, optionalImport, timeoutError, toBytes } from "../util.js";
 
 /**
  * Beam (beam.cloud) sandboxes via the official `@beamcloud/beam-js` SDK (checked against 1.1.6).
@@ -8,7 +8,7 @@ import { DEFAULT_EXEC_TIMEOUT_S, dirname, optionalImport, shq, timeoutError, toB
  *   new Sandbox({ name, cpu, memory: MiB, gpu?, image?, keepWarmSeconds, env }).create()
  *       -> SandboxInstance (containerId is the sandbox id)
  *   Sandbox.connect(id)                       reattach by id
- *   instance.execShell(text, { cwd, env, wait })  start a process; .wait() -> exit code,
+ *   instance.exec(argv, { cwd, env, wait })  start a process; .wait() -> exit code,
  *       .stdout / .stderr are polled streams (async-iterable by line, or .read() for all so far)
  *   instance.fs.writeBytes(path, buf) / fs.readBytes(path)
  *   instance.terminate()
@@ -42,7 +42,7 @@ interface BeamProcess {
 
 interface BeamInstance {
   containerId: string;
-  execShell(command: string, opts?: { cwd?: string; env?: Record<string, string>; wait?: boolean }): Promise<BeamProcess>;
+  exec(command: string[], opts?: { cwd?: string; env?: Record<string, string>; wait?: boolean }): Promise<BeamProcess>;
   fs: {
     writeBytes(path: string, content: Uint8Array | Buffer): Promise<void>;
     readBytes(path: string): Promise<Uint8Array>;
@@ -151,7 +151,8 @@ class BeamBox implements ProviderSandbox {
     try {
       // Never `wait: true`: that call returns only when the command exits, so the deadline below
       // could not start until it was already too late to enforce.
-      proc = await this.sb.execShell(cmd, { cwd: opts.cwd, env, wait: false });
+      // Beam's gateway treats execShell input like argv on some accounts.
+      proc = await this.sb.exec(["sh", "-c", cmd], { cwd: opts.cwd, env, wait: false });
     } catch (err) {
       throw fail(err, "exec");
     }
@@ -190,7 +191,7 @@ class BeamBox implements ProviderSandbox {
     } catch {
       // Most likely a missing parent directory: create it and try once more.
       try {
-        const p = await this.sb.execShell(`mkdir -p ${shq(dirname(path))}`, { wait: true });
+        const p = await this.sb.exec(["mkdir", "-p", "--", dirname(path)], { wait: true });
         await p.wait();
         await this.sb.fs.writeBytes(path, buf);
       } catch (err) {

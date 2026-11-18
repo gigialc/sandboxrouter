@@ -51,10 +51,10 @@ export interface ProviderInfo {
   limits: { maxVcpu: number; maxMemoryGb: number; maxPorts?: number; reservedPorts?: number[] };
   /**
    * The size every sandbox gets unless a custom image (template, snapshot) is passed, whatever
-   * vcpu/memoryGb ask for. Measured inside real sandboxes (nproc, MemTotal). The router skips the
+   * vcpu/memoryGb ask for. Use the documented stock template size or a measurement from a live sandbox. The router skips the
    * provider for requests bigger than this and prices it at this size.
    */
-  defaultSize?: { vcpu: number; memoryGb: number; measured: string };
+  defaultSize?: { vcpu: number; memoryGb: number; measured?: string };
   /** Runs on your own machine (Docker). Never chosen automatically; name it to use it. */
   local?: boolean;
   /** Env vars the adapter reads. Any one group being fully set means "configured". */
@@ -120,7 +120,53 @@ export function listingOrder(spec: SandboxSpec = { vcpu: DEFAULT_VCPU, memoryGb:
  * size (or by your measured cold starts), ties broken alphabetically. Nobody gets a better slot.
  * Prices come from each provider's public pricing page; PRs that correct one are welcome.
  */
+/** Sellable Harness Runtime microVM shapes. Use the same allocation for pricing and create. */
+const DIGITALOCEAN_SIZES = [
+  { slug: "mars-1vcpu-1gb", vcpu: 1, memoryGb: 1 },
+  { slug: "mars-2vcpu-2gb", vcpu: 2, memoryGb: 2 },
+  { slug: "mars-2vcpu-4gb", vcpu: 2, memoryGb: 4 },
+  { slug: "mars-4vcpu-8gb", vcpu: 4, memoryGb: 8 },
+  { slug: "mars-16vcpu-32gb", vcpu: 16, memoryGb: 32 },
+] as const;
+
+export function digitalOceanSize(vcpu: number, memoryGb: number) {
+  return DIGITALOCEAN_SIZES.find((size) => size.vcpu >= vcpu && size.memoryGb >= memoryGb);
+}
+
+export const GOOGLE_SHELL_SIZE = { vcpu: 1, memoryGb: 2 } as const;
+
 const ENTRIES: Omit<ProviderInfo, "billing" | "plan">[] = [
+  {
+    id: "digitalocean",
+    name: "DigitalOcean Harness Runtime",
+    pricing: {
+      vcpuHour: 0.044,
+      gbHour: 0.0095,
+      source: "https://docs.digitalocean.com/products/managed-agents/agent-harness-runtime/details/pricing/",
+      checked: "2026-11-18",
+      note: "Actual CPU and allocated memory, per second; storage and outbound traffic separate. Positive Harness Runtime balance required.",
+    },
+    capabilities: ["pause"],
+    limits: { maxVcpu: 16, maxMemoryGb: 32 },
+    credentials: [["DIGITALOCEAN_TOKEN"], ["DIGITALOCEAN_ACCESS_TOKEN"]],
+    docs: "https://docs.digitalocean.com/products/managed-agents/agent-harness-runtime/how-to/run-sandbox/",
+  },
+  {
+    id: "google",
+    name: "Google Cloud Agent Platform",
+    pricing: {
+      vcpuHour: 0.085,
+      gbHour: 0.009,
+      source: "https://cloud.google.com/products/gemini-enterprise-agent-platform/pricing",
+      checked: "2026-11-18",
+      note: "Standard shell template estimate for 1 vCPU / 2 GiB. Allocated Agent Compute and Agent Memory, per second; storage separate.",
+    },
+    capabilities: ["pause"],
+    limits: { maxVcpu: GOOGLE_SHELL_SIZE.vcpu, maxMemoryGb: GOOGLE_SHELL_SIZE.memoryGb },
+    defaultSize: GOOGLE_SHELL_SIZE,
+    credentials: [["GOOGLE_SANDBOX_ENGINE", "GOOGLE_SANDBOX_TEMPLATE"]],
+    docs: "https://docs.cloud.google.com/gemini-enterprise-agent-platform/scale/sandbox/shell-sandbox-quickstart",
+  },
   {
     id: "docker",
     name: "Docker (local)",
@@ -702,6 +748,8 @@ ENTRIES.push(
  */
 const P = "2026-11-06";
 const BILLING: Record<ProviderId, Pick<ProviderInfo, "billing" | "plan">> = {
+  digitalocean: { billing: "active-cpu" },
+  google: { billing: "allocated" },
   docker: { billing: "allocated" },
   agent37: { billing: "allocated" },
   agentcore: { billing: "active-cpu" },
@@ -860,6 +908,10 @@ function fullHourlyCost(id: ProviderId, spec: SandboxSpec = {}): number {
     const size = vercelSandboxSize(spec);
     return size.vcpu * pricing.vcpuHour + size.memoryGb * pricing.gbHour;
   }
+  if (id === "digitalocean") {
+    const shape = digitalOceanSize(vcpu, mem) ?? DIGITALOCEAN_SIZES[DIGITALOCEAN_SIZES.length - 1];
+    return shape.vcpu * pricing.vcpuHour + shape.memoryGb * pricing.gbHour;
+  }
   // Blaxel sizes by memory, about 2 GB per core.
   if (id === "blaxel") mem = Math.max(mem, vcpu * 2);
   // Boat rents the smallest fixed size that fits.
@@ -928,6 +980,7 @@ export function cpuHourlyAtFull(id: ProviderId, spec: SandboxSpec = {}): number 
   const mem = spec.memoryGb ?? DEFAULT_MEMORY_GB;
   if (id === "vercel") return vercelSandboxSize(spec).vcpu * p.pricing.vcpuHour;
   if (id === "cloudflare") return cloudflareInstance(vcpu, mem).vcpu * p.pricing.vcpuHour;
+  if (id === "digitalocean") return (digitalOceanSize(vcpu, mem)?.vcpu ?? p.limits.maxVcpu) * p.pricing.vcpuHour;
   if (id === "upstash") return fullHourlyCost(id, spec);
   if (id === "deno") return 2 * p.pricing.vcpuHour;
   return vcpu * p.pricing.vcpuHour;
@@ -948,11 +1001,11 @@ export function unfit(id: ProviderId, spec: SandboxSpec, require: Capability[] =
   if (spec.ports?.length && p.limits.maxPorts !== undefined && spec.ports.length > p.limits.maxPorts) return `max ${p.limits.maxPorts} preview ports`;
   const reserved = spec.ports?.find((port) => p.limits.reservedPorts?.includes(port));
   if (reserved !== undefined) return `port ${reserved} is reserved by the provider`;
-  if ((spec.vcpu ?? DEFAULT_VCPU) > p.limits.maxVcpu) return `max ${p.limits.maxVcpu} vCPU`;
-  if ((spec.memoryGb ?? DEFAULT_MEMORY_GB) > p.limits.maxMemoryGb) return `max ${p.limits.maxMemoryGb} GB memory`;
+  const fixed = fixedSize(id, spec);
+  if ((spec.vcpu ?? fixed?.vcpu ?? DEFAULT_VCPU) > p.limits.maxVcpu) return `max ${p.limits.maxVcpu} vCPU`;
+  if ((spec.memoryGb ?? fixed?.memoryGb ?? DEFAULT_MEMORY_GB) > p.limits.maxMemoryGb) return `max ${p.limits.maxMemoryGb} GB memory`;
   // A default image's size is fixed. With no size asked for you get that size, so only a size you
   // name can be too big for it.
-  const fixed = fixedSize(id, spec);
   if (fixed && ((spec.vcpu ?? 0) > fixed.vcpu || (spec.memoryGb ?? 0) > fixed.memoryGb))
     return `default image is ${fixed.vcpu} vCPU / ${fixed.memoryGb} GB; a bigger size needs image.${id}`;
   return null;

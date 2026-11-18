@@ -88,6 +88,7 @@
     "e2b": ">=2",
     "modal": ">=0.11",
     "morphcloud": ">=0.0.20",
+    "google-auth-library": "^10.0.0",
     "@mobilerun/sdk": ">=6",
     "@limrun/api": ">=0.69",
     "@aws-sdk/client-appstream": ">=3",
@@ -114,6 +115,9 @@
       "optional": true
     },
     "morphcloud": {
+      "optional": true
+    },
+    "google-auth-library": {
       "optional": true
     },
     "@fly/sprites": {

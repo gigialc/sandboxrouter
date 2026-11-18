@@ -119,7 +119,7 @@
     }
   },
   "version": "0.14.0",
-  "generatedAt": "2026-11-18T00:33:08.749Z",
+  "generatedAt": "2026-11-18T15:39:51.934Z",
   "shapes": [
     "1x2",
     "2x4",
@@ -600,10 +600,37 @@
       "noBenchmarks": null,
       "planLabel": "$20/mo (credited)",
       "defaultSize": null,
-      "check": null,
+      "check": {
+        "date": "2026-11-18T15:39:06.708Z",
+        "version": "0.14.0",
+        "by": "gigialc",
+        "passed": 13,
+        "failed": [],
+        "skipped": [
+          "pause and resume"
+        ],
+        "notRun": [],
+        "notes": [],
+        "steps": {
+          "create": "pass",
+          "exec: stdout, stderr, exit code": "pass",
+          "exec: env and cwd": "pass",
+          "exec: UTF-8 output": "pass",
+          "exec: streaming": "pass",
+          "files: binary round-trip": "pass",
+          "files: 1 MB round-trip": "pass",
+          "files: missing file is an error": "pass",
+          "files: visible to commands": "pass",
+          "exec: command timeout": "pass",
+          "exec: timed-out command was stopped": "pass",
+          "pause and resume": "skip",
+          "kill": "pass",
+          "killed sandbox is gone": "pass"
+        }
+      },
       "live": {
-        "status": "untested",
-        "label": "not run yet"
+        "status": "passed",
+        "label": "passed (2026-11-18)"
       },
       "billedVsList": null,
       "computers": [],
@@ -1235,6 +1262,73 @@
       }
     },
     {
+      "id": "digitalocean",
+      "name": "DigitalOcean Harness Runtime",
+      "local": false,
+      "capabilities": [
+        "pause"
+      ],
+      "limits": {
+        "maxVcpu": 16,
+        "maxMemoryGb": 32
+      },
+      "credentials": [
+        [
+          "DIGITALOCEAN_TOKEN"
+        ],
+        [
+          "DIGITALOCEAN_ACCESS_TOKEN"
+        ]
+      ],
+      "docs": "https://docs.digitalocean.com/products/managed-agents/agent-harness-runtime/how-to/run-sandbox/",
+      "pricing": {
+        "vcpuHour": 0.044,
+        "gbHour": 0.0095,
+        "source": "https://docs.digitalocean.com/products/managed-agents/agent-harness-runtime/details/pricing/",
+        "checked": "2026-11-18",
+        "note": "Actual CPU and allocated memory, per second; storage and outbound traffic separate. Positive Harness Runtime balance required."
+      },
+      "access": null,
+      "billing": "active-cpu",
+      "plan": null,
+      "noBenchmarks": null,
+      "planLabel": "none",
+      "defaultSize": null,
+      "check": null,
+      "live": {
+        "status": "untested",
+        "label": "not run yet"
+      },
+      "billedVsList": null,
+      "computers": [],
+      "prices": {
+        "1x2": {
+          "usd": 0.107,
+          "unfit": null
+        },
+        "2x4": {
+          "usd": 0.126,
+          "unfit": null
+        },
+        "4x8": {
+          "usd": 0.252,
+          "unfit": null
+        },
+        "8x16": {
+          "usd": 1.008,
+          "unfit": null
+        },
+        "16x32": {
+          "usd": 1.008,
+          "unfit": null
+        },
+        "32x128": {
+          "usd": 1.008,
+          "unfit": "max 16 vCPU"
+        }
+      }
+    },
+    {
       "id": "docker",
       "name": "Docker (local)",
       "local": true,
@@ -1668,6 +1762,74 @@
         "32x128": {
           "usd": 2.1269,
           "unfit": "max 64 GB memory"
+        }
+      }
+    },
+    {
+      "id": "google",
+      "name": "Google Cloud Agent Platform",
+      "local": false,
+      "capabilities": [
+        "pause"
+      ],
+      "limits": {
+        "maxVcpu": 1,
+        "maxMemoryGb": 2
+      },
+      "credentials": [
+        [
+          "GOOGLE_SANDBOX_ENGINE",
+          "GOOGLE_SANDBOX_TEMPLATE"
+        ]
+      ],
+      "docs": "https://docs.cloud.google.com/gemini-enterprise-agent-platform/scale/sandbox/shell-sandbox-quickstart",
+      "pricing": {
+        "vcpuHour": 0.085,
+        "gbHour": 0.009,
+        "source": "https://cloud.google.com/products/gemini-enterprise-agent-platform/pricing",
+        "checked": "2026-11-18",
+        "note": "Standard shell template estimate for 1 vCPU / 2 GiB. Allocated Agent Compute and Agent Memory, per second; storage separate."
+      },
+      "access": null,
+      "billing": "allocated",
+      "plan": null,
+      "noBenchmarks": null,
+      "planLabel": "none",
+      "defaultSize": {
+        "vcpu": 1,
+        "memoryGb": 2
+      },
+      "check": null,
+      "live": {
+        "status": "untested",
+        "label": "not run yet"
+      },
+      "billedVsList": null,
+      "computers": [],
+      "prices": {
+        "1x2": {
+          "usd": 0.103,
+          "unfit": null
+        },
+        "2x4": {
+          "usd": 0.103,
+          "unfit": "max 1 vCPU"
+        },
+        "4x8": {
+          "usd": 0.103,
+          "unfit": "max 1 vCPU"
+        },
+        "8x16": {
+          "usd": 0.103,
+          "unfit": "max 1 vCPU"
+        },
+        "16x32": {
+          "usd": 0.103,
+          "unfit": "max 1 vCPU"
+        },
+        "32x128": {
+          "usd": 0.103,
+          "unfit": "max 1 vCPU"
         }
       }
     },
@@ -6256,6 +6418,15 @@
           "minimumSeconds": 0
         },
         {
+          "provider": "beam",
+          "name": "Beam",
+          "runUsd": 0.0003888888888888889,
+          "runHourlyUsd": 0.14,
+          "hourlyUsd": 0.14,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0
+        },
+        {
           "provider": "sprites",
           "name": "Fly.io Sprites",
           "runUsd": 0.0004569444444444445,
@@ -6469,6 +6640,15 @@
           "minimumSeconds": 0
         },
         {
+          "provider": "beam",
+          "name": "Beam",
+          "runUsd": 0.07,
+          "runHourlyUsd": 0.14,
+          "hourlyUsd": 0.14,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0
+        },
+        {
           "provider": "blaxel",
           "name": "Blaxel",
           "runUsd": 0.0828,
@@ -6560,6 +6740,15 @@
           "runUsd": 0.5344,
           "runHourlyUsd": 0.1336,
           "hourlyUsd": 0.1336,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0
+        },
+        {
+          "provider": "beam",
+          "name": "Beam",
+          "runUsd": 0.56,
+          "runHourlyUsd": 0.14,
+          "hourlyUsd": 0.14,
           "perSandboxUsd": 0,
           "minimumSeconds": 0
         },
@@ -6691,6 +6880,15 @@
           "runUsd": 0.5345,
           "runHourlyUsd": 0.5345,
           "hourlyUsd": 0.5345,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0
+        },
+        {
+          "provider": "beam",
+          "name": "Beam",
+          "runUsd": 0.56,
+          "runHourlyUsd": 0.56,
+          "hourlyUsd": 0.56,
           "perSandboxUsd": 0,
           "minimumSeconds": 0
         },
@@ -6876,6 +7074,15 @@
           "runUsd": 0.0668,
           "runHourlyUsd": 0.1336,
           "hourlyUsd": 0.1336,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0
+        },
+        {
+          "provider": "beam",
+          "name": "Beam",
+          "runUsd": 0.07,
+          "runHourlyUsd": 0.14,
+          "hourlyUsd": 0.14,
           "perSandboxUsd": 0,
           "minimumSeconds": 0
         },
@@ -7398,25 +7605,25 @@
         "id": "2x4-hour",
         "label": "2 vCPU / 4 GB, one hour",
         "unit": "per hour",
-        "median": 0.1656,
+        "median": 0.16505,
         "cheapest": {
           "provider": "agent37",
           "name": "Agent37",
           "usd": 0.0065
         },
-        "providers": 15
+        "providers": 16
       },
       {
         "id": "agent-hour",
         "label": "Agent session, one hour at 10% CPU",
         "unit": "per hour",
-        "median": 0.0952,
+        "median": 0.1028,
         "cheapest": {
           "provider": "agent37",
           "name": "Agent37",
           "usd": 0.0065
         },
-        "providers": 15
+        "providers": 16
       },
       {
         "id": "calls-1000",
@@ -7428,7 +7635,7 @@
           "name": "Boat",
           "usd": 0.05
         },
-        "providers": 15
+        "providers": 16
       }
     ],
     "history": [

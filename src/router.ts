@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { accessLabel, billedCpuShare, billingRules, CATALOG, cpuHourlyAtFull, DEFAULT_MEMORY_GB, DEFAULT_VCPU, fixedSize, hourlyCost, info, unfit, vercelSandboxSize, type ProviderInfo } from "./catalog.js";
+import { accessLabel, billedCpuShare, billingRules, CATALOG, cpuHourlyAtFull, DEFAULT_MEMORY_GB, DEFAULT_VCPU, digitalOceanSize, fixedSize, hourlyCost, info, unfit, vercelSandboxSize, type ProviderInfo } from "./catalog.js";
 import {
   type ComputerRoute,
   RoutedComputer,
@@ -34,6 +34,8 @@ import { NorthflankProvider } from "./providers/northflank.js";
 import { BoatProvider } from "./providers/boat.js";
 import { ExeDevProvider } from "./providers/exedev.js";
 import { AgentCoreProvider } from "./providers/agentcore.js";
+import { DigitalOceanProvider } from "./providers/digitalocean.js";
+import { GoogleAgentPlatformProvider } from "./providers/google.js";
 import { AzureSessionsProvider } from "./providers/azure.js";
 import { LambdaMicrovmProvider } from "./providers/lambda.js";
 import { AlibabaProvider } from "./providers/alibaba.js";
@@ -247,6 +249,8 @@ export function defaultProviders(): Provider[] {
     new ExeDevProvider(),
     new AgentCoreProvider(),
     new AzureSessionsProvider(),
+    new DigitalOceanProvider(),
+    new GoogleAgentPlatformProvider(),
     new LambdaMicrovmProvider(),
     new Agent37Provider(),
     new AlibabaProvider(),
@@ -856,5 +860,9 @@ export const EXEC_GRACE_S = 30;
 /** The size a provider gives for a spec, including fixed images and Vercel allocations. */
 export function sizeOf(id: ProviderId, spec: SandboxSpec = {}): Size {
   if (id === "vercel") return vercelSandboxSize(spec);
+  if (id === "digitalocean") {
+    const shape = digitalOceanSize(spec.vcpu ?? DEFAULT_VCPU, spec.memoryGb ?? DEFAULT_MEMORY_GB);
+    if (shape) return { vcpu: shape.vcpu, memoryGb: shape.memoryGb };
+  }
   return fixedSize(id, spec) ?? { vcpu: spec.vcpu ?? DEFAULT_VCPU, memoryGb: spec.memoryGb ?? DEFAULT_MEMORY_GB };
 }

@@ -308,6 +308,8 @@ export const PACKAGE: Record<string, string | null> = {
   freestyle: null,
   upstash: null,
   azure: null,
+  digitalocean: null,
+  google: "google-auth-library",
   agentcore: "@smithy/signature-v4 @aws-crypto/sha256-js @aws-sdk/credential-provider-node",
   lambda: "@smithy/signature-v4 @aws-crypto/sha256-js @aws-sdk/credential-provider-node",
   alibaba: "e2b",
