@@ -240,6 +240,7 @@ export function taskTable(reports: BenchReport[], version: string = TASK_VERSION
     const maxCoreMs = cpuMs !== undefined && coreRead !== undefined && coreRead <= taskMillis * 1.1 ? coreRead : undefined;
     const runs = rs.reduce((n, r) => n + r.runs, 0);
     const ok = rs.reduce((n, r) => n + r.taskOk!, 0);
+    const limited = rs.reduce((n, r) => n + (r.limited ?? 0), 0);
     return [{
       provider: id,
       name: CATALOG.find((c) => c.id === id)!.name,
@@ -253,8 +254,9 @@ export function taskTable(reports: BenchReport[], version: string = TASK_VERSION
       reusedUsd: taskUsd(id, measured(size), createMs, taskMillis, cpuMs, ratio, true, maxCoreMs),
       runs,
       ok,
-      limited: rs.reduce((n, r) => n + (r.limited ?? 0), 0),
-      successRate: runs ? ok / runs : 0,
+      limited,
+      // A request the provider refused for the benchmarking account's own limit isn't a failed job: it never ran.
+      successRate: runs - limited > 0 ? ok / (runs - limited) : 0,
       ...(cpuMs !== undefined ? { cpuMs } : {}),
       activeCpu: cpuHourlyAtFull(id, measured(size)) > 0,
       minimumSeconds: rules.minSeconds,

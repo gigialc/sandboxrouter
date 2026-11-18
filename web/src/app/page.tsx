@@ -66,7 +66,9 @@ export default function Home() {
   const day = (iso: string) => new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
   const fastest = short_ && [...short_.rows].sort((a, b) => a.taskMs - b.taskMs)[0];
   const cheapestTask = short_?.rows[0];
-  const shortRows = short_?.rows.slice(0, 6) ?? [];
+  // The same numbers as the benchmarks page's picker: cost per successful run, and time including the start.
+  const perRun = (r: { taskUsd: number; successRate: number }) => r.taskUsd / Math.max(r.successRate, 0.01);
+  const shortRows = short_ ? [...short_.rows].sort((a, b) => perRun(a) - perRun(b)).slice(0, 6) : [];
 
   return (
     <div className="px-5 sm:px-10">
@@ -214,7 +216,7 @@ export default function Home() {
             visual={
               <div className="overflow-x-auto border border-line p-5 sm:p-8">
                 <p className="text-[12px] uppercase tracking-[0.12em] text-muted">Short job · cheapest first</p>
-                <ResultTable cols={[{ label: "Est. / 1,000 runs" }, { label: "Took", className: "hidden sm:table-cell" }]}>
+                <ResultTable cols={[{ label: "Est. / 1,000 runs" }, { label: "Time incl. start", className: "hidden sm:table-cell" }]}>
                   {shortRows.map((r, k) => (
                     <ResultRow
                       key={r.provider}
@@ -223,10 +225,10 @@ export default function Home() {
                       name={r.name.replace(/ \(.*\)$/, "")}
                       notes={r.size.vcpu !== 2 || r.size.memoryGb !== 4 ? [`${r.size.vcpu} vCPU / ${r.size.memoryGb} GB`] : undefined}
                     >
-                      <BarNum value={r.taskUsd} max={barMax(shortRows.map((x) => x.taskUsd))}>
-                        {money(r.taskUsd * 1000)}
+                      <BarNum value={perRun(r)} max={barMax(shortRows.map(perRun))}>
+                        {money(perRun(r) * 1000)}
                       </BarNum>
-                      <Num className="hidden sm:table-cell">{time(r.taskMs)}</Num>
+                      <Num className="hidden sm:table-cell">{time(r.createMs + r.taskMs)}</Num>
                     </ResultRow>
                   ))}
                 </ResultTable>

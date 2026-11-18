@@ -121,7 +121,7 @@
     }
   },
   "version": "0.15.1",
-  "generatedAt": "2026-11-18T21:53:44.777Z",
+  "generatedAt": "2026-11-18T22:15:09.424Z",
   "shapes": [
     "1x2",
     "2x4",
@@ -3731,7 +3731,7 @@
             "runs": 3,
             "ok": 2,
             "limited": 1,
-            "successRate": 0.6666666666666666,
+            "successRate": 1,
             "cpuMs": 1115,
             "activeCpu": false,
             "minimumSeconds": 0,

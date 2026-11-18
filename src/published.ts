@@ -289,7 +289,7 @@ export const PUBLISHED: PublishedData = {
         "taskMs": 987,
         "taskUsd": 0.000014999999999999999,
         "reusedUsd": 0.000004934999999999999,
-        "successRate": 0.6666666666666666,
+        "successRate": 1,
         "runs": 3,
         "ok": 2,
         "limited": 1,
