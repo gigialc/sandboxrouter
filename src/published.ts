@@ -5,7 +5,7 @@ import type { PublishedData } from "./recommend.js";
 
 export const PUBLISHED: PublishedData = {
   "schema": 1,
-  "dataThrough": "2026-11-18T18:00:22.162Z",
+  "dataThrough": "2026-11-18T18:15:10.682Z",
   "conditionalStartFees": {
     "boat": {
       "minUsd": 0.03,
@@ -226,12 +226,12 @@ export const PUBLISHED: PublishedData = {
         "vcpu": 1,
         "memoryGb": 2
       },
-      "medianCreateMs": 2517,
-      "medianReadyMs": 2777,
+      "medianCreateMs": 2300,
+      "medianReadyMs": 2602,
       "successRate": 1,
       "runs": 3,
       "hourlyUsd": 0.10300000000000001,
-      "measuredAt": "2026-11-18T17:54:56.745Z"
+      "measuredAt": "2026-11-18T18:15:10.682Z"
     },
     "sail": {
       "name": "Sailboxes (Sail Research)",
@@ -758,6 +758,22 @@ export const PUBLISHED: PublishedData = {
         "ok": 3,
         "limited": 0,
         "measuredAt": "2026-11-18T18:00:22.162Z"
+      },
+      "google": {
+        "name": "Google Cloud Agent Platform",
+        "size": {
+          "vcpu": 1,
+          "memoryGb": 2
+        },
+        "createMs": 2602,
+        "taskMs": 302707,
+        "taskUsd": 0.008755,
+        "reusedUsd": 0.008660783611111111,
+        "successRate": 1,
+        "runs": 3,
+        "ok": 3,
+        "limited": 0,
+        "measuredAt": "2026-11-18T18:15:10.682Z"
       },
       "vercel": {
         "name": "Vercel Sandbox",
