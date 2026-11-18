@@ -5,7 +5,7 @@ import type { PublishedData } from "./recommend.js";
 
 export const PUBLISHED: PublishedData = {
   "schema": 1,
-  "dataThrough": "2026-11-18T20:54:36.345Z",
+  "dataThrough": "2026-11-18T22:34:03.877Z",
   "conditionalStartFees": {
     "boat": {
       "minUsd": 0.03,
@@ -69,29 +69,18 @@ export const PUBLISHED: PublishedData = {
       "hourlyUsd": 0.16449999999999998,
       "measuredAt": "2026-11-11T21:29:12.572Z"
     },
-    "e2b": {
-      "name": "E2B",
-      "size": {
-        "vcpu": 2,
-        "memoryGb": 0.5
-      },
-      "medianCreateMs": 326,
-      "successRate": 1,
-      "runs": 105,
-      "hourlyUsd": 0.1089,
-      "measuredAt": "2026-11-17T16:19:15.367Z"
-    },
     "openscale": {
       "name": "OpenScale Sandboxes",
       "size": {
         "vcpu": 2,
-        "memoryGb": 1
+        "memoryGb": 4
       },
-      "medianCreateMs": 353,
+      "medianCreateMs": 323,
+      "medianReadyMs": 1290,
       "successRate": 1,
-      "runs": 105,
-      "hourlyUsd": 0.013999999999999999,
-      "measuredAt": "2026-11-17T16:19:15.367Z"
+      "runs": 100,
+      "hourlyUsd": 0.017,
+      "measuredAt": "2026-11-18T22:34:03.877Z"
     },
     "vercel": {
       "name": "Vercel Sandbox",
@@ -103,18 +92,6 @@ export const PUBLISHED: PublishedData = {
       "successRate": 1,
       "runs": 100,
       "hourlyUsd": 0.3408,
-      "measuredAt": "2026-11-17T16:19:15.367Z"
-    },
-    "daytona": {
-      "name": "Daytona",
-      "size": {
-        "vcpu": 1,
-        "memoryGb": 1
-      },
-      "medianCreateMs": 369,
-      "successRate": 1,
-      "runs": 105,
-      "hourlyUsd": 0.06659999999999999,
       "measuredAt": "2026-11-17T16:19:15.367Z"
     },
     "cloudflare": {
@@ -140,6 +117,19 @@ export const PUBLISHED: PublishedData = {
       "runs": 100,
       "hourlyUsd": 0.23796,
       "measuredAt": "2026-11-17T16:19:15.367Z"
+    },
+    "e2b": {
+      "name": "E2B",
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "medianCreateMs": 559,
+      "medianReadyMs": 953,
+      "successRate": 1,
+      "runs": 100,
+      "hourlyUsd": 0.1656,
+      "measuredAt": "2026-11-18T22:34:03.877Z"
     },
     "agent37": {
       "name": "Agent37",
@@ -176,6 +166,19 @@ export const PUBLISHED: PublishedData = {
       "runs": 105,
       "hourlyUsd": 0.022,
       "measuredAt": "2026-11-17T16:19:15.367Z"
+    },
+    "daytona": {
+      "name": "Daytona",
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "medianCreateMs": 1200,
+      "medianReadyMs": 1619,
+      "successRate": 1,
+      "runs": 100,
+      "hourlyUsd": 0.1656,
+      "measuredAt": "2026-11-18T22:34:03.877Z"
     },
     "morph": {
       "name": "Morph Cloud",
@@ -1753,6 +1756,10 @@ export const PUBLISHED: PublishedData = {
           "n": 10,
           "ok": 10,
           "limited": 0,
+          "size": {
+            "vcpu": 2,
+            "memoryGb": 4
+          },
           "p50Ms": 993,
           "p99Ms": 1372,
           "wallMs": 1372,
@@ -1764,6 +1771,10 @@ export const PUBLISHED: PublishedData = {
           "n": 10,
           "ok": 10,
           "limited": 0,
+          "size": {
+            "vcpu": 1,
+            "memoryGb": 1
+          },
           "p50Ms": 1479,
           "p99Ms": 1590,
           "wallMs": 1590,
@@ -1775,6 +1786,10 @@ export const PUBLISHED: PublishedData = {
           "n": 10,
           "ok": 10,
           "limited": 0,
+          "size": {
+            "vcpu": 2,
+            "memoryGb": 4
+          },
           "p50Ms": 1482,
           "p99Ms": 1666,
           "wallMs": 1666,
@@ -1786,6 +1801,10 @@ export const PUBLISHED: PublishedData = {
           "n": 10,
           "ok": 10,
           "limited": 0,
+          "size": {
+            "vcpu": 2,
+            "memoryGb": 4
+          },
           "p50Ms": 1549,
           "p99Ms": 2311,
           "wallMs": 2311,
@@ -1797,6 +1816,10 @@ export const PUBLISHED: PublishedData = {
           "n": 10,
           "ok": 10,
           "limited": 0,
+          "size": {
+            "vcpu": 2,
+            "memoryGb": 4
+          },
           "p50Ms": 1655,
           "p99Ms": 3157,
           "wallMs": 3157,
@@ -1808,6 +1831,10 @@ export const PUBLISHED: PublishedData = {
           "n": 10,
           "ok": 10,
           "limited": 0,
+          "size": {
+            "vcpu": 2,
+            "memoryGb": 4
+          },
           "p50Ms": 1834,
           "p99Ms": 3535,
           "wallMs": 3535,
@@ -1819,6 +1846,10 @@ export const PUBLISHED: PublishedData = {
           "n": 10,
           "ok": 10,
           "limited": 0,
+          "size": {
+            "vcpu": 2,
+            "memoryGb": 4
+          },
           "p50Ms": 2073,
           "p99Ms": 3086,
           "wallMs": 3086,
@@ -1830,6 +1861,10 @@ export const PUBLISHED: PublishedData = {
           "n": 10,
           "ok": 10,
           "limited": 0,
+          "size": {
+            "vcpu": 2,
+            "memoryGb": 0.5
+          },
           "p50Ms": 2103,
           "p99Ms": 2119,
           "wallMs": 2119,
@@ -1841,6 +1876,10 @@ export const PUBLISHED: PublishedData = {
           "n": 10,
           "ok": 10,
           "limited": 0,
+          "size": {
+            "vcpu": 2,
+            "memoryGb": 4
+          },
           "p50Ms": 2265,
           "p99Ms": 3639,
           "wallMs": 3639,
@@ -1852,6 +1891,10 @@ export const PUBLISHED: PublishedData = {
           "n": 10,
           "ok": 10,
           "limited": 0,
+          "size": {
+            "vcpu": 2,
+            "memoryGb": 4
+          },
           "p50Ms": 2964,
           "p99Ms": 3874,
           "wallMs": 3874,
@@ -1863,6 +1906,10 @@ export const PUBLISHED: PublishedData = {
           "n": 10,
           "ok": 10,
           "limited": 0,
+          "size": {
+            "vcpu": 2,
+            "memoryGb": 4
+          },
           "p50Ms": 4036,
           "p99Ms": 4332,
           "wallMs": 4332,
@@ -1874,6 +1921,10 @@ export const PUBLISHED: PublishedData = {
           "n": 10,
           "ok": 10,
           "limited": 0,
+          "size": {
+            "vcpu": 2,
+            "memoryGb": 1
+          },
           "p50Ms": 18892,
           "p99Ms": 19600,
           "wallMs": 19600,
@@ -1885,6 +1936,10 @@ export const PUBLISHED: PublishedData = {
           "n": 10,
           "ok": 8,
           "limited": 0,
+          "size": {
+            "vcpu": 2,
+            "memoryGb": 4
+          },
           "p50Ms": 2669,
           "p99Ms": 4339,
           "wallMs": 12345,
@@ -1896,6 +1951,10 @@ export const PUBLISHED: PublishedData = {
           "n": 10,
           "ok": 2,
           "limited": 8,
+          "size": {
+            "vcpu": 2,
+            "memoryGb": 4
+          },
           "p50Ms": 3077,
           "p99Ms": 4545,
           "wallMs": 4545,
@@ -1907,6 +1966,10 @@ export const PUBLISHED: PublishedData = {
           "n": 10,
           "ok": 0,
           "limited": 10,
+          "size": {
+            "vcpu": 2,
+            "memoryGb": 4
+          },
           "wallMs": 1694,
           "measuredAt": "2026-11-17T18:33:05.397Z"
         },
@@ -1915,6 +1978,10 @@ export const PUBLISHED: PublishedData = {
           "n": 10,
           "ok": 0,
           "limited": 10,
+          "size": {
+            "vcpu": 2,
+            "memoryGb": 4
+          },
           "wallMs": 3573,
           "measuredAt": "2026-11-17T18:33:05.397Z"
         }
@@ -1954,6 +2021,10 @@ export const PUBLISHED: PublishedData = {
           "n": 100,
           "ok": 100,
           "limited": 0,
+          "size": {
+            "vcpu": 2,
+            "memoryGb": 4
+          },
           "p50Ms": 1053,
           "p99Ms": 5563,
           "wallMs": 5860,
@@ -1965,6 +2036,10 @@ export const PUBLISHED: PublishedData = {
           "n": 100,
           "ok": 100,
           "limited": 0,
+          "size": {
+            "vcpu": 2,
+            "memoryGb": 4
+          },
           "p50Ms": 1521,
           "p99Ms": 2034,
           "wallMs": 2094,
@@ -1976,6 +2051,10 @@ export const PUBLISHED: PublishedData = {
           "n": 100,
           "ok": 100,
           "limited": 0,
+          "size": {
+            "vcpu": 2,
+            "memoryGb": 4
+          },
           "p50Ms": 2079,
           "p99Ms": 2671,
           "wallMs": 2672,
@@ -1987,6 +2066,10 @@ export const PUBLISHED: PublishedData = {
           "n": 100,
           "ok": 100,
           "limited": 0,
+          "size": {
+            "vcpu": 2,
+            "memoryGb": 4
+          },
           "p50Ms": 2314,
           "p99Ms": 2862,
           "wallMs": 2890,
@@ -1998,6 +2081,10 @@ export const PUBLISHED: PublishedData = {
           "n": 100,
           "ok": 100,
           "limited": 0,
+          "size": {
+            "vcpu": 2,
+            "memoryGb": 4
+          },
           "p50Ms": 4349,
           "p99Ms": 7210,
           "wallMs": 7539,
@@ -2009,6 +2096,10 @@ export const PUBLISHED: PublishedData = {
           "n": 100,
           "ok": 100,
           "limited": 0,
+          "size": {
+            "vcpu": 2,
+            "memoryGb": 4
+          },
           "p50Ms": 4465,
           "p99Ms": 4956,
           "wallMs": 5168,
@@ -2020,6 +2111,10 @@ export const PUBLISHED: PublishedData = {
           "n": 100,
           "ok": 100,
           "limited": 0,
+          "size": {
+            "vcpu": 2,
+            "memoryGb": 1
+          },
           "p50Ms": 5615,
           "p99Ms": 6504,
           "wallMs": 6507,
@@ -2031,6 +2126,10 @@ export const PUBLISHED: PublishedData = {
           "n": 100,
           "ok": 83,
           "limited": 17,
+          "size": {
+            "vcpu": 2,
+            "memoryGb": 4
+          },
           "p50Ms": 1312,
           "p99Ms": 6738,
           "wallMs": 7050,
@@ -2042,6 +2141,10 @@ export const PUBLISHED: PublishedData = {
           "n": 100,
           "ok": 65,
           "limited": 35,
+          "size": {
+            "vcpu": 2,
+            "memoryGb": 4
+          },
           "p50Ms": 6417,
           "p99Ms": 8834,
           "wallMs": 10028,
@@ -2053,6 +2156,10 @@ export const PUBLISHED: PublishedData = {
           "n": 100,
           "ok": 52,
           "limited": 48,
+          "size": {
+            "vcpu": 2,
+            "memoryGb": 0.5
+          },
           "p50Ms": 1396,
           "p99Ms": 2252,
           "wallMs": 2252,
@@ -2064,6 +2171,10 @@ export const PUBLISHED: PublishedData = {
           "n": 100,
           "ok": 46,
           "limited": 54,
+          "size": {
+            "vcpu": 2,
+            "memoryGb": 4
+          },
           "p50Ms": 4436,
           "p99Ms": 8357,
           "wallMs": 8357,
@@ -2075,6 +2186,10 @@ export const PUBLISHED: PublishedData = {
           "n": 100,
           "ok": 34,
           "limited": 66,
+          "size": {
+            "vcpu": 2,
+            "memoryGb": 4
+          },
           "p50Ms": 2791,
           "p99Ms": 7854,
           "wallMs": 7854,
@@ -2086,6 +2201,10 @@ export const PUBLISHED: PublishedData = {
           "n": 100,
           "ok": 10,
           "limited": 90,
+          "size": {
+            "vcpu": 1,
+            "memoryGb": 1
+          },
           "p50Ms": 1374,
           "p99Ms": 2002,
           "wallMs": 2002,
@@ -2097,6 +2216,10 @@ export const PUBLISHED: PublishedData = {
           "n": 100,
           "ok": 2,
           "limited": 98,
+          "size": {
+            "vcpu": 2,
+            "memoryGb": 4
+          },
           "p50Ms": 3992,
           "p99Ms": 4001,
           "wallMs": 4001,

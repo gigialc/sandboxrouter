@@ -17,7 +17,8 @@ export const money = (n?: number) =>
           : n === 0
             ? "$0"
             : `$${Number(n.toPrecision(2)).toFixed(Math.max(2, 1 - Math.floor(Math.log10(n))))}`;
-export const perHour = (n?: number) => (n === undefined ? "n/a" : `${money(n)}/h`);
+/** Hourly prices are rounded to four decimals first, so 0.1645 and 0.16449999999999998 print the same. */
+export const perHour = (n?: number) => (n === undefined ? "n/a" : `${money(Math.round(n * 1e4) / 1e4)}/h`);
 /** Milliseconds as "320 ms", "4.2 s", "31 s" or "3.4 min". */
 export const time = (ms?: number) =>
   ms === undefined

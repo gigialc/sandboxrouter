@@ -12,7 +12,8 @@ export default function OpengraphImage() {
   const cloud = site.providers.filter((p) => !p.local);
   const passing = cloud.filter((p) => p.live.status === "passed").length;
   const top = ranked("2x4")
-    .filter((p) => !p.local && !p.access && !p.prices["2x4"].unfit)
+    // No room for a note here, so prices that need your own image stay out.
+    .filter((p) => !p.local && !p.access && !p.prices["2x4"].unfit && !p.prices["2x4"].ownImage)
     .slice(0, 3);
   return new ImageResponse(
     (

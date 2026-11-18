@@ -1,6 +1,6 @@
 import { ConditionalStartFeeNote } from "@/components/ConditionalStartFeeNote";
 import { BarNum, Footnote, Num, ResultRow, ResultTable, barMax, money, time } from "@/components/results";
-import { site } from "@/lib/site";
+import { OWN_IMAGE_NOTE, needsOwnImage, site, sizeNote } from "@/lib/site";
 
 /** A real model doing the same task in a sandbox on each provider: cheapest per session first. */
 export function AgentTable() {
@@ -26,6 +26,8 @@ export function AgentTable() {
               id={r.provider}
               name={r.name}
               notes={[
+                sizeNote(r.size),
+                needsOwnImage(r.provider, r.size) ? OWN_IMAGE_NOTE : "",
                 r.started !== undefined ? `${r.started} started` : "",
                 r.limited ? `${r.limited} reported limit refusals` : "",
               ].filter(Boolean)}
@@ -46,6 +48,7 @@ export function AgentTable() {
       </ResultTable>
       <Footnote>
         Model: {rows[0].model}. Costs estimate sandbox usage. Idle is the share of the session spent waiting on the model.
+        {rows.some((r) => sizeNote(r.size)) && " Sessions ran at 2 vCPU / 4 GB unless a size is shown."}
         {" "}<ConditionalStartFeeNote ids={rows.map((r) => r.provider)} />
       </Footnote>
     </div>
