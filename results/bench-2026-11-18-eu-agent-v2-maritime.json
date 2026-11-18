@@ -1,0 +1,40 @@
+{
+  "tool": "sandboxrouter",
+  "version": "0.13.0",
+  "date": "2026-11-17T23:54:45.098Z",
+  "label": "home-eu",
+  "runs": 3,
+  "spec": {
+    "vcpu": 2,
+    "memoryGb": 4
+  },
+  "task": "agent-v2",
+  "node": "v22.22.0",
+  "platform": "darwin-arm64",
+  "rows": [
+    {
+      "provider": "maritime",
+      "runs": 3,
+      "failures": 0,
+      "createFailures": 0,
+      "commandFailures": 0,
+      "cleanupFailures": 0,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "medianCreateMs": 1127,
+      "medianExecMs": 262,
+      "medianReadyMs": 1389,
+      "hourlyUsd": 0.022,
+      "taskOk": 3,
+      "medianTaskReadyMs": 1389,
+      "medianTaskMs": 61170,
+      "taskPhasesMs": {
+        "agent": 61170
+      },
+      "medianTaskCpuMs": 2040,
+      "medianTaskMaxCoreMs": 1350
+    }
+  ]
+}

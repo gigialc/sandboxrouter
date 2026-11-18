@@ -1,0 +1,29 @@
+{
+  "tool": "sandboxrouter",
+  "version": "0.13.0",
+  "date": "2026-11-17T23:54:12.771Z",
+  "label": "home-eu",
+  "runs": 3,
+  "spec": {
+    "vcpu": 2,
+    "memoryGb": 4
+  },
+  "node": "v22.22.0",
+  "platform": "darwin-arm64",
+  "rows": [
+    {
+      "provider": "sprites",
+      "runs": 3,
+      "failures": 3,
+      "createFailures": 3,
+      "commandFailures": 0,
+      "cleanupFailures": 0,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "hourlyUsd": 0.16449999999999998,
+      "limited": 3
+    }
+  ]
+}

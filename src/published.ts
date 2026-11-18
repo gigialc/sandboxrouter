@@ -5,7 +5,7 @@ import type { PublishedData } from "./recommend.js";
 
 export const PUBLISHED: PublishedData = {
   "schema": 1,
-  "dataThrough": "2026-11-17T23:49:57.570Z",
+  "dataThrough": "2026-11-18T00:06:52.487Z",
   "conditionalStartFees": {
     "boat": {
       "minUsd": 0.03,
@@ -338,6 +338,19 @@ export const PUBLISHED: PublishedData = {
       }
     },
     "long": {
+      "agent37": {
+        "name": "Agent37",
+        "createMs": 1523,
+        "taskMs": 170531,
+        "taskUsd": 0.0003253753424657534,
+        "reusedUsd": 0.0003082587918112633,
+        "successRate": 1,
+        "runs": 3,
+        "ok": 3,
+        "limited": 0,
+        "minimumSeconds": 60,
+        "measuredAt": "2026-11-18T00:06:52.487Z"
+      },
       "openscale": {
         "name": "OpenScale Sandboxes",
         "createMs": 1453,
@@ -374,6 +387,42 @@ export const PUBLISHED: PublishedData = {
         "limited": 0,
         "measuredAt": "2026-11-17T23:49:08.280Z"
       },
+      "daytona": {
+        "name": "Daytona",
+        "createMs": 827,
+        "taskMs": 74989,
+        "taskUsd": 0.001406,
+        "reusedUsd": 0.0013872965,
+        "successRate": 1,
+        "runs": 3,
+        "ok": 3,
+        "limited": 0,
+        "measuredAt": "2026-11-18T00:06:52.487Z"
+      },
+      "freestyle": {
+        "name": "Freestyle",
+        "createMs": 1732,
+        "taskMs": 63537,
+        "taskUsd": 0.0024496999999999995,
+        "reusedUsd": 0.00235828165,
+        "successRate": 1,
+        "runs": 3,
+        "ok": 3,
+        "limited": 0,
+        "measuredAt": "2026-11-17T23:58:49.200Z"
+      },
+      "cloudflare": {
+        "name": "Cloudflare Sandbox",
+        "createMs": 794,
+        "taskMs": 56430,
+        "taskUsd": 0.0029064,
+        "reusedUsd": 0.0028749999999999995,
+        "successRate": 1,
+        "runs": 3,
+        "ok": 3,
+        "limited": 0,
+        "measuredAt": "2026-11-17T23:58:49.200Z"
+      },
       "modal": {
         "name": "Modal",
         "createMs": 1169,
@@ -397,6 +446,19 @@ export const PUBLISHED: PublishedData = {
         "ok": 3,
         "limited": 0,
         "measuredAt": "2026-11-17T23:49:08.280Z"
+      },
+      "vercel": {
+        "name": "Vercel Sandbox",
+        "createMs": 917,
+        "taskMs": 180649,
+        "taskUsd": 0.013856533333333332,
+        "reusedUsd": 0.013824709777777775,
+        "successRate": 1,
+        "runs": 3,
+        "ok": 3,
+        "limited": 0,
+        "minimumSeconds": 60,
+        "measuredAt": "2026-11-17T23:53:22.989Z"
       }
     },
     "python": {
@@ -734,6 +796,43 @@ export const PUBLISHED: PublishedData = {
       }
     },
     "agent": {
+      "agent37": {
+        "name": "Agent37",
+        "createMs": 1442,
+        "taskMs": 60878,
+        "taskUsd": 0.00021691689497716892,
+        "reusedUsd": 0.00011004555610350075,
+        "successRate": 1,
+        "runs": 3,
+        "ok": 3,
+        "limited": 0,
+        "minimumSeconds": 60,
+        "measuredAt": "2026-11-17T23:51:25.110Z"
+      },
+      "openscale": {
+        "name": "OpenScale Sandboxes",
+        "createMs": 1308,
+        "taskMs": 61649,
+        "taskUsd": 0.000245,
+        "reusedUsd": 0.00023974611111111108,
+        "successRate": 1,
+        "runs": 3,
+        "ok": 3,
+        "limited": 0,
+        "measuredAt": "2026-11-17T23:54:04.615Z"
+      },
+      "maritime": {
+        "name": "Maritime",
+        "createMs": 1389,
+        "taskMs": 61170,
+        "taskUsd": 0.000385,
+        "reusedUsd": 0.00037381666666666665,
+        "successRate": 1,
+        "runs": 3,
+        "ok": 3,
+        "limited": 0,
+        "measuredAt": "2026-11-17T23:54:45.098Z"
+      },
       "agentcore": {
         "name": "Amazon Bedrock AgentCore Code Interpreter",
         "createMs": 1087,
@@ -745,6 +844,18 @@ export const PUBLISHED: PublishedData = {
         "ok": 3,
         "limited": 0,
         "measuredAt": "2026-11-17T23:47:54.312Z"
+      },
+      "daytona": {
+        "name": "Daytona",
+        "createMs": 1030,
+        "taskMs": 60821,
+        "taskUsd": 0.0011469999999999998,
+        "reusedUsd": 0.0011251884999999998,
+        "successRate": 1,
+        "runs": 3,
+        "ok": 3,
+        "limited": 0,
+        "measuredAt": "2026-11-17T23:51:25.110Z"
       },
       "cloudflare": {
         "name": "Cloudflare Sandbox",
@@ -770,6 +881,18 @@ export const PUBLISHED: PublishedData = {
         "limited": 0,
         "minimumSeconds": 60,
         "measuredAt": "2026-11-17T23:44:45.227Z"
+      },
+      "e2b": {
+        "name": "E2B",
+        "createMs": 547,
+        "taskMs": 61238,
+        "taskUsd": 0.0018754999999999998,
+        "reusedUsd": 0.0018524494999999999,
+        "successRate": 1,
+        "runs": 3,
+        "ok": 3,
+        "limited": 0,
+        "measuredAt": "2026-11-17T23:54:04.615Z"
       },
       "novita": {
         "name": "Novita AI Agent Sandbox",
@@ -847,6 +970,18 @@ export const PUBLISHED: PublishedData = {
         "minimumSeconds": 60,
         "measuredAt": "2026-11-17T23:45:01.763Z"
       },
+      "maritime": {
+        "name": "Maritime",
+        "createMs": 1297,
+        "taskMs": 27946,
+        "taskUsd": 0.0001833333333333333,
+        "reusedUsd": 0.00017078111111111112,
+        "successRate": 1,
+        "runs": 3,
+        "ok": 3,
+        "limited": 0,
+        "measuredAt": "2026-11-17T23:51:31.059Z"
+      },
       "daytona": {
         "name": "Daytona",
         "createMs": 585,
@@ -858,6 +993,30 @@ export const PUBLISHED: PublishedData = {
         "ok": 3,
         "limited": 0,
         "measuredAt": "2026-11-17T23:45:01.763Z"
+      },
+      "novita": {
+        "name": "Novita AI Agent Sandbox",
+        "createMs": 1216,
+        "taskMs": 22053,
+        "taskUsd": 0.0007776,
+        "reusedUsd": 0.0007145172,
+        "successRate": 1,
+        "runs": 3,
+        "ok": 3,
+        "limited": 0,
+        "measuredAt": "2026-11-17T23:53:49.019Z"
+      },
+      "cloudflare": {
+        "name": "Cloudflare Sandbox",
+        "createMs": 703,
+        "taskMs": 20289,
+        "taskUsd": 0.0009559999999999998,
+        "reusedUsd": 0.0009417799999999999,
+        "successRate": 1,
+        "runs": 3,
+        "ok": 3,
+        "limited": 0,
+        "measuredAt": "2026-11-17T23:53:49.019Z"
       },
       "e2b": {
         "name": "E2B",
@@ -871,6 +1030,18 @@ export const PUBLISHED: PublishedData = {
         "limited": 0,
         "measuredAt": "2026-11-17T23:47:40.891Z"
       },
+      "freestyle": {
+        "name": "Freestyle",
+        "createMs": 1048,
+        "taskMs": 34319,
+        "taskUsd": 0.0013362,
+        "reusedUsd": 0.0012738068833333335,
+        "successRate": 1,
+        "runs": 3,
+        "ok": 3,
+        "limited": 0,
+        "measuredAt": "2026-11-17T23:53:49.019Z"
+      },
       "vercel": {
         "name": "Vercel Sandbox",
         "createMs": 990,
@@ -883,6 +1054,31 @@ export const PUBLISHED: PublishedData = {
         "limited": 0,
         "minimumSeconds": 60,
         "measuredAt": "2026-11-17T23:41:34.251Z"
+      },
+      "lambda": {
+        "name": "AWS Lambda MicroVMs",
+        "createMs": 2974,
+        "taskMs": 52252,
+        "taskUsd": 0.0039231136,
+        "reusedUsd": 0.0036605452112000005,
+        "successRate": 1,
+        "runs": 3,
+        "ok": 3,
+        "limited": 0,
+        "measuredAt": "2026-11-17T23:53:49.019Z"
+      },
+      "sail": {
+        "name": "Sailboxes (Sail Research)",
+        "createMs": 2471,
+        "taskMs": 22122,
+        "taskUsd": 0.010336597222222223,
+        "reusedUsd": 0.000311015,
+        "successRate": 1,
+        "runs": 3,
+        "ok": 3,
+        "limited": 0,
+        "perSandboxUsd": 0.01,
+        "measuredAt": "2026-11-17T23:53:49.019Z"
       }
     }
   },
