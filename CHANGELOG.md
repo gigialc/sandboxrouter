@@ -2,12 +2,36 @@
 
 All notable changes. Versions follow [semver](https://semver.org/); while the version is 0.x, a minor bump can change the API.
 
-## Unreleased
+## 0.15.0 (2026-11-18)
 
 ### Changed
+- **The benchmark data in the package is refreshed** to Nov 18: real-agent results on the stricter task, and the changes below.
 - **E2B, Daytona and OpenScale are benchmarked at 2 vCPU / 4 GB**, like everyone else, from a template or image built at that size, instead of at their smaller default images. The price tables and price index include them at that size, marked as needing your own image.
 - **`--image provider=ref,...`** on the CLI sets `spec.image`, e.g. `sandboxrouter bench --image e2b=my-template --vcpu 2 --memory 4`.
 - **Published prices leave out fees that only one plan pays.** Sail's $0.01 per sandbox applies on its free plan and is waived on paid plans, so the benchmark tables, the price index and `recommend()` now rank Sail without it and note the fee instead, the way they already treat Boat's start fees above its allowance. The router's own estimate (`perSandboxUsd`) is unchanged.
+
+## 0.14.1 (2026-11-18)
+
+### Added
+- **DigitalOcean and Google Cloud Agent Platform** shell sandboxes.
+- The package's published benchmark data now includes the verified results for Beam, Morph, Northflank and Google.
+
+### Fixed
+- Morph shell execution, Northflank readiness and cleanup, and Google command timeouts.
+
+## 0.14.0 (2026-11-18)
+
+### Added
+- **Routed preview URLs and background commands.**
+
+### Fixed
+- A private E2B preview is reported clearly instead of as a generic failure.
+
+## 0.13.0 (2026-11-17)
+
+### Changed
+- **Benchmark results are verified:** each job checks its own output, and only results from the current, checked version of a job are published. Pricing estimates and benchmark claims are worded as estimates.
+- Cleaner SDK installs: provider SDKs are optional and only needed for the providers you use.
 
 ## 0.12.0 (2026-11-17)
 
