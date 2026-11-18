@@ -2,6 +2,14 @@
 
 All notable changes. Versions follow [semver](https://semver.org/); while the version is 0.x, a minor bump can change the API.
 
+## 0.15.2 (2026-11-19)
+
+### Changed
+- **Refreshed benchmark data in the package.** Start times for E2B, Daytona and OpenScale are now measured at 2 vCPU / 4 GB (100 runs each), the same size as their job results. Load rows carry the size they ran at.
+
+### Fixed
+- **A request refused for the benchmarking account's own limit no longer counts as a failed job.** Boat's short job ran 2 of 2 times correctly; its cost per successful run was overstated by half.
+
 ## 0.15.1 (2026-11-18)
 
 ### Fixed
