@@ -119,7 +119,7 @@
     }
   },
   "version": "0.14.1",
-  "generatedAt": "2026-11-18T17:53:47.335Z",
+  "generatedAt": "2026-11-18T18:00:50.245Z",
   "shapes": [
     "1x2",
     "2x4",
@@ -3384,9 +3384,9 @@
       "provider": "beam",
       "name": "Beam",
       "submissions": 1,
-      "medianCreateMs": 282,
-      "medianExecMs": 529,
-      "medianReadyMs": 792,
+      "medianCreateMs": 256,
+      "medianExecMs": 458,
+      "medianReadyMs": 708,
       "successRate": 1,
       "runs": 3,
       "hourlyUsd": 0.14,
@@ -3394,7 +3394,7 @@
         "vcpu": 2,
         "memoryGb": 4
       },
-      "measuredAt": "2026-11-18T17:49:19.514Z"
+      "measuredAt": "2026-11-18T18:00:22.162Z"
     },
     {
       "provider": "novita",
@@ -3565,9 +3565,9 @@
       "provider": "morph",
       "name": "Morph Cloud",
       "submissions": 1,
-      "medianCreateMs": 1470,
-      "medianExecMs": 540,
-      "medianReadyMs": 1992,
+      "medianCreateMs": 1236,
+      "medianExecMs": 723,
+      "medianReadyMs": 1967,
       "successRate": 1,
       "runs": 3,
       "hourlyUsd": 0.1,
@@ -3575,7 +3575,7 @@
         "vcpu": 2,
         "memoryGb": 4
       },
-      "measuredAt": "2026-11-18T17:44:07.988Z"
+      "measuredAt": "2026-11-18T17:57:59.751Z"
     },
     {
       "provider": "boat",
@@ -3626,9 +3626,9 @@
       "provider": "google",
       "name": "Google Cloud Agent Platform",
       "submissions": 1,
-      "medianCreateMs": 2456,
-      "medianExecMs": 222,
-      "medianReadyMs": 2678,
+      "medianCreateMs": 2517,
+      "medianExecMs": 200,
+      "medianReadyMs": 2777,
       "successRate": 1,
       "runs": 3,
       "hourlyUsd": 0.10300000000000001,
@@ -3636,7 +3636,7 @@
         "vcpu": 1,
         "memoryGb": 2
       },
-      "measuredAt": "2026-11-18T17:53:44.923Z"
+      "measuredAt": "2026-11-18T17:54:56.745Z"
     },
     {
       "provider": "sail",
@@ -4666,6 +4666,59 @@
             "measuredAt": "2026-11-17T23:49:08.280Z"
           },
           {
+            "provider": "morph",
+            "name": "Morph Cloud",
+            "size": {
+              "vcpu": 2,
+              "memoryGb": 4
+            },
+            "createMs": 2022,
+            "taskMs": 209904,
+            "phasesMs": {
+              "cpu": 118849,
+              "cores": 61057,
+              "disk": 29179
+            },
+            "hourlyUsd": 0.1,
+            "taskUsd": 0.00588888888888889,
+            "reusedUsd": 0.005830666666666667,
+            "runs": 3,
+            "ok": 3,
+            "limited": 0,
+            "successRate": 1,
+            "cpuMs": 251210,
+            "activeCpu": false,
+            "minimumSeconds": 0,
+            "perSandboxUsd": 0,
+            "measuredAt": "2026-11-18T17:55:00.043Z"
+          },
+          {
+            "provider": "beam",
+            "name": "Beam",
+            "size": {
+              "vcpu": 2,
+              "memoryGb": 4
+            },
+            "createMs": 708,
+            "taskMs": 205793,
+            "phasesMs": {
+              "cpu": 101259,
+              "cores": 98056,
+              "disk": 6745
+            },
+            "hourlyUsd": 0.14,
+            "taskUsd": 0.008050000000000002,
+            "reusedUsd": 0.008003061111111112,
+            "runs": 3,
+            "ok": 3,
+            "limited": 0,
+            "successRate": 1,
+            "activeCpu": false,
+            "minimumSeconds": 0,
+            "perSandboxUsd": 0,
+            "measuredAt": "2026-11-18T18:00:22.162Z"
+          },
+          {
             "provider": "vercel",
             "name": "Vercel Sandbox",
             "size": {
@@ -4776,8 +4829,26 @@
             "taskFailures": 0
           },
           {
+            "provider": "morph",
+            "name": "Morph Cloud",
+            "requested": 3,
+            "completed": 3,
+            "limited": 0,
+            "failures": 0,
+            "taskFailures": 0
+          },
+          {
             "provider": "vercel",
             "name": "Vercel Sandbox",
+            "requested": 3,
+            "completed": 3,
+            "limited": 0,
+            "failures": 0,
+            "taskFailures": 0
+          },
+          {
+            "provider": "beam",
+            "name": "Beam",
             "requested": 3,
             "completed": 3,
             "limited": 0,
@@ -5237,6 +5308,15 @@
             "taskFailures": 0
           },
           {
+            "provider": "morph",
+            "name": "Morph Cloud",
+            "requested": 3,
+            "completed": 0,
+            "limited": 0,
+            "failures": 0,
+            "taskFailures": 3
+          },
+          {
             "provider": "novita",
             "name": "Novita AI Agent Sandbox",
             "requested": 3,
@@ -5552,6 +5632,31 @@
             "measuredAt": "2026-11-18T17:44:41.265Z"
           },
           {
+            "provider": "morph",
+            "name": "Morph Cloud",
+            "size": {
+              "vcpu": 2,
+              "memoryGb": 4
+            },
+            "createMs": 2030,
+            "taskMs": 520,
+            "phasesMs": {
+              "download": 520
+            },
+            "hourlyUsd": 0.1,
+            "taskUsd": 0.00008333333333333334,
+            "reusedUsd": 0.000014444444444444446,
+            "runs": 3,
+            "ok": 3,
+            "limited": 0,
+            "successRate": 1,
+            "cpuMs": 200,
+            "activeCpu": false,
+            "minimumSeconds": 0,
+            "perSandboxUsd": 0,
+            "measuredAt": "2026-11-18T17:55:29.358Z"
+          },
+          {
             "provider": "novita",
             "name": "Novita AI Agent Sandbox",
             "size": {
@@ -5758,6 +5863,15 @@
           {
             "provider": "maritime",
             "name": "Maritime",
+            "requested": 3,
+            "completed": 3,
+            "limited": 0,
+            "failures": 0,
+            "taskFailures": 0
+          },
+          {
+            "provider": "morph",
+            "name": "Morph Cloud",
             "requested": 3,
             "completed": 3,
             "limited": 0,
@@ -6379,6 +6493,15 @@
             "taskFailures": 0
           },
           {
+            "provider": "morph",
+            "name": "Morph Cloud",
+            "requested": 3,
+            "completed": 0,
+            "limited": 0,
+            "failures": 0,
+            "taskFailures": 3
+          },
+          {
             "provider": "vercel",
             "name": "Vercel Sandbox",
             "requested": 3,
@@ -6608,6 +6731,33 @@
             "measuredAt": "2026-11-17T23:47:40.891Z"
           },
           {
+            "provider": "morph",
+            "name": "Morph Cloud",
+            "size": {
+              "vcpu": 2,
+              "memoryGb": 4
+            },
+            "createMs": 1967,
+            "taskMs": 33693,
+            "phasesMs": {
+              "fetch": 5174,
+              "install": 27309,
+              "typecheck": 1210
+            },
+            "hourlyUsd": 0.1,
+            "taskUsd": 0.001,
+            "reusedUsd": 0.0009359166666666666,
+            "runs": 3,
+            "ok": 3,
+            "limited": 0,
+            "successRate": 1,
+            "cpuMs": 41890,
+            "activeCpu": false,
+            "minimumSeconds": 0,
+            "perSandboxUsd": 0,
+            "measuredAt": "2026-11-18T17:57:59.751Z"
+          },
+          {
             "provider": "beam",
             "name": "Beam",
             "size": {
@@ -6835,8 +6985,26 @@
             "taskFailures": 0
           },
           {
+            "provider": "google",
+            "name": "Google Cloud Agent Platform",
+            "requested": 3,
+            "completed": 0,
+            "limited": 0,
+            "failures": 0,
+            "taskFailures": 3
+          },
+          {
             "provider": "maritime",
             "name": "Maritime",
+            "requested": 3,
+            "completed": 3,
+            "limited": 0,
+            "failures": 0,
+            "taskFailures": 0
+          },
+          {
+            "provider": "morph",
+            "name": "Morph Cloud",
             "requested": 3,
             "completed": 3,
             "limited": 0,
@@ -9252,6 +9420,17 @@
       ]
     },
     {
+      "date": "2026-11-18T17:56:00.887Z",
+      "label": "home-eu",
+      "by": "gigialc",
+      "platform": "darwin-arm64",
+      "runs": 3,
+      "providers": 1,
+      "ids": [
+        "morph"
+      ]
+    },
+    {
       "date": "2026-11-17T23:44:45.227Z",
       "label": "home-eu",
       "by": null,
@@ -9294,6 +9473,17 @@
       "providers": 1,
       "ids": [
         "maritime"
+      ]
+    },
+    {
+      "date": "2026-11-18T17:55:29.358Z",
+      "label": "home-eu",
+      "by": "gigialc",
+      "platform": "darwin-arm64",
+      "runs": 3,
+      "providers": 1,
+      "ids": [
+        "morph"
       ]
     },
     {
@@ -9369,6 +9559,17 @@
       ]
     },
     {
+      "date": "2026-11-18T17:55:00.043Z",
+      "label": "home-eu",
+      "by": "gigialc",
+      "platform": "darwin-arm64",
+      "runs": 3,
+      "providers": 1,
+      "ids": [
+        "morph"
+      ]
+    },
+    {
       "date": "2026-11-17T23:53:22.989Z",
       "label": "home-eu",
       "by": null,
@@ -9411,6 +9612,17 @@
       "providers": 1,
       "ids": [
         "maritime"
+      ]
+    },
+    {
+      "date": "2026-11-18T17:55:13.128Z",
+      "label": "home-eu",
+      "by": "gigialc",
+      "platform": "darwin-arm64",
+      "runs": 3,
+      "providers": 1,
+      "ids": [
+        "morph"
       ]
     },
     {
@@ -9497,6 +9709,17 @@
       ]
     },
     {
+      "date": "2026-11-18T17:54:56.745Z",
+      "label": "home-eu",
+      "by": "gigialc",
+      "platform": "darwin-arm64",
+      "runs": 3,
+      "providers": 1,
+      "ids": [
+        "google"
+      ]
+    },
+    {
       "date": "2026-11-17T23:51:31.059Z",
       "label": "home-eu",
       "by": null,
@@ -9505,6 +9728,17 @@
       "providers": 1,
       "ids": [
         "maritime"
+      ]
+    },
+    {
+      "date": "2026-11-18T17:57:59.751Z",
+      "label": "home-eu",
+      "by": "gigialc",
+      "platform": "darwin-arm64",
+      "runs": 3,
+      "providers": 1,
+      "ids": [
+        "morph"
       ]
     },
     {
@@ -9674,6 +9908,17 @@
     },
     {
       "date": "2026-11-18T17:44:41.265Z",
+      "label": "home-eu",
+      "by": "gigialc",
+      "platform": "darwin-arm64",
+      "runs": 3,
+      "providers": 1,
+      "ids": [
+        "beam"
+      ]
+    },
+    {
+      "date": "2026-11-18T18:00:22.162Z",
       "label": "home-eu",
       "by": "gigialc",
       "platform": "darwin-arm64",
