@@ -2,6 +2,11 @@
 
 All notable changes. Versions follow [semver](https://semver.org/); while the version is 0.x, a minor bump can change the API.
 
+## 0.15.1 (2026-11-18)
+
+### Fixed
+- **E2B, Daytona and OpenScale job costs were priced at their default image's size, not the 2 vCPU / 4 GB they ran at.** 0.15.0 ran them at 2 vCPU / 4 GB but still applied the smaller size's hourly price, so their costs were too low (E2B's agent session showed $1.91 per 1,000, not $2.90). Published job costs now use the size each run really had.
+
 ## 0.15.0 (2026-11-18)
 
 ### Changed

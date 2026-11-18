@@ -1,6 +1,6 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { benchmarksPublishable, billingRules, CATALOG, cpuHourlyAtFull, hourlyCost, planOnlyStartFee } from "./catalog.js";
+import { benchmarksPublishable, billingRules, CATALOG, cpuHourlyAtFull, hourlyCost, planOnlyStartFee, withOwnImages } from "./catalog.js";
 import { BILLED_VS_LIST } from "./billing.js";
 import { AGENT_TASK_VERSION } from "./agent-bench.js";
 import { isCurrentTask, TASK_VERSION, taskByVersion, taskUsd, type PhaseMs } from "./task.js";
@@ -139,7 +139,7 @@ export function aggregate(reports: BenchReport[], cohort: Size = DEFAULT_SIZE): 
       medianReadyMs: rs.every((r) => r.medianReadyMs !== undefined) ? median(rs.map((r) => r.medianReadyMs!)) : undefined,
       successRate: attempted ? ok / attempted : 0,
       runs: attempted,
-      hourlyUsd: hourlyCost(id, size),
+      hourlyUsd: hourlyCost(id, measured(size)),
       size,
       measuredAt: matching.map((x) => x.date).sort().at(-1)!,
     };
@@ -228,7 +228,7 @@ export function taskTable(reports: BenchReport[], version: string = TASK_VERSION
     // The job's own CPU hint (the agent loop's 10%) prices it the way its sandboxes were started.
     const size = { ...rs[0].size!, ...(def.cpuUtilization ? { cpuUtilization: def.cpuUtilization } : {}) };
     const ratio = BILLED_VS_LIST[id]?.ratio ?? 1;
-    const hourlyUsd = hourlyCost(id, size) * ratio;
+    const hourlyUsd = hourlyCost(id, measured(size)) * ratio;
     const rules = billingRules(id);
     const cpus = successful.map((r) => r.medianTaskCpuMs).filter((n): n is number => typeof n === "number");
     // A container can show the whole host's /proc/stat (Daytona does): a reading beyond what the sandbox's
@@ -249,14 +249,14 @@ export function taskTable(reports: BenchReport[], version: string = TASK_VERSION
       phasesMs,
       hourlyUsd,
       // A fee only one plan pays (Sail's free plan) is noted beside the table, not counted in it.
-      taskUsd: taskUsd(id, size, createMs, taskMillis, cpuMs, ratio, false, maxCoreMs) - planOnlyStartFee(id),
-      reusedUsd: taskUsd(id, size, createMs, taskMillis, cpuMs, ratio, true, maxCoreMs),
+      taskUsd: taskUsd(id, measured(size), createMs, taskMillis, cpuMs, ratio, false, maxCoreMs) - planOnlyStartFee(id),
+      reusedUsd: taskUsd(id, measured(size), createMs, taskMillis, cpuMs, ratio, true, maxCoreMs),
       runs,
       ok,
       limited: rs.reduce((n, r) => n + (r.limited ?? 0), 0),
       successRate: runs ? ok / runs : 0,
       ...(cpuMs !== undefined ? { cpuMs } : {}),
-      activeCpu: cpuHourlyAtFull(id, size) > 0,
+      activeCpu: cpuHourlyAtFull(id, measured(size)) > 0,
       minimumSeconds: rules.minSeconds,
       perSandboxUsd: rules.perSandboxUsd - planOnlyStartFee(id),
       measuredAt: xs.map((x) => x.date).sort().at(-1)!,
@@ -462,6 +462,12 @@ export interface AgentReport {
   runs: number;
   rows: import("./agent-bench.js").AgentRow[];
 }
+
+/**
+ * A size a run really had, priced as that size. Without this, a provider whose default image is smaller
+ * (E2B, Daytona, OpenScale) would be priced at the default image's size even when the run used a bigger one.
+ */
+const measured = <T extends { vcpu: number; memoryGb: number }>(size: T) => withOwnImages(size) as T & { image: Record<string, string> };
 
 export function loadAgentReports(dir: string): AgentReport[] {
   let files: string[];
