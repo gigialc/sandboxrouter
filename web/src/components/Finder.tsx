@@ -11,12 +11,14 @@ import { site } from "@/lib/site";
 const JOBS: [RecJob, string, string][] = [
   ["agent", "Agent session", "About a minute: 10 model turns, each a 6 s wait on the model and a short Python tool call. The sandbox is mostly idle."],
   ["python", "Quick Python run", "A 1 to 2 second pure-Python script (JSON, a regex and a sort over 200,000 records): one code-interpreter call."],
+  ["long", "Long job", "The short job 40 times in a row: minutes of steady CPU and disk work."],
   ["repo", "Coding agent on a repo", "Fetch Node and a real TypeScript project, npm ci, typecheck: what a coding agent does first."],
   ["short", "Short CPU job", "One hash, then two concurrent hashes, then a 256 MB disk write."],
-  ["long", "Long job", "The short job 40 times in a row: minutes of steady CPU and disk work."],
   ["download", "Download", "A 53 MB download over HTTPS."],
   ["start", "Start only", "Start a sandbox and run one command."],
 ];
+// The three jobs shown first: providers differ most in how they bill a short run, idle time and a long run.
+const HEADLINE: readonly RecJob[] = ["agent", "python", "long"];
 const DATA = published as PublishedData;
 const BATCH_JOBS: Partial<Record<RecJob, PublishedLoad["job"]>> = { start: "start", python: "rl", agent: "agents" };
 const resultsFor = (job: RecJob) => (job === "start" ? DATA.start : DATA.jobs[job] ?? {});
@@ -49,6 +51,7 @@ export function Finder() {
   const [job, setJob] = useState<RecJob>(AVAILABLE_JOBS[0]?.[0] ?? "start");
   const [selectedCount, setCount] = useState(1);
   const [all, setAll] = useState(false);
+  const [moreJobs, setMoreJobs] = useState(false);
   const [sharing, setSharing] = useState("");
   const [copyFallback, setCopyFallback] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -163,11 +166,16 @@ export function Finder() {
         <h2 className="text-xl font-normal tracking-[-0.02em] sm:text-2xl">Find the best provider for your job</h2>
         <div className="mt-5 flex flex-wrap items-center gap-x-8 gap-y-3">
           <div className="flex flex-wrap" role="group" aria-label="What you're running">
-            {AVAILABLE_JOBS.map(([id, label]) => (
+            {AVAILABLE_JOBS.filter(([id]) => moreJobs || HEADLINE.includes(id) || id === job).map(([id, label]) => (
               <button key={id} aria-pressed={job === id} onClick={() => setJob(id)} className={seg(job === id)}>
                 {label}
               </button>
             ))}
+            {!moreJobs && AVAILABLE_JOBS.some(([id]) => !HEADLINE.includes(id) && id !== job) && (
+              <button type="button" onClick={() => setMoreJobs(true)} className="px-3 py-1.5 text-[13px] text-ink-2 underline underline-offset-4 decoration-line-2 hover:text-ink">
+                More jobs
+              </button>
+            )}
           </div>
           {batches.length > 0 && <div className="flex items-center gap-3">
             <span className="text-[12px] text-muted">At once</span>
