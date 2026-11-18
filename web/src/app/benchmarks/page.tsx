@@ -91,16 +91,19 @@ export default function BenchmarksPage() {
                   ),
                 },
 
+          ...(site.agent.length > 0
+            ? [
                 {
                   id: "agent",
                   label: "Real AI agent",
                   content: (
         <Section id="agent" title="A real agent" how="agent" line="A real model does the same task in a sandbox on each provider, with one tool that runs commands there.">
-          {site.agent.length > 0 ? <AgentTable /> :
-            <p className="mt-4 text-[13px] text-muted">Awaiting a run with the new prime sequence verifier.</p>}
+          <AgentTable />
         </Section>
                   ),
                 },
+              ]
+            : []),
 
           ...(site.load.length > 0
             ? [

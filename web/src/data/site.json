@@ -12,9 +12,11 @@
     "daytona": "/logos/daytona.png",
     "dedalus": "/logos/dedalus.ico",
     "deno": "/logos/deno.svg",
+    "digitalocean": "/logos/digitalocean.svg",
     "e2b": "/logos/e2b.png",
     "exedev": "/logos/exedev.png",
     "freestyle": "/logos/freestyle.png",
+    "google": "/logos/google.png",
     "hopx": "/logos/hopx.png",
     "instabox": "/logos/instabox.svg",
     "koyeb": "/logos/koyeb.png",
@@ -119,7 +121,7 @@
     }
   },
   "version": "0.14.1",
-  "generatedAt": "2026-11-18T18:15:46.064Z",
+  "generatedAt": "2026-11-18T18:34:45.600Z",
   "shapes": [
     "1x2",
     "2x4",
