@@ -27,11 +27,11 @@ const NAV = [
 export function Nav() {
   return (
     <header className="sticky top-0 z-30 border-b border-line bg-bg/90 backdrop-blur-md">
-      <div className="flex h-14 items-center px-5 sm:px-10">
+      <div className="flex h-14 items-center px-2.5 min-[320px]:px-5 sm:px-10">
         <Link href="/" aria-label="sandboxRouter home">
           <Logo />
         </Link>
-        <nav className="ml-auto flex items-center gap-7 text-[13px] text-ink-2">
+        <nav className="ml-auto flex items-center gap-1 text-[13px] text-ink-2 min-[320px]:gap-2.5 sm:gap-4 lg:gap-7">
           {NAV.map((n) => (
             <Link key={n.href} href={n.href} className="hidden hover:text-ink sm:block">
               {n.label}
@@ -45,7 +45,7 @@ export function Nav() {
               <a href={`${HOSTED_URL}/auth/github`} className="hidden hover:text-ink sm:block">
                 Sign in
               </a>
-              <a href={`${HOSTED_URL}/dashboard`} className="rounded-full bg-ink px-4 py-1.5 text-[13px] font-medium text-bg hover:bg-ink-2">
+              <a href={`${HOSTED_URL}/dashboard`} className="rounded-full bg-ink px-3 py-1.5 text-[13px] font-medium text-bg hover:bg-ink-2 min-[320px]:px-4">
                 Sign up
               </a>
             </>

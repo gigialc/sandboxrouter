@@ -53,27 +53,13 @@ export default function Home() {
 
   return (
     <div className="px-5 sm:px-10">
-      <section className="flex flex-col items-center pt-24 pb-16 text-center sm:pt-36">
-        {REPO_PUBLIC && (
-          <a
-            href={REPO}
-            className="mb-8 inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-line px-3.5 py-1.5 text-[12.5px] text-ink-2 hover:border-line-2 hover:text-ink"
-          >
-            <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden />
-            Open source, MIT licensed
-            <span className="text-muted">·</span>
-            <span className="text-ink">
-              <span className="sm:hidden">GitHub &rarr;</span>
-              <span className="hidden sm:inline">Read the code on GitHub &rarr;</span>
-            </span>
-          </a>
-        )}
-        <h1 className="text-[40px] font-normal leading-[1.08] tracking-[-0.04em] sm:text-[64px]">
+      <section className="flex flex-col items-center gap-[clamp(0.875rem,2.75svh,1.5rem)] pt-[clamp(1.25rem,5svh,2.5rem)] pb-10 text-center sm:gap-[clamp(1rem,4.25svh,2.5rem)] sm:pt-[clamp(1.5rem,calc(16svh_-_4.5rem),5rem)] sm:pb-14">
+        <h1 className="text-[clamp(1.875rem,min(calc(1rem_+_4.5vw),8.75svh),4rem)] font-normal leading-[1.08] tracking-[-0.04em] text-balance">
           One API for every sandbox.
           <br />
           <span className="text-muted">Find a provider that fits.</span>
         </h1>
-        <div className="mt-10 flex flex-wrap justify-center gap-3">
+        <div className="flex flex-wrap justify-center gap-3">
           {HOSTED_PUBLIC ? (
             <Button href={`${HOSTED_URL}/dashboard`} primary>
               Get a key
@@ -83,20 +69,20 @@ export default function Home() {
               Quickstart
             </Button>
           )}
-          {REPO_PUBLIC && !HOSTED_PUBLIC ? <Button href={REPO}>GitHub</Button> : <Button href="/docs">Docs</Button>}
+          {REPO_PUBLIC ? <Button href={REPO}>GitHub</Button> : <Button href="/docs">Docs</Button>}
         </div>
 
-        <p className="mt-12 max-w-lg text-[15px] leading-7 text-ink-2">
+        <p className="max-w-lg text-[15px] leading-6 text-ink-2 sm:leading-7">
           The SDK prioritises providers by estimated cost and can try another if a start fails.{" "}
           {HOSTED_PUBLIC ? "Open source, or one hosted key." : "Open source."}{" "}
           <Link href="/learn" className="text-ink underline underline-offset-4 decoration-line-2 hover:decoration-ink">
             New to sandboxes?
           </Link>
         </p>
-        <div className="mt-10 flex w-full max-w-xl flex-col items-center gap-4">
+        <div className="flex w-full max-w-xl flex-col items-center gap-3">
           <InstallChip cmd={`npm i ${NPM}`} />
           <div className="w-full text-left">
-            <CodeBlock title="index.ts" code={OWN_KEYS} />
+            <CodeBlock title="index.ts" code={OWN_KEYS} wrap />
           </div>
         </div>
       </section>
@@ -208,7 +194,7 @@ export default function Home() {
               },
             ]}
             visual={
-              <div className="border border-line p-5 sm:p-8">
+              <div className="overflow-x-auto border border-line p-5 sm:p-8">
                 <p className="text-[12px] uppercase tracking-[0.12em] text-muted">Short job · cheapest first</p>
                 <ResultTable cols={[{ label: "Est. / 1,000 runs" }, { label: "Took", className: "hidden sm:table-cell" }]}>
                   {shortRows.map((r, k) => (
