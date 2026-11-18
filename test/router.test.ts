@@ -468,9 +468,9 @@ describe("ids and prices", () => {
     const names = CATALOG.map((c) => c.name);
     expect(names).toEqual([...names].sort((a, b) => a.localeCompare(b)));
     // Alibaba's default template (2 vCPU / 2 GB) and Azure's sessions are fixed below the default size.
-    // E2B, Daytona and OpenScale default images are smaller too (measured in real sandboxes).
+    // E2B, Daytona, OpenScale and Google's standard shell template also start smaller.
     for (const c of CATALOG)
-      if (!["alibaba", "azure", "e2b", "daytona", "openscale"].includes(c.id)) expect(unfit(c.id, { vcpu: 2, memoryGb: 4 })).toBeNull();
+      if (!["alibaba", "azure", "e2b", "daytona", "openscale", "google"].includes(c.id)) expect(unfit(c.id, { vcpu: 2, memoryGb: 4 })).toBeNull();
     expect(CATALOG.filter((c) => c.local).map((c) => c.id)).toEqual(["docker"]);
     expect(new Set(CATALOG.map((c) => hourlyCost(c.id))).size).toBeGreaterThan(1);
   });
