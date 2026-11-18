@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
+import { pageAlternates } from "@/lib/public-pages";
 import { PageHeader } from "@/components/chrome";
 import Link from "next/link";
 import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
+  alternates: pageAlternates("/learn"),
   title: "Sandboxes for AI agents, explained",
   description:
     "What a sandbox is, why AI agents need one, how isolation, start times and billing work, and how to compare providers without getting fooled by the price per hour.",

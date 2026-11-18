@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageAlternates } from "@/lib/public-pages";
 import { ConditionalStartFeeNote } from "@/components/ConditionalStartFeeNote";
 import { ProviderLogo } from "@/components/ProviderName";
 import Link from "next/link";
@@ -16,7 +17,7 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps<"/providers/[id]">): Promise<Metadata> {
   const { id } = await params;
   const p = provider(id);
-  return { title: p ? p.name : "Not found" };
+  return p ? { title: p.name, alternates: pageAlternates(`/providers/${p.id}`) } : { title: "Not found" };
 }
 
 export default async function ProviderPage({ params }: PageProps<"/providers/[id]">) {

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageAlternates } from "@/lib/public-pages";
 import { PageHeader } from "@/components/chrome";
 import Link from "next/link";
 import { AgentTable } from "@/components/AgentTable";
@@ -13,6 +14,7 @@ import { REPO, site } from "@/lib/site";
 
 const description = "Compare sandbox startup and job times, estimated costs, and bills from real provider accounts.";
 export const metadata: Metadata = {
+  alternates: pageAlternates("/benchmarks"),
   title: "Benchmarks",
   description,
   openGraph: { title: "SandboxRouter Benchmarks", description, url: "/benchmarks" },

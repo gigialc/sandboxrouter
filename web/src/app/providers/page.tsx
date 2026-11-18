@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
+import { pageAlternates } from "@/lib/public-pages";
 import { PageHeader, SectionTitle } from "@/components/chrome";
 import { DesktopTable } from "@/components/DesktopTable";
 import { PriceIndex } from "@/components/PriceIndex";
 import { ProviderTable } from "@/components/ProviderTable";
 import { Sources } from "@/components/Sources";
 
-export const metadata: Metadata = { title: "Providers" };
+export const metadata: Metadata = { alternates: pageAlternates("/providers"), title: "Providers" };
 
 export default function ProvidersPage() {
   return (
@@ -18,6 +19,9 @@ export default function ProvidersPage() {
       </div>
       <div className="mt-12">
         <ProviderTable />
+        <p className="mt-4 text-[13px] text-muted">
+          <a href="/providers.json" className="underline underline-offset-4">Provider catalog JSON</a> includes all sandbox sizes, desktop and phone prices, and the price index.
+        </p>
       </div>
       <div className="mt-12">
         <Sources />

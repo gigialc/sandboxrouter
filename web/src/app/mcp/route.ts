@@ -1,4 +1,6 @@
-import { callTool, DATA, MCP_TOOLS, ORIGIN, ToolError } from "@/lib/agents";
+import { benchmarksJson, callTool, DATA, llmsTxt, MCP_TOOLS, providersJson, ToolError } from "@/lib/agents";
+import { readPageMarkdown } from "@/lib/page-markdown";
+import { MARKDOWN, markdownPath, ORIGIN, publicPages } from "@/lib/public-pages";
 import { site } from "@/lib/site";
 
 // A public, read-only MCP server (Streamable HTTP, stateless, JSON responses) over the published benchmarks:
@@ -14,7 +16,23 @@ type Msg = { jsonrpc?: string; id?: string | number | null; method?: string; par
 const ok = (id: Msg["id"], result: unknown) => ({ jsonrpc: "2.0", id, result });
 const fail = (id: Msg["id"], code: number, message: string) => ({ jsonrpc: "2.0", id: id ?? null, error: { code, message } });
 
-function handle(m: Msg) {
+const dataResources = [
+  { path: "/llms.txt", name: "Agent index", mimeType: "text/plain", read: llmsTxt },
+  { path: "/benchmarks.json", name: "Benchmark data", mimeType: "application/json", read: () => JSON.stringify(benchmarksJson()) },
+  { path: "/providers.json", name: "Provider catalog", mimeType: "application/json", read: () => JSON.stringify(providersJson()) },
+];
+
+const resources = [
+  ...dataResources.map(({ path, name, mimeType }) => ({ uri: `${ORIGIN}${path}`, name, mimeType })),
+  ...publicPages.map(({ path, title, description }) => ({
+    uri: `${ORIGIN}${markdownPath(path)}`,
+    name: title,
+    description,
+    mimeType: MARKDOWN,
+  })),
+];
+
+async function handle(m: Msg, requestUrl: string) {
   if (!m || m.jsonrpc !== "2.0" || typeof m.method !== "string") return fail(m?.id, -32600, "Invalid request");
   // Notifications (no id) get no response.
   if (m.id === undefined) return undefined;
@@ -23,7 +41,7 @@ function handle(m: Msg) {
       const asked = String(m.params?.protocolVersion ?? "");
       return ok(m.id, {
         protocolVersion: PROTOCOLS.includes(asked) ? asked : PROTOCOLS[0],
-        capabilities: { tools: { listChanged: false } },
+        capabilities: { tools: { listChanged: false }, resources: { listChanged: false } },
         serverInfo: { name: "sandboxrouter-benchmarks", title: "sandboxRouter benchmarks", version: String(site.version) },
         instructions: `Sandbox provider benchmarks measured on real accounts (data through ${DATA.dataThrough.slice(0, 10)}). Use recommend_provider to pick a provider for a job; costs and times are per successful run. Methodology: ${ORIGIN}/methodology`,
       });
@@ -44,7 +62,20 @@ function handle(m: Msg) {
       }
     }
     case "resources/list":
-      return ok(m.id, { resources: [] });
+      return ok(m.id, { resources });
+    case "resources/read": {
+      const uri = m.params?.uri;
+      const resource = resources.find((entry) => entry.uri === uri);
+      if (!resource) return fail(m.id, -32002, "Resource not found");
+      const data = dataResources.find(({ path }) => `${ORIGIN}${path}` === uri);
+      if (data) return ok(m.id, { contents: [{ uri, mimeType: data.mimeType, text: data.read() }] });
+
+      const page = publicPages.find(({ path }) => `${ORIGIN}${markdownPath(path)}` === uri);
+      if (!page) return fail(m.id, -32002, "Resource not found");
+      const { body, status } = await readPageMarkdown(page.path, requestUrl);
+      if (status !== 200) return fail(m.id, -32603, "Page temporarily unavailable");
+      return ok(m.id, { contents: [{ uri, mimeType: MARKDOWN, text: body }] });
+    }
     case "prompts/list":
       return ok(m.id, { prompts: [] });
     default:
@@ -60,7 +91,7 @@ export async function POST(req: Request) {
     return Response.json(fail(null, -32700, "Parse error"), { status: 400, headers: CORS });
   }
   const msgs = Array.isArray(body) ? body : [body];
-  const out = msgs.map((m) => handle(m as Msg)).filter((r) => r !== undefined);
+  const out = (await Promise.all(msgs.map((m) => handle(m as Msg, req.url)))).filter((r) => r !== undefined);
   if (!out.length) return new Response(null, { status: 202, headers: CORS });
   return Response.json(Array.isArray(body) ? out : out[0], { headers: CORS });
 }

@@ -75,6 +75,7 @@ export function Footer() {
           <Link href="/security" className="hover:text-ink">Security</Link>
           <Link href="/docs" className="hover:text-ink">Docs</Link>
           <Link href="/playground" className="hover:text-ink">Playground</Link>
+          <a href="/llms.txt" className="hover:text-ink">For agents</a>
           {REPO_PUBLIC && <a href={REPO} className="hover:text-ink">GitHub</a>}
           <a href={NPM_URL} className="hover:text-ink">npm</a>
           {HOSTED_PUBLIC && (

@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
+import { pageAlternates } from "@/lib/public-pages";
 import { PageHeader } from "@/components/chrome";
 import Link from "next/link";
 import { HOSTED_FEE_PCT, HOSTED_URL, REPO } from "@/lib/site";
 
 export const metadata: Metadata = {
+  alternates: pageAlternates("/security"),
   title: "Security",
   description: "What runs where with sandboxRouter: the open-source library on your own keys, and the hosted key on ours.",
 };

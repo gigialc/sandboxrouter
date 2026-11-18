@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageAlternates } from "@/lib/public-pages";
 import { PageHeader } from "@/components/chrome";
 import Link from "next/link";
 import { ConditionalStartFeeNote } from "@/components/ConditionalStartFeeNote";
@@ -6,6 +7,7 @@ import { CodeBlock } from "@/components/code";
 import { HOSTED_FEE_PCT, NPM, REPO, REPO_PUBLIC, site } from "@/lib/site";
 
 export const metadata: Metadata = {
+  alternates: pageAlternates("/methodology"),
   title: "Methodology",
   description: "How sandboxRouter prices providers, tests them on real accounts and runs its benchmarks.",
 };

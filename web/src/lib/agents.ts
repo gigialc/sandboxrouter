@@ -3,9 +3,9 @@
 // recommend() the SDK uses, so an agent and a person reading the site get the same answer.
 import published from "@/data/published.json";
 import { recommend, type PublishedData, type RecJob, type RecPriority } from "@/lib/recommend";
-import { HOSTED_FEE_PCT, HOSTED_URL, NPM, REPO, RESULTS_REF, site } from "@/lib/site";
+import { HOSTED_FEE_PCT, HOSTED_URL, NPM, NPM_URL, REPO, RESULTS_REF, shapeLabel, site } from "@/lib/site";
+import { markdownPath, ORIGIN, publicPages } from "@/lib/public-pages";
 
-export const ORIGIN = "https://www.sandboxrouter.ai";
 export const DATA = published as PublishedData;
 export const JOBS = ["start", "short", "long", "python", "download", "agent", "repo"] as const satisfies readonly RecJob[];
 export const PRIORITIES = ["value", "cost", "speed"] as const satisfies readonly RecPriority[];
@@ -42,8 +42,42 @@ export function benchmarksJson() {
       bills: "Vendor metered usage and provider estimates are typed separately. Hosted charges are SandboxRouter credit debits. USD values preserve up to six decimals. Where present, billResolutionUsd is the source's precision.",
       recommend: `Rank the current benchmark data with the MCP tool recommend_provider at ${ORIGIN}/mcp. The npm CLI uses the benchmark snapshot bundled with its installed version.`,
     },
+    useCases: site.useCases,
     agent: site.agent,
     bills: { dataThrough: BILL_DATA_THROUGH, provider: site.costRuns, hosted: site.hostedCosts },
+  };
+}
+
+/** All provider table views, including sizes and operating systems hidden behind browser controls. */
+export function providersJson() {
+  return {
+    about: {
+      page: `${ORIGIN}/providers`,
+      methodology: `${ORIGIN}/methodology#pricing`,
+      currency: "USD",
+      units: "Sandbox prices are hourly list rates by reference shape. Active CPU rates assume full utilization. Unfit entries identify unsupported shapes. Desktop rates are hourly where available. Price index lines are estimated direct-provider scenario costs.",
+    },
+    shapes: site.shapes.map((id) => ({ id, label: shapeLabel(id) })),
+    providers: site.providers.map((p) => ({
+      id: p.id,
+      name: p.name,
+      page: `${ORIGIN}/providers/${p.id}`,
+      markdown: `${ORIGIN}/providers/${p.id}.md`,
+      docs: p.docs,
+      local: p.local ?? false,
+      capabilities: p.capabilities,
+      limits: p.limits,
+      pricing: p.pricing,
+      billing: p.billing,
+      billedVsList: p.billedVsList,
+      prices: p.prices,
+      defaultSize: p.defaultSize,
+      plan: p.plan,
+      access: p.access,
+      live: p.live,
+    })),
+    desktops: site.desktops,
+    priceIndex: site.priceIndex,
   };
 }
 
@@ -63,8 +97,24 @@ export function benchmarksMarkdown(): string {
     "",
     "Estimates exclude account-specific fees. [Boat charges for starts above included allowances](https://docs.boat.dev/limits.md#extra-starts).",
     "",
-    "## Cost and time for a job",
+    "## Estimated cost for common scenarios",
   ];
+  for (const scenario of site.useCases) {
+    const { vcpu, memoryGb, cpuUtilization } = scenario.spec;
+    const size = `${vcpu} vCPU / ${memoryGb} GB, ${scenario.runSeconds} s`;
+    out.push(
+      "",
+      `### ${scenario.title}`,
+      "",
+      `${scenario.blurb} ${size}${cpuUtilization === undefined ? "" : `, ${cpuUtilization * 100}% CPU assumed`}.`,
+      "",
+      table(
+        ["Provider", "Est. per run", "Est. per 1,000 runs"],
+        scenario.top.map((r) => [r.name, money(r.runUsd), money(r.runUsd * 1000)]),
+      ),
+    );
+  }
+  out.push("", "## Cost and time for a measured job");
   if (!Object.keys(DATA.jobs).length) out.push("", "No results have been published with the new workload checks yet.");
   for (const job of JOBS.filter((j) => j !== "start")) {
     const r = recommend(DATA, { job, priority: "value" });
@@ -174,27 +224,21 @@ export function llmsTxt(): string {
 ## How an agent should use it
 
 - **Ask which provider for a job:** MCP endpoint \`${ORIGIN}/mcp\` (Streamable HTTP, no auth), tool \`recommend_provider\` with \`job\` (${JOBS.join(", ")}), \`count\` (sandboxes at once), \`priority\` (${PRIORITIES.join(", ")}). Or \`npx ${NPM} recommend --job python --count 100\`, or \`recommend()\` from the SDK.
-- **Read the numbers:** ${ORIGIN}/benchmarks.json (stable schema, field meanings under \`about\`). Raw results for every run: ${REPO}/tree/${RESULTS_REF}/results
-- **Read any page as Markdown:** send \`Accept: text/markdown\`, or add \`.md\` to the path (for example ${ORIGIN}/benchmarks.md).
+- [Benchmarks JSON](${ORIGIN}/benchmarks.json): published measurements, modelled scenarios, and billing evidence.
+- [Provider catalog JSON](${ORIGIN}/providers.json): every sandbox size and desktop OS, billing rules, and the price index.
+- [OpenAPI specification](${ORIGIN}/openapi.json): schemas for the public read-only data endpoints.
+- [Raw benchmark results](${REPO}/tree/${RESULTS_REF}/results): evidence from individual runs.
+- **Read pages as Markdown:** request a link below, or request the canonical HTML URL with \`Accept: text/markdown\`. MCP clients can also list and read these pages as resources.
 - The SDK's routing already uses these published start times when you haven't benchmarked yourself.
 
 ## Pages
 
-- [Benchmarks](${ORIGIN}/benchmarks.md): every table
-- [Methodology](${ORIGIN}/methodology.md): how each number is measured and priced
-- [Providers](${ORIGIN}/providers.md): prices and features
-- [Docs](${ORIGIN}/docs.md): SDK, CLI and hosted API
-- [Learn](${ORIGIN}/learn.md): sandboxes for AI agents, explained
-- [Security](${ORIGIN}/security.md)
-${site.providers
-  .filter((p) => !p.local)
-  .map((p) => `- [${p.name}](${ORIGIN}/providers/${p.id}.md)`)
-  .join("\n")}
+${publicPages.map(({ path, title, description }) => `- [${title}](${ORIGIN}${markdownPath(path)}): ${description}`).join("\n")}
 
 ## Source
 
 - SDK, CLI and benchmark harness: ${REPO}
-- npm: https://www.npmjs.com/package/${NPM}
+- [SandboxRouter SDK and CLI on npm](${NPM_URL})
 `;
 }
 
@@ -203,8 +247,21 @@ export function htmlToMarkdown(html: string, base: string): string {
   let s = html.match(/<main[\s\S]*?<\/main>/i)?.[0] ?? html;
   s = s.replace(/<(script|style|svg|noscript|template|button|nav|form)\b[\s\S]*?<\/\1>/gi, "");
   s = s.replace(/<!--[\s\S]*?-->/g, "");
-  const abs = (href: string) => (href.startsWith("/") ? base + href : href);
-  s = s.replace(/<pre[^>]*>([\s\S]*?)<\/pre>/gi, (_, c) => `\n\n\`\`\`\n${strip(c).trim()}\n\`\`\`\n\n`);
+  const abs = (href: string) => {
+    try {
+      return new URL(decode(href), base).href;
+    } catch {
+      return href;
+    }
+  };
+  const codeBlocks: string[] = [];
+  s = s.replace(/<pre[^>]*>([\s\S]*?)<\/pre>/gi, (_, content) => {
+    const code = strip(content).replace(/^\n|\n$/g, "");
+    const fence = "`".repeat(Math.max(3, ...Array.from(code.matchAll(/`+/g), (m) => m[0].length + 1)));
+    const index = codeBlocks.push(`${fence}\n${code}\n${fence}`) - 1;
+    return `\n\n\u0000${index}\u0000\n\n`;
+  });
+  s = s.replace(/<\/a>\s*<a(?=\s)/gi, "</a> <a");
   s = s.replace(/<h([1-6])[^>]*>([\s\S]*?)<\/h\1>/gi, (_, n, c) => `\n\n${"#".repeat(Number(n))} ${inline(c, abs).trim()}\n\n`);
   s = s.replace(/<table[^>]*>([\s\S]*?)<\/table>/gi, (_, t) => {
     const rows = [...t.matchAll(/<tr[^>]*>([\s\S]*?)<\/tr>/gi)].map((m) =>
@@ -223,18 +280,19 @@ export function htmlToMarkdown(html: string, base: string): string {
     .map((l) => l.replace(/[ \t]+/g, " ").trimEnd())
     .join("\n")
     .replace(/\n{3,}/g, "\n\n")
-    .trim() + "\n";
+    .trim()
+    .replace(/\u0000(\d+)\u0000/g, (_, index) => codeBlocks[Number(index)]) + "\n";
 }
 
 function inline(s: string, abs: (h: string) => string): string {
   return decode(
     s
       .replace(/<a\b[^>]*href="([^"]*)"[^>]*>([\s\S]*?)<\/a>/gi, (_, h, c) => {
-        const text = strip(c).replace(/\s+/g, " ").trim();
+        const text = c.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
         return text ? `[${text}](${abs(h)})` : "";
       })
-      .replace(/<(strong|b)\b[^>]*>([\s\S]*?)<\/\1>/gi, (_, __, c) => `**${strip(c).trim()}**`)
-      .replace(/<code\b[^>]*>([\s\S]*?)<\/code>/gi, (_, c) => `\`${strip(c)}\``)
+      .replace(/<(strong|b)\b[^>]*>([\s\S]*?)<\/\1>/gi, (_, __, c) => `**${c.trim()}**`)
+      .replace(/<code\b[^>]*>([\s\S]*?)<\/code>/gi, (_, c) => `\`${c}\``)
       .replace(/<[^>]+>/g, ""),
   );
 }
@@ -286,7 +344,7 @@ export const MCP_TOOLS = [
   },
   {
     name: "list_providers",
-    description: "Every sandbox provider sandboxRouter supports: id, name, list price per hour at 2 vCPU / 4 GB, and whether it's benchmarked.",
+    description: "Cloud sandbox provider IDs, names, and benchmark availability. For all prices and sizes, read /providers.json.",
     inputSchema: { type: "object", properties: {}, additionalProperties: false },
   },
 ] as const;

@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
+import { pageAlternates } from "@/lib/public-pages";
 import { PageHeader } from "@/components/chrome";
 import { Playground } from "@/components/Playground";
 
-export const metadata: Metadata = { title: "Playground" };
+export const metadata: Metadata = { alternates: pageAlternates("/playground"), title: "Playground" };
 
 export default function PlaygroundPage() {
   return (
