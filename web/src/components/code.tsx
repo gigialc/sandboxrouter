@@ -19,7 +19,10 @@ export function CopyButton({ text, className = "" }: { text: string; className?:
   );
 }
 
-export function CodeBlock({ code, title }: { code: string; title?: string }) {
+export function CodeBlock({ code, title, wrap = false }: { code: string; title?: string; wrap?: boolean }) {
+  const layout = wrap
+    ? "whitespace-pre-wrap wrap-anywhere p-3 leading-[clamp(1.125rem,2.7svh,1.5rem)] sm:p-4"
+    : "overflow-x-auto p-4 leading-6";
   return (
     <div className="border border-line bg-panel">
       {title && (
@@ -28,7 +31,7 @@ export function CodeBlock({ code, title }: { code: string; title?: string }) {
           <CopyButton text={code} />
         </div>
       )}
-      <pre className="overflow-x-auto p-4 font-mono text-[12.5px] leading-6 text-ink-2">
+      <pre className={`font-mono text-[12.5px] text-ink-2 ${layout}`}>
         <code>{code}</code>
       </pre>
     </div>
@@ -62,12 +65,12 @@ export function CodeTabs({ tabs }: { tabs: { label: string; code: string }[] }) 
 
 export function InstallChip({ cmd }: { cmd: string }) {
   return (
-    <div className="inline-flex h-9 items-center rounded-full border border-line bg-panel pl-1 font-mono text-[12.5px]">
-      <span className="select-all py-2 pl-3 pr-1 text-ink-2">
+    <div className="inline-flex min-h-9 max-w-full items-center rounded-full border border-line bg-panel pl-1 font-mono text-[12.5px]">
+      <span className="min-w-0 select-all wrap-anywhere py-2 pl-3 pr-1 text-ink-2">
         <span className="text-muted">$ </span>
         {cmd}
       </span>
-      <CopyButton text={cmd} className="mr-1" />
+      <CopyButton text={cmd} className="mr-1 shrink-0" />
     </div>
   );
 }
