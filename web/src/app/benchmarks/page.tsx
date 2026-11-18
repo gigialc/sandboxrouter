@@ -11,7 +11,13 @@ import { UseCaseTable } from "@/components/UseCaseTable";
 import { BarNum, Num, ResultRow, ResultTable, barMax, perHour, time } from "@/components/results";
 import { REPO, site } from "@/lib/site";
 
-export const metadata: Metadata = { title: "Benchmarks" };
+const description = "Compare sandbox startup and job times, estimated costs, and bills from real provider accounts.";
+export const metadata: Metadata = {
+  title: "Benchmarks",
+  description,
+  openGraph: { title: "SandboxRouter Benchmarks", description, url: "/benchmarks" },
+  twitter: { card: "summary_large_image", title: "SandboxRouter Benchmarks", description },
+};
 
 const shortDay = (iso: string) => new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
 /** One section: its title, one line, a link to how it's measured, then its table. */

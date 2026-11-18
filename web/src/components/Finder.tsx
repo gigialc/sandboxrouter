@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import published from "@/data/published.json";
 import { recommend, type PublishedData, type PublishedLoad, type RecJob, type Recommendation } from "@/lib/recommend";
 import { ProviderLogo, ProviderName } from "@/components/ProviderName";
+import { ConditionalStartFeeNote } from "@/components/ConditionalStartFeeNote";
 import { money } from "@/components/results";
 import { site } from "@/lib/site";
 
@@ -25,6 +26,7 @@ const completeProviders = (batch: PublishedLoad, job: RecJob) =>
     .filter(([id, row]) => id in resultsFor(job) && row.ok === row.n && row.p50Ms !== undefined)
     .map(([id]) => id);
 const HAS_PAIRED_STARTS = Object.values(DATA.start).every((row) => row.medianReadyMs !== undefined);
+const shareButton = "border border-line px-3 py-1.5 text-[13px] text-ink-2 hover:border-line-2 hover:text-ink disabled:opacity-50";
 
 const secs = (s: number) => (s >= 10 ? `${s.toFixed(0)} s` : `${s.toFixed(1)} s`);
 const seg = (on: boolean) =>
@@ -45,6 +47,21 @@ export function Finder() {
   const [job, setJob] = useState<RecJob>(AVAILABLE_JOBS[0]?.[0] ?? "start");
   const [selectedCount, setCount] = useState(1);
   const [all, setAll] = useState(false);
+  const [sharing, setSharing] = useState("");
+  const [copyFallback, setCopyFallback] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const chartRef = useRef<SVGSVGElement>(null);
+  useEffect(() => {
+    const restoreSelection = () => {
+      const query = new URLSearchParams(window.location.search);
+      setJob(AVAILABLE_JOBS.find(([id]) => id === query.get("job"))?.[0] ?? AVAILABLE_JOBS[0]?.[0] ?? "start");
+      setCount(Number(query.get("count")) || 1);
+    };
+    restoreSelection();
+    window.addEventListener("popstate", restoreSelection);
+    return () => window.removeEventListener("popstate", restoreSelection);
+  }, []);
+
   const batches = DATA.load
     .filter((batch) => batch.job === BATCH_JOBS[job] && batch.n >= 10 && completeProviders(batch, job).length > 0)
     .sort((a, b) => a.n - b.n);
@@ -78,6 +95,11 @@ export function Finder() {
   const shown = all ? points : points.slice(0, 8);
   const startLabel = batch || HAS_PAIRED_STARTS ? "to first command" : "to create response";
   const timeLabel = job === "start" ? startLabel : "per job";
+  const [, jobLabel, description] = AVAILABLE_JOBS.find(([id]) => id === job) ?? JOBS[0];
+  const chartLink = new URL("https://www.sandboxrouter.ai/benchmarks#find");
+  chartLink.searchParams.set("job", job);
+  if (count > 1) chartLink.searchParams.set("count", String(count));
+  const boatFee = points.some((p) => p.provider === "boat") ? DATA.conditionalStartFees?.boat : undefined;
   const answers: [string, Point, string][] = [
     ["Cheapest", cheapest, `${money(cheapest.y)} ${unit}`],
     ["Fastest", fastest, `${secs(fastest.secondsEach)} ${timeLabel}`],
@@ -87,6 +109,45 @@ export function Finder() {
       `${secs(value.secondsEach)} · ${money(value.y)} ${unit}`,
     ],
   ];
+
+  const copyChart = async () => {
+    try {
+      await navigator.clipboard.writeText(chartLink.href);
+      setSharing("Chart link copied.");
+      setCopyFallback(false);
+    } catch {
+      setSharing("");
+      setCopyFallback(true);
+    }
+  };
+
+  const saveChart = async () => {
+    const chart = chartRef.current;
+    if (!chart) return;
+    setSaving(true);
+    setSharing("");
+    try {
+      const { downloadBenchmarkChart } = await import("@/lib/export-benchmark");
+      const latest = points.map((p) => p.measuredAt).sort().at(-1) ?? DATA.dataThrough;
+      const measuredThrough = new Intl.DateTimeFormat("en-GB", { dateStyle: "medium", timeZone: "UTC" }).format(new Date(latest));
+      await downloadBenchmarkChart(chart, {
+        jobLabel: count === 1 ? jobLabel : `${jobLabel} · ${count} at once`,
+        description,
+        measuredThrough,
+        sourceUrl: chartLink.href,
+        note: job === "start"
+          ? "List prices for tested sandbox sizes."
+          : `${points.length} providers plotted. Time includes startup. Cost per successful job is a retry estimate. The green line connects providers unbeaten on both axes. Sandbox sizes vary.`
+            + (boatFee ? ` Boat's estimate excludes $${boatFee.minUsd.toFixed(2)}–$${boatFee.maxUsd.toFixed(2)} per start above allowance.` : ""),
+        summaries: answers.map(([label, p, metric]) => ({ label, name: p.name, metric })),
+      });
+      setSharing("PNG download started.");
+    } catch {
+      setSharing("Couldn’t download the chart. Try again or copy its link.");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <section id="find" className="mt-10 scroll-mt-32 border border-line">
@@ -111,7 +172,7 @@ export function Finder() {
             </div>
           </div>}
         </div>
-        <p className="mt-4 text-[13px] text-muted">{JOBS.find(([id]) => id === job)?.[2]}</p>
+        <p className="mt-4 text-[13px] text-muted">{description}</p>
         {batch && (
           <p className="mt-2 text-[13px] text-muted">
             {points.length} {points.length === 1 ? "provider" : "providers"} with single-run results completed a batch of {count}.{" "}
@@ -135,13 +196,30 @@ export function Finder() {
       </div>
 
       <div className="p-5 sm:p-7">
-        <PriceSpeedMap points={points} unit={unit} count={count} startOnly={job === "start"} axisLabel={`Time ${timeLabel}`} />
+        <div className="mb-4 flex flex-wrap items-center gap-2">
+          <button type="button" className={shareButton} onClick={copyChart}>Copy chart link</button>
+          <button type="button" className={shareButton} onClick={saveChart} disabled={saving}>
+            {saving ? "Preparing image…" : "Download PNG"}
+          </button>
+          <span role="status" className="text-[12px] text-muted">{sharing}</span>
+          {copyFallback && (
+            <input
+              aria-label="Chart link"
+              className="w-full max-w-md border border-line px-2 py-1 text-[12px] text-ink-2"
+              readOnly
+              value={chartLink.href}
+              onFocus={(e) => e.currentTarget.select()}
+            />
+          )}
+        </div>
+        <PriceSpeedMap svgRef={chartRef} points={points} unit={unit} count={count} startOnly={job === "start"} axisLabel={job === "start" ? `Time ${startLabel}` : "Time per job, incl. startup"} />
         <p className="mt-3 text-[12px] leading-5 text-muted">
           Lower and further left is better. The line joins the best deals: for each of them, no provider is both faster and cheaper.
           {batch && (job === "start"
             ? " Readiness comes from the batch. Hourly prices use the single-run configuration."
             : " Time combines batch readiness with the measured single-sandbox job time.")}
           {job === "start" ? "" : " Cost per successful run is a retry estimate, including modelled start and minimum charges."}
+          {job !== "start" && boatFee && <> <ConditionalStartFeeNote id="boat" /></>}
         </p>
 
         <table className="mt-8 w-full text-[14px]">
@@ -188,7 +266,7 @@ export function Finder() {
 
 // ---- the map ----
 
-/** Log-scale ticks at 1, 2 and 5 of each power of ten; just the powers of ten when that's too many. */
+/** Keep an endpoint and the decade ticks when the full log grid gets crowded. */
 const niceTicks = (lo: number, hi: number) => {
   const out: number[] = [];
   for (let e = Math.floor(Math.log10(lo)); e <= Math.ceil(Math.log10(hi)); e++) {
@@ -197,7 +275,7 @@ const niceTicks = (lo: number, hi: number) => {
       if (v >= lo && v <= hi) out.push(v);
     }
   }
-  return out.length > 7 ? out.filter((v) => Math.abs(Math.log10(v) - Math.round(Math.log10(v))) < 1e-9) : out;
+  return out.length > 7 ? out.filter((v, i) => i === 0 || Math.abs(Math.log10(v) - Math.round(Math.log10(v))) < 1e-9) : out;
 };
 
 /** About five round ticks across a linear range. */
@@ -213,7 +291,7 @@ const tickMoney = (v: number) => `$${Number(v.toPrecision(1))}`;
 
 const short = (name: string) => name.replace(/ (Sandboxes?|AI Agent Sandbox|Code Interpreter)$/, "").replace("Amazon Bedrock ", "").replace(/ \(.*\)$/, "");
 
-function PriceSpeedMap({ points, unit, count, startOnly, axisLabel }: { points: Point[]; unit: string; count: number; startOnly: boolean; axisLabel: string }) {
+function PriceSpeedMap({ svgRef, points, unit, count, startOnly, axisLabel }: { svgRef: RefObject<SVGSVGElement | null>; points: Point[]; unit: string; count: number; startOnly: boolean; axisLabel: string }) {
   const box = useRef<HTMLDivElement>(null);
   const [w, setW] = useState(720);
   const [hover, setHover] = useState<string | null>(null);
@@ -261,7 +339,7 @@ function PriceSpeedMap({ points, unit, count, startOnly, axisLabel }: { points: 
 
   return (
     <div ref={box} className="relative">
-      <svg width={w} height={h} role="img" aria-label={`Price against speed for ${ps.length} providers; the list below has the same data.`} className="block overflow-visible">
+      <svg ref={svgRef} width={w} height={h} role="img" aria-label={`Price against speed for ${ps.length} providers; the list below has the same data.`} className="block overflow-visible">
         {/* Grid and axes: hairline, recessive. */}
         {xt.map((v) => (
           <g key={`x${v}`}>
@@ -284,7 +362,7 @@ function PriceSpeedMap({ points, unit, count, startOnly, axisLabel }: { points: 
           {xLog ? ", log scale" : ""} →
         </text>
         <text x={12} y={m.t} transform={`rotate(-90 12 ${m.t})`} textAnchor="end" className="fill-muted text-[11px]">
-          Cost {unit}, log scale →
+          Est. cost {unit}, log scale →
         </text>
         <text x={m.l + 8} y={h - m.b - 8} className="fill-accent-ink text-[11px]">
           ↙ better
