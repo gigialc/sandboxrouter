@@ -1,0 +1,35 @@
+{
+  "tool": "sandboxrouter-cost",
+  "version": "0.14.1",
+  "date": "2026-11-18T17:23:07.801Z",
+  "minutes": 2,
+  "load": false,
+  "by": "gigialc",
+  "entries": [
+    {
+      "provider": "beam",
+      "requested": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "listUsdHour": 0.14,
+      "startedAt": "2026-11-18T17:21:07.038Z",
+      "delivered": {
+        "vcpu": 2,
+        "memoryMb": 4096
+      },
+      "deliveredUsdHour": 0.14,
+      "endedAt": "2026-11-18T17:23:07.801Z",
+      "seconds": 121,
+      "predictedUsd": 0.004706,
+      "bill": {
+        "usd": 0.004624,
+        "kind": "provider-usage",
+        "resolutionUsd": 0.000001,
+        "seconds": 118,
+        "source": "Beam Usage console, one isolated Performance sandbox. Included credits offset the full CPU and memory charge.",
+        "at": "2026-11-18T17:23:56.030Z"
+      }
+    }
+  ]
+}

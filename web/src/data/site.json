@@ -119,7 +119,7 @@
     }
   },
   "version": "0.14.1",
-  "generatedAt": "2026-11-18T17:16:52.448Z",
+  "generatedAt": "2026-11-18T17:23:56.366Z",
   "shapes": [
     "1x2",
     "2x4",
@@ -7843,6 +7843,32 @@
     ]
   },
   "costRuns": [
+    {
+      "provider": "beam",
+      "name": "Beam",
+      "date": "2026-11-18T17:23:07.801Z",
+      "minutes": 2,
+      "load": false,
+      "by": "gigialc",
+      "requested": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "delivered": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "seconds": 121,
+      "predictedUsd": 0.004706,
+      "billedUsd": 0.004624,
+      "billedSeconds": 118,
+      "billSource": "Beam Usage console, one isolated Performance sandbox. Included credits offset the full CPU and memory charge.",
+      "billKind": "provider-usage",
+      "billResolutionUsd": 0.000001,
+      "settledAt": "2026-11-18T17:23:56.030Z",
+      "file": "cost-2026-11-18-beam-120s.json",
+      "error": null
+    },
     {
       "provider": "modal",
       "name": "Modal",
