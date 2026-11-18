@@ -300,7 +300,7 @@ It prints one line per step and exits 1 if any fails. `checkProvider(router, id)
 | Boat | 14/14 passed | 2026-11-14, v0.8.1 |
 | Maritime | 14/14 passed | 2026-11-13, v0.7.0 |
 | Sailboxes (Sail Research) | 14/14 passed | 2026-11-14, v0.8.0 |
-| Northflank | not run yet | |
+| Northflank | 13/13 passed; n/a: pause and resume | 2026-11-18, v0.14.0 |
 | Morph Cloud | 14/14 passed | 2026-11-18, v0.14.0 |
 | exe.dev | not run yet | |
 | Novita AI Agent Sandbox | 14/14 passed | 2026-11-13, v0.7.0 |

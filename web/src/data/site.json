@@ -119,7 +119,7 @@
     }
   },
   "version": "0.14.0",
-  "generatedAt": "2026-11-18T16:08:17.931Z",
+  "generatedAt": "2026-11-18T16:21:48.014Z",
   "shapes": [
     "1x2",
     "2x4",
@@ -2429,10 +2429,37 @@
       "noBenchmarks": null,
       "planLabel": "none",
       "defaultSize": null,
-      "check": null,
+      "check": {
+        "date": "2026-11-18T16:21:24.028Z",
+        "version": "0.14.0",
+        "by": "gigialc",
+        "passed": 13,
+        "failed": [],
+        "skipped": [
+          "pause and resume"
+        ],
+        "notRun": [],
+        "notes": [],
+        "steps": {
+          "create": "pass",
+          "exec: stdout, stderr, exit code": "pass",
+          "exec: env and cwd": "pass",
+          "exec: UTF-8 output": "pass",
+          "exec: streaming": "pass",
+          "files: binary round-trip": "pass",
+          "files: 1 MB round-trip": "pass",
+          "files: missing file is an error": "pass",
+          "files: visible to commands": "pass",
+          "exec: command timeout": "pass",
+          "exec: timed-out command was stopped": "pass",
+          "pause and resume": "skip",
+          "kill": "pass",
+          "killed sandbox is gone": "pass"
+        }
+      },
       "live": {
-        "status": "untested",
-        "label": "not run yet"
+        "status": "passed",
+        "label": "passed (2026-11-18)"
       },
       "billedVsList": null,
       "computers": [],
@@ -6425,6 +6452,15 @@
           "minimumSeconds": 60
         },
         {
+          "provider": "northflank",
+          "name": "Northflank",
+          "runUsd": 0.00018527777777777778,
+          "runHourlyUsd": 0.0667,
+          "hourlyUsd": 0.0667,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0
+        },
+        {
           "provider": "morph",
           "name": "Morph Cloud",
           "runUsd": 0.0002777777777777778,
@@ -6611,6 +6647,15 @@
           "minimumSeconds": 0
         },
         {
+          "provider": "northflank",
+          "name": "Northflank",
+          "runUsd": 0.03335,
+          "runHourlyUsd": 0.0667,
+          "hourlyUsd": 0.0667,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0
+        },
+        {
           "provider": "cloudflare",
           "name": "Cloudflare Sandbox",
           "runUsd": 0.0432,
@@ -6769,6 +6814,15 @@
           "minimumSeconds": 0
         },
         {
+          "provider": "northflank",
+          "name": "Northflank",
+          "runUsd": 0.2668,
+          "runHourlyUsd": 0.0667,
+          "hourlyUsd": 0.0667,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0
+        },
+        {
           "provider": "morph",
           "name": "Morph Cloud",
           "runUsd": 0.4,
@@ -6924,6 +6978,15 @@
           "runHourlyUsd": 0.258,
           "hourlyUsd": 0.248,
           "perSandboxUsd": 0.01,
+          "minimumSeconds": 0
+        },
+        {
+          "provider": "northflank",
+          "name": "Northflank",
+          "runUsd": 0.2666,
+          "runHourlyUsd": 0.2666,
+          "hourlyUsd": 0.2666,
+          "perSandboxUsd": 0,
           "minimumSeconds": 0
         },
         {
@@ -7126,6 +7189,15 @@
           "runUsd": 0.010999999999999998,
           "runHourlyUsd": 0.021999999999999995,
           "hourlyUsd": 0.022,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0
+        },
+        {
+          "provider": "northflank",
+          "name": "Northflank",
+          "runUsd": 0.03335,
+          "runHourlyUsd": 0.0667,
+          "hourlyUsd": 0.0667,
           "perSandboxUsd": 0,
           "minimumSeconds": 0
         },
@@ -7684,37 +7756,37 @@
         "id": "2x4-hour",
         "label": "2 vCPU / 4 GB, one hour",
         "unit": "per hour",
-        "median": 0.1645,
+        "median": 0.15225,
         "cheapest": {
           "provider": "agent37",
           "name": "Agent37",
           "usd": 0.0065
         },
-        "providers": 17
+        "providers": 18
       },
       {
         "id": "agent-hour",
         "label": "Agent session, one hour at 10% CPU",
         "unit": "per hour",
-        "median": 0.1,
+        "median": 0.0976,
         "cheapest": {
           "provider": "agent37",
           "name": "Agent37",
           "usd": 0.0065
         },
-        "providers": 17
+        "providers": 18
       },
       {
         "id": "calls-1000",
         "label": "1,000 tool calls, 10 s each",
         "unit": "per 1,000",
-        "median": 0.46,
+        "median": 0.458472,
         "cheapest": {
           "provider": "boat",
           "name": "Boat",
           "usd": 0.05
         },
-        "providers": 17
+        "providers": 18
       }
     ],
     "history": [
