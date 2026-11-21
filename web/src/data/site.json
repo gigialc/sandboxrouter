@@ -121,7 +121,7 @@
     }
   },
   "version": "0.15.2",
-  "generatedAt": "2026-11-18T23:05:10.898Z",
+  "generatedAt": "2026-11-21T14:56:22.727Z",
   "shapes": [
     "1x2",
     "2x4",
@@ -9178,6 +9178,26 @@
             "median": 0.46,
             "cheapest": 0.05,
             "provider": "boat"
+          }
+        }
+      },
+      {
+        "date": "2026-11-21",
+        "lines": {
+          "2x4-hour": {
+            "median": 0.1645,
+            "cheapest": 0.0065,
+            "provider": "agent37"
+          },
+          "agent-hour": {
+            "median": 0.1,
+            "cheapest": 0.0065,
+            "provider": "agent37"
+          },
+          "calls-1000": {
+            "median": 0.456944,
+            "cheapest": 0.047222,
+            "provider": "openscale"
           }
         }
       }
