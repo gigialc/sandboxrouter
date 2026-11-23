@@ -222,6 +222,13 @@ async function main() {
     const command = rest[0];
     if (!command) throw new RouterError('usage: sandboxrouter compare "<cmd>" [--setup "<cmd>"] [--runs 3] [--provider a,b]');
     const ids = providers ?? router.registered().filter((id) => router.isConfigured(id));
+    // With no keys there is nothing to compare: say so instead of printing an empty table.
+    if (!ids.length) {
+      throw new RouterError(
+        "no provider keys found: set the API key for at least one provider (the README's Env table lists each provider's variables); " +
+          "`npx @sandboxrouter/sdk providers` shows which are set",
+      );
+    }
     const rows = await compare({ router, providers: ids, command, setup: values.setup, runs: num(values.runs), timeoutSeconds: num(values.seconds), parallel: num(values.parallel), onProgress: (m) => console.error(m) });
     if (values.json) return console.log(JSON.stringify(rows, null, 2));
     const s = (v?: number) => (v === undefined ? "n/a" : `${(v / 1000).toFixed(1)} s`);
