@@ -13,7 +13,7 @@ function Spark({ values, dark }: { values: number[]; dark: boolean }) {
   const pts = values.map((v, i) => `${(i / (values.length - 1)) * 64},${hi === lo ? 8 : 15 - ((v - lo) / (hi - lo)) * 14}`).join(" ");
   return (
     <svg width="64" height="16" viewBox="0 0 64 16" aria-hidden="true" className="hidden sm:block">
-      <polyline points={pts} fill="none" strokeWidth="1.25" className={dark ? "stroke-[#2fbf7f]" : "stroke-accent"} />
+      <polyline points={pts} fill="none" strokeWidth="1.25" className={dark ? "stroke-[#ff8a3d]" : "stroke-accent"} />
     </svg>
   );
 }

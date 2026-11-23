@@ -4,11 +4,9 @@ import { useEffect, useState } from "react";
 
 type Theme = "light" | "dark";
 
-/** The theme showing now: the one picked here, else the OS's. */
+/** The theme showing now: the one picked here, else dusk, the site's own. */
 function current(): Theme {
-  const set = document.documentElement.dataset.theme;
-  if (set === "light" || set === "dark") return set;
-  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  return document.documentElement.dataset.theme === "light" ? "light" : "dark";
 }
 
 /** Light/dark switch for the header. The choice is kept in localStorage; layout.tsx applies it before paint. */
@@ -27,7 +25,7 @@ export function ThemeToggle() {
 
   const label = theme === "dark" ? "Switch to light mode" : "Switch to dark mode";
   return (
-    <button type="button" onClick={flip} aria-label={label} title={label} className="flex h-7 w-7 items-center justify-center rounded-full text-ink-2 hover:bg-panel hover:text-ink">
+    <button type="button" onClick={flip} aria-label={label} title={label} className="flex h-7 w-7 items-center justify-center text-ink-2 hover:bg-panel hover:text-ink">
       {theme === "dark" ? (
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
           <circle cx="12" cy="12" r="4" />
