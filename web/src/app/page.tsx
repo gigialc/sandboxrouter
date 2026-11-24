@@ -1,9 +1,9 @@
 import { createElement } from "react";
 import published from "@/data/published.json";
 import { recommend, type PublishedData, type RecPriority } from "@/lib/recommend";
-import { site } from "@/lib/site";
+import { HOSTED_PUBLIC, HOSTED_URL, REPO, REPO_PUBLIC, site } from "@/lib/site";
 import { HomeContent } from "@/components/HomeContent";
-import { Storm, type StormMode, type StormTower } from "@/components/Storm";
+import { Storm, type StormMode, type StormNav, type StormTower } from "@/components/Storm";
 
 const DATA = published as unknown as PublishedData;
 
@@ -20,13 +20,23 @@ export default function Home() {
     { key: "failover", label: "Failover", order: order("speed") },
   ];
   const cloud = site.providers.filter((p) => !p.local).length;
+  // The same links as the header on every other page (components/chrome.tsx).
+  const nav: StormNav = {
+    links: [
+      { href: "/providers", label: "Providers" },
+      { href: "/benchmarks", label: "Benchmarks" },
+      { href: "/docs", label: "Docs" },
+      ...(REPO_PUBLIC ? [{ href: REPO, label: "GitHub" }] : []),
+    ],
+    account: HOSTED_PUBLIC ? { signIn: `${HOSTED_URL}/auth/github`, signUp: `${HOSTED_URL}/dashboard` } : undefined,
+  };
   return (
     <>
       {/* A custom element, so the Markdown made for agents (lib/agents.ts) can leave the whole scene out. */}
       {createElement(
         "storm-scene",
         { style: { display: "block" } },
-        <Storm towers={towers} modes={modes} providerCount={cloud} measuredOn={DATA.dataThrough.slice(0, 10)} />,
+        <Storm towers={towers} modes={modes} providerCount={cloud} measuredOn={DATA.dataThrough.slice(0, 10)} nav={nav} />,
       )}
       <HomeContent />
     </>

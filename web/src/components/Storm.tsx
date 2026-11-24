@@ -170,13 +170,19 @@ interface Strike {
 }
 type Phase = "idle" | "probing" | "failed" | "struck" | "thunder";
 
-export function Storm({ towers, modes, providerCount, measuredOn }: { towers: StormTower[]; modes: StormMode[]; providerCount: number; measuredOn: string }) {
+/** The site's own navigation, shown over the scene (the page's sticky bar is underneath it until the scene ends). */
+export interface StormNav {
+  links: { href: string; label: string }[];
+  /** Hosted sign-in and dashboard, when the hosted service is public. */
+  account?: { signIn: string; signUp: string };
+}
+
+export function Storm({ towers, modes, providerCount, measuredOn, nav }: { towers: StormTower[]; modes: StormMode[]; providerCount: number; measuredOn: string; nav: StormNav }) {
   const rootRef = useRef<HTMLDivElement>(null);
   const hostRef = useRef<HTMLDivElement>(null);
   const tagRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [modeKey, setModeKey] = useState<ModeKey>("speed");
   const modeRef = useRef<ModeKey>("speed");
-  const [follow, setFollow] = useState(false);
   const followRef = useRef(false);
   const [readout, setReadout] = useState<{ phase: Phase; pick?: number; failed?: number; mode: Strike["mode"]; arrived?: number }>({ phase: "idle", mode: "speed" });
   const fire = useRef<(opts?: { named?: number; mode?: ModeKey; follow?: boolean }) => void>(() => {});
@@ -1032,10 +1038,6 @@ export function Storm({ towers, modes, providerCount, measuredOn }: { towers: St
     setModeKey(k);
     fire.current({ mode: k });
   }, []);
-  const toggleFollow = useCallback(() => {
-    followRef.current = !followRef.current;
-    setFollow(followRef.current);
-  }, []);
 
   const pick = readout.pick !== undefined ? towers[readout.pick] : undefined;
   const failed = readout.failed !== undefined ? towers[readout.failed] : undefined;
@@ -1078,34 +1080,42 @@ export function Storm({ towers, modes, providerCount, measuredOn }: { towers: St
           ))}
         </div>
 
+        {/* The site's navigation. It stays while the scene scrolls; the page's own bar takes over below. */}
+        <header className="pointer-events-none absolute inset-x-0 top-0 z-10 flex h-14 items-center px-2.5 min-[320px]:px-5 sm:px-10">
+          <Link href="/" className="pointer-events-auto inline-flex items-center gap-2 text-[15px] tracking-tight">
+            <svg width="18" height="18" viewBox="0 0 22 22" aria-hidden="true">
+              <path d="M1.5 11H7c3 0 3.5-7 8-7M7 11h8M7 11c3 0 3.5 7 8 7" stroke="currentColor" strokeWidth="1.6" fill="none" strokeLinecap="square" />
+              <rect x="15.5" y="2" width="4" height="4" fill="#6fc3ff" />
+              <rect x="15" y="8.5" width="5" height="5" fill="#6fc3ff" />
+              <rect x="15.5" y="16" width="4" height="4" fill="#6fc3ff" />
+            </svg>
+            sandboxRouter
+          </Link>
+          <nav className="pointer-events-auto ml-auto flex items-center gap-2.5 text-[13px] text-[#f4e6c8]/80 sm:gap-4 lg:gap-7">
+            {nav.links.map((l) => (
+              <Link key={l.href} href={l.href} className="hidden hover:text-[#f4e6c8] sm:block">
+                {l.label}
+              </Link>
+            ))}
+            {nav.account ? (
+              <>
+                <a href={nav.account.signIn} className="hidden hover:text-[#f4e6c8] sm:block">
+                  Sign in
+                </a>
+                <a href={nav.account.signUp} className="bg-[#f4e6c8] px-3 py-1.5 text-[13px] font-medium text-[#0c0a09] hover:bg-white min-[320px]:px-4">
+                  Sign up
+                </a>
+              </>
+            ) : (
+              <Link href="/docs#quickstart" className="bg-[#f4e6c8] px-4 py-1.5 text-[13px] font-medium text-[#0c0a09] hover:bg-white">
+                Quickstart
+              </Link>
+            )}
+          </nav>
+        </header>
+
         {/* The demo's own controls: they fade as the copy comes in. */}
         <div className="pointer-events-none absolute inset-0" style={{ opacity: "calc(1 - var(--p) * 2)" }}>
-          <header className="absolute inset-x-0 top-0 flex items-center px-5 py-5 sm:px-8">
-            <Link href="/" className="pointer-events-auto inline-flex items-center gap-2 text-[15px] tracking-tight">
-              <svg width="18" height="18" viewBox="0 0 22 22" aria-hidden="true">
-                <path d="M1.5 11H7c3 0 3.5-7 8-7M7 11h8M7 11c3 0 3.5 7 8 7" stroke="currentColor" strokeWidth="1.6" fill="none" strokeLinecap="square" />
-                <rect x="15.5" y="2" width="4" height="4" fill="#6fc3ff" />
-                <rect x="15" y="8.5" width="5" height="5" fill="#6fc3ff" />
-                <rect x="15.5" y="16" width="4" height="4" fill="#6fc3ff" />
-              </svg>
-              sandboxRouter
-            </Link>
-            <div className="pointer-events-auto ml-auto flex items-center gap-1.5">
-              <button onClick={toggleFollow} className={`${chip} ${follow ? "border-[#6fc3ff] bg-[#6fc3ff] text-[#0c0a09]" : off}`} title="Let the camera follow each strike down from the cloud">
-                Follow strikes
-              </button>
-              <button onClick={() => view.current("overview")} className={`${chip} ${off}`}>
-                Overview
-              </button>
-              <button onClick={() => view.current("out")} className={`${chip} ${off}`} aria-label="Zoom out">
-                −
-              </button>
-              <button onClick={() => view.current("in")} className={`${chip} ${off}`} aria-label="Zoom in">
-                +
-              </button>
-            </div>
-          </header>
-
           <div className="absolute inset-x-0 top-[72px] flex flex-col items-center px-5 text-center" aria-live="polite">
             <p className="font-mono text-[10.5px] uppercase tracking-[0.2em] text-[#f4e6c8]/55">{readout.phase === "idle" ? "sandboxRouter" : "Routing by"}</p>
             <p className="mt-1 text-[40px] leading-none font-medium tracking-[-0.03em] sm:text-[56px]">
@@ -1126,7 +1136,7 @@ export function Storm({ towers, modes, providerCount, measuredOn }: { towers: St
               ))}
             </div>
             <p className="text-center font-mono text-[10px] uppercase tracking-[0.14em] text-[#f4e6c8]/45">
-              Drag to look around · click a sandbox to strike it · double-click to fly to it · scroll for more
+              Drag to look around · click a sandbox to strike it · double-click to fly to it · + and − zoom · scroll for more
             </p>
           </div>
         </div>
