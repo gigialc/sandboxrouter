@@ -2,6 +2,14 @@
 
 All notable changes. Versions follow [semver](https://semver.org/); while the version is 0.x, a minor bump can change the API.
 
+## Unreleased
+
+### Added
+- **`router.move(sandbox)` and `router.copy(a, b)`: carry a working folder between sandboxes on any two providers.** `move` starts a sandbox on another provider (or the ones you name), copies the folder across and kills the old one; if the new sandbox can't start or the copy fails, the old one is left running. Files, modes and symlinks move; running processes and memory don't. Also on the hosted `Client`, and exported as `copyFiles` and `moveSandbox`.
+
+### Fixed
+- **`sandboxrouter compare` with no provider keys says so** instead of printing an empty table.
+
 ## 0.15.2 (2026-11-19)
 
 ### Changed

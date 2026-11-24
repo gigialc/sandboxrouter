@@ -14,6 +14,7 @@ import { loadBench, median } from "./bench-store.js";
 import { PUBLISHED } from "./published.js";
 import { Ledger, defaultLedgerFile } from "./ledger.js";
 import { DEFAULT_EXEC_TIMEOUT_S, LIMIT_ERROR, SETUP_ERRORS, errorStatus, timeoutError, withDeadline } from "./util.js";
+import { copyFiles, moveSandbox, type CopyOptions, type CopyResult, type FileBox, type MoveOptions } from "./move.js";
 import { BILLED_VS_LIST } from "./billing.js";
 import { FAILING, VERIFIED } from "./verified.js";
 import { isPort, validate, validateStart } from "./validate.js";
@@ -652,6 +653,27 @@ export class Router {
     if (!p) throw new RouterError(`${provider} does not offer computers`, [], "bad_request");
     const e = this.ledger?.list().find((x) => x.id === id);
     return new RoutedComputer(provider, await p.connectComputer(id.slice(i + 1)), [], e?.usdHour, this.ledger);
+  }
+
+  /**
+   * Copy a folder from one sandbox to another, on any two providers. Files only: running processes,
+   * memory and env vars stay behind. See `CopyOptions`.
+   */
+  copy(from: FileBox, to: FileBox, opts: CopyOptions = {}): Promise<CopyResult> {
+    return copyFiles(from, to, opts);
+  }
+
+  /**
+   * Move a sandbox's folder to a new sandbox and kill the old one: on another provider by default,
+   * or on the ones `provider` names. The new sandbox keeps the old one's size where another provider
+   * sells it, else the default size. If the new one can't
+   * start or the copy fails, the old sandbox is left running and untouched.
+   *
+   *   sbx = await router.move(sbx);                       // next-best provider
+   *   sbx = await router.move(sbx, { provider: "e2b", path: "/workspace", exclude: ["node_modules"] });
+   */
+  move(from: FileBox, opts: MoveOptions = {}): Promise<RoutedSandbox & { moved: CopyResult }> {
+    return moveSandbox({ candidates: async (spec, route) => this.plan(spec, route), create: (spec, route) => this.create(spec, route) }, from, opts);
   }
 
   /** Reattach to a sandbox by its routed id (`provider:nativeId`). */

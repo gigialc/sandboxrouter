@@ -1,4 +1,5 @@
 import type { Candidate, Quote, Size } from "./router.js";
+import { copyFiles, moveSandbox, type CopyOptions, type CopyResult, type FileBox, type MoveOptions } from "./move.js";
 import type { Attempt, Capability, ExecOptions, ExecResult, RouteOptions, RouterErrorCode, SandboxProcess, SandboxSpec, StartOptions } from "./types.js";
 
 /**
@@ -74,6 +75,19 @@ export class Client {
     const res = await this.request("POST", "/v1/sandboxes", { ...spec, ...route }, "application/json", headers);
     const r = (await res.json()) as CreateResponse;
     return new RemoteSandbox(this, r.id, r.provider, { ...r, replayed: res.headers.get("idempotent-replayed") === "true" });
+  }
+
+  /** Copy a folder from one sandbox to another, on any two providers. The files pass through this machine. */
+  copy(from: FileBox, to: FileBox, opts: CopyOptions = {}): Promise<CopyResult> {
+    return copyFiles(from, to, opts);
+  }
+
+  /**
+   * Move a sandbox's folder to a new sandbox and kill the old one: on another provider by default,
+   * or on the ones `provider` names. If the new one can't start or the copy fails, the old sandbox is left running.
+   */
+  move(from: FileBox, opts: MoveOptions = {}): Promise<RemoteSandbox & { moved: CopyResult }> {
+    return moveSandbox({ candidates: (spec, route) => this.route(spec, route), create: (spec, route) => this.create(spec, route) }, from, opts);
   }
 
   /** A handle on a sandbox you created earlier. */
