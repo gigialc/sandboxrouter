@@ -130,6 +130,27 @@ console.table(router.plan({ vcpu: 32 }));
 await a.kill();
 ```
 
+### Moving between sandboxes
+
+`router.move(sandbox)` starts a sandbox on another provider, copies the working folder across and kills the old one. `router.copy(a, b)` copies between two sandboxes you already have. Both work across any two providers, and on the hosted `Client` too.
+
+```ts
+let sbx = await router.create({ vcpu: 2, memoryGb: 4 });
+await sbx.exec("git clone https://github.com/me/app && cd app && npm ci");
+
+sbx = await router.move(sbx);                                  // the next provider in the usual order
+sbx = await router.move(sbx, { provider: "e2b", path: "/workspace", exclude: ["node_modules"] });
+console.log(sbx.provider, sbx.moved);                          // { from, to, bytes, ms }
+
+await router.copy(sbx, other, { path: "/data", to: "/mnt/data" });
+```
+
+- **What moves:** files, their modes and symlinks. Running processes, memory and env vars don't: start your commands again on the new sandbox.
+- **Which folder:** `path`, or without one the folder commands run in on the old sandbox, into the folder commands run in on the new one (home folders differ: `/home/user` on E2B, `/home/daytona` on Daytona). Copied whole like that, the new sandbox keeps its own `.bashrc` and `.profile`.
+- **Size:** the new sandbox gets the old one's size where another provider sells it, else the default size. Pass `spec` to choose.
+- **If it fails:** the new sandbox is killed and the old one is left running, untouched. `keep: true` leaves the old one running after a move that worked.
+- **Limits:** the folder is packed with `tar` and sent through your process in 4 MB pieces, so both sandboxes need `tar` and `split`, and it suits working folders, not disks. A folder that packs to over 1 GB is refused before anything is sent (`maxBytes`).
+
 ### Sizes and prices
 
 With no size, any provider can take the sandbox at the size it starts by default: 2 vCPU / 4 GB on most, but a fixed, smaller image on some (Daytona 1 vCPU / 1 GB, E2B 2 vCPU / 0.5 GB, OpenScale 2 vCPU / 1 GB). Set `vcpu` or `memoryGb` and only providers that can give that size are tried (those three need a custom `image` built at the size). Each candidate and each sandbox says what it gets:
