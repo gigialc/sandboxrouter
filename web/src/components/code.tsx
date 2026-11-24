@@ -65,7 +65,7 @@ export function CodeTabs({ tabs }: { tabs: { label: string; code: string }[] }) 
 
 export function InstallChip({ cmd }: { cmd: string }) {
   return (
-    <div className="inline-flex min-h-9 max-w-full items-center rounded-full border border-line bg-panel pl-1 font-mono text-[12.5px]">
+    <div className="inline-flex min-h-9 max-w-full items-center border border-line bg-panel pl-1 font-mono text-[12.5px]">
       <span className="min-w-0 select-all wrap-anywhere py-2 pl-3 pr-1 text-ink-2">
         <span className="text-muted">$ </span>
         {cmd}

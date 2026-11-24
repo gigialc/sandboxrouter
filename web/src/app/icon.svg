@@ -2,8 +2,8 @@
   <rect width="32" height="32" rx="7" fill="#0a0a0a"/>
   <g transform="translate(4.6 4.4) scale(1.05)">
     <path d="M1.5 11H7c3 0 3.5-7 8-7M7 11h8M7 11c3 0 3.5 7 8 7" stroke="#fafafa" stroke-width="2" fill="none" stroke-linecap="square"/>
-    <rect x="15.5" y="2" width="4" height="4" fill="#2fbf7f"/>
-    <rect x="15" y="8.5" width="5" height="5" fill="#2fbf7f"/>
-    <rect x="15.5" y="16" width="4" height="4" fill="#2fbf7f"/>
+    <rect x="15.5" y="2" width="4" height="4" fill="#ff8a3d"/>
+    <rect x="15" y="8.5" width="5" height="5" fill="#ff8a3d"/>
+    <rect x="15.5" y="16" width="4" height="4" fill="#ff8a3d"/>
   </g>
 </svg>

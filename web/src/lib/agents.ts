@@ -262,7 +262,8 @@ ${publicPages.map(({ path, title, description }) => `- [${title}](${ORIGIN}${mar
 /** A page's main content as Markdown: enough structure (headings, lists, tables, links, code) for an agent. */
 export function htmlToMarkdown(html: string, base: string): string {
   let s = html.match(/<main[\s\S]*?<\/main>/i)?.[0] ?? html;
-  s = s.replace(/<(script|style|svg|noscript|template|button|nav|form)\b[\s\S]*?<\/\1>/gi, "");
+  // storm-scene is the front page's interactive scene: nothing in it is content, so agents don't get its controls and captions.
+  s = s.replace(/<(script|style|svg|noscript|template|button|nav|form|storm-scene)\b[\s\S]*?<\/\1>/gi, "");
   s = s.replace(/<!--[\s\S]*?-->/g, "");
   const abs = (href: string) => {
     try {
