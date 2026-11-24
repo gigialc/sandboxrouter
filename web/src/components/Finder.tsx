@@ -32,7 +32,7 @@ const secs = (s: number) => (s >= 10 ? `${s.toFixed(0)} s` : `${s.toFixed(1)} s`
 const measuredSize = (size: Recommendation["size"]) =>
   size && (size.vcpu !== 2 || size.memoryGb !== 4) ? `${size.vcpu} vCPU / ${size.memoryGb} GB` : "";
 const seg = (on: boolean) =>
-  `px-3 py-1.5 text-[13px] border -ml-px first:ml-0 ${on ? "relative z-[1] border-accent bg-accent text-bg" : "border-line text-ink-2 hover:text-ink"}`;
+  `px-3 py-1.5 text-[13px] border -ml-px first:ml-0 ${on ? "relative z-[1] border-accent bg-accent text-on-accent" : "border-line text-ink-2 hover:text-ink"}`;
 
 type Point = Recommendation & {
   /** Cost the chart and list show: per 1,000 jobs per successful run, or per hour for "start". */

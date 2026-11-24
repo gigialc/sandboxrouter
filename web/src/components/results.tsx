@@ -35,7 +35,7 @@ export const time = (ms?: number) =>
 
 const seg = (on: boolean) =>
   `-ml-px first:ml-0 border px-3 py-1.5 text-[13px] whitespace-nowrap ${
-    on ? "relative z-[1] border-accent bg-accent text-bg" : "border-line text-ink-2 hover:text-ink"
+    on ? "relative z-[1] border-accent bg-accent text-on-accent" : "border-line text-ink-2 hover:text-ink"
   }`;
 
 /** A labelled group of square buttons, one of which is on. */

@@ -96,7 +96,7 @@ export function Tag({ children }: { children: React.ReactNode }) {
 }
 
 export function Button({ href, children, primary = false }: { href: string; children: React.ReactNode; primary?: boolean }) {
-  const cls = primary ? "bg-accent text-bg hover:bg-accent-ink" : "border border-line-2 bg-bg text-ink hover:border-ink";
+  const cls = primary ? "bg-accent text-on-accent hover:bg-accent-hover" : "border border-line-2 bg-bg text-ink hover:border-ink";
   const external = href.startsWith("http");
   return external ? (
     <a href={href} className={`inline-flex h-9 items-center px-4 text-[13px] font-medium ${cls}`}>
@@ -131,7 +131,7 @@ export function PageHeader({ kicker, title, children }: { kicker: string; title:
 export function SectionTitle({ id, kicker, children }: { id?: string; kicker?: string; children: React.ReactNode }) {
   return (
     <div id={id} className="scroll-mt-20">
-      {kicker && <p className="mb-3 font-mono text-[11px] uppercase tracking-[0.18em] text-accent">{kicker}</p>}
+      {kicker && <p className="mb-3 font-mono text-[11px] uppercase tracking-[0.18em] text-accent-ink">{kicker}</p>}
       <h2 className="text-2xl font-normal tracking-[-0.025em] sm:text-[28px]">{children}</h2>
     </div>
   );
