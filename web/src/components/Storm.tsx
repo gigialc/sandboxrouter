@@ -1151,32 +1151,23 @@ export function Storm({ towers, modes, providerCount, measuredOn, nav }: { tower
           className="absolute inset-y-0 left-0 flex w-full max-w-[560px] flex-col justify-center px-6 sm:px-12"
           style={{ transform: "translateX(calc((var(--p) - 1) * 60%))", opacity: "calc(var(--p) * 1.6 - 0.6)", pointerEvents: "auto" }}
         >
-          <p className="font-mono text-[10.5px] uppercase tracking-[0.16em] text-[#f4e6c8]/65">
-            Open source · {providerCount} providers · {towers.length} timed on real accounts
-          </p>
           {/* Not a heading: the page has one h1, in the content below, and this scene is left out of what agents read. */}
-          <p className="mt-4 text-[36px] leading-[1.02] font-medium tracking-[-0.03em] sm:text-[52px]">
+          <p className="text-[36px] leading-[1.02] font-medium tracking-[-0.03em] sm:text-[52px]">
             Lightning takes the fastest path.
             <br />
             <span className="text-[#ff8a3d]">So does your code.</span>
           </p>
-          <p className="mt-5 max-w-[500px] text-[15px] leading-relaxed text-[#f4e6c8]/80">
-            One API for every sandbox provider. Each run goes to the best one that&apos;s up; if it isn&apos;t, the next strike lands somewhere else. Thunder is
-            everyone else, still starting.
-          </p>
-          <code className="mt-6 inline-block w-fit border border-[#f4e6c8]/30 bg-[#0c0a09]/50 px-3 py-2 font-mono text-[12.5px] select-text">npm i @sandboxrouter/sdk</code>
-          <div className="mt-6 flex flex-wrap gap-2 font-mono text-[11px] uppercase tracking-[0.12em]">
-            <Link href="/docs#quickstart" className="bg-[#ff8a3d] px-4 py-2.5 text-[#0c0a09] hover:bg-[#ffe9c4]">
-              Get started ↗
+          <p className="mt-5 max-w-[440px] text-[15px] leading-relaxed text-[#f4e6c8]/80">One API for every sandbox provider. Each run goes to the best one that&apos;s up.</p>
+          {/* One action: the bar above already links to providers, benchmarks and docs. */}
+          <div className="mt-7 flex flex-wrap items-center gap-2">
+            <Link href="/docs#quickstart" className="bg-[#ff8a3d] px-4 py-2.5 text-[13px] font-medium text-[#0c0a09] hover:bg-[#ffe9c4]">
+              Get started
             </Link>
-            <Link href="/providers" className="border border-[#f4e6c8]/35 px-4 py-2.5 hover:border-[#f4e6c8]">
-              Providers
-            </Link>
-            <Link href="/benchmarks" className="border border-[#f4e6c8]/35 px-4 py-2.5 hover:border-[#f4e6c8]">
-              Benchmarks
-            </Link>
+            <code className="border border-[#f4e6c8]/30 bg-[#0c0a09]/50 px-3 py-2.5 font-mono text-[12.5px] select-text">npm i @sandboxrouter/sdk</code>
           </div>
-          <p className="mt-6 font-mono text-[10px] uppercase tracking-[0.12em] text-[#f4e6c8]/45">Median start times and list prices, measured {measuredOn}</p>
+          <p className="mt-6 text-[12px] text-[#f4e6c8]/45">
+            {providerCount} providers, {towers.length} timed on real accounts ({measuredOn})
+          </p>
         </div>
       </div>
     </div>
