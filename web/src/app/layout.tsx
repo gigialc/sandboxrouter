@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
 import { Footer, Nav } from "@/components/chrome";
 import { site } from "@/lib/site";
 import "./globals.css";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
-const serif = Instrument_Serif({ weight: "400", subsets: ["latin"], variable: "--font-launch-serif" });
 
 const CLOUD = site.providers.filter((p) => !p.local);
 const DESCRIPTION = `A free, open-source router for AI agent sandboxes: one API across ${CLOUD.length} providers, priced side by side, ${
@@ -22,15 +21,15 @@ export const metadata: Metadata = {
 };
 
 /**
- * Apply a theme picked with the header toggle before first paint, so a light choice doesn't flash dark (dusk is the default).
+ * Apply a theme picked with the header toggle before first paint, so a dark choice doesn't flash light.
  * Links to the hosted dashboard (another origin) carry the theme showing here, so it opens in the same one.
  */
 const THEME_SCRIPT = `try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.dataset.theme=t}catch(e){}
-document.addEventListener("click",function(e){var a=e.target.closest&&e.target.closest('a[href^="https://api.sandboxrouter.ai"]');if(!a)return;var d=document.documentElement.dataset.theme||"dark";var u=new URL(a.href);u.searchParams.set("theme",d);a.href=u.toString()},true);`;
+document.addEventListener("click",function(e){var a=e.target.closest&&e.target.closest('a[href^="https://api.sandboxrouter.ai"]');if(!a)return;var d=document.documentElement.dataset.theme||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");var u=new URL(a.href);u.searchParams.set("theme",d);a.href=u.toString()},true);`;
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} ${serif.variable} h-full antialiased`} suppressHydrationWarning>
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
       </head>

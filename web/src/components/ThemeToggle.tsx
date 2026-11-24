@@ -4,9 +4,11 @@ import { useEffect, useState } from "react";
 
 type Theme = "light" | "dark";
 
-/** The theme showing now: the one picked here, else dusk, the site's own. */
+/** The theme showing now: the one picked here, else the OS's. */
 function current(): Theme {
-  return document.documentElement.dataset.theme === "light" ? "light" : "dark";
+  const set = document.documentElement.dataset.theme;
+  if (set === "light" || set === "dark") return set;
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 }
 
 /** Light/dark switch for the header. The choice is kept in localStorage; layout.tsx applies it before paint. */
