@@ -1061,7 +1061,7 @@ export function Storm({ towers, modes, providerCount, measuredOn, nav }: { tower
   const off = "border-[#f4e6c8]/25 bg-[#0c0a09]/45 text-[#f4e6c8]/80 hover:border-[#f4e6c8]/70 hover:text-[#f4e6c8]";
 
   return (
-    <div ref={rootRef} className="relative z-50 -mt-14 h-[220vh] bg-[#0c0a09] text-[#f4e6c8]" style={{ "--p": 0 } as React.CSSProperties}>
+    <div ref={rootRef} className="relative z-50 -mt-[57px] h-[220vh] bg-[#0c0a09] text-[#f4e6c8]" style={{ "--p": 0 } as React.CSSProperties}>
       <div ref={hostRef} className="sticky top-0 h-screen cursor-grab overflow-hidden select-none">
         {/* Tags: one per sandbox, placed over it each frame. */}
         <div className="pointer-events-none absolute inset-0">
