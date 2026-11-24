@@ -1085,9 +1085,9 @@ export function Storm({ towers, modes, providerCount, measuredOn, nav }: { tower
           <Link href="/" className="pointer-events-auto inline-flex items-center gap-2 text-[15px] tracking-tight">
             <svg width="18" height="18" viewBox="0 0 22 22" aria-hidden="true">
               <path d="M1.5 11H7c3 0 3.5-7 8-7M7 11h8M7 11c3 0 3.5 7 8 7" stroke="currentColor" strokeWidth="1.6" fill="none" strokeLinecap="square" />
-              <rect x="15.5" y="2" width="4" height="4" fill="#6fc3ff" />
-              <rect x="15" y="8.5" width="5" height="5" fill="#6fc3ff" />
-              <rect x="15.5" y="16" width="4" height="4" fill="#6fc3ff" />
+              <rect x="15.5" y="2" width="4" height="4" fill="#ff8a3d" />
+              <rect x="15" y="8.5" width="5" height="5" fill="#ff8a3d" />
+              <rect x="15.5" y="16" width="4" height="4" fill="#ff8a3d" />
             </svg>
             sandboxRouter
           </Link>
