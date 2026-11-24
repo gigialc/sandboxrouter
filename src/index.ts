@@ -40,6 +40,7 @@ export { validate, splitRequest, SPEC_KEYS, ROUTE_KEYS, STRATEGIES } from "./val
 export { CATALOG, hourlyCost, unfit, info, billingRules, billedUsd, type ProviderInfo } from "./catalog.js";
 export { createApp, HttpError, ERROR_STATUS, ORPHAN_GRACE_MS, type ServerHooks } from "./server.js";
 export { Client, ClientError, RemoteSandbox, type CreateResponse } from "./client.js";
+export { copyFiles, moveSandbox, DEFAULT_COPY_MAX_BYTES, type CopyOptions, type CopyResult, type FileBox, type MoveOptions, type Mover } from "./move.js";
 export {
   RoutedComputer,
   createComputer,
