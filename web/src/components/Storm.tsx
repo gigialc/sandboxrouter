@@ -1108,7 +1108,7 @@ export function Storm({ towers, modes, providerCount, measuredOn }: { towers: St
 
           <div className="absolute inset-x-0 top-[72px] flex flex-col items-center px-5 text-center" aria-live="polite">
             <p className="font-mono text-[10.5px] uppercase tracking-[0.2em] text-[#f4e6c8]/55">{readout.phase === "idle" ? "sandboxRouter" : "Routing by"}</p>
-            <p className="mt-1 text-[44px] leading-none sm:text-[64px]" style={{ fontFamily: "var(--font-launch-serif), Georgia, serif" }}>
+            <p className="mt-1 text-[40px] leading-none font-medium tracking-[-0.03em] sm:text-[56px]">
               {readout.phase === "idle" ? "One API. Every sandbox." : title}
             </p>
             <p className="mt-2 min-h-[20px] font-mono text-[12.5px] text-[#f4e6c8]/85">{sub}</p>
@@ -1144,11 +1144,12 @@ export function Storm({ towers, modes, providerCount, measuredOn }: { towers: St
           <p className="font-mono text-[10.5px] uppercase tracking-[0.16em] text-[#f4e6c8]/65">
             Open source · {providerCount} providers · {towers.length} timed on real accounts
           </p>
-          <h1 className="mt-4 text-[40px] leading-[0.98] tracking-[-0.01em] sm:text-[58px]" style={{ fontFamily: "var(--font-launch-serif), Georgia, serif" }}>
+          {/* Not a heading: the page has one h1, in the content below, and this scene is left out of what agents read. */}
+          <p className="mt-4 text-[36px] leading-[1.02] font-medium tracking-[-0.03em] sm:text-[52px]">
             Lightning takes the fastest path.
             <br />
             <span className="text-[#ff8a3d]">So does your code.</span>
-          </h1>
+          </p>
           <p className="mt-5 max-w-[500px] text-[15px] leading-relaxed text-[#f4e6c8]/80">
             One API for every sandbox provider. Each run goes to the best one that&apos;s up; if it isn&apos;t, the next strike lands somewhere else. Thunder is
             everyone else, still starting.

@@ -280,7 +280,7 @@ export function htmlToMarkdown(html: string, base: string): string {
     return `\n\n\u0000${index}\u0000\n\n`;
   });
   s = s.replace(/<\/a>\s*<a(?=\s)/gi, "</a> <a");
-  s = s.replace(/<h([1-6])[^>]*>([\s\S]*?)<\/h\1>/gi, (_, n, c) => `\n\n${"#".repeat(Number(n))} ${inline(c, abs).trim()}\n\n`);
+  s = s.replace(/<h([1-6])[^>]*>([\s\S]*?)<\/h\1>/gi, (_, n, c) => `\n\n${"#".repeat(Number(n))} ${inline(c.replace(/<br\s*\/?>/gi, " "), abs).replace(/\s+/g, " ").trim()}\n\n`);
   s = s.replace(/<table[^>]*>([\s\S]*?)<\/table>/gi, (_, t) => {
     const rows = [...t.matchAll(/<tr[^>]*>([\s\S]*?)<\/tr>/gi)].map((m) =>
       [...m[1].matchAll(/<t[hd][^>]*>([\s\S]*?)<\/t[hd]>/gi)].map((c) => inline(c[1], abs).replace(/\s+/g, " ").replace(/\|/g, "\\|").trim()),
