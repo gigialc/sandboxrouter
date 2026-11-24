@@ -1,62 +1,45 @@
 @import "tailwindcss";
 
-/* One light theme: white page, black ink, hairlines, full-width layout, pill buttons, and one signature
-   accent (jade green, 5:1 on white; "passed" uses it too) for the mark, primary actions, selected controls and price bars. */
+/* One look for the whole site, taken from the storm on the front page: near-black with a warm cast, cream ink,
+   hairlines, and one accent (burnt orange; "passed" uses it too) for the mark, primary actions, selected
+   controls and price bars. Headings are set in a serif; controls are square and lettered in mono. */
 :root {
-  color-scheme: light;
-  --bg: #ffffff;
-  --panel: #f5f5f5;
-  --panel-2: #ececec;
-  --ink: #000000;
-  --ink-2: #2b2b2b;
-  --muted: #5f5f5f;
-  --line: #e3e3e3;
-  --line-2: #cfcfcf;
+  color-scheme: dark;
+  --bg: #0c0a09;
+  --panel: #171210;
+  --panel-2: #201814;
+  --ink: #f4e6c8;
+  --ink-2: #d6c6a6;
+  --muted: #9c8c74;
+  --line: #2e231c;
+  --line-2: #43342a;
   --ok: var(--accent);
-  --bad: #b91c1c;
-  --accent: #007f4f;
-  --accent-ink: #00663f;
-  --accent-soft: #e6f4ee;
+  --bad: #f07171;
+  --accent: #ff8a3d;
+  --accent-ink: #ffab6e;
+  --accent-soft: #2c180c;
   --bar: var(--accent);
-  /* Chart marks: the accent, stepped into each mode's chart lightness band (checked for contrast and band). */
-  --chart: #007f4f;
+  /* Chart marks: the accent. */
+  --chart: #ff8a3d;
 }
 
-/* Dark: the same system on near-black, with a brighter jade so it keeps its contrast. Follows the OS
-   unless the header toggle picked one (data-theme on <html>, set before paint in layout.tsx). */
-:root[data-theme="dark"] {
-  color-scheme: dark;
-  --bg: #0b0c0c;
-  --panel: #151717;
-  --panel-2: #1d2020;
-  --ink: #f2f2f2;
-  --ink-2: #d0d0d0;
-  --muted: #9a9a9a;
-  --line: #262929;
-  --line-2: #363a3a;
-  --bad: #f07171;
-  --accent: #2fbf7f;
-  --accent-ink: #5fd6a0;
-  --accent-soft: #10291f;
-  --chart: #20a068;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    color-scheme: dark;
-    --bg: #0b0c0c;
-    --panel: #151717;
-    --panel-2: #1d2020;
-    --ink: #f2f2f2;
-    --ink-2: #d0d0d0;
-    --muted: #9a9a9a;
-    --line: #262929;
-    --line-2: #363a3a;
-    --bad: #f07171;
-    --accent: #2fbf7f;
-    --accent-ink: #5fd6a0;
-    --accent-soft: #10291f;
-    --chart: #20a068;
-  }
+/* The header toggle can still pick a light page: the same system on warm paper, with a deeper orange so it
+   keeps its contrast. Dusk is the default whatever the OS says (data-theme on <html>, set before paint in layout.tsx). */
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f7f1e6;
+  --panel: #efe6d6;
+  --panel-2: #e6dbc8;
+  --ink: #1a130e;
+  --ink-2: #3a2e25;
+  --muted: #6f6154;
+  --line: #ddd0bc;
+  --line-2: #c9b9a2;
+  --bad: #b91c1c;
+  --accent: #b4480f;
+  --accent-ink: #933a0b;
+  --accent-soft: #f5dfcf;
+  --chart: #b4480f;
 }
 
 @theme inline {
@@ -91,7 +74,15 @@ body {
 
 ::selection {
   background: var(--accent);
-  color: #ffffff;
+  color: var(--bg);
+}
+
+/* Headings in the launch serif. It has one weight and wants looser tracking than the sans. */
+h1,
+h2 {
+  font-family: var(--font-launch-serif), Georgia, serif !important;
+  font-weight: 400 !important;
+  letter-spacing: -0.01em !important;
 }
 
 :focus-visible {
@@ -105,7 +96,7 @@ body {
 
 /* Docs prose */
 .prose-sr h2 {
-  font-size: 1.35rem;
+  font-size: 1.75rem;
   font-weight: 500;
   letter-spacing: -0.02em;
   margin: 3.5rem 0 0.75rem;
