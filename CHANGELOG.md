@@ -2,6 +2,11 @@
 
 All notable changes. Versions follow [semver](https://semver.org/); while the version is 0.x, a minor bump can change the API.
 
+## Unreleased
+
+### Fixed
+- **Daytona: a sandbox started from your own image no longer fails after 60 seconds.** Daytona prepares an image the first time it sees it (53 s for a 1.3 GB image in our test, under a second after that), and the adapter was using the Daytona SDK's 60-second default. It now waits up to 10 minutes; `createTimeoutSeconds` (default 120) is still the router's limit, so raise it for the first create from a large image.
+
 ## 0.17.0 (2026-11-25)
 
 ### Added

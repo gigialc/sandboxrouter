@@ -12,6 +12,9 @@ import type {
 } from "../computers.js";
 
 type DaytonaModule = typeof import("@daytonaio/sdk");
+/** Seconds the Daytona SDK waits for a sandbox started from an image (its default, 60, is too short for a first pull). */
+const IMAGE_CREATE_TIMEOUT_S = 600;
+
 type DaytonaClient = InstanceType<DaytonaModule["Daytona"]>;
 type DaytonaSandbox = Awaited<ReturnType<DaytonaClient["get"]>>;
 
@@ -61,11 +64,16 @@ export class DaytonaProvider implements Provider, ComputerProvider {
     };
     try {
       const sbx = spec.image?.daytona
-        ? await d.create({
-            ...base,
-            image: spec.image.daytona,
-            resources: { cpu: spec.vcpu, memory: spec.memoryGb },
-          })
+        ? await d.create(
+            {
+              ...base,
+              image: spec.image.daytona,
+              resources: { cpu: spec.vcpu, memory: spec.memoryGb },
+            },
+            // Daytona pulls and prepares an image the first time it sees it: about a minute for a 1 GB
+            // image, against the SDK's 60 s default. The router's createTimeoutSeconds is the real limit.
+            { timeout: IMAGE_CREATE_TIMEOUT_S },
+          )
         : await d.create(base);
       return new DaytonaBox(sbx);
     } catch (err) {
