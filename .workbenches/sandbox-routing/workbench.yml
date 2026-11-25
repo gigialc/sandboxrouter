@@ -1,0 +1,52 @@
+spec: 1
+version: 0.1.0
+
+name: sandbox-routing
+description: Put a project's agent sandboxes behind sandboxRouter, so one integration runs on any provider, and prove it with a real sandbox.
+
+runner: opencode
+# Unevaluated: the same model the registry's most-used packages run. No trial against the raw model yet.
+model:
+    id: anthropic/claude-opus-5-5
+
+instructions: ./instructions.md
+skills:
+    - ./skills/sandbox-routing
+
+tools:
+    - node
+    - npm
+    - git
+
+# Provider keys are the consumer's own. The gate needs at least one to start a real sandbox; with none it
+# fails and says so. Add the names of the providers you use when you run it.
+env:
+    SANDBOXROUTER_API_KEY:
+        required: false
+    E2B_API_KEY:
+        required: false
+    DAYTONA_API_KEY:
+        required: false
+    MODAL_TOKEN_ID:
+        required: false
+    MODAL_TOKEN_SECRET:
+        required: false
+    NORTHFLANK_API_TOKEN:
+        required: false
+    NORTHFLANK_PROJECT_ID:
+        required: false
+    BL_API_KEY:
+        required: false
+    BL_WORKSPACE:
+        required: false
+
+requirements:
+    os: [linux, macos]
+    memory_gb: 4
+
+runtimes:
+    local: {}
+    docker:
+        image:
+            build: ./Dockerfile
+            context: .
