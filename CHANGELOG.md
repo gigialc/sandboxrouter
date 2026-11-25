@@ -2,10 +2,13 @@
 
 All notable changes. Versions follow [semver](https://semver.org/); while the version is 0.x, a minor bump can change the API.
 
-## Unreleased
+## 0.17.0 (2026-11-25)
 
 ### Added
 - **`encrypt: true` on `move` and `copy`: the folder crosses between the two sandboxes as ciphertext.** The destination sandbox makes a key pair and keeps the private key; the source encrypts the archive (AES-256) with a one-time key sealed to that public key; the destination checks the archive's SHA-256 before unpacking. The calling process, and the hosted API when it is used, relay bytes they can't read. Needs `openssl` in both sandboxes. The security page says what this does and doesn't cover.
+
+### Fixed
+- **Boat: a paused sandbox resumes again on the next command.** Boat now answers a command to a paused sandbox with `409 machine_not_running` where it used `409 sandbox_not_ready`; the adapter resumes on both.
 
 ## 0.16.0 (2026-11-24)
 
