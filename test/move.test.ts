@@ -157,6 +157,62 @@ describe("copy and move between sandboxes", () => {
     expect(e2b.boxes[0].killed).toBe(false);
   });
 
+  it("with encrypt, relays only ciphertext, and the files still arrive intact", async () => {
+    const e2b = new LocalProvider("e2b");
+    const daytona = new LocalProvider("daytona");
+    const r = router(e2b, daytona);
+    const a = await r.create({}, { provider: "e2b" });
+    const b = await r.create({}, { provider: "daytona" });
+    const [from, to] = [e2b.boxes[0], daytona.boxes[0]];
+    fill(from.home);
+    writeFileSync(join(from.home, "secret.txt"), "SUBSCRIPTION-TOKEN-0123456789\n".repeat(200));
+
+    // Everything that leaves the source sandbox on its way to the destination.
+    const relayed: Buffer[] = [];
+    const read = from.readFile.bind(from);
+    from.readFile = async (path) => {
+      const data = await read(path);
+      relayed.push(Buffer.from(data));
+      return data;
+    };
+
+    const result = await r.copy(a, b, { encrypt: true, chunkBytes: 64 * 1024 });
+
+    expect(result.encrypted).toBe(true);
+    const wire = Buffer.concat(relayed);
+    expect(wire.length).toBeGreaterThan(1000);
+    expect(wire.includes("SUBSCRIPTION-TOKEN")).toBe(false);
+    // Not a gzip archive either: the plain archive would start with 1f 8b.
+    expect(relayed.some((piece) => piece[0] === 0x1f && piece[1] === 0x8b)).toBe(false);
+    expect(readFileSync(join(to.home, "secret.txt"), "utf8")).toContain("SUBSCRIPTION-TOKEN-0123456789");
+    expect(readFileSync(join(to.home, "src/deep/data.bin")).equals(Buffer.alloc(300_000, 7))).toBe(true);
+    expect(statSync(join(to.home, "run.sh")).mode & 0o111).toBe(0o111);
+    // No key or archive is left behind on either side.
+    expect((await a.exec("ls -d /tmp/sr-move-* 2>/dev/null | wc -l")).stdout.trim()).toBe("0");
+  });
+
+  it("with encrypt, refuses an archive that was changed on the way and unpacks nothing", async () => {
+    const e2b = new LocalProvider("e2b");
+    const daytona = new LocalProvider("daytona");
+    const r = router(e2b, daytona);
+    const a = await r.create({}, { provider: "e2b" });
+    const b = await r.create({}, { provider: "daytona" });
+    const [from, to] = [e2b.boxes[0], daytona.boxes[0]];
+    fill(from.home);
+
+    const read = from.readFile.bind(from);
+    from.readFile = async (path) => {
+      const data = Buffer.from(await read(path));
+      // Flip one byte in the middle of an archive piece, as something in between could.
+      if (/\/p\.[a-z]{4}$/.test(path)) data[Math.floor(data.length / 2)] ^= 0xff;
+      return new Uint8Array(data);
+    };
+
+    await expect(r.copy(a, b, { encrypt: true })).rejects.toThrow(/decrypting and unpacking the folder failed on daytona/);
+    expect(existsSync(join(to.home, "notes.txt"))).toBe(false);
+    expect(existsSync(join(from.home, "notes.txt"))).toBe(true);
+  });
+
   it("moves through the HTTP API with the hosted client", async () => {
     const e2b = new LocalProvider("e2b");
     const daytona = new LocalProvider("daytona");

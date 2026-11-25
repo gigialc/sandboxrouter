@@ -58,6 +58,36 @@ export default function SecurityPage() {
           </li>
         </ul>
 
+        <h2>Moving files between sandboxes</h2>
+        <p>
+          <code>move</code> and <code>copy</code> carry a folder from one sandbox to another, on any two providers. The folder
+          is packed in the first sandbox, passes through the program that called <code>move</code>, and is unpacked in the
+          second.
+        </p>
+        <ul>
+          <li>
+            <strong>On your own keys:</strong> the folder goes from one provider, through your own server, to the other. It never
+            reaches sandboxRouter.
+          </li>
+          <li>
+            <strong>On the hosted key:</strong> the folder also passes through <code>{HOSTED_URL.replace("https://", "")}</code>,
+            over TLS. It is relayed, not written to disk or to a database. File names are part of each request&apos;s address,
+            so they, unlike file contents, can appear in access logs.
+          </li>
+          <li>
+            <strong>With <code>encrypt: true</code>:</strong> the folder is encrypted inside the first sandbox and can only be
+            opened inside the second, which makes a key pair and keeps the private key. Your server and ours relay bytes
+            neither can read (AES-256, with a one-time key sealed to that public key), and the second sandbox checks the
+            archive&apos;s SHA-256 before unpacking.
+          </li>
+          <li>
+            <strong>What encryption doesn&apos;t cover:</strong> the two providers that run the sandboxes can see what is on
+            them, as with any cloud machine, and so can whoever is able to run commands in them: you, and on the hosted key,
+            sandboxRouter. For credentials such as an agent&apos;s login, keep them in your own secret store, leave them out of
+            the move with <code>exclude</code>, and put them into the new sandbox yourself.
+          </li>
+        </ul>
+
         <h2>What isn&apos;t promised yet</h2>
         <ul>
           <li>No uptime commitment (SLA) and no region pinning: a sandbox runs wherever the chosen provider runs it.</li>

@@ -29,6 +29,15 @@ export interface CopyOptions {
   timeoutSeconds?: number;
   /** Bytes sent per file transfer (default 4 MB). Providers cap how much one file call carries. */
   chunkBytes?: number;
+  /**
+   * Encrypt the folder between the two sandboxes, so everything in between (this process, and the
+   * sandboxRouter server when you use the hosted API) only relays bytes it can't read. The destination
+   * makes a key pair and keeps the private key; the source encrypts the archive (AES-256) with a
+   * one-time key sealed to the destination's public key; the destination checks the archive's SHA-256
+   * before unpacking. Both sandboxes need `openssl`. It doesn't hide the files from the two providers
+   * that run the sandboxes, or from whoever can run commands in them.
+   */
+  encrypt?: boolean;
 }
 
 export interface CopyResult {
@@ -38,6 +47,8 @@ export interface CopyResult {
   to: string;
   /** Size of the packed (gzip) folder that was sent. */
   bytes: number;
+  /** True when the folder crossed encrypted (`encrypt`). */
+  encrypted: boolean;
   ms: number;
 }
 
@@ -58,7 +69,8 @@ const DEFAULT_COPY_TIMEOUT_S = 600;
  * Copy a folder from one sandbox to another, on any two providers: packed with tar on the source,
  * carried through this process in pieces, unpacked on the destination. Files, their modes and
  * symlinks come across; running processes, memory and env vars don't. The source isn't changed.
- * Both sandboxes need `tar` and `split` (every stock image has them).
+ * Both sandboxes need `tar` and `split` (every stock image has them). With `encrypt`, what crosses
+ * is ciphertext only the destination sandbox can open.
  */
 export async function copyFiles(from: FileBox, to: FileBox, opts: CopyOptions = {}): Promise<CopyResult> {
   const started = Date.now();
@@ -72,6 +84,7 @@ export async function copyFiles(from: FileBox, to: FileBox, opts: CopyOptions = 
     if (p.replace(/\/+$/, "") === "") throw new RouterError("copy won't take the whole filesystem (/): name a folder", [], "bad_request");
   }
 
+  const encrypt = opts.encrypt === true;
   const tmp = `/tmp/sr-move-${randomUUID().slice(0, 8)}`;
   const run = async (box: FileBox, what: string, cmd: string) => {
     const r = await box.exec(cmd, { timeoutSeconds });
@@ -101,17 +114,50 @@ export async function copyFiles(from: FileBox, to: FileBox, opts: CopyOptions = 
       throw new RouterError(`the folder packs to ${mb(bytes)}, over the ${mb(maxBytes)} limit: pass exclude (e.g. node_modules) or a higher maxBytes`, [], "bad_request");
     }
 
+    await run(to, "preparing the destination", `mkdir -p ${shq(tmp)} ${shq(dst)}`);
+    // What is sent: the archive, or its ciphertext (a few bytes longer).
+    let sent = bytes;
+    if (encrypt) {
+      for (const box of [from, to]) {
+        const has = await box.exec("command -v openssl >/dev/null 2>&1", { timeoutSeconds: 60 });
+        if (has.exitCode !== 0) throw new RouterError(`encrypt needs openssl in both sandboxes, and ${box.provider}'s image has none`, [], "unsupported");
+      }
+      // The private key is made on the destination and never leaves it; only the public key travels.
+      const pem = await run(to, "making the destination's key", `cd ${shq(tmp)} && umask 077 && openssl genrsa -out k.pem 2048 2>/dev/null && openssl rsa -in k.pem -pubout 2>/dev/null`);
+      const pub = /-----BEGIN PUBLIC KEY-----[\s\S]+?-----END PUBLIC KEY-----/.exec(pem)?.[0];
+      if (!pub) throw new RouterError(`couldn't read the public key made on ${to.provider}`, [], "all_failed");
+      await from.writeFile(`${tmp}/pub.pem`, `${pub}\n`);
+      // A one-time AES key encrypts the archive; that key and the archive's hash are sealed to the public key.
+      const sealed = await run(
+        from,
+        "encrypting the archive",
+        [
+          `cd ${shq(tmp)}`,
+          "umask 077",
+          "openssl rand -hex 32 > k",
+          `h=$(openssl dgst -sha256 -r a.tgz | cut -d' ' -f1)`,
+          "openssl enc -aes-256-cbc -pbkdf2 -pass file:k -in a.tgz -out a.enc",
+          `printf '%s %s' "$(cat k)" "$h" | openssl pkeyutl -encrypt -pubin -inkey pub.pem -out k.enc`,
+          "rm -f k a.tgz pub.pem",
+          "mv a.enc a.tgz",
+          `echo "size=$(wc -c < a.tgz | tr -d ' ')"`,
+        ].join(" && "),
+      );
+      sent = Number(/size=(\d+)/.exec(sealed)?.[1] ?? NaN);
+      if (!Number.isFinite(sent)) throw new RouterError(`couldn't read the encrypted size on ${from.provider}`, [], "all_failed");
+      await to.writeFile(`${tmp}/k.enc`, await from.readFile(`${tmp}/k.enc`));
+    }
+
     const listed = await run(from, "splitting the archive", `cd ${shq(tmp)} && split -b ${chunk} -a 4 a.tgz p. && rm a.tgz && ls p.*`);
     const parts = listed.split("\n").map((l) => l.trim()).filter((l) => /^p\.[a-z]{4}$/.test(l)).sort();
     if (parts.length === 0) throw new RouterError(`no archive pieces found on ${from.provider}`, [], "all_failed");
 
-    await run(to, "preparing the destination", `mkdir -p ${shq(tmp)} ${shq(dst)}`);
     for (const part of parts) await to.writeFile(`${tmp}/${part}`, await from.readFile(`${tmp}/${part}`));
 
     // The size check catches a piece a provider cut short before tar unpacks half a folder.
     const got = await run(to, "checking the archive", `cat ${shq(tmp)}/p.* | wc -c | tr -d ' '`);
-    if (Number(got.trim().split("\n").pop()) !== bytes) {
-      throw new RouterError(`the archive arrived as ${got.trim()} bytes on ${to.provider}, expected ${bytes}`, [], "all_failed");
+    if (Number(got.trim().split("\n").pop()) !== sent) {
+      throw new RouterError(`the archive arrived as ${got.trim()} bytes on ${to.provider}, expected ${sent}`, [], "all_failed");
     }
     // -o: the files belong to whoever runs the destination sandbox, not the source's user id.
     // Copying a whole working folder would replace the destination image's shell startup files with
@@ -119,8 +165,24 @@ export async function copyFiles(from: FileBox, to: FileBox, opts: CopyOptions = 
     const keep = opts.path === undefined ? IMAGE_FILES.map(shq).join(" ") : "";
     const save = keep ? `mkdir -p ${shq(`${tmp}/keep`)} && for f in ${keep}; do if [ -f ${shq(dst)}/"$f" ]; then cp -p ${shq(dst)}/"$f" ${shq(`${tmp}/keep`)}/; fi; done && ` : "";
     const restore = keep ? ` && for f in ${keep}; do if [ -f ${shq(`${tmp}/keep`)}/"$f" ]; then cp -p ${shq(`${tmp}/keep`)}/"$f" ${shq(dst)}/; fi; done` : "";
-    await run(to, "unpacking the folder", `${save}cat ${shq(tmp)}/p.* | tar -xzo -f - -C ${shq(dst)}${restore}`);
-    return { from: src, to: dst, bytes, ms: Date.now() - started };
+    // Encrypted: open the one-time key with the private key, decrypt, and unpack only if the hash matches.
+    const open = encrypt
+      ? [
+          `cd ${shq(tmp)}`,
+          // The keys and the plain archive are written private (umask 077), in a subshell so that
+          // tar below still unpacks with the sandbox's own umask and the files keep their modes.
+          `( ${[
+            "umask 077",
+            "openssl pkeyutl -decrypt -inkey k.pem -in k.enc -out kh",
+            "cut -d' ' -f1 kh > k",
+            "cat p.* | openssl enc -d -aes-256-cbc -pbkdf2 -pass file:k -out a.tgz",
+            `[ "$(openssl dgst -sha256 -r a.tgz | cut -d' ' -f1)" = "$(cut -d' ' -f2 kh)" ]`,
+          ].join(" && ")} )`,
+          `tar -xzo -f a.tgz -C ${shq(dst)}`,
+        ].join(" && ")
+      : `cat ${shq(tmp)}/p.* | tar -xzo -f - -C ${shq(dst)}`;
+    await run(to, encrypt ? "decrypting and unpacking the folder" : "unpacking the folder", `${save}${open}${restore}`);
+    return { from: src, to: dst, bytes, encrypted: encrypt, ms: Date.now() - started };
   } finally {
     await Promise.all([clean(from), clean(to)]);
   }
@@ -137,7 +199,7 @@ export interface Mover<B extends FileBox> {
  * fails the new sandbox is killed and the old one is left as it was.
  */
 export async function moveSandbox<B extends FileBox>(mover: Mover<B>, from: FileBox, opts: MoveOptions = {}): Promise<B & { moved: CopyResult }> {
-  const { spec: given = {}, keep, path, to, exclude, maxBytes, timeoutSeconds, chunkBytes, ...route } = opts;
+  const { spec: given = {}, keep, path, to, exclude, maxBytes, timeoutSeconds, chunkBytes, encrypt, ...route } = opts;
   let spec: SandboxSpec = { ...given };
   const elsewhere = async (s: SandboxSpec) =>
     (await mover.candidates(s, route)).filter((c) => !c.skip && c.provider !== from.provider).map((c) => c.provider);
@@ -157,7 +219,7 @@ export async function moveSandbox<B extends FileBox>(mover: Mover<B>, from: File
   const next = await mover.create(spec, route);
   let moved: CopyResult;
   try {
-    moved = await copyFiles(from, next, { path, to, exclude, maxBytes, timeoutSeconds, chunkBytes });
+    moved = await copyFiles(from, next, { path, to, exclude, maxBytes, timeoutSeconds, chunkBytes, encrypt });
   } catch (error) {
     await next.kill().catch(() => {});
     throw error;

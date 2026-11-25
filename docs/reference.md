@@ -140,7 +140,8 @@ await sbx.exec("git clone https://github.com/me/app && cd app && npm ci");
 
 sbx = await router.move(sbx);                                  // the next provider in the usual order
 sbx = await router.move(sbx, { provider: "e2b", path: "/workspace", exclude: ["node_modules"] });
-console.log(sbx.provider, sbx.moved);                          // { from, to, bytes, ms }
+sbx = await router.move(sbx, { encrypt: true, exclude: [".credentials"] });  // nothing in between can read it
+console.log(sbx.provider, sbx.moved);                          // { from, to, bytes, encrypted, ms }
 
 await router.copy(sbx, other, { path: "/data", to: "/mnt/data" });
 ```
@@ -149,6 +150,7 @@ await router.copy(sbx, other, { path: "/data", to: "/mnt/data" });
 - **Which folder:** `path`, or without one the folder commands run in on the old sandbox, into the folder commands run in on the new one (home folders differ: `/home/user` on E2B, `/home/daytona` on Daytona). Copied whole like that, the new sandbox keeps its own `.bashrc` and `.profile`.
 - **Size:** the new sandbox gets the old one's size where another provider sells it, else the default size. Pass `spec` to choose.
 - **If it fails:** the new sandbox is killed and the old one is left running, untouched. `keep: true` leaves the old one running after a move that worked.
+- **Encrypted in between:** `encrypt: true` encrypts the folder inside the old sandbox so that only the new one can open it: the new sandbox makes a key pair and keeps the private key, the old one encrypts the archive (AES-256) with a one-time key sealed to that public key, and the new one checks the archive's SHA-256 before unpacking. Your process, and the hosted API when you use it, relay bytes they can't read. Both sandboxes need `openssl`. It doesn't hide files from the two providers running the sandboxes, or from whoever can run commands in them, so keep credentials out with `exclude` and put them into the new sandbox yourself.
 - **Limits:** the folder is packed with `tar` and sent through your process in 4 MB pieces, so both sandboxes need `tar` and `split`, and it suits working folders, not disks. A folder that packs to over 1 GB is refused before anything is sent (`maxBytes`).
 
 ### Sizes and prices
