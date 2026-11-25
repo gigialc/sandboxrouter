@@ -31,6 +31,8 @@ let base = "";
 // Created at load time: describeConformance needs the path when the suite is declared.
 const root = mkdtempSync("/tmp/sbr-boat-");
 const boxes = new Map<string, Box>();
+/** The 409 code the fake answers for a stopped sandbox (Boat has used two). */
+let stoppedCode = "sandbox_not_ready";
 const seen: { method: string; path: string; headers: Record<string, string | undefined>; body?: any }[] = [];
 let provisionPolls = 0;
 let createState: "ready" | "error" = "ready";
@@ -87,7 +89,7 @@ beforeAll(async () => {
       box.state = "ready";
       return send(200, { sandbox: { id, state: "ready" } });
     }
-    if (box.state !== "ready") return send(409, envelope(409, "sandbox_not_ready", `sandbox is ${box.state}`));
+    if (box.state !== "ready") return send(409, envelope(409, stoppedCode, `sandbox is ${box.state}`));
 
     if (route === "/files/folder") {
       if (!filesOk(body.path)) return send(400, envelope(400, "invalid_path", "path must be under /home/user or /tmp"));
@@ -233,6 +235,18 @@ describe("BoatProvider", () => {
     expect(readFileSync(join(root, "sudo.txt"), "utf8")).toBe("via sudo");
     expect(new TextDecoder().decode(await sbx.readFile(path))).toBe("via sudo");
     await sbx.kill();
+  });
+
+  it("resumes a stopped sandbox when Boat answers 409 machine_not_running, its newer code for the same thing", async () => {
+    stoppedCode = "machine_not_running";
+    try {
+      const sbx = await p().create({});
+      await sbx.pause!();
+      expect((await sbx.exec("echo back")).stdout).toBe("back\n");
+      expect(boxes.get(sbx.nativeId)!.state).toBe("ready");
+    } finally {
+      stoppedCode = "sandbox_not_ready";
+    }
   });
 
   it("stop keeps the sandbox for the next call to resume, and delete confirms with the id header", async () => {

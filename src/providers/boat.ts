@@ -125,6 +125,8 @@ class BoatError extends ProviderError {
 
 const READY = new Set(["ready", "idle", "running"]);
 const STOPPED = new Set(["archived", "stopped"]);
+/** 409 codes a data call gets while the sandbox is stopped or still booting: resume or wait, then retry. */
+const STOPPED_CODES = new Set(["sandbox_not_ready", "machine_not_running", "boat_starting"]);
 
 /** Boat has four fixed sizes (catalog.ts). Pick the smallest that covers the request. */
 function machineType(vcpu: number, memoryGb: number): string {
@@ -171,12 +173,15 @@ class BoatSandbox implements ProviderSandbox {
     this.base = `/sandboxes/${encodeURIComponent(nativeId)}`;
   }
 
-  /** Data call; when the sandbox is stopped (409 sandbox_not_ready) or still starting, wait/resume once and retry. */
+  /**
+   * Data call; when the sandbox is stopped or still starting, wait/resume once and retry. Boat has answered a
+   * stopped sandbox with 409 sandbox_not_ready and, since Nov 2026, 409 machine_not_running.
+   */
   private async call(method: string, path: string, json?: unknown): Promise<Response> {
     try {
       return await this.p.request(method, `${this.base}${path}`, { json });
     } catch (err) {
-      if (!(err instanceof BoatError && err.status === 409 && (err.code === "sandbox_not_ready" || err.code === "boat_starting"))) throw err;
+      if (!(err instanceof BoatError && err.status === 409 && STOPPED_CODES.has(err.code ?? ""))) throw err;
       await this.p.ready(this.nativeId);
       return this.p.request(method, `${this.base}${path}`, { json });
     }
