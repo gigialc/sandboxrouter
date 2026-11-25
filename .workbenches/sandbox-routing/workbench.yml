@@ -4,10 +4,11 @@ version: 0.1.0
 name: sandbox-routing
 description: Put a project's agent sandboxes behind sandboxRouter, so one integration runs on any provider, and prove it with a real sandbox.
 
-runner: opencode
-# Unevaluated: the same model the registry's most-used packages run. No trial against the raw model yet.
+runner: claude-code
+# One real run so far (see the pull request). No trial against the raw model yet.
 model:
-    id: anthropic/claude-opus-5-5
+    id: anthropic/claude-sonnet-5-5
+runner_config: ./runner/claude.json
 
 instructions: ./instructions.md
 skills:
@@ -22,6 +23,8 @@ tools:
 # fails and says so. Add the names of the providers you use when you run it.
 env:
     SANDBOXROUTER_API_KEY:
+        required: false
+    AGENT37_API_KEY:
         required: false
     E2B_API_KEY:
         required: false

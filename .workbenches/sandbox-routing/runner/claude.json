@@ -1,0 +1,27 @@
+{
+    "permissions": {
+        "allow": [
+            "Read",
+            "Glob",
+            "Grep",
+            "Skill",
+            "Edit",
+            "Write",
+            "Bash"
+        ],
+        "deny": [
+            "Read(./.env)",
+            "Read(./.env.*)",
+            "Read(./**/.env)",
+            "Read(./**/.env.*)",
+            "Bash(env)",
+            "Bash(env:*)",
+            "Bash(printenv:*)",
+            "Bash(rm -rf /:*)",
+            "Bash(git push:*)",
+            "Bash(npm publish:*)",
+            "Bash(sudo:*)"
+        ]
+    },
+    "max_turns": 80
+}
