@@ -3,6 +3,7 @@
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { accountStartFees, benchmarksPublishable, billingRules, CATALOG, DEFAULT_MEMORY_GB, DEFAULT_VCPU, fittingSpec, hourlyCost, planLabel, planOnlyStartFee, unfit, withOwnImages } from "../src/catalog.js";
 import type { SpreadResult } from "../src/burst.js";
+import { imageTable, loadImageReports } from "../src/image-bench.js";
 import { agentTable, aggregate, burstTable, loadAgentReports, loadBursts, loadReports, taskOutcomes, taskTable } from "../src/leaderboard.js";
 import { TASKS } from "../src/task.js";
 import { priceIndex } from "../src/price-index.js";
@@ -264,6 +265,8 @@ const data = {
   })(),
   // A real agent (Gemini) doing the same task in a sandbox on each provider.
   agent: agentTable(loadAgentReports("results")),
+  // Starting straight from a public registry image, with no template or snapshot step.
+  image: imageTable(loadImageReports("results")),
   // Today's price index, and how it has moved (scripts/price-index.json, recorded daily when it changes).
   priceIndex: {
     lines: priceIndex(),

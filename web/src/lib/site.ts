@@ -87,6 +87,27 @@ export interface IndexLine {
   providers: number;
 }
 
+/** One provider started straight from a public registry image (results/, tool "sandboxrouter-image"). */
+export interface ImageRow {
+  provider: string;
+  name: string;
+  size: MeasuredSize;
+  firstCreateMs?: number;
+  repeatCreateMs: number[];
+  medianRepeatCreateMs?: number;
+  verified: number;
+  failures: number;
+  hourlyUsd?: number;
+  measuredAt: string;
+}
+
+export interface ImageTableData {
+  image: string;
+  spec: { vcpu: number; memoryGb: number };
+  repeats: number;
+  rows: ImageRow[];
+}
+
 export interface LoadRow {
   provider: string;
   name: string;
@@ -223,6 +244,7 @@ export const site = data as unknown as {
   leaderboard: LeaderRow[];
   load: { id: string; n: number; job: string; title: string; blurb: string; rows: LoadRow[] }[];
   agent: AgentRow[];
+  image: ImageTableData[];
   priceIndex: { lines: IndexLine[]; history: { date: string; lines: Record<string, { median: number; cheapest: number; provider: string }> }[] };
   tasks: { kinds: {
     id: string; title: string; blurb: string; version: string; repeat: number; phases: { id: string; label: string }[];

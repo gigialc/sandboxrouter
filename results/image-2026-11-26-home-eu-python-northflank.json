@@ -1,0 +1,37 @@
+{
+  "tool": "sandboxrouter-image",
+  "version": "0.17.0",
+  "date": "2026-11-26T15:38:22.928Z",
+  "label": "home-eu",
+  "image": "python:3.11-bookworm",
+  "verify": {
+    "command": "python3 --version",
+    "contains": "Python 3.11"
+  },
+  "spec": {
+    "vcpu": 4,
+    "memoryGb": 8
+  },
+  "repeats": 3,
+  "node": "v22.22.0",
+  "platform": "darwin-arm64",
+  "rows": [
+    {
+      "provider": "northflank",
+      "size": {
+        "vcpu": 4,
+        "memoryGb": 8
+      },
+      "firstCreateMs": 7424,
+      "repeatCreateMs": [
+        7335,
+        5712,
+        7013
+      ],
+      "medianRepeatCreateMs": 7013,
+      "verified": 4,
+      "failures": 0,
+      "hourlyUsd": 0.1333
+    }
+  ]
+}

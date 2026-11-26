@@ -6,6 +6,7 @@ import { AgentTable } from "@/components/AgentTable";
 import { BenchTabs } from "@/components/BenchTabs";
 import { BillTable } from "@/components/BillTable";
 import { Finder } from "@/components/Finder";
+import { ImageTable } from "@/components/ImageTable";
 import { LoadTable } from "@/components/LoadTable";
 import { TaskTable } from "@/components/TaskTable";
 import { UseCaseTable } from "@/components/UseCaseTable";
@@ -171,6 +172,20 @@ export default function BenchmarksPage() {
       </Section>
             ),
           },
+
+          ...(site.image.length > 0
+            ? [
+                {
+                  id: "image",
+                  label: "Your own image",
+                  content: (
+        <Section id="image" title="Your own image" how="image" line="Start a sandbox straight from a public registry image, with no template or snapshot to build first.">
+          <ImageTable />
+        </Section>
+                  ),
+                },
+              ]
+            : []),
 
           {
             id: "real-cost",
