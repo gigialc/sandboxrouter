@@ -121,7 +121,7 @@
     }
   },
   "version": "0.17.0",
-  "generatedAt": "2026-11-26T15:56:39.019Z",
+  "generatedAt": "2026-11-26T18:50:05.011Z",
   "shapes": [
     "1x2",
     "2x4",
@@ -8041,8 +8041,8 @@
     },
     {
       "id": "image",
-      "title": "Your own image",
-      "blurb": "Start from your own container image (30 minutes).",
+      "title": "Custom image or template",
+      "blurb": "Start from your own image, or a template the provider builds from it (30 minutes).",
       "spec": {
         "vcpu": 2,
         "memoryGb": 4,

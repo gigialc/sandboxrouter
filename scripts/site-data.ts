@@ -106,7 +106,7 @@ const USE_CASES: { id: string; title: string; blurb: string; spec: SandboxSpec; 
   { id: "long", title: "Long jobs", blurb: "Evals, crawls or builds that run for 4 hours.", spec: { vcpu: 2, memoryGb: 4, timeoutMinutes: 240 } },
   { id: "big", title: "Big machines", blurb: "8 vCPU / 16 GB for an hour: heavy builds and test suites.", spec: { vcpu: 8, memoryGb: 16, timeoutMinutes: 60 } },
   { id: "pause", title: "Pause and resume", blurb: "Keep the disk, stop paying for CPU, pick it up later (30 minutes running).", spec: { vcpu: 2, memoryGb: 4, timeoutMinutes: 30 }, require: ["pause"] },
-  { id: "image", title: "Your own image", blurb: "Start from your own container image (30 minutes).", spec: { vcpu: 2, memoryGb: 4, timeoutMinutes: 30 }, require: ["custom-image"] },
+  { id: "image", title: "Custom image or template", blurb: "Start from your own image, or a template the provider builds from it (30 minutes).", spec: { vcpu: 2, memoryGb: 4, timeoutMinutes: 30 }, require: ["custom-image"] },
 ];
 // Stand-ins with every key "set": ranking reads only the catalog, never a provider.
 const stub = (id: ProviderId): Provider => ({
