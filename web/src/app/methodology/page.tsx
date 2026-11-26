@@ -211,7 +211,7 @@ export default function MethodologyPage() {
             requests.
           </p>
 
-          <h2 id="image">Your own image</h2>
+          <h2 id="image">Straight from an image</h2>
           <p>
             The harness gives each provider the registry address of a public image and asks for a sandbox, through the
             router, with no template, snapshot or blueprint built beforehand. Only providers that accept an image

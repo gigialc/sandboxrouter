@@ -177,9 +177,9 @@ export default function BenchmarksPage() {
             ? [
                 {
                   id: "image",
-                  label: "Your own image",
+                  label: "Straight from an image",
                   content: (
-        <Section id="image" title="Your own image" how="image" line="Start a sandbox straight from a public registry image, with no template or snapshot to build first.">
+        <Section id="image" title="Straight from an image" how="image" line="Start a sandbox straight from a public registry image, with no template or snapshot to build first.">
           <ImageTable />
         </Section>
                   ),
