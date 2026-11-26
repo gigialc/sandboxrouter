@@ -9,6 +9,7 @@ All notable changes. Versions follow [semver](https://semver.org/); while the ve
 
 ### Fixed
 - **Daytona: a sandbox started from your own image no longer fails after 60 seconds.** Daytona prepares an image the first time it sees it (53 s for a 1.3 GB image in our test, under a second after that), and the adapter was using the Daytona SDK's 60-second default. It now waits up to 10 minutes; `createTimeoutSeconds` (default 120) is still the router's limit, so raise it for the first create from a large image.
+- **Northflank: `kill()` no longer reports a failure for a sandbox that was deleted.** Northflank takes about 62 seconds to remove a deleted service, and the adapter stopped waiting at 60 and threw "did not disappear after deletion". The sandbox was always removed; the adapter now waits up to 3 minutes.
 
 ## 0.17.0 (2026-11-25)
 
