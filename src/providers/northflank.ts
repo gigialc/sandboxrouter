@@ -12,7 +12,8 @@ const DEFAULT_IMAGE = "ubuntu:22.04";
 const MIN_EXPIRY_SECONDS = 300;
 const MAX_EXPIRY_SECONDS = 604_800;
 const READY_TIMEOUT_MS = 5 * 60_000;
-const DELETE_TIMEOUT_MS = 60_000;
+/** A deleted service takes about 62 s to disappear (measured, any size or image), so 60 s reported every kill as failed. */
+const DELETE_TIMEOUT_MS = 180_000;
 
 /**
  * Northflank sandboxes via `@northflank/js-client`. Auth: NORTHFLANK_API_TOKEN plus
