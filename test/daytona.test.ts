@@ -23,6 +23,7 @@ import { describeConformance } from "./conformance.js";
 const root = mkdtempSync(join(tmpdir(), "sbr-daytona-"));
 const configs: unknown[] = [];
 const created: any[] = [];
+const createOptions: any[] = [];
 const calls: [string, ...unknown[]][] = [];
 const live = new Map<string, FakeSandbox>();
 const children: ChildProcess[] = [];
@@ -193,8 +194,9 @@ vi.mock("@daytonaio/sdk", () => ({
     constructor(config: unknown) {
       configs.push(config);
     }
-    async create(params: unknown) {
+    async create(params: unknown, options?: unknown) {
       created.push(params);
+      createOptions.push(options);
       if (createError) throw createError;
       const s = new FakeSandbox(params);
       if (startError) {
@@ -227,6 +229,7 @@ const sdk = (name: string) => calls.filter((c) => c[0] === name).map((c) => c.sl
 beforeEach(() => {
   calls.length = 0;
   created.length = 0;
+  createOptions.length = 0;
   configs.length = 0;
   createError = undefined;
   startError = undefined;
@@ -259,7 +262,10 @@ describe("DaytonaProvider", () => {
     });
     expect((await sbx.exec("echo $A")).stdout).toBe("1\n");
     await sbx.kill();
+    // A first start from an image takes longer than the SDK's 60 s default.
+    expect(createOptions[0]).toEqual({ timeout: 600 });
     await (await p().create({})).kill();
+    expect(createOptions[1]).toBeUndefined();
     expect(created[1]).toEqual({ autoStopInterval: 30, autoDeleteInterval: 1, labels: { "sandboxrouter-create": expect.any(String) } });
     expect(created[1]).not.toHaveProperty("image");
     await (await p().create({ timeoutMinutes: 0.2 })).kill();
