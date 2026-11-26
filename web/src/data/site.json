@@ -121,7 +121,7 @@
     }
   },
   "version": "0.17.0",
-  "generatedAt": "2026-11-25T14:54:36.811Z",
+  "generatedAt": "2026-11-26T15:56:39.019Z",
   "shapes": [
     "1x2",
     "2x4",
@@ -9119,6 +9119,142 @@
       "name": "Vercel Sandbox",
       "measuredAt": "2026-11-18T19:18:35.821Z",
       "model": "gemini-3.5-flash"
+    }
+  ],
+  "image": [
+    {
+      "image": "mcr.microsoft.com/playwright:v1.65.1-noble",
+      "spec": {
+        "vcpu": 4,
+        "memoryGb": 8
+      },
+      "repeats": 3,
+      "rows": [
+        {
+          "provider": "daytona",
+          "size": {
+            "vcpu": 4,
+            "memoryGb": 8
+          },
+          "firstCreateMs": 28294,
+          "repeatCreateMs": [
+            831,
+            973,
+            1009
+          ],
+          "medianRepeatCreateMs": 973,
+          "verified": 4,
+          "failures": 0,
+          "hourlyUsd": 0.3312,
+          "name": "Daytona",
+          "measuredAt": "2026-11-26T15:54:47.241Z"
+        },
+        {
+          "provider": "modal",
+          "size": {
+            "vcpu": 4,
+            "memoryGb": 8
+          },
+          "firstCreateMs": 34408,
+          "repeatCreateMs": [
+            1148,
+            1153,
+            1155
+          ],
+          "medianRepeatCreateMs": 1153,
+          "verified": 4,
+          "failures": 0,
+          "hourlyUsd": 0.4759,
+          "name": "Modal",
+          "measuredAt": "2026-11-26T15:54:47.241Z"
+        },
+        {
+          "provider": "northflank",
+          "size": {
+            "vcpu": 4,
+            "memoryGb": 8
+          },
+          "firstCreateMs": 16930,
+          "repeatCreateMs": [
+            17624,
+            16724,
+            3517
+          ],
+          "medianRepeatCreateMs": 16724,
+          "verified": 4,
+          "failures": 0,
+          "hourlyUsd": 0.1333,
+          "name": "Northflank",
+          "measuredAt": "2026-11-26T15:54:47.241Z"
+        }
+      ]
+    },
+    {
+      "image": "python:3.11-bookworm",
+      "spec": {
+        "vcpu": 4,
+        "memoryGb": 8
+      },
+      "repeats": 3,
+      "rows": [
+        {
+          "provider": "daytona",
+          "size": {
+            "vcpu": 4,
+            "memoryGb": 8
+          },
+          "firstCreateMs": 13617,
+          "repeatCreateMs": [
+            960,
+            1010,
+            801
+          ],
+          "medianRepeatCreateMs": 960,
+          "verified": 4,
+          "failures": 0,
+          "hourlyUsd": 0.3312,
+          "name": "Daytona",
+          "measuredAt": "2026-11-26T12:48:33.371Z"
+        },
+        {
+          "provider": "modal",
+          "size": {
+            "vcpu": 4,
+            "memoryGb": 8
+          },
+          "firstCreateMs": 23399,
+          "repeatCreateMs": [
+            1393,
+            1519,
+            1553
+          ],
+          "medianRepeatCreateMs": 1519,
+          "verified": 4,
+          "failures": 0,
+          "hourlyUsd": 0.4759,
+          "name": "Modal",
+          "measuredAt": "2026-11-26T12:48:33.371Z"
+        },
+        {
+          "provider": "northflank",
+          "size": {
+            "vcpu": 4,
+            "memoryGb": 8
+          },
+          "firstCreateMs": 7424,
+          "repeatCreateMs": [
+            7335,
+            5712,
+            7013
+          ],
+          "medianRepeatCreateMs": 7013,
+          "verified": 4,
+          "failures": 0,
+          "hourlyUsd": 0.1333,
+          "name": "Northflank",
+          "measuredAt": "2026-11-26T15:38:22.928Z"
+        }
+      ]
     }
   ],
   "priceIndex": {

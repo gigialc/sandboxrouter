@@ -4,6 +4,9 @@ All notable changes. Versions follow [semver](https://semver.org/); while the ve
 
 ## Unreleased
 
+### Added
+- **Benchmark: starting from your own image.** A new report type (`sandboxrouter-image`) and the script that writes it (`scripts/image-bench.ts`): give every provider the registry address of a public image, with no template or snapshot built first, and time the first start and the starts after it. Each sandbox is checked to be the image asked for, and a provider is listed only when all of them were. The first results are on [sandboxrouter.ai/benchmarks#image](https://sandboxrouter.ai/benchmarks#image).
+
 ### Fixed
 - **Daytona: a sandbox started from your own image no longer fails after 60 seconds.** Daytona prepares an image the first time it sees it (53 s for a 1.3 GB image in our test, under a second after that), and the adapter was using the Daytona SDK's 60-second default. It now waits up to 10 minutes; `createTimeoutSeconds` (default 120) is still the router's limit, so raise it for the first create from a large image.
 

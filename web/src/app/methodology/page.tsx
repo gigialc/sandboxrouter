@@ -211,6 +211,23 @@ export default function MethodologyPage() {
             requests.
           </p>
 
+          <h2 id="image">Your own image</h2>
+          <p>
+            The harness gives each provider the registry address of a public image and asks for a sandbox, through the
+            router, with no template, snapshot or blueprint built beforehand. Only providers that accept an image
+            address directly can be in this table. Every run uses 4 vCPU and 8 GB.
+          </p>
+          <p>
+            The first start includes the provider pulling and preparing the image. It can be measured once per image
+            and account, so it is a single observation, and it grows with the size of the image. The later starts are
+            the median of three, made right after it.
+          </p>
+          <p>
+            Each sandbox runs a command whose output identifies the image, such as the language version. A provider
+            is listed only when every one of its sandboxes was the image asked for. Times are from one location; the
+            hourly price is the list price at that size.
+          </p>
+
           <h2 id="bills">Measured bills</h2>
           <p>
             Each direct check starts one sandbox, checks the size, applies CPU load unless marked idle, and deletes it.
