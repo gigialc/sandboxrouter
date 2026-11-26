@@ -1,0 +1,71 @@
+{
+  "tool": "sandboxrouter-image",
+  "version": "0.17.0",
+  "date": "2026-11-26T15:54:47.241Z",
+  "label": "home-eu",
+  "image": "mcr.microsoft.com/playwright:v1.65.1-noble",
+  "verify": {
+    "command": "node --version; ls /ms-playwright",
+    "contains": "chromium-1255"
+  },
+  "spec": {
+    "vcpu": 4,
+    "memoryGb": 8
+  },
+  "repeats": 3,
+  "node": "v22.22.0",
+  "platform": "darwin-arm64",
+  "rows": [
+    {
+      "provider": "daytona",
+      "size": {
+        "vcpu": 4,
+        "memoryGb": 8
+      },
+      "firstCreateMs": 28294,
+      "repeatCreateMs": [
+        831,
+        973,
+        1009
+      ],
+      "medianRepeatCreateMs": 973,
+      "verified": 4,
+      "failures": 0,
+      "hourlyUsd": 0.3312
+    },
+    {
+      "provider": "modal",
+      "size": {
+        "vcpu": 4,
+        "memoryGb": 8
+      },
+      "firstCreateMs": 34408,
+      "repeatCreateMs": [
+        1148,
+        1153,
+        1155
+      ],
+      "medianRepeatCreateMs": 1153,
+      "verified": 4,
+      "failures": 0,
+      "hourlyUsd": 0.4759
+    },
+    {
+      "provider": "northflank",
+      "size": {
+        "vcpu": 4,
+        "memoryGb": 8
+      },
+      "firstCreateMs": 16930,
+      "repeatCreateMs": [
+        17624,
+        16724,
+        3517
+      ],
+      "medianRepeatCreateMs": 16724,
+      "verified": 4,
+      "failures": 0,
+      "hourlyUsd": 0.1333
+    }
+  ]
+}

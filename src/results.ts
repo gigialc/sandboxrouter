@@ -75,6 +75,9 @@ const IPV4 = /\b(?:25[0-5]|2[0-4]\d|1?\d?\d)(?:\.(?:25[0-5]|2[0-4]\d|1?\d?\d)){3
 const ADDRESS =
   /\b\d+[A-Za-z]?\s+(?:[A-Za-zÀ-ÿ'.-]+\s+){0,3}(?:street|st|road|rd|avenue|ave|lane|ln|drive|dr|way|court|ct|place|pl|boulevard|blvd|terrace|close)\b\.?|\b(?:calle|carrer|rue|via|avenida|straße|strasse|str)\.?\s+[A-Za-zÀ-ÿ'.-]+(?:\s+[A-Za-zÀ-ÿ'.-]+){0,3}\s+\d+|\b(?:apt|apartment|flat|suite|unit|piso|puerta)\.?\s*#?\d+/i;
 
+/** A registry image reference: optional host, path, then a tag or digest. No "user:password@". */
+const IMAGE_REF = /^(?=.{1,200}$)[a-z0-9]+(?:[._-][a-z0-9]+)*(?::\d+)?(?:\/[a-z0-9]+(?:[._-][a-z0-9]+)*)*(?::[A-Za-z0-9_][A-Za-z0-9._-]{0,127}|@sha256:[a-f0-9]{64})$/;
+
 const isNum = (n: unknown, min = 0, max = Infinity) => typeof n === "number" && Number.isFinite(n) && n >= min && n <= max;
 const isCount = (n: unknown, max: number) => Number.isInteger(n) && isNum(n, 0, max);
 const isSize = (size: any) => isNum(size?.vcpu, 0.1, 1024) && isNum(size?.memoryGb, 0.0625, 4096);
@@ -301,6 +304,40 @@ export function validateResult(j: any, now = Date.now()): string[] {
       }
       if (e?.belowQuotedCapRejected !== undefined && typeof e.belowQuotedCapRejected !== "boolean") out.push(`${e.provider}: invalid cap check`);
       if (e?.commandVerified !== true || e?.deleted !== true) out.push(`${e?.provider}: command output and deletion must be verified`);
+    }
+  } else if (j.tool === "sandboxrouter-image") {
+    add(checkDate(j.date, now));
+    add(checkLabel(j.label));
+    add(checkBy(j.by));
+    // A public reference only: no credentials in it, and nothing that is not a registry path.
+    if (typeof j.image !== "string" || !IMAGE_REF.test(j.image)) out.push("image must be a public registry reference, e.g. python:3.11-bookworm");
+    if (typeof j.verify?.command !== "string" || !j.verify.command || typeof j.verify?.contains !== "string" || !j.verify.contains) {
+      out.push("verify needs the command run in every sandbox and the text its output must contain");
+    }
+    if (!isSize(j.spec)) out.push("spec must record the requested size");
+    if (!isNum(j.repeats, 3, 100) || !Number.isInteger(j.repeats)) out.push("repeats must be at least 3");
+    if (!Array.isArray(j.rows) || !j.rows.length) out.push("rows is empty");
+    for (const r of Array.isArray(j.rows) ? j.rows : []) {
+      provider(r?.provider, "row provider");
+      if (noBench(r?.provider)) out.push(`${r.provider}: ${NO_BENCH}`);
+      if (!isSize(r?.size)) out.push(`${r?.provider}: invalid sandbox size`);
+      const repeat = Array.isArray(r?.repeatCreateMs) ? r.repeatCreateMs : undefined;
+      if (!repeat || repeat.length > j.repeats || repeat.some((ms: unknown) => !isNum(ms, 1, MAX_MS))) {
+        out.push(`${r?.provider}: repeatCreateMs must list at most ${j.repeats} times, each between 1 ms and 15 min`);
+        continue;
+      }
+      if (r.firstCreateMs !== undefined && !isNum(r.firstCreateMs, 1, MAX_MS)) out.push(`${r.provider}: firstCreateMs must be between 1 ms and 15 min`);
+      if (r.firstCreateMs === undefined && repeat.length) out.push(`${r.provider}: repeat starts without a first start`);
+      const starts = (r.firstCreateMs === undefined ? 0 : 1) + repeat.length;
+      if (!isCount(r.verified, 1 + j.repeats) || !isCount(r.failures, 1 + j.repeats) || r.verified !== starts || r.verified + r.failures > 1 + j.repeats) {
+        out.push(`${r.provider}: verified must count the timed starts, and verified plus failures cannot exceed the starts made`);
+      }
+      const sorted = [...repeat].sort((a: number, b: number) => a - b);
+      const mid = Math.floor(sorted.length / 2);
+      const expected = !sorted.length ? undefined : sorted.length % 2 ? sorted[mid] : Math.round((sorted[mid - 1] + sorted[mid]) / 2);
+      if (r.medianRepeatCreateMs !== expected) out.push(`${r.provider}: medianRepeatCreateMs must be the median of repeatCreateMs`);
+      if (r.hourlyUsd !== undefined && !isNum(r.hourlyUsd, 0, 1000)) out.push(`${r.provider}: hourlyUsd is out of range`);
+      if ("error" in r || "lastError" in r) out.push(`${r.provider}: errors must not be shared (they can hold account details)`);
     }
   } else {
     out.push(`unknown tool "${String(j.tool)}": expected a benchmark report, saved check, cost run or hosted ledger check`);

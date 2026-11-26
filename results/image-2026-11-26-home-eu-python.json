@@ -1,0 +1,54 @@
+{
+  "tool": "sandboxrouter-image",
+  "version": "0.17.0",
+  "date": "2026-11-26T12:48:33.371Z",
+  "label": "home-eu",
+  "image": "python:3.11-bookworm",
+  "verify": {
+    "command": "python3 --version",
+    "contains": "Python 3.11"
+  },
+  "spec": {
+    "vcpu": 4,
+    "memoryGb": 8
+  },
+  "repeats": 3,
+  "node": "v22.22.0",
+  "platform": "darwin-arm64",
+  "rows": [
+    {
+      "provider": "daytona",
+      "size": {
+        "vcpu": 4,
+        "memoryGb": 8
+      },
+      "firstCreateMs": 13617,
+      "repeatCreateMs": [
+        960,
+        1010,
+        801
+      ],
+      "medianRepeatCreateMs": 960,
+      "verified": 4,
+      "failures": 0,
+      "hourlyUsd": 0.3312
+    },
+    {
+      "provider": "modal",
+      "size": {
+        "vcpu": 4,
+        "memoryGb": 8
+      },
+      "firstCreateMs": 23399,
+      "repeatCreateMs": [
+        1393,
+        1519,
+        1553
+      ],
+      "medianRepeatCreateMs": 1519,
+      "verified": 4,
+      "failures": 0,
+      "hourlyUsd": 0.4759
+    }
+  ]
+}
