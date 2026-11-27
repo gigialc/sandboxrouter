@@ -46,6 +46,7 @@ import { DenoProvider } from "./providers/deno.js";
 import { FreestyleProvider } from "./providers/freestyle.js";
 import { KoyebProvider } from "./providers/koyeb.js";
 import { DedalusProvider } from "./providers/dedalus.js";
+import { RunCloudProvider } from "./providers/runcloud.js";
 import { Agent37Provider } from "./providers/agent37.js";
 import { OpenScaleProvider } from "./providers/openscale.js";
 import { SuperserveProvider } from "./providers/superserve.js";
@@ -265,6 +266,7 @@ export function defaultProviders(): Provider[] {
     new NovitaProvider(),
     new LangSmithProvider(),
     new OpenScaleProvider(),
+    new RunCloudProvider(),
     new SuperserveProvider(),
     new SailProvider(),
     new UpstashProvider(),

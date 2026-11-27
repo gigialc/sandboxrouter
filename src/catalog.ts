@@ -629,6 +629,21 @@ ENTRIES.push(
     access: { status: "waitlist", note: "private beta: your organization has to be admitted before keys work", checked: "2026-11-05" },
   },
   {
+    id: "runcloud",
+    name: "Run Cloud",
+    pricing: {
+      vcpuHour: 0.008856,
+      gbHour: 0.0029943,
+      note: "per second ($0.00000492 per physical core = 2 vCPUs, $0.00000083175 per GiB); the reservation is the floor, CPU and memory used above it bill at the same rates; $5 to start without a card, then the first $15 a month free with one",
+      source: "https://run.cloud/pricing",
+      checked: "2026-11-27",
+    },
+    capabilities: ["pause", "ports", "custom-image"],
+    limits: { maxVcpu: 32, maxMemoryGb: 112 },
+    credentials: [["RUN_CLOUD_API_KEY"]],
+    docs: "https://docs.run.cloud/sandboxes",
+  },
+  {
     id: "deno",
     name: "Deno Sandbox",
     pricing: {
@@ -793,6 +808,7 @@ const BILLING: Record<ProviderId, Pick<ProviderInfo, "billing" | "plan">> = {
   novita: { billing: "allocated" },
   openscale: { billing: "allocated" },
   runloop: { billing: "allocated" },
+  runcloud: { billing: "allocated" },
   sprites: { billing: "active-cpu" },
   sail: { billing: "active-cpu" },
   superserve: {

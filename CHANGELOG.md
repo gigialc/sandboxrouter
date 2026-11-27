@@ -8,6 +8,7 @@ All notable changes. Versions follow [semver](https://semver.org/); while the ve
 - **Releases publish themselves.** A push to `main` that changes the version in `package.json` publishes that version to npm from GitHub Actions, through npm trusted publishing: no npm token is stored in the repository.
 
 ### Added
+- **Run Cloud.** A new adapter (`runcloud`, `RUN_CLOUD_API_KEY`) for Run Cloud's Firecracker microVM sandboxes over plain REST: any Docker image, sizes up to 32 vCPU / 112 GiB, pause and resume, and `url()` through a public tunnel. Output arrives at the end (the live stream needs a WebSocket with an Authorization header).
 - **Benchmark: starting from your own image.** A new report type (`sandboxrouter-image`) and the script that writes it (`scripts/image-bench.ts`): give every provider the registry address of a public image, with no template or snapshot built first, and time the first start and the starts after it. Each sandbox is checked to be the image asked for, and a provider is listed only when all of them were. The first results are on [sandboxrouter.ai/benchmarks#image](https://sandboxrouter.ai/benchmarks#image).
 
 ### Fixed

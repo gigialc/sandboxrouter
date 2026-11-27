@@ -1,6 +1,6 @@
 # sandboxRouter
 
-**One API for every sandbox.** A free, open-source router for the places an AI agent can run code: Agent37, Alibaba Cloud, AWS (Bedrock AgentCore and Lambda MicroVMs), Azure Container Apps, Beam, Blaxel, Boat, Cloudflare, CodeSandbox, Daytona, Dedalus Machines, Deno, DigitalOcean Harness Runtime, E2B, exe.dev, Fly.io Sprites, Freestyle, Google Cloud Agent Platform, HOPX, InstaBox, Koyeb, Maritime, Modal, Morph, Northflank, Novita, OpenScale, Runloop, Sail, Superserve, Tensorlake, Upstash Box and Vercel, plus Docker on your own machine. It picks a provider by price, speed or capability, and falls back to the next one when a provider is down or rate-limited.
+**One API for every sandbox.** A free, open-source router for the places an AI agent can run code: Agent37, Alibaba Cloud, AWS (Bedrock AgentCore and Lambda MicroVMs), Azure Container Apps, Beam, Blaxel, Boat, Cloudflare, CodeSandbox, Daytona, Dedalus Machines, Deno, DigitalOcean Harness Runtime, E2B, exe.dev, Fly.io Sprites, Freestyle, Google Cloud Agent Platform, HOPX, InstaBox, Koyeb, Maritime, Modal, Morph, Northflank, Novita, OpenScale, Run Cloud, Runloop, Sail, Superserve, Tensorlake, Upstash Box and Vercel, plus Docker on your own machine. It picks a provider by price, speed or capability, and falls back to the next one when a provider is down or rate-limited.
 
 E2B quickstart (Node 22.19+ and an E2B API key):
 
@@ -51,6 +51,7 @@ List price while running, 2 vCPU / 4 GB, cheapest first; waitlisted sign-ups fol
 | [Agent37](https://sandboxrouter.ai/providers/agent37) | $0.007 | none | passed (2026-11-13) | [pricing](https://www.agent37.com/docs/agents-api/billing) |
 | [Boat](https://sandboxrouter.ai/providers/boat) | $0.018 | $20/mo (credited) | passed (2026-11-14) | [pricing](https://docs.boat.dev/pricing.md) |
 | [Maritime](https://sandboxrouter.ai/providers/maritime) | $0.022 | $20/mo (credited) | passed (2026-11-13) | [pricing](https://maritime.sh/pricing) |
+| [Run Cloud](https://sandboxrouter.ai/providers/runcloud) | $0.030 | none | not run yet | [pricing](https://run.cloud/pricing) |
 | [Sailboxes (Sail Research)](https://sandboxrouter.ai/providers/sail) | up to $0.062 | none | passed (2026-11-14) | [pricing](https://docs.sailresearch.com/sailboxes-pricing.md) |
 | [Northflank](https://sandboxrouter.ai/providers/northflank) | $0.067 | none | passed (2026-11-18) | [pricing](https://northflank.com/pricing) |
 | [Morph Cloud](https://sandboxrouter.ai/providers/morph) | $0.100 | none | passed (2026-11-18) | [pricing](https://cloud.morph.so/web/pricing) |
@@ -85,7 +86,7 @@ List price while running, 2 vCPU / 4 GB, cheapest first; waitlisted sign-ups fol
 | [E2B](https://sandboxrouter.ai/providers/e2b) | skipped (default image is 2 vCPU / 0.5 GB; a bigger size needs image.e2b) | none | passed (2026-11-13) | [pricing](https://e2b.dev/pricing) |
 | [Docker (local)](https://sandboxrouter.ai/providers/docker) | free | none | passed (2026-11-13) | [pricing](https://docs.docker.com/engine/) |
 
-Checked 2026-11-04 to 2026-11-18.
+Checked 2026-11-04 to 2026-11-27.
 
 ## Install
 
