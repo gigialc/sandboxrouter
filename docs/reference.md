@@ -323,12 +323,11 @@ It prints one line per step and exits 1 if any fails. `checkProvider(router, id)
 | Agent37 | 14/14 passed; note: output arrived only at the end (no live streaming) | 2026-11-13, v0.7.0 |
 | Boat | 14/14 passed | 2026-11-14, v0.8.1 |
 | Maritime | 14/14 passed | 2026-11-13, v0.7.0 |
-| Run Cloud | 14/14 passed; note: output arrived only at the end (no live streaming) | 2026-11-27, v0.17.0 |
+| Run Cloud | not run yet | |
 | Sailboxes (Sail Research) | 14/14 passed | 2026-11-14, v0.8.0 |
 | Northflank | 13/13 passed; n/a: pause and resume | 2026-11-18, v0.14.0 |
 | Morph Cloud | 14/14 passed | 2026-11-18, v0.14.0 |
 | exe.dev | not run yet | |
-| Novita AI Agent Sandbox | 14/14 passed | 2026-11-13, v0.7.0 |
 | DigitalOcean Harness Runtime | not run yet | |
 | Freestyle | 14/14 passed; note: output arrived only at the end (no live streaming) | 2026-11-13, v0.7.0 |
 | Beam | 13/13 passed; n/a: pause and resume | 2026-11-18, v0.14.0 |
@@ -354,6 +353,7 @@ It prints one line per step and exits 1 if any fails. `checkProvider(router, id)
 | Azure Container Apps dynamic sessions | not run yet | |
 | Daytona | 14/14 passed | 2026-11-13, v0.7.0 |
 | Alibaba Cloud Agent Sandbox | not run yet | |
+| Novita AI Agent Sandbox | 14/14 passed | 2026-11-13, v0.7.0 |
 | Google Cloud Agent Platform | 14/14 passed; note: output arrived only at the end (no live streaming) | 2026-11-18, v0.14.0 |
 | E2B | 14/14 passed | 2026-11-13, v0.7.0 |
 | Docker (local) | 14/14 passed | 2026-11-13, v0.7.0 |

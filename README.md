@@ -51,12 +51,11 @@ List price while running, 2 vCPU / 4 GB, cheapest first; waitlisted sign-ups fol
 | [Agent37](https://sandboxrouter.ai/providers/agent37) | $0.007 | none | passed (2026-11-13) | [pricing](https://www.agent37.com/docs/agents-api/billing) |
 | [Boat](https://sandboxrouter.ai/providers/boat) | $0.018 | $20/mo (credited) | passed (2026-11-14) | [pricing](https://docs.boat.dev/pricing.md) |
 | [Maritime](https://sandboxrouter.ai/providers/maritime) | $0.022 | $20/mo (credited) | passed (2026-11-13) | [pricing](https://maritime.sh/pricing) |
-| [Run Cloud](https://sandboxrouter.ai/providers/runcloud) | $0.030 | none | passed (2026-11-27) | [pricing](https://run.cloud/pricing) |
+| [Run Cloud](https://sandboxrouter.ai/providers/runcloud) | $0.030 | none | not run yet | [pricing](https://run.cloud/pricing) |
 | [Sailboxes (Sail Research)](https://sandboxrouter.ai/providers/sail) | up to $0.062 | none | passed (2026-11-14) | [pricing](https://docs.sailresearch.com/sailboxes-pricing.md) |
 | [Northflank](https://sandboxrouter.ai/providers/northflank) | $0.067 | none | passed (2026-11-18) | [pricing](https://northflank.com/pricing) |
 | [Morph Cloud](https://sandboxrouter.ai/providers/morph) | $0.100 | none | passed (2026-11-18) | [pricing](https://cloud.morph.so/web/pricing) |
 | [exe.dev](https://sandboxrouter.ai/providers/exedev) | $0.105 | $15/mo | not run yet | [pricing](https://exe.dev/docs/standalone-vms.md) |
-| [Novita AI Agent Sandbox](https://sandboxrouter.ai/providers/novita) | $0.117 | none | passed (2026-11-13) | [pricing](https://docs.novita.ai/guides/sandbox-pricing) |
 | [DigitalOcean Harness Runtime](https://sandboxrouter.ai/providers/digitalocean) | up to $0.126 | none | not run yet | [pricing](https://docs.digitalocean.com/products/managed-agents/agent-harness-runtime/details/pricing/) |
 | [Freestyle](https://sandboxrouter.ai/providers/freestyle) | $0.134 | none | passed (2026-11-13) | [pricing](https://www.freestyle.sh/docs/vms/pricing-and-limits) |
 | [Beam](https://sandboxrouter.ai/providers/beam) | $0.140 | $20/mo (credited) | passed (2026-11-18) | [pricing](https://www.beam.cloud/pricing) |
@@ -82,6 +81,7 @@ List price while running, 2 vCPU / 4 GB, cheapest first; waitlisted sign-ups fol
 | [Azure Container Apps dynamic sessions](https://sandboxrouter.ai/providers/azure) | skipped (max 1 vCPU) | none | not run yet | [pricing](https://learn.microsoft.com/en-us/azure/container-apps/billing#dynamic-sessions) |
 | [Daytona](https://sandboxrouter.ai/providers/daytona) | skipped (default image is 1 vCPU / 1 GB; a bigger size needs image.daytona) | none | passed (2026-11-13) | [pricing](https://www.daytona.io/pricing) |
 | [Alibaba Cloud Agent Sandbox](https://sandboxrouter.ai/providers/alibaba) | skipped (max 2 GB memory) | none | not run yet | [pricing](https://www.alibabacloud.com/help/en/agent-sandbox/product-overview/billing-overview) |
+| [Novita AI Agent Sandbox](https://sandboxrouter.ai/providers/novita) | skipped (default image is 2 vCPU / 1 GB; a bigger size needs image.novita) | none | passed (2026-11-13) | [pricing](https://docs.novita.ai/guides/sandbox-pricing) |
 | [Google Cloud Agent Platform](https://sandboxrouter.ai/providers/google) | skipped (max 1 vCPU) | none | passed (2026-11-18) | [pricing](https://cloud.google.com/products/gemini-enterprise-agent-platform/pricing) |
 | [E2B](https://sandboxrouter.ai/providers/e2b) | skipped (default image is 2 vCPU / 0.5 GB; a bigger size needs image.e2b) | none | passed (2026-11-13) | [pricing](https://e2b.dev/pricing) |
 | [Docker (local)](https://sandboxrouter.ai/providers/docker) | free | none | passed (2026-11-13) | [pricing](https://docs.docker.com/engine/) |
