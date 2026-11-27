@@ -72,6 +72,14 @@ Copy an adapter close to the new one: [`koyeb.ts`](src/providers/koyeb.ts) or [`
 
 List only the capabilities the adapter implements and tests, not what the provider markets.
 
+## If you work at the provider
+
+You're welcome to add your own product. Say so in the pull request, as a disclosure.
+
+A new provider is listed as "not run yet" until its real-account check passes on our own account, so results a vendor runs on its own account don't count toward that. To get yours checked quickly, send test credits or a promo code for a fresh account to [gigiialc on X](https://x.com/gigiialc) or gigialcaraz38@gmail.com. A few dollars covers the check and the benchmarks.
+
+Credits pay for the test runs and nothing else. They don't change your position, your price or the wording on the site: providers are ordered by public list price, and benchmark results are published as measured, including failures.
+
 ## Neutrality
 
 Providers are ordered by list price (or your own measured cold starts), ties alphabetical. PRs that give a provider a better slot, a default or nicer copy won't be merged, including from providers. Provider teams are welcome to fix their own adapter.
