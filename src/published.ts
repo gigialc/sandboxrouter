@@ -49,12 +49,12 @@ export const PUBLISHED: PublishedData = {
       "name": "Novita AI Agent Sandbox",
       "size": {
         "vcpu": 2,
-        "memoryGb": 4
+        "memoryGb": 1
       },
       "medianCreateMs": 298,
       "successRate": 1,
       "runs": 100,
-      "hourlyUsd": 0.11664,
+      "hourlyUsd": 0.08208,
       "measuredAt": "2026-11-17T16:19:15.367Z"
     },
     "sprites": {
@@ -1818,7 +1818,7 @@ export const PUBLISHED: PublishedData = {
           "limited": 0,
           "size": {
             "vcpu": 2,
-            "memoryGb": 4
+            "memoryGb": 1
           },
           "p50Ms": 1655,
           "p99Ms": 3157,
@@ -2053,7 +2053,7 @@ export const PUBLISHED: PublishedData = {
           "limited": 0,
           "size": {
             "vcpu": 2,
-            "memoryGb": 4
+            "memoryGb": 1
           },
           "p50Ms": 2079,
           "p99Ms": 2671,
