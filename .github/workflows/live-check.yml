@@ -53,6 +53,7 @@ jobs:
           CSB_API_KEY: ${{ secrets.CSB_API_KEY }}
           DAYTONA_API_KEY: ${{ secrets.DAYTONA_API_KEY }}
           DEDALUS_API_KEY: ${{ secrets.DEDALUS_API_KEY }}
+          RUN_CLOUD_API_KEY: ${{ secrets.RUN_CLOUD_API_KEY }}
           DENO_DEPLOY_TOKEN: ${{ secrets.DENO_DEPLOY_TOKEN }}
           E2B_API_KEY: ${{ secrets.E2B_API_KEY }}
           EXE_TOKEN: ${{ secrets.EXE_TOKEN }}
@@ -105,6 +106,7 @@ jobs:
           CSB_API_KEY: ${{ secrets.CSB_API_KEY }}
           DAYTONA_API_KEY: ${{ secrets.DAYTONA_API_KEY }}
           DEDALUS_API_KEY: ${{ secrets.DEDALUS_API_KEY }}
+          RUN_CLOUD_API_KEY: ${{ secrets.RUN_CLOUD_API_KEY }}
           DENO_DEPLOY_TOKEN: ${{ secrets.DENO_DEPLOY_TOKEN }}
           E2B_API_KEY: ${{ secrets.E2B_API_KEY }}
           EXE_TOKEN: ${{ secrets.EXE_TOKEN }}

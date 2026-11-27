@@ -34,7 +34,8 @@ export type ProviderId =
   | "openscale"
   | "sail"
   | "digitalocean"
-  | "google";
+  | "google"
+  | "runcloud";
 
 /** Things a caller can require of a provider. The router skips providers that lack one. */
 export type Capability =

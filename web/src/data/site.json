@@ -31,6 +31,7 @@
     "novita": "/logos/novita.ico",
     "openscale": "/logos/openscale.svg",
     "orgo": "/logos/orgo.svg",
+    "runcloud": "/logos/runcloud.svg",
     "runloop": "/logos/runloop.png",
     "sail": "/logos/sail.ico",
     "sprites": "/logos/sprites.png",
@@ -121,7 +122,7 @@
     }
   },
   "version": "0.17.0",
-  "generatedAt": "2026-11-27T15:32:00.837Z",
+  "generatedAt": "2026-11-27T21:32:10.726Z",
   "shapes": [
     "1x2",
     "2x4",
@@ -2725,6 +2726,72 @@
         "32x128": {
           "usd": 0.014,
           "unfit": "max 8 vCPU"
+        }
+      }
+    },
+    {
+      "id": "runcloud",
+      "name": "Run Cloud",
+      "local": false,
+      "capabilities": [
+        "pause",
+        "ports",
+        "custom-image"
+      ],
+      "limits": {
+        "maxVcpu": 32,
+        "maxMemoryGb": 112
+      },
+      "credentials": [
+        [
+          "RUN_CLOUD_API_KEY"
+        ]
+      ],
+      "docs": "https://docs.run.cloud/sandboxes",
+      "pricing": {
+        "vcpuHour": 0.008856,
+        "gbHour": 0.0029943,
+        "note": "per second ($0.00000492 per physical core = 2 vCPUs, $0.00000083175 per GiB); the reservation is the floor, CPU and memory used above it bill at the same rates; $5 to start without a card, then the first $15 a month free with one",
+        "source": "https://run.cloud/pricing",
+        "checked": "2026-11-27"
+      },
+      "access": null,
+      "billing": "allocated",
+      "plan": null,
+      "noBenchmarks": null,
+      "planLabel": "none",
+      "defaultSize": null,
+      "check": null,
+      "live": {
+        "status": "untested",
+        "label": "not run yet"
+      },
+      "billedVsList": null,
+      "computers": [],
+      "prices": {
+        "1x2": {
+          "usd": 0.0148,
+          "unfit": null
+        },
+        "2x4": {
+          "usd": 0.0297,
+          "unfit": null
+        },
+        "4x8": {
+          "usd": 0.0594,
+          "unfit": null
+        },
+        "8x16": {
+          "usd": 0.1188,
+          "unfit": null
+        },
+        "16x32": {
+          "usd": 0.2375,
+          "unfit": null
+        },
+        "32x128": {
+          "usd": 0.6667,
+          "unfit": "max 112 GB memory"
         }
       }
     },
