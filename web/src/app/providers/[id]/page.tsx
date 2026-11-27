@@ -37,6 +37,9 @@ const sbx = await router.create({}, { provider: "${p.id}" });
 await sbx.exec("uname -a", { onStdout: (c) => process.stdout.write(c) });
 await sbx.kill();`;
   const caps = [...p.capabilities, ...(p.computers.length ? ["computers"] : [])];
+  // Live output is a measured step of the real-account check: say "streaming" only where it passed.
+  const streamed = p.check?.steps["exec: streaming"];
+  const execLabel = streamed === "pass" ? "Exec + streaming" : streamed === "info" ? "Exec (output arrives at the end)" : "Exec";
 
   const lb = site.leaderboard.find((r) => r.provider === p.id);
   // Newest first, so every provider's facts come from its newest run that has them.
@@ -187,7 +190,7 @@ await sbx.kill();`;
           <h2 className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted">Adapter</h2>
           <dl className="mt-4 text-[13px]">
             {[
-              ["Supports", ["Exec + streaming", "Files", ...caps.map((c) => CAPABILITY_LABEL[c] ?? c)].join(" · ")],
+              ["Supports", [execLabel, "Files", ...caps.map((c) => CAPABILITY_LABEL[c] ?? c)].join(" · ")],
               ["Max size", `${p.limits.maxVcpu} vCPU · ${p.limits.maxMemoryGb} GB`],
               ...(p.computers.length ? [["Computers", p.computers.join(", ")]] : []),
               [
