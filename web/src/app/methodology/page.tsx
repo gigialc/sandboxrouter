@@ -20,9 +20,10 @@ const SECTIONS = [
   ["active-cpu", "Providers that bill active CPU"],
   ["check", "The real-account check"],
   ["speed", "Start time"],
-  ["jobs", "Real work"],
+  ["jobs", "Cost of a real task"],
   ["agent", "A real agent"],
   ["load", "Under load"],
+  ["image", "Straight from an image"],
   ["bills", "Measured bills"],
   ["limits", "What this doesn't cover"],
   ["runs", "Where it ran, and adding a run"],
@@ -35,6 +36,7 @@ export default function MethodologyPage() {
   const active = cloud.filter((p) => p.billing === "active-cpu").map((p) => p.name.replace(/ \(.*\)$/, ""));
   const billed = cloud.filter((p) => p.billedVsList);
   const noBench = cloud.filter((p) => p.noBenchmarks).map((p) => p.name);
+  const fixedSize = cloud.filter((p) => p.defaultSize).map((p) => p.name.replace(/ \(.*\)$/, ""));
   const subs = [...site.submissions].sort((a, b) => b.date.localeCompare(a.date));
 
   return (
@@ -59,8 +61,7 @@ export default function MethodologyPage() {
           <p>
             Every price starts from the provider&apos;s public pricing page; each <Link href="/providers">provider page</Link> links the source
             and the date it was checked, and a watcher flags pricing pages that change. A price is for the size you ask for, or the
-            size the provider really gives: some round up to their next size, and a few fix the size of their default image (E2B,
-            OpenScale, Daytona).
+            size the provider really gives: some round up to their next size, and a few fix the size of their default image ({fixedSize.join(", ")}).
           </p>
           <p>
             Ranking prices a whole run, not an hour: running time is rounded up to the provider&apos;s billing step and minimum charge,
@@ -274,7 +275,8 @@ export default function MethodologyPage() {
           <p>
             With the <a href="https://cli.github.com">GitHub CLI</a> signed in, <code>--submit</code> opens the pull request for you.
             Only the report is sent, never keys; providers whose every run failed on your own account are left out, and nothing is
-            written if your connection drops. A weekly run from GitHub&apos;s own servers in the US adds a second location.
+            written if your connection drops. A weekly run from GitHub&apos;s own servers in the US is scheduled; its reports are reviewed before
+            they join the tables, and none is in them yet.
           </p>
         </article>
       </div>
