@@ -1,0 +1,85 @@
+{
+  "tool": "sandboxrouter-check",
+  "version": "0.17.0",
+  "date": "2026-11-27T17:02:40.567Z",
+  "platform": "darwin-arm64",
+  "by": "t0tl",
+  "provider": "runcloud",
+  "sandboxId": "runcloud:sbx_9d3bbd0d7789ad215450",
+  "results": [
+    {
+      "step": "create",
+      "ms": 5886,
+      "status": "pass",
+      "detail": "runcloud:sbx_9d3bbd0d7789ad215450, ~$0.0297/hr"
+    },
+    {
+      "step": "exec: stdout, stderr, exit code",
+      "ms": 301,
+      "status": "pass"
+    },
+    {
+      "step": "exec: env and cwd",
+      "ms": 302,
+      "status": "pass"
+    },
+    {
+      "step": "exec: UTF-8 output",
+      "ms": 296,
+      "status": "pass"
+    },
+    {
+      "step": "exec: streaming",
+      "ms": 3322,
+      "status": "info",
+      "detail": "output arrived only at the end (no live streaming)"
+    },
+    {
+      "step": "files: binary round-trip",
+      "ms": 540,
+      "status": "pass"
+    },
+    {
+      "step": "files: 1 MB round-trip",
+      "ms": 4655,
+      "status": "pass"
+    },
+    {
+      "step": "files: missing file is an error",
+      "ms": 343,
+      "status": "pass"
+    },
+    {
+      "step": "files: visible to commands",
+      "ms": 1101,
+      "status": "pass"
+    },
+    {
+      "step": "exec: command timeout",
+      "ms": 3664,
+      "status": "pass",
+      "detail": "threw after 3664 ms"
+    },
+    {
+      "step": "exec: timed-out command was stopped",
+      "ms": 6827,
+      "status": "pass"
+    },
+    {
+      "step": "pause and resume",
+      "ms": 15343,
+      "status": "pass"
+    },
+    {
+      "step": "kill",
+      "ms": 808,
+      "status": "pass"
+    },
+    {
+      "step": "killed sandbox is gone",
+      "ms": 182,
+      "status": "pass"
+    }
+  ],
+  "ok": true
+}

@@ -7,7 +7,7 @@ Everything the [README](../README.md) leaves out. The tables marked generated ar
 ```bash
 npm i @sandboxrouter/sdk
 # then the SDK of each provider you use (Agent37, Azure, AgentCore, Boat, Cloudflare, Dedalus, DigitalOcean, exe.dev, Freestyle, InstaBox, Koyeb,
-# Lambda, Maritime, Sail, Superserve, Upstash and Docker need none; the AWS ones need the signing packages below):
+# Lambda, Maritime, Run Cloud, Sail, Superserve, Upstash and Docker need none; the AWS ones need the signing packages below):
 npm i e2b                       # E2B (also Alibaba Cloud and OpenScale)
 npm i @daytonaio/sdk            # Daytona
 npm i modal                     # Modal
@@ -70,6 +70,7 @@ Set the keys for the providers you want. Providers without keys are skipped.
 | Northflank | `NORTHFLANK_API_TOKEN` + `NORTHFLANK_PROJECT_ID` |
 | Novita AI Agent Sandbox | `NOVITA_API_KEY` |
 | OpenScale Sandboxes | `OPENSCALE_API_KEY` |
+| Run Cloud | `RUN_CLOUD_API_KEY` |
 | Runloop | `RUNLOOP_API_KEY` |
 | Sailboxes (Sail Research) | `SAIL_API_KEY` |
 | Superserve | `SUPERSERVE_API_KEY` |
@@ -322,6 +323,7 @@ It prints one line per step and exits 1 if any fails. `checkProvider(router, id)
 | Agent37 | 14/14 passed; note: output arrived only at the end (no live streaming) | 2026-11-13, v0.7.0 |
 | Boat | 14/14 passed | 2026-11-14, v0.8.1 |
 | Maritime | 14/14 passed | 2026-11-13, v0.7.0 |
+| Run Cloud | 14/14 passed; note: output arrived only at the end (no live streaming) | 2026-11-27, v0.17.0 |
 | Sailboxes (Sail Research) | 14/14 passed | 2026-11-14, v0.8.0 |
 | Northflank | 13/13 passed; n/a: pause and resume | 2026-11-18, v0.14.0 |
 | Morph Cloud | 14/14 passed | 2026-11-18, v0.14.0 |
@@ -454,6 +456,7 @@ print(sr.quote(vcpu=2, memory_gb=4, expected_seconds=10, max_hourly_usd=0.03))
 | Fly.io Sprites | `cpus`, `ramMB` (may be ignored) | none: `kill()` or `gc` deletes | no | no | Sprites idle for free on their own. |
 | Blaxel | memory (CPU follows) | `ttl` | image | no (archiving is a per-workspace preview) | Idle sandboxes go to free standby on their own. |
 | Tensorlake | `cpus`, `memoryMb` | idle timeout | image | yes (memory + disk) | Output is line-based. |
+| Run Cloud | `cpu` (vCPUs), `memory` (MiB) | `timeoutSeconds`, destroyed at the end | any Docker image (`runcloud/agent-base` default) | yes (memory + disk) | Plain REST; buffered `/exec` (no live streaming); files move in 512 KiB chunks over the files API; `url()` opens a public tunnel. |
 | Runloop | snapped to Runloop's custom sizes | `keep_alive_time_seconds` (max 48 h) | blueprint | yes (Pro plan) | Commands start in the home directory. |
 | HOPX | set by the template | timeout | template | yes (memory + disk) | Size requests aren't applied, so the router only sends default-size work. |
 | Northflank | cheapest `nf-compute` plan that fits | `expiryTime` (5 min to 7 days) | any public image | no | Runs as a deployment service; files move as base64 over exec. |

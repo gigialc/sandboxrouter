@@ -22,6 +22,7 @@ export const VERIFIED: Partial<Record<ProviderId, string>> = {
   northflank: "2026-11-18",
   novita: "2026-11-13",
   openscale: "2026-11-13",
+  runcloud: "2026-11-27",
   sail: "2026-11-14",
   superserve: "2026-11-13",
   tensorlake: "2026-11-14",

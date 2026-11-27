@@ -360,6 +360,7 @@ export const PACKAGE: Record<string, string | null> = {
   codesandbox: "@codesandbox/sdk",
   deno: "@deno/sandbox",
   dedalus: null,
+  runcloud: null,
   agent37: null,
   openscale: "e2b",
   superserve: null,

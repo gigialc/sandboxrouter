@@ -94,6 +94,7 @@ export { DenoProvider } from "./providers/deno.js";
 export { FreestyleProvider } from "./providers/freestyle.js";
 export { KoyebProvider } from "./providers/koyeb.js";
 export { DedalusProvider } from "./providers/dedalus.js";
+export { RunCloudProvider } from "./providers/runcloud.js";
 export { OpenScaleProvider } from "./providers/openscale.js";
 export { SuperserveProvider } from "./providers/superserve.js";
 export { SailProvider } from "./providers/sail.js";

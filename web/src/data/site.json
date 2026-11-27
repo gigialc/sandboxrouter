@@ -31,6 +31,7 @@
     "novita": "/logos/novita.ico",
     "openscale": "/logos/openscale.svg",
     "orgo": "/logos/orgo.svg",
+    "runcloud": "/logos/runcloud.svg",
     "runloop": "/logos/runloop.png",
     "sail": "/logos/sail.ico",
     "sprites": "/logos/sprites.png",
@@ -121,7 +122,7 @@
     }
   },
   "version": "0.17.0",
-  "generatedAt": "2026-11-26T18:50:05.011Z",
+  "generatedAt": "2026-11-27T17:02:48.189Z",
   "shapes": [
     "1x2",
     "2x4",
@@ -2718,6 +2719,102 @@
         "32x128": {
           "usd": 0.014,
           "unfit": "max 8 vCPU"
+        }
+      }
+    },
+    {
+      "id": "runcloud",
+      "name": "Run Cloud",
+      "local": false,
+      "capabilities": [
+        "pause",
+        "ports",
+        "custom-image"
+      ],
+      "limits": {
+        "maxVcpu": 32,
+        "maxMemoryGb": 112
+      },
+      "credentials": [
+        [
+          "RUN_CLOUD_API_KEY"
+        ]
+      ],
+      "docs": "https://docs.run.cloud/sandboxes",
+      "pricing": {
+        "vcpuHour": 0.008856,
+        "gbHour": 0.0029943,
+        "note": "per second ($0.00000492 per physical core = 2 vCPUs, $0.00000083175 per GiB); the reservation is the floor, CPU and memory used above it bill at the same rates; $5 to start without a card, then the first $15 a month free with one",
+        "source": "https://run.cloud/pricing",
+        "checked": "2026-11-27"
+      },
+      "access": null,
+      "billing": "allocated",
+      "plan": null,
+      "noBenchmarks": null,
+      "planLabel": "none",
+      "defaultSize": null,
+      "check": {
+        "date": "2026-11-27T17:02:40.567Z",
+        "version": "0.17.0",
+        "by": "t0tl",
+        "passed": 14,
+        "failed": [],
+        "skipped": [],
+        "notRun": [],
+        "notes": [
+          {
+            "step": "exec: streaming",
+            "detail": "output arrived only at the end (no live streaming)"
+          }
+        ],
+        "steps": {
+          "create": "pass",
+          "exec: stdout, stderr, exit code": "pass",
+          "exec: env and cwd": "pass",
+          "exec: UTF-8 output": "pass",
+          "exec: streaming": "info",
+          "files: binary round-trip": "pass",
+          "files: 1 MB round-trip": "pass",
+          "files: missing file is an error": "pass",
+          "files: visible to commands": "pass",
+          "exec: command timeout": "pass",
+          "exec: timed-out command was stopped": "pass",
+          "pause and resume": "pass",
+          "kill": "pass",
+          "killed sandbox is gone": "pass"
+        }
+      },
+      "live": {
+        "status": "passed",
+        "label": "passed (2026-11-27)"
+      },
+      "billedVsList": null,
+      "computers": [],
+      "prices": {
+        "1x2": {
+          "usd": 0.0148,
+          "unfit": null
+        },
+        "2x4": {
+          "usd": 0.0297,
+          "unfit": null
+        },
+        "4x8": {
+          "usd": 0.0594,
+          "unfit": null
+        },
+        "8x16": {
+          "usd": 0.1188,
+          "unfit": null
+        },
+        "16x32": {
+          "usd": 0.2375,
+          "unfit": null
+        },
+        "32x128": {
+          "usd": 0.6667,
+          "unfit": "max 112 GB memory"
         }
       }
     },
@@ -7139,6 +7236,16 @@
           "ownImage": false
         },
         {
+          "provider": "runcloud",
+          "name": "Run Cloud",
+          "runUsd": 0.0000825,
+          "runHourlyUsd": 0.029699999999999997,
+          "hourlyUsd": 0.0297,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0,
+          "ownImage": false
+        },
+        {
           "provider": "agent37",
           "name": "Agent37",
           "runUsd": 0.00010833333333333331,
@@ -7374,6 +7481,16 @@
           "ownImage": false
         },
         {
+          "provider": "runcloud",
+          "name": "Run Cloud",
+          "runUsd": 0.01485,
+          "runHourlyUsd": 0.0297,
+          "hourlyUsd": 0.0297,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0,
+          "ownImage": false
+        },
+        {
           "provider": "sail",
           "name": "Sailboxes (Sail Research)",
           "runUsd": 0.0175,
@@ -7598,6 +7715,16 @@
           "ownImage": false
         },
         {
+          "provider": "runcloud",
+          "name": "Run Cloud",
+          "runUsd": 0.1188,
+          "runHourlyUsd": 0.0297,
+          "hourlyUsd": 0.0297,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0,
+          "ownImage": false
+        },
+        {
           "provider": "sail",
           "name": "Sailboxes (Sail Research)",
           "runUsd": 0.248,
@@ -7812,6 +7939,16 @@
           "ownImage": false
         },
         {
+          "provider": "runcloud",
+          "name": "Run Cloud",
+          "runUsd": 0.1188,
+          "runHourlyUsd": 0.1188,
+          "hourlyUsd": 0.1188,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0,
+          "ownImage": false
+        },
+        {
           "provider": "sail",
           "name": "Sailboxes (Sail Research)",
           "runUsd": 0.248,
@@ -7943,6 +8080,16 @@
           "runUsd": 0.010999999999999998,
           "runHourlyUsd": 0.021999999999999995,
           "hourlyUsd": 0.022,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0,
+          "ownImage": false
+        },
+        {
+          "provider": "runcloud",
+          "name": "Run Cloud",
+          "runUsd": 0.01485,
+          "runHourlyUsd": 0.0297,
+          "hourlyUsd": 0.0297,
           "perSandboxUsd": 0,
           "minimumSeconds": 0,
           "ownImage": false
@@ -8089,6 +8236,16 @@
           "runUsd": 0.010999999999999998,
           "runHourlyUsd": 0.021999999999999995,
           "hourlyUsd": 0.022,
+          "perSandboxUsd": 0,
+          "minimumSeconds": 0,
+          "ownImage": false
+        },
+        {
+          "provider": "runcloud",
+          "name": "Run Cloud",
+          "runUsd": 0.01485,
+          "runHourlyUsd": 0.0297,
+          "hourlyUsd": 0.0297,
           "perSandboxUsd": 0,
           "minimumSeconds": 0,
           "ownImage": false
@@ -9263,37 +9420,37 @@
         "id": "2x4-hour",
         "label": "2 vCPU / 4 GB, one hour",
         "unit": "per hour",
-        "median": 0.1645,
+        "median": 0.15225,
         "cheapest": {
           "provider": "agent37",
           "name": "Agent37",
           "usd": 0.0065
         },
-        "providers": 21
+        "providers": 22
       },
       {
         "id": "agent-hour",
         "label": "Agent session, one hour at 10% CPU",
         "unit": "per hour",
-        "median": 0.1,
+        "median": 0.0976,
         "cheapest": {
           "provider": "agent37",
           "name": "Agent37",
           "usd": 0.0065
         },
-        "providers": 21
+        "providers": 22
       },
       {
         "id": "calls-1000",
         "label": "1,000 tool calls, 10 s each",
         "unit": "per 1,000",
-        "median": 0.456944,
+        "median": 0.422917,
         "cheapest": {
           "provider": "openscale",
           "name": "OpenScale Sandboxes",
           "usd": 0.047222
         },
-        "providers": 21
+        "providers": 22
       }
     ],
     "history": [
