@@ -1,0 +1,51 @@
+name: publish
+# Publishes @sandboxrouter/sdk to npm when a push to main changes the version in package.json and that
+# version is not on npm yet. A release is therefore: merge the release pull request.
+#
+# No npm token is stored here. npm trusts this workflow file directly (trusted publishing, OIDC): the
+# package's settings on npmjs.com name this repository and this file name, publish.yml. Renaming the
+# file breaks publishing until that setting is changed too.
+on:
+  push:
+    branches: [main]
+    paths: [package.json]
+  workflow_dispatch:
+permissions:
+  contents: read
+  id-token: write # lets npm verify that the publish comes from this workflow
+concurrency:
+  group: publish
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+      - name: Is this version on npm already?
+        id: version
+        run: |
+          name=$(node -p "require('./package.json').name")
+          version=$(node -p "require('./package.json').version")
+          if npm view "$name@$version" version >/dev/null 2>&1; then
+            echo "$name@$version is already on npm; nothing to publish."
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Publishing $name@$version."
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/setup-python@v7
+        if: steps.version.outputs.publish == 'true'
+        with:
+          python-version: "3.12"
+      # Trusted publishing needs npm 11.5.1 or later.
+      - run: npm install -g npm@^11.5.1
+        if: steps.version.outputs.publish == 'true'
+      - run: npm ci
+        if: steps.version.outputs.publish == 'true'
+      # prepublishOnly builds, checks the package contents and runs the tests before anything is uploaded.
+      - run: npm publish
+        if: steps.version.outputs.publish == 'true'

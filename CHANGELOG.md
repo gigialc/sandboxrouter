@@ -4,6 +4,9 @@ All notable changes. Versions follow [semver](https://semver.org/); while the ve
 
 ## Unreleased
 
+### Changed
+- **Releases publish themselves.** A push to `main` that changes the version in `package.json` publishes that version to npm from GitHub Actions, through npm trusted publishing: no npm token is stored in the repository.
+
 ### Added
 - **Benchmark: starting from your own image.** A new report type (`sandboxrouter-image`) and the script that writes it (`scripts/image-bench.ts`): give every provider the registry address of a public image, with no template or snapshot built first, and time the first start and the starts after it. Each sandbox is checked to be the image asked for, and a provider is listed only when all of them were. The first results are on [sandboxrouter.ai/benchmarks#image](https://sandboxrouter.ai/benchmarks#image).
 
