@@ -2,7 +2,7 @@
 
 All notable changes. Versions follow [semver](https://semver.org/); while the version is 0.x, a minor bump can change the API.
 
-## Unreleased
+## 0.18.0 (2026-11-27)
 
 ### Changed
 - **Releases publish themselves.** A push to `main` that changes the version in `package.json` publishes that version to npm from GitHub Actions, through npm trusted publishing: no npm token is stored in the repository.
