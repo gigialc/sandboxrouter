@@ -727,6 +727,8 @@ ENTRIES.push(
     },
     capabilities: ["pause", "custom-image", "ports", "background"],
     limits: { maxVcpu: 8, maxMemoryGb: 8 },
+    // The default "base" template; a bigger size needs a template built with cpuCount / memoryMB.
+    defaultSize: { vcpu: 2, memoryGb: 1, measured: "2026-11-26" },
     credentials: [["NOVITA_API_KEY"]],
     docs: "https://docs.novita.ai/guides/sandbox-overview",
   },

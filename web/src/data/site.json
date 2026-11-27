@@ -121,7 +121,7 @@
     }
   },
   "version": "0.17.0",
-  "generatedAt": "2026-11-26T18:50:05.011Z",
+  "generatedAt": "2026-11-27T15:32:00.837Z",
   "shapes": [
     "1x2",
     "2x4",
@@ -2563,7 +2563,11 @@
       "plan": null,
       "noBenchmarks": null,
       "planLabel": "none",
-      "defaultSize": null,
+      "defaultSize": {
+        "vcpu": 2,
+        "memoryGb": 1,
+        "usd": 0.0821
+      },
       "check": {
         "date": "2026-11-13T23:33:56.411Z",
         "version": "0.7.0",
@@ -2599,26 +2603,29 @@
       "prices": {
         "1x2": {
           "usd": 0.0583,
-          "unfit": null
+          "unfit": null,
+          "ownImage": true
         },
         "2x4": {
           "usd": 0.1166,
-          "unfit": null
+          "unfit": null,
+          "ownImage": true
         },
         "4x8": {
           "usd": 0.2333,
-          "unfit": null
+          "unfit": null,
+          "ownImage": true
         },
         "8x16": {
-          "usd": 0.4666,
+          "usd": 0.0821,
           "unfit": "max 8 GB memory"
         },
         "16x32": {
-          "usd": 0.9331,
+          "usd": 0.0821,
           "unfit": "max 8 vCPU"
         },
         "32x128": {
-          "usd": 2.6035,
+          "usd": 0.0821,
           "unfit": "max 8 vCPU"
         }
       }
@@ -3421,10 +3428,10 @@
       "medianExecMs": 586,
       "successRate": 1,
       "runs": 100,
-      "hourlyUsd": 0.11664,
+      "hourlyUsd": 0.08208,
       "size": {
         "vcpu": 2,
-        "memoryGb": 4
+        "memoryGb": 1
       },
       "measuredAt": "2026-11-17T16:19:15.367Z"
     },
@@ -7186,7 +7193,7 @@
           "hourlyUsd": 0.1166,
           "perSandboxUsd": 0,
           "minimumSeconds": 0,
-          "ownImage": false
+          "ownImage": true
         },
         {
           "provider": "freestyle",
@@ -7471,7 +7478,7 @@
           "hourlyUsd": 0.1166,
           "perSandboxUsd": 0,
           "minimumSeconds": 0,
-          "ownImage": false
+          "ownImage": true
         },
         {
           "provider": "freestyle",
@@ -7635,7 +7642,7 @@
           "hourlyUsd": 0.1166,
           "perSandboxUsd": 0,
           "minimumSeconds": 0,
-          "ownImage": false
+          "ownImage": true
         },
         {
           "provider": "freestyle",
@@ -7975,7 +7982,7 @@
           "hourlyUsd": 0.1166,
           "perSandboxUsd": 0,
           "minimumSeconds": 0,
-          "ownImage": false
+          "ownImage": true
         },
         {
           "provider": "freestyle",
@@ -8121,7 +8128,7 @@
           "hourlyUsd": 0.1166,
           "perSandboxUsd": 0,
           "minimumSeconds": 0,
-          "ownImage": false
+          "ownImage": true
         },
         {
           "provider": "freestyle",
@@ -8311,7 +8318,7 @@
           "label": "home-eu",
           "size": {
             "vcpu": 2,
-            "memoryGb": 4
+            "memoryGb": 1
           }
         },
         {
@@ -8596,7 +8603,7 @@
           "label": "home-eu",
           "size": {
             "vcpu": 2,
-            "memoryGb": 4
+            "memoryGb": 1
           }
         },
         {
