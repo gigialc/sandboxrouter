@@ -456,7 +456,7 @@ print(sr.quote(vcpu=2, memory_gb=4, expected_seconds=10, max_hourly_usd=0.03))
 | Fly.io Sprites | `cpus`, `ramMB` (may be ignored) | none: `kill()` or `gc` deletes | no | no | Sprites idle for free on their own. |
 | Blaxel | memory (CPU follows) | `ttl` | image | no (archiving is a per-workspace preview) | Idle sandboxes go to free standby on their own. |
 | Tensorlake | `cpus`, `memoryMb` | idle timeout | image | yes (memory + disk) | Output is line-based. |
-| Run Cloud | `cpu` (vCPUs), `memory` (MiB) | `timeoutSeconds`, destroyed at the end | any Docker image (`runcloud/agent-base` default) | yes (memory + disk) | Plain REST; buffered `/exec` (no live streaming); files move in 512 KiB chunks over the files API; `url()` opens a public tunnel. |
+| Run Cloud | `cpu` (vCPUs; with `cpuUtilization` below 1 that share is reserved and `cpuLimit` bursts to the full size), `memory` (MiB) | `timeoutSeconds`, destroyed at the end | any Docker image (`runcloud/agent-base` default) | yes (memory + disk) | Plain REST; buffered `/exec` (no live streaming); files move in 512 KiB chunks over the files API; `url()` opens a public tunnel. |
 | Runloop | snapped to Runloop's custom sizes | `keep_alive_time_seconds` (max 48 h) | blueprint | yes (Pro plan) | Commands start in the home directory. |
 | HOPX | set by the template | timeout | template | yes (memory + disk) | Size requests aren't applied, so the router only sends default-size work. |
 | Northflank | cheapest `nf-compute` plan that fits | `expiryTime` (5 min to 7 days) | any public image | no | Runs as a deployment service; files move as base64 over exec. |

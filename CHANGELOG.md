@@ -2,6 +2,11 @@
 
 All notable changes. Versions follow [semver](https://semver.org/); while the version is 0.x, a minor bump can change the API.
 
+## Unreleased
+
+### Changed
+- **Run Cloud: priced and sized like Modal when `cpuUtilization` is below 1.** Run Cloud bills the larger of the reserved CPU and the CPU used, and a sandbox can now burst above its reservation (`cpuLimit`). The adapter reserves `cpuUtilization` of the size you ask for (at least 1/8 vCPU) and lets it burst to the full size, so ranking prices CPU at that share, as for Modal.
+
 ## 0.18.0 (2026-11-27)
 
 ### Changed
