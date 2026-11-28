@@ -47,6 +47,8 @@ export default function BenchmarksPage() {
   const timedStarts = rows.filter((r) => r.medianCreateMs !== undefined);
   const latestStart = timedStarts.map((r) => r.measuredAt).sort().at(-1);
   const maxCreate = barMax(rows.map((r) => r.medianCreateMs ?? 0));
+  // Delete timing started later than create timing: the column appears once a report has it.
+  const timedDeletes = rows.some((r) => r.medianKillMs !== undefined);
 
   return (
     <div className="px-5 sm:px-10 pt-14">
@@ -137,6 +139,7 @@ export default function BenchmarksPage() {
         cols={[
           { label: "Median create" },
           { label: "Command", className: "hidden sm:table-cell" },
+          ...(timedDeletes ? [{ label: "Delete", className: "hidden sm:table-cell" }] : []),
           { label: "Ready, excluding limit refusals", className: "hidden md:table-cell" },
           { label: "Per hour" },
         ]}
@@ -150,6 +153,7 @@ export default function BenchmarksPage() {
             notes={[
               r.size.vcpu !== 2 || r.size.memoryGb !== 4 ? `${r.size.vcpu} vCPU / ${r.size.memoryGb} GB` : "",
               r.runs === 0 ? "All requests refused by the test account limit" : `${r.runs} requests excluding limit refusals`,
+              r.killWaitsUntilGone ? "Delete time includes waiting until the sandbox is gone" : "",
             ].filter(Boolean)}
           >
             {r.medianCreateMs === undefined ? <Num>—</Num> : (
@@ -160,11 +164,22 @@ export default function BenchmarksPage() {
             <Num className="hidden sm:table-cell" title="Median round trip of one command, once started">
               {time(r.medianExecMs)}
             </Num>
+            {timedDeletes && (
+              <Num className="hidden sm:table-cell" title="Median time for the delete call to return">
+                {r.medianKillMs === undefined ? "—" : time(r.medianKillMs)}
+              </Num>
+            )}
             <Num className="hidden md:table-cell">{r.runs > 0 ? `${Math.round(r.successRate * 100)}%` : "—"}</Num>
             <Num>{perHour(r.hourlyUsd)}</Num>
           </ResultRow>
         ))}
       </ResultTable>
+      {timedDeletes && (
+        <Footnote>
+          Delete is the time the delete call takes to return. Where a row says so, the router waits until the sandbox is gone, because that
+          provider&apos;s delete request only schedules the deletion; the other rows time the request alone.
+        </Footnote>
+      )}
       {hasStartFee(rows.map((r) => r.provider)) && (
         <Footnote>
           Per hour is the list price at the size shown. <ConditionalStartFeeNote ids={rows.map((r) => r.provider)} what="hourly prices" />

@@ -50,6 +50,8 @@ export interface LeaderRow {
   medianCreateMs?: number;
   medianExecMs?: number;
   medianReadyMs?: number;
+  medianKillMs?: number;
+  killWaitsUntilGone?: boolean;
   successRate: number;
   runs: number;
   hourlyUsd: number;

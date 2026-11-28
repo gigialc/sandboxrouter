@@ -129,7 +129,7 @@ export function validateResult(j: any, now = Date.now()): string[] {
       if (!isNum(r?.runs, 1, 1000)) out.push(`${r?.provider}: runs is not a positive number`);
       if (!isNum(r?.failures, 0, r?.runs ?? 0)) out.push(`${r?.provider}: failures must be between 0 and runs`);
       if (r?.limited !== undefined && !isNum(r.limited, 0, r?.failures ?? 0)) out.push(`${r?.provider}: limited must be between 0 and failures`);
-      for (const k of ["medianCreateMs", "medianExecMs", "medianReadyMs", "medianTaskReadyMs"] as const) {
+      for (const k of ["medianCreateMs", "medianExecMs", "medianReadyMs", "medianKillMs", "medianTaskReadyMs"] as const) {
         if (r?.[k] !== undefined && !isNum(r[k], 1, MAX_MS)) out.push(`${r?.provider}: ${k} must be between 1 ms and 15 min`);
       }
       if (r?.failures < r?.runs && r?.medianCreateMs === undefined) out.push(`${r?.provider}: successful runs but no medianCreateMs`);

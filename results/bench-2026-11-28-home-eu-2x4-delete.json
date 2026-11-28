@@ -1,0 +1,304 @@
+{
+  "tool": "sandboxrouter",
+  "version": "0.18.0",
+  "date": "2026-11-28T15:05:23.053Z",
+  "label": "home-eu",
+  "runs": 5,
+  "spec": {
+    "vcpu": 2,
+    "memoryGb": 4
+  },
+  "node": "v22.22.0",
+  "platform": "darwin-arm64",
+  "rows": [
+    {
+      "provider": "vercel",
+      "runs": 5,
+      "failures": 0,
+      "createFailures": 0,
+      "commandFailures": 0,
+      "cleanupFailures": 0,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "medianCreateMs": 245,
+      "medianExecMs": 224,
+      "medianReadyMs": 482,
+      "medianKillMs": 239,
+      "hourlyUsd": 0.3408
+    },
+    {
+      "provider": "e2b",
+      "runs": 5,
+      "failures": 0,
+      "createFailures": 0,
+      "commandFailures": 0,
+      "cleanupFailures": 0,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 0.5
+      },
+      "medianCreateMs": 306,
+      "medianExecMs": 348,
+      "medianReadyMs": 700,
+      "medianKillMs": 219,
+      "hourlyUsd": 0.1089
+    },
+    {
+      "provider": "novita",
+      "runs": 5,
+      "failures": 0,
+      "createFailures": 0,
+      "commandFailures": 0,
+      "cleanupFailures": 0,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 1
+      },
+      "medianCreateMs": 318,
+      "medianExecMs": 548,
+      "medianReadyMs": 866,
+      "medianKillMs": 188,
+      "hourlyUsd": 0.08208
+    },
+    {
+      "provider": "openscale",
+      "runs": 5,
+      "failures": 0,
+      "createFailures": 0,
+      "commandFailures": 0,
+      "cleanupFailures": 0,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 1
+      },
+      "medianCreateMs": 339,
+      "medianExecMs": 965,
+      "medianReadyMs": 1341,
+      "medianKillMs": 264,
+      "hourlyUsd": 0.013999999999999999
+    },
+    {
+      "provider": "daytona",
+      "runs": 5,
+      "failures": 0,
+      "createFailures": 0,
+      "commandFailures": 0,
+      "cleanupFailures": 0,
+      "size": {
+        "vcpu": 1,
+        "memoryGb": 1
+      },
+      "medianCreateMs": 358,
+      "medianExecMs": 413,
+      "medianReadyMs": 771,
+      "medianKillMs": 348,
+      "hourlyUsd": 0.06659999999999999
+    },
+    {
+      "provider": "modal",
+      "runs": 5,
+      "failures": 0,
+      "createFailures": 0,
+      "commandFailures": 0,
+      "cleanupFailures": 0,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "medianCreateMs": 418,
+      "medianExecMs": 721,
+      "medianReadyMs": 1139,
+      "medianKillMs": 146,
+      "hourlyUsd": 0.23796
+    },
+    {
+      "provider": "freestyle",
+      "runs": 5,
+      "failures": 0,
+      "createFailures": 0,
+      "commandFailures": 0,
+      "cleanupFailures": 0,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "medianCreateMs": 880,
+      "medianExecMs": 188,
+      "medianReadyMs": 1068,
+      "medianKillMs": 326,
+      "hourlyUsd": 0.13362
+    },
+    {
+      "provider": "agentcore",
+      "runs": 5,
+      "failures": 0,
+      "createFailures": 0,
+      "commandFailures": 0,
+      "cleanupFailures": 0,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "medianCreateMs": 901,
+      "medianExecMs": 286,
+      "medianReadyMs": 1163,
+      "medianKillMs": 193,
+      "hourlyUsd": 0.2168
+    },
+    {
+      "provider": "morph",
+      "runs": 5,
+      "failures": 0,
+      "createFailures": 0,
+      "commandFailures": 0,
+      "cleanupFailures": 0,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "medianCreateMs": 966,
+      "medianExecMs": 520,
+      "medianReadyMs": 1502,
+      "medianKillMs": 1296,
+      "hourlyUsd": 0.1
+    },
+    {
+      "provider": "sail",
+      "runs": 5,
+      "failures": 0,
+      "createFailures": 0,
+      "commandFailures": 0,
+      "cleanupFailures": 0,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "medianCreateMs": 1124,
+      "medianExecMs": 231,
+      "medianReadyMs": 1391,
+      "medianKillMs": 672,
+      "hourlyUsd": 0.062
+    },
+    {
+      "provider": "agent37",
+      "runs": 5,
+      "failures": 0,
+      "createFailures": 0,
+      "commandFailures": 0,
+      "cleanupFailures": 0,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "medianCreateMs": 1343,
+      "medianExecMs": 582,
+      "medianReadyMs": 1961,
+      "medianKillMs": 401,
+      "hourlyUsd": 0.006520547945205479
+    },
+    {
+      "provider": "boat",
+      "runs": 5,
+      "failures": 0,
+      "createFailures": 0,
+      "commandFailures": 0,
+      "cleanupFailures": 0,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "medianCreateMs": 1491,
+      "medianExecMs": 138,
+      "medianReadyMs": 1695,
+      "medianKillMs": 109,
+      "hourlyUsd": 0.018
+    },
+    {
+      "provider": "tensorlake",
+      "runs": 5,
+      "failures": 0,
+      "createFailures": 0,
+      "commandFailures": 0,
+      "cleanupFailures": 0,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "medianCreateMs": 2260,
+      "medianExecMs": 554,
+      "medianReadyMs": 2760,
+      "medianKillMs": 105,
+      "hourlyUsd": 0.2
+    },
+    {
+      "provider": "lambda",
+      "runs": 5,
+      "failures": 0,
+      "createFailures": 0,
+      "commandFailures": 0,
+      "cleanupFailures": 0,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "medianCreateMs": 3194,
+      "medianExecMs": 360,
+      "medianReadyMs": 3557,
+      "medianKillMs": 177,
+      "hourlyUsd": 0.25220016
+    },
+    {
+      "provider": "cloudflare",
+      "runs": 5,
+      "failures": 0,
+      "createFailures": 0,
+      "commandFailures": 0,
+      "cleanupFailures": 0,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "medianCreateMs": 3371,
+      "medianExecMs": 137,
+      "medianReadyMs": 3632,
+      "medianKillMs": 184,
+      "hourlyUsd": 0.21599999999999997
+    },
+    {
+      "provider": "maritime",
+      "runs": 5,
+      "failures": 0,
+      "createFailures": 0,
+      "commandFailures": 0,
+      "cleanupFailures": 0,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "medianCreateMs": 4536,
+      "medianExecMs": 217,
+      "medianReadyMs": 4749,
+      "medianKillMs": 1329,
+      "hourlyUsd": 0.022
+    },
+    {
+      "provider": "northflank",
+      "runs": 5,
+      "failures": 0,
+      "createFailures": 0,
+      "commandFailures": 0,
+      "cleanupFailures": 0,
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "medianCreateMs": 5519,
+      "medianExecMs": 300,
+      "medianReadyMs": 5811,
+      "medianKillMs": 62580,
+      "hourlyUsd": 0.06666
+    }
+  ]
+}
