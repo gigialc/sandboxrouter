@@ -121,6 +121,32 @@ export interface SteadyRow {
   measuredAt: string;
 }
 
+/** One provider's assistant sessions (results/, tool "sandboxrouter-assistant"). Times are medians, in ms from the test machine. */
+export interface AssistantRow {
+  provider: string;
+  name: string;
+  size: MeasuredSize;
+  /** Starting the sandbox plus the first Python call. */
+  firstAnswerMs: number;
+  uploadMs: number;
+  analyseMs: number;
+  downloadMs: number;
+  callMs: number;
+  callP95Ms: number;
+  /** One call after the sandbox sat idle. */
+  idleMs: number;
+  runs: number;
+  calls: number;
+  idleSeconds: number;
+  uploadBytes: number;
+  downloadBytes: number;
+  sessionUsd?: number;
+  hourlyUsd?: number;
+  /** The router sends this provider's files through shell commands: upload and download times are for that route. */
+  filesThroughCommands?: boolean;
+  measuredAt: string;
+}
+
 export interface ImageTableData {
   image: string;
   spec: { vcpu: number; memoryGb: number };
@@ -270,6 +296,7 @@ export const site = data as unknown as {
   priceSpread: { size: { vcpu: number; memoryGb: number }; medianVcpuHourUsd: number; rows: { provider: string; name: string; hourlyUsd: number; vcpuHourUsd: number; tested: boolean }[] };
   /** Those prices as recorded over time: a new entry whenever one changes. */
   priceHistory: { date: string; prices: Record<string, number>; note?: string }[];
+  assistant: AssistantRow[];
   priceIndex: { lines: IndexLine[]; history: { date: string; lines: Record<string, { median: number; cheapest: number; provider: string }> }[] };
   tasks: { kinds: {
     id: string; title: string; blurb: string; version: string; repeat: number; phases: { id: string; label: string }[];

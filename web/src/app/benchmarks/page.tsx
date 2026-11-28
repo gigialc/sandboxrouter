@@ -8,6 +8,7 @@ import { BillTable } from "@/components/BillTable";
 import { Finder } from "@/components/Finder";
 import { ImageTable } from "@/components/ImageTable";
 import { SteadyTable } from "@/components/SteadyTable";
+import { AssistantTable } from "@/components/AssistantTable";
 import { LoadTable } from "@/components/LoadTable";
 import { TaskTable } from "@/components/TaskTable";
 import { UseCaseTable } from "@/components/UseCaseTable";
@@ -211,6 +212,20 @@ export default function BenchmarksPage() {
                   content: (
         <Section id="steady" title="Speed over time" how="steady" line="One sandbox kept running, doing the same small job every few seconds: does it stay as fast as it started.">
           <SteadyTable />
+        </Section>
+                  ),
+                },
+              ]
+            : []),
+
+          ...(site.assistant.length > 0
+            ? [
+                {
+                  id: "assistant",
+                  label: "Assistant",
+                  content: (
+        <Section id="assistant" title="An assistant session" how="assistant" line="One conversation of a chat assistant with a code tool: the first answer, a file in, a file out, many short calls, and a call after a quiet minute.">
+          <AssistantTable />
         </Section>
                   ),
                 },

@@ -26,6 +26,7 @@ const SECTIONS = [
   ["load", "Under load"],
   ["image", "Straight from an image"],
   ["steady", "Speed over time"],
+  ["assistant", "An assistant session"],
   ["bills", "Measured bills"],
   ["limits", "What this doesn't cover"],
   ["runs", "Where it ran, and adding a run"],
@@ -266,6 +267,27 @@ export default function MethodologyPage() {
             depends on what else shares the machine; it does not show speed, which is the typical sample next to it. Each
             run is one sandbox, at one time, from one location: runs differ, because a provider can place the next sandbox
             on a busier or quieter machine, and a handful of runs is a small sample.
+          </p>
+
+          <h2 id="assistant">An assistant session</h2>
+          <p>
+            This is one conversation of a chat assistant that has a code tool, in one sandbox. The harness starts a sandbox
+            and runs a first Python call: together they are the first answer. It then uploads a 4 MB CSV file, runs a Python
+            script that reads it, prints a total per category and writes a 1 MB result file, and downloads that file. After
+            that come 20 short Python calls, each adding a line to a file and printing how many lines it has, so a call only
+            passes when the sandbox kept what the calls before it wrote. Last, the sandbox is left alone for 60 seconds, the
+            way it is while a person reads, and one more call is timed.
+          </p>
+          <p>
+            Times are taken on the test machine, so they include the network to the provider: that is the wait a person
+            sees. File transfers run one at a time across providers, so they do not share the test machine&apos;s connection.
+            On three providers (AgentCore, Agent37 and Boat) the router has no file endpoint to use and sends files in pieces
+            through shell commands; their rows say so, and their upload and download times are for that route.
+            Each provider runs three sessions and the table shows medians. The totals the script prints and the hash of the
+            downloaded file are compared with values computed on the test machine, and a provider is listed only when every
+            session finished and every result matched. The session needs Python 3 in the provider&apos;s default image. The
+            cost per session is the published price applied to the session&apos;s measured time and CPU use, with the same
+            rules as the other jobs. Times are from one location.
           </p>
 
           <h2 id="bills">Measured bills</h2>
