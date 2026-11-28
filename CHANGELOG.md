@@ -7,6 +7,7 @@ All notable changes. Versions follow [semver](https://semver.org/); while the ve
 ### Added
 - **Benchmark: delete time.** `bench` now times the delete call of every sandbox it started and reports the median (`medianKillMs`, "Delete" in the table). The site's start-time table shows it once a report has it. It is the wait the caller sees; a provider may finish cleanup after it answers. Rows where the router waits until the sandbox is gone (Northflank) are marked.
 - **Benchmark: speed over time.** A new report type (`sandboxrouter-steady`) and the script that writes it (`scripts/steady-bench.ts`): one sandbox per provider is kept for 10 minutes and runs the same one-core job every 10 seconds, timed by the sandbox's own clock. The site ranks providers by how far the 95th percentile sample falls behind the median one, as the median across their runs.
+- **Benchmark: an assistant session.** A new report type (`sandboxrouter-assistant`) and the script that writes it (`scripts/assistant-bench.ts`): one conversation of a chat assistant with a code tool, in one sandbox. It times the first answer (start plus a first Python call), a 4 MB upload, an analysis, a 1 MB download, 20 short calls that must see each other's files, and one call after a minute idle, as seen from the test machine. Every result is checked, and the site lists a provider only when all of its sessions passed.
 
 ## 0.18.0 (2026-11-27)
 

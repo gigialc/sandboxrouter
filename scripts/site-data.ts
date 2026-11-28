@@ -5,6 +5,7 @@ import { accountStartFees, benchmarksPublishable, billingRules, CATALOG, DEFAULT
 import type { SpreadResult } from "../src/burst.js";
 import { imageTable, loadImageReports } from "../src/image-bench.js";
 import { loadSteadyReports, steadyTable } from "../src/steady.js";
+import { assistantTable, loadAssistantReports } from "../src/assistant.js";
 import { agentTable, aggregate, burstTable, loadAgentReports, loadBursts, loadReports, taskOutcomes, taskTable } from "../src/leaderboard.js";
 import { TASKS } from "../src/task.js";
 import { priceIndex } from "../src/price-index.js";
@@ -270,6 +271,8 @@ const data = {
   image: imageTable(loadImageReports("results")),
   // One sandbox kept for minutes, the same small job at a fixed interval: does it stay as fast as it started.
   steady: steadyTable(loadSteadyReports("results")),
+  // One conversation of a chat assistant with a code tool: first answer, a file up and down, short calls, a call after idle.
+  assistant: assistantTable(loadAssistantReports("results")),
   // Today's price index, and how it has moved (scripts/price-index.json, recorded daily when it changes).
   priceIndex: {
     lines: priceIndex(),

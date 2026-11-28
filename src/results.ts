@@ -1,5 +1,6 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { steadySummary } from "./steady.js";
+import { assistantSummary } from "./assistant.js";
 import { join, relative } from "node:path";
 import { benchmarksPublishable, CATALOG } from "./catalog.js";
 import { CHECK_STEPS } from "./check.js";
@@ -363,6 +364,39 @@ export function validateResult(j: any, now = Date.now()): string[] {
       for (const k of ["medianMs", "p95Ms", "maxMs"] as const) {
         if (r[k] !== want[k]) out.push(`${r.provider}: ${k} does not match sampleMs`);
       }
+      if (r.hourlyUsd !== undefined && !isNum(r.hourlyUsd, 0, 1000)) out.push(`${r.provider}: hourlyUsd is out of range`);
+      if ("error" in r || "lastError" in r) out.push(`${r.provider}: errors must not be shared (they can hold account details)`);
+    }
+  } else if (j.tool === "sandboxrouter-assistant") {
+    add(checkDate(j.date, now));
+    add(checkLabel(j.label));
+    add(checkBy(j.by));
+    if (typeof j.task !== "string" || !j.task) out.push("task must be the session version, e.g. \"assistant-v1\"");
+    if (!isSize(j.spec)) out.push("spec must record the requested size");
+    if (!Number.isInteger(j.runs) || !isNum(j.runs, 3, 100)) out.push("runs must be at least 3 sessions");
+    if (!Number.isInteger(j.calls) || !isNum(j.calls, 10, 1000)) out.push("calls must be at least 10");
+    if (!isNum(j.idleSeconds, 30, 3600)) out.push("idleSeconds must be between 30 s and an hour");
+    if (!isNum(j.uploadBytes, 1, 1e10) || !isNum(j.downloadBytes, 1, 1e10)) out.push("uploadBytes and downloadBytes must record the file sizes");
+    if (!Array.isArray(j.rows) || !j.rows.length) out.push("rows is empty");
+    for (const r of Array.isArray(j.rows) ? j.rows : []) {
+      provider(r?.provider, "row provider");
+      if (noBench(r?.provider)) out.push(`${r.provider}: ${NO_BENCH}`);
+      if (!isSize(r?.size)) out.push(`${r?.provider}: invalid sandbox size`);
+      const sessions = Array.isArray(r?.sessions) ? r.sessions : undefined;
+      const times = ["createMs", "firstMs", "uploadMs", "analyseMs", "downloadMs", "idleMs", "sessionMs"] as const;
+      const whole = (s: any) =>
+        times.every((k) => isNum(s?.[k], 1, MAX_MS)) && Array.isArray(s.callMs) && s.callMs.length === j.calls && s.callMs.every((v: unknown) => isNum(v, 1, MAX_MS)) &&
+        (s.cpuMs === undefined || isNum(s.cpuMs, 0, MAX_MS * 1024)) && (s.maxCoreMs === undefined || isNum(s.maxCoreMs, 0, MAX_MS));
+      if (!sessions || !sessions.every(whole)) {
+        out.push(`${r?.provider}: every session must list its times (1 ms to 15 min) and one time per call`);
+        continue;
+      }
+      if (!isCount(r.failures, j.runs) || sessions.length + r.failures !== j.runs) out.push(`${r.provider}: sessions plus failures must equal the sessions asked for`);
+      const want = assistantSummary(sessions) as Record<string, number | undefined>;
+      for (const k of ["firstAnswerMs", "uploadMs", "analyseMs", "downloadMs", "callMs", "callP95Ms", "idleMs"]) {
+        if (r[k] !== want[k]) out.push(`${r.provider}: ${k} does not match the sessions`);
+      }
+      if (r.sessionUsd !== undefined && !isNum(r.sessionUsd, 0, 1000)) out.push(`${r.provider}: sessionUsd is out of range`);
       if (r.hourlyUsd !== undefined && !isNum(r.hourlyUsd, 0, 1000)) out.push(`${r.provider}: hourlyUsd is out of range`);
       if ("error" in r || "lastError" in r) out.push(`${r.provider}: errors must not be shared (they can hold account details)`);
     }
