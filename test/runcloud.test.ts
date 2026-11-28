@@ -161,6 +161,22 @@ describe("runcloud", () => {
     await sbx.kill();
   });
 
+  it("reserves cpuUtilization of the size and bursts to the full size", async () => {
+    seen.length = 0;
+    const sbx = await p().create({ vcpu: 2, memoryGb: 4, cpuUtilization: 0.1 });
+    expect(seen[0].body).toMatchObject({ cpu: 0.2, cpuLimit: 2, memory: 4096 });
+    await sbx.kill();
+    seen.length = 0;
+    const small = await p().create({ vcpu: 0.5, cpuUtilization: 0.01 });
+    expect(seen[0].body).toMatchObject({ cpu: 0.125, cpuLimit: 0.5 });
+    await small.kill();
+    seen.length = 0;
+    const full = await p().create({ vcpu: 2, cpuUtilization: 1 });
+    expect(seen[0].body.cpu).toBe(2);
+    expect(seen[0].body).not.toHaveProperty("cpuLimit");
+    await full.kill();
+  });
+
   it("surfaces API errors with their status", async () => {
     await expect(new RunCloudProvider("nope", base).create({})).rejects.toMatchObject({ status: 401, message: expect.stringContaining("unauthorized: invalid API key") });
   });

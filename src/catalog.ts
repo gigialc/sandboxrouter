@@ -633,8 +633,10 @@ ENTRIES.push(
     name: "Run Cloud",
     pricing: {
       vcpuHour: 0.008856,
+      reservesCpu: true,
+      cpuFloor: 0.125,
       gbHour: 0.0029943,
-      note: "per second ($0.00000492 per physical core = 2 vCPUs, $0.00000083175 per GiB); the reservation is the floor, CPU and memory used above it bill at the same rates; $5 to start without a card, then the first $15 a month free with one",
+      note: "per second ($0.00000492 per physical core = 2 vCPUs, $0.00000083175 per GiB); the reservation is the floor, CPU and memory used above it bill at the same rates (the adapter reserves cpuUtilization of the size and bursts to the full size); $5 to start without a card, then the first $15 a month free with one",
       source: "https://run.cloud/pricing",
       checked: "2026-11-27",
     },

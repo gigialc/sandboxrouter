@@ -6,8 +6,9 @@ import { DEFAULT_EXEC_TIMEOUT_S, killedByTimeout, timeoutError, toBytes } from "
  * CPU and memory; CPU and memory used above the reservation bill at the same rates.
  *
  * https://api.run.cloud, Authorization: Bearer <RUN_CLOUD_API_KEY>:
- *   POST   /run-cloud/sandboxes {image, cpu, memory, timeoutSeconds, onTimeout, tags, wait:false}
- *                                  -> {id, state, last_error, ...}   cpu is vCPUs, memory MiB
+ *   POST   /run-cloud/sandboxes {image, cpu, cpuLimit, memory, timeoutSeconds, onTimeout, tags, wait:false}
+ *                                  -> {id, state, last_error, ...}   cpu is the vCPU reservation, cpuLimit
+ *                                     the vCPUs it may burst to, memory MiB
  *   GET    /run-cloud/sandboxes/:id -> {id, state, last_error, ...}
  *   POST   /run-cloud/sandboxes/:id/exec {cmd:[argv], cwd, env, timeout_seconds}
  *                                  -> {exit_code, stdout, stderr}; a command past its timeout has its
@@ -87,9 +88,16 @@ export class RunCloudProvider implements Provider {
   }
 
   async create(spec: SandboxSpec): Promise<ProviderSandbox> {
+    // Run Cloud bills the larger of the reserved CPU and the CPU used, and `cpuLimit` lets a sandbox burst
+    // above its reservation to the full size. With cpuUtilization below 1, only that share is reserved
+    // (at least 1/8 vCPU, the platform default), so CPU is billed about as used.
+    const vcpu = spec.vcpu ?? 2;
+    const share = Math.min(1, spec.cpuUtilization ?? 1);
+    const reserved = share < 1 ? Math.min(vcpu, Math.max(0.125, Math.round(vcpu * share * 1000) / 1000)) : vcpu;
     const { body } = await this.api<Sandbox>("POST", "/run-cloud/sandboxes", {
       image: spec.image?.runcloud ?? DEFAULT_IMAGE,
-      cpu: spec.vcpu ?? 2,
+      cpu: reserved,
+      ...(reserved < vcpu ? { cpuLimit: vcpu } : {}),
       memory: Math.round((spec.memoryGb ?? 4) * 1024),
       // A hard lifetime: destroy at the end instead of parking a resumable snapshot.
       timeoutSeconds: Math.max(60, Math.round((spec.timeoutMinutes ?? 30) * 60)),
