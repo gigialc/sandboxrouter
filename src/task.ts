@@ -36,9 +36,9 @@ export interface TaskPhaseDef {
   timeoutSeconds?: number;
 }
 
-const ZERO_256_SHA256 = "a6d72ac7690f53be6ae46ba88506bd97302a093f7108472bd9efc3cefda06484";
+export const ZERO_256_SHA256 = "a6d72ac7690f53be6ae46ba88506bd97302a093f7108472bd9efc3cefda06484";
 const ZERO_512_SHA256 = "9acca8e8c22201155389f65abbf6bc9723edc7384ead80503839f49dcc56d767";
-const hashZeros = (count: number, hash: string) =>
+export const hashZeros = (count: number, hash: string) =>
   `hash=$(head -c ${count} /dev/zero | sha256sum) && [ "${'${hash%% *}'}" = "${hash}" ]`;
 
 const HASH_DISK: TaskPhaseDef[] = [

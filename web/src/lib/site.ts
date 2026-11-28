@@ -103,6 +103,24 @@ export interface ImageRow {
   measuredAt: string;
 }
 
+/** One provider's sandbox running the same sample at a fixed interval (results/, tool "sandboxrouter-steady"). */
+export interface SteadyRow {
+  provider: string;
+  name: string;
+  size: MeasuredSize;
+  medianMs: number;
+  maxMs: number;
+  /** How much slower the 95th percentile sample was than the median one (0.04 = 4%): the median across runs. */
+  spread: number;
+  /** Each run's own figure, lowest first. */
+  spreads: number[];
+  runs: number;
+  samples: number;
+  intervalSeconds: number;
+  hourlyUsd?: number;
+  measuredAt: string;
+}
+
 export interface ImageTableData {
   image: string;
   spec: { vcpu: number; memoryGb: number };
@@ -247,6 +265,7 @@ export const site = data as unknown as {
   load: { id: string; n: number; job: string; title: string; blurb: string; rows: LoadRow[] }[];
   agent: AgentRow[];
   image: ImageTableData[];
+  steady: SteadyRow[];
   priceIndex: { lines: IndexLine[]; history: { date: string; lines: Record<string, { median: number; cheapest: number; provider: string }> }[] };
   tasks: { kinds: {
     id: string; title: string; blurb: string; version: string; repeat: number; phases: { id: string; label: string }[];

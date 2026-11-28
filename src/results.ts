@@ -1,4 +1,5 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { steadySummary } from "./steady.js";
 import { join, relative } from "node:path";
 import { benchmarksPublishable, CATALOG } from "./catalog.js";
 import { CHECK_STEPS } from "./check.js";
@@ -336,6 +337,32 @@ export function validateResult(j: any, now = Date.now()): string[] {
       const mid = Math.floor(sorted.length / 2);
       const expected = !sorted.length ? undefined : sorted.length % 2 ? sorted[mid] : Math.round((sorted[mid - 1] + sorted[mid]) / 2);
       if (r.medianRepeatCreateMs !== expected) out.push(`${r.provider}: medianRepeatCreateMs must be the median of repeatCreateMs`);
+      if (r.hourlyUsd !== undefined && !isNum(r.hourlyUsd, 0, 1000)) out.push(`${r.provider}: hourlyUsd is out of range`);
+      if ("error" in r || "lastError" in r) out.push(`${r.provider}: errors must not be shared (they can hold account details)`);
+    }
+  } else if (j.tool === "sandboxrouter-steady") {
+    add(checkDate(j.date, now));
+    add(checkLabel(j.label));
+    add(checkBy(j.by));
+    if (typeof j.task !== "string" || !j.task) out.push("task must be the sample version, e.g. \"steady-v1\"");
+    if (!isSize(j.spec)) out.push("spec must record the requested size");
+    if (!Number.isInteger(j.samples) || !isNum(j.samples, 30, 1000)) out.push("samples must be at least 30");
+    if (!isNum(j.intervalSeconds, 5, 600)) out.push("intervalSeconds must be between 5 s and 10 min");
+    if (!Array.isArray(j.rows) || !j.rows.length) out.push("rows is empty");
+    for (const r of Array.isArray(j.rows) ? j.rows : []) {
+      provider(r?.provider, "row provider");
+      if (noBench(r?.provider)) out.push(`${r.provider}: ${NO_BENCH}`);
+      if (!isSize(r?.size)) out.push(`${r?.provider}: invalid sandbox size`);
+      const ms = Array.isArray(r?.sampleMs) ? r.sampleMs : undefined;
+      if (!ms || ms.some((v: unknown) => !isNum(v, 1, MAX_MS))) {
+        out.push(`${r?.provider}: sampleMs must list each sample's time, between 1 ms and 15 min`);
+        continue;
+      }
+      if (!isCount(r.failures, j.samples) || ms.length + r.failures !== j.samples) out.push(`${r.provider}: samples timed plus failures must equal the samples asked for`);
+      const want = steadySummary(ms);
+      for (const k of ["medianMs", "p95Ms", "maxMs"] as const) {
+        if (r[k] !== want[k]) out.push(`${r.provider}: ${k} does not match sampleMs`);
+      }
       if (r.hourlyUsd !== undefined && !isNum(r.hourlyUsd, 0, 1000)) out.push(`${r.provider}: hourlyUsd is out of range`);
       if ("error" in r || "lastError" in r) out.push(`${r.provider}: errors must not be shared (they can hold account details)`);
     }

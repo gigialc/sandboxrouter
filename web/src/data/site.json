@@ -122,7 +122,7 @@
     }
   },
   "version": "0.18.0",
-  "generatedAt": "2026-11-28T15:06:17.417Z",
+  "generatedAt": "2026-11-28T15:42:29.735Z",
   "shapes": [
     "1x2",
     "2x4",
@@ -9344,6 +9344,348 @@
           "measuredAt": "2026-11-26T15:38:22.928Z"
         }
       ]
+    }
+  ],
+  "steady": [
+    {
+      "provider": "lambda",
+      "name": "AWS Lambda MicroVMs",
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "medianMs": 3458,
+      "maxMs": 3472,
+      "spread": 0.00231314226075785,
+      "spreads": [
+        0.0017361111111111605,
+        0.0028901734104045396
+      ],
+      "runs": 2,
+      "samples": 60,
+      "intervalSeconds": 10,
+      "hourlyUsd": 0.25220016,
+      "measuredAt": "2026-11-28T15:31:50.656Z"
+    },
+    {
+      "provider": "agentcore",
+      "name": "Amazon Bedrock AgentCore Code Interpreter",
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "medianMs": 3606,
+      "maxMs": 3638,
+      "spread": 0.0030506254789672838,
+      "spreads": [
+        0.002495148322705809,
+        0.0036061026352287584
+      ],
+      "runs": 2,
+      "samples": 60,
+      "intervalSeconds": 10,
+      "hourlyUsd": 0.2168,
+      "measuredAt": "2026-11-28T15:31:50.656Z"
+    },
+    {
+      "provider": "openscale",
+      "name": "OpenScale Sandboxes",
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 1
+      },
+      "medianMs": 3253,
+      "maxMs": 3292,
+      "spread": 0.005226040798377518,
+      "spreads": [
+        0.0036911719470931192,
+        0.006760909649661917
+      ],
+      "runs": 2,
+      "samples": 60,
+      "intervalSeconds": 10,
+      "hourlyUsd": 0.013999999999999999,
+      "measuredAt": "2026-11-28T15:31:50.656Z"
+    },
+    {
+      "provider": "novita",
+      "name": "Novita AI Agent Sandbox",
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 1
+      },
+      "medianMs": 2384,
+      "maxMs": 2471,
+      "spread": 0.017829559660452965,
+      "spreads": [
+        0.01215932914046114,
+        0.02349979018044479
+      ],
+      "runs": 2,
+      "samples": 60,
+      "intervalSeconds": 10,
+      "hourlyUsd": 0.08208,
+      "measuredAt": "2026-11-28T15:31:50.656Z"
+    },
+    {
+      "provider": "morph",
+      "name": "Morph Cloud",
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "medianMs": 5408,
+      "maxMs": 5891,
+      "spread": 0.023629616542563014,
+      "spreads": [
+        0.016555059523809534,
+        0.030704173561316495
+      ],
+      "runs": 2,
+      "samples": 60,
+      "intervalSeconds": 10,
+      "hourlyUsd": 0.1,
+      "measuredAt": "2026-11-28T15:31:50.656Z"
+    },
+    {
+      "provider": "northflank",
+      "name": "Northflank",
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "medianMs": 3317,
+      "maxMs": 3531,
+      "spread": 0.024747768652753632,
+      "spreads": [
+        0.022666269012824314,
+        0.02682926829268295
+      ],
+      "runs": 2,
+      "samples": 60,
+      "intervalSeconds": 10,
+      "hourlyUsd": 0.06666,
+      "measuredAt": "2026-11-28T15:31:50.656Z"
+    },
+    {
+      "provider": "modal",
+      "name": "Modal",
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "medianMs": 1513,
+      "maxMs": 2061,
+      "spread": 0.04376829407834748,
+      "spreads": [
+        0.01718213058419238,
+        0.07035445757250258
+      ],
+      "runs": 2,
+      "samples": 60,
+      "intervalSeconds": 10,
+      "hourlyUsd": 0.23796,
+      "measuredAt": "2026-11-28T15:31:50.656Z"
+    },
+    {
+      "provider": "daytona",
+      "name": "Daytona",
+      "size": {
+        "vcpu": 1,
+        "memoryGb": 1
+      },
+      "medianMs": 1585,
+      "maxMs": 1836,
+      "spread": 0.04829633999400529,
+      "spreads": [
+        0.03587161736941469,
+        0.06072106261859589
+      ],
+      "runs": 2,
+      "samples": 60,
+      "intervalSeconds": 10,
+      "hourlyUsd": 0.06659999999999999,
+      "measuredAt": "2026-11-28T15:31:50.656Z"
+    },
+    {
+      "provider": "e2b",
+      "name": "E2B",
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 0.5
+      },
+      "medianMs": 4608,
+      "maxMs": 6009,
+      "spread": 0.05001302263832541,
+      "spreads": [
+        0.04630487127245786,
+        0.05372117400419296
+      ],
+      "runs": 2,
+      "samples": 60,
+      "intervalSeconds": 10,
+      "hourlyUsd": 0.1089,
+      "measuredAt": "2026-11-28T15:31:50.656Z"
+    },
+    {
+      "provider": "tensorlake",
+      "name": "Tensorlake",
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "medianMs": 948,
+      "maxMs": 1141,
+      "spread": 0.051729259686014606,
+      "spreads": [
+        0.027122641509433887,
+        0.07633587786259532
+      ],
+      "runs": 2,
+      "samples": 60,
+      "intervalSeconds": 10,
+      "hourlyUsd": 0.2,
+      "measuredAt": "2026-11-28T15:31:50.656Z"
+    },
+    {
+      "provider": "cloudflare",
+      "name": "Cloudflare Sandbox",
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "medianMs": 1254,
+      "maxMs": 2040,
+      "spread": 0.05921249697073694,
+      "spreads": [
+        0.030223390275952777,
+        0.0882016036655211
+      ],
+      "runs": 2,
+      "samples": 60,
+      "intervalSeconds": 10,
+      "hourlyUsd": 0.21599999999999997,
+      "measuredAt": "2026-11-28T15:31:50.656Z"
+    },
+    {
+      "provider": "maritime",
+      "name": "Maritime",
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "medianMs": 2201,
+      "maxMs": 2715,
+      "spread": 0.0991441523268487,
+      "spreads": [
+        0.07511312217194566,
+        0.12317518248175174
+      ],
+      "runs": 2,
+      "samples": 60,
+      "intervalSeconds": 10,
+      "hourlyUsd": 0.022,
+      "measuredAt": "2026-11-28T15:31:50.656Z"
+    },
+    {
+      "provider": "vercel",
+      "name": "Vercel Sandbox",
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "medianMs": 5084,
+      "maxMs": 7600,
+      "spread": 0.10593270051401982,
+      "spreads": [
+        0.054965188713814506,
+        0.15690021231422513
+      ],
+      "runs": 2,
+      "samples": 60,
+      "intervalSeconds": 10,
+      "hourlyUsd": 0.3408,
+      "measuredAt": "2026-11-28T15:31:50.656Z"
+    },
+    {
+      "provider": "agent37",
+      "name": "Agent37",
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "medianMs": 6973,
+      "maxMs": 11457,
+      "spread": 0.12784809727644164,
+      "spreads": [
+        0.0684960201089233,
+        0.18720017444395998
+      ],
+      "runs": 2,
+      "samples": 60,
+      "intervalSeconds": 10,
+      "hourlyUsd": 0.006520547945205479,
+      "measuredAt": "2026-11-28T15:31:50.656Z"
+    },
+    {
+      "provider": "freestyle",
+      "name": "Freestyle",
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "medianMs": 1001,
+      "maxMs": 1472,
+      "spread": 0.17590480188352098,
+      "spreads": [
+        0.07308377896613183,
+        0.2787258248009101
+      ],
+      "runs": 2,
+      "samples": 60,
+      "intervalSeconds": 10,
+      "hourlyUsd": 0.13362,
+      "measuredAt": "2026-11-28T15:31:50.656Z"
+    },
+    {
+      "provider": "boat",
+      "name": "Boat",
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "medianMs": 519,
+      "maxMs": 1298,
+      "spread": 0.17984907352062163,
+      "spreads": [
+        0.04184100418410042,
+        0.31785714285714284
+      ],
+      "runs": 2,
+      "samples": 60,
+      "intervalSeconds": 10,
+      "hourlyUsd": 0.018,
+      "measuredAt": "2026-11-28T15:31:50.656Z"
+    },
+    {
+      "provider": "sail",
+      "name": "Sailboxes (Sail Research)",
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "medianMs": 4818,
+      "maxMs": 8887,
+      "spread": 0.4190515757230673,
+      "spreads": [
+        0.0628917676556624,
+        0.7752113837904722
+      ],
+      "runs": 2,
+      "samples": 60,
+      "intervalSeconds": 10,
+      "hourlyUsd": 0.062,
+      "measuredAt": "2026-11-28T15:31:50.656Z"
     }
   ],
   "priceIndex": {

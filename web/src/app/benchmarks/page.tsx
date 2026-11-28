@@ -7,6 +7,7 @@ import { BenchTabs } from "@/components/BenchTabs";
 import { BillTable } from "@/components/BillTable";
 import { Finder } from "@/components/Finder";
 import { ImageTable } from "@/components/ImageTable";
+import { SteadyTable } from "@/components/SteadyTable";
 import { LoadTable } from "@/components/LoadTable";
 import { TaskTable } from "@/components/TaskTable";
 import { UseCaseTable } from "@/components/UseCaseTable";
@@ -196,6 +197,20 @@ export default function BenchmarksPage() {
                   content: (
         <Section id="image" title="Straight from an image" how="image" line="Start a sandbox straight from a public registry image, with no template or snapshot to build first.">
           <ImageTable />
+        </Section>
+                  ),
+                },
+              ]
+            : []),
+
+          ...(site.steady.length > 0
+            ? [
+                {
+                  id: "steady",
+                  label: "Over time",
+                  content: (
+        <Section id="steady" title="Speed over time" how="steady" line="One sandbox kept running, doing the same small job every few seconds: does it stay as fast as it started.">
+          <SteadyTable />
         </Section>
                   ),
                 },
