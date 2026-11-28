@@ -7,7 +7,7 @@ import { imageTable, loadImageReports } from "../src/image-bench.js";
 import { loadSteadyReports, steadyTable } from "../src/steady.js";
 import { agentTable, aggregate, burstTable, loadAgentReports, loadBursts, loadReports, taskOutcomes, taskTable } from "../src/leaderboard.js";
 import { TASKS } from "../src/task.js";
-import { priceIndex } from "../src/price-index.js";
+import { priceIndex, priceSpread } from "../src/price-index.js";
 import { computerCatalog } from "../src/computers.js";
 import { CHECK_STEPS } from "../src/check.js";
 import { conformanceTable, liveStatus } from "../src/conformance.js";
@@ -271,6 +271,9 @@ const data = {
   // One sandbox kept for minutes, the same small job at a fixed interval: does it stay as fast as it started.
   steady: steadyTable(loadSteadyReports("results")),
   // Today's price index, and how it has moved (scripts/price-index.json, recorded daily when it changes).
+  // Every hosted provider's list price for the same sandbox today, and how those prices have been recorded over time.
+  priceSpread: priceSpread(),
+  priceHistory: existsSync("scripts/price-history.json") ? JSON.parse(readFileSync("scripts/price-history.json", "utf8")) : [],
   priceIndex: {
     lines: priceIndex(),
     history: existsSync("scripts/price-index.json") ? JSON.parse(readFileSync("scripts/price-index.json", "utf8")) : [],

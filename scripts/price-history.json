@@ -1,0 +1,40 @@
+[
+  {
+    "date": "2026-11-28",
+    "prices": {
+      "agent37": 0.0065,
+      "agentcore": 0.2168,
+      "beam": 0.14,
+      "blaxel": 0.1656,
+      "boat": 0.018,
+      "cloudflare": 0.216,
+      "codesandbox": 0.1486,
+      "daytona": 0.1656,
+      "dedalus": 0.149,
+      "deno": 0.3,
+      "digitalocean": 0.126,
+      "e2b": 0.1656,
+      "exedev": 0.105,
+      "freestyle": 0.1336,
+      "hopx": 0.1656,
+      "instabox": 0.017,
+      "koyeb": 0.0576,
+      "lambda": 0.2522,
+      "langsmith": 0.189,
+      "maritime": 0.022,
+      "modal": 0.238,
+      "morph": 0.1,
+      "northflank": 0.0667,
+      "novita": 0.1166,
+      "openscale": 0.017,
+      "runcloud": 0.0297,
+      "runloop": 0.3168,
+      "sail": 0.062,
+      "sprites": 0.1645,
+      "superserve": 0.1656,
+      "tensorlake": 0.2,
+      "upstash": 0.2,
+      "vercel": 0.3408
+    }
+  }
+]

@@ -266,6 +266,10 @@ export const site = data as unknown as {
   agent: AgentRow[];
   image: ImageTableData[];
   steady: SteadyRow[];
+  /** Every hosted provider's list price for a 2 vCPU / 4 GB sandbox, cheapest first. */
+  priceSpread: { size: { vcpu: number; memoryGb: number }; medianVcpuHourUsd: number; rows: { provider: string; name: string; hourlyUsd: number; vcpuHourUsd: number; tested: boolean }[] };
+  /** Those prices as recorded over time: a new entry whenever one changes. */
+  priceHistory: { date: string; prices: Record<string, number>; note?: string }[];
   priceIndex: { lines: IndexLine[]; history: { date: string; lines: Record<string, { median: number; cheapest: number; provider: string }> }[] };
   tasks: { kinds: {
     id: string; title: string; blurb: string; version: string; repeat: number; phases: { id: string; label: string }[];
