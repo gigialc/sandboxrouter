@@ -45,6 +45,12 @@ Speed over time: one sandbox per provider for 10 minutes, the same one-core job 
 node --import tsx scripts/steady-bench.ts --providers daytona,modal --label "Berlin" --by YOUR_GITHUB_USERNAME --out results/steady-2026-11-28-berlin.json
 ```
 
+An assistant session: first answer, a file up and down, 20 short calls and a call after a minute idle, three sessions per provider:
+
+```bash
+node --import tsx scripts/assistant-bench.ts --providers daytona,modal --label "Berlin" --by YOUR_GITHUB_USERNAME --out results/assistant-2026-11-28-berlin.json
+```
+
 Each costs a few cents and kills its sandboxes; `npx tsx src/cli.ts gc --all` cleans up after a crash. Run `npm run results:check`, then open a PR with the files. CI refuses keys, emails, IP addresses, street-address labels, unknown providers, impossible numbers, and edits to someone else's bench report. A maintainer reviews every result PR.
 
 - `--by` credits you on the site. Results never include keys, env vars or error messages.
