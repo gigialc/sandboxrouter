@@ -39,6 +39,12 @@ node --import tsx scripts/image-bench.ts --image python:3.11-bookworm --verify "
 
 The first start can be measured once per image and account, so use a tag the account has not started before.
 
+Speed over time: one sandbox per provider for 10 minutes, the same one-core job every 10 seconds:
+
+```bash
+node --import tsx scripts/steady-bench.ts --providers daytona,modal --label "Berlin" --by YOUR_GITHUB_USERNAME --out results/steady-2026-11-28-berlin.json
+```
+
 Each costs a few cents and kills its sandboxes; `npx tsx src/cli.ts gc --all` cleans up after a crash. Run `npm run results:check`, then open a PR with the files. CI refuses keys, emails, IP addresses, street-address labels, unknown providers, impossible numbers, and edits to someone else's bench report. A maintainer reviews every result PR.
 
 - `--by` credits you on the site. Results never include keys, env vars or error messages.

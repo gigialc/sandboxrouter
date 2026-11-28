@@ -2,6 +2,11 @@
 
 All notable changes. Versions follow [semver](https://semver.org/); while the version is 0.x, a minor bump can change the API.
 
+## Unreleased
+
+### Added
+- **Benchmark: speed over time.** A new report type (`sandboxrouter-steady`) and the script that writes it (`scripts/steady-bench.ts`): one sandbox per provider is kept for 10 minutes and runs the same one-core job every 10 seconds, timed by the sandbox's own clock. The site ranks providers by how far the 95th percentile sample falls behind the median one, as the median across their runs.
+
 ## 0.18.0 (2026-11-27)
 
 ### Changed

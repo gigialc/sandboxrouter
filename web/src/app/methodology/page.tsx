@@ -24,6 +24,7 @@ const SECTIONS = [
   ["agent", "A real agent"],
   ["load", "Under load"],
   ["image", "Straight from an image"],
+  ["steady", "Speed over time"],
   ["bills", "Measured bills"],
   ["limits", "What this doesn't cover"],
   ["runs", "Where it ran, and adding a run"],
@@ -227,6 +228,22 @@ export default function MethodologyPage() {
             Each sandbox runs a command whose output identifies the image, such as the language version. A provider
             is listed only when every one of its sandboxes was the image asked for. Times are from one location; the
             hourly price is the list price at that size.
+          </p>
+
+          <h2 id="steady">Speed over time</h2>
+          <p>
+            The harness starts one sandbox on each provider and keeps it. Every 10 seconds, for 10 minutes, it runs the
+            same piece of work: hashing 1 GB on one core. The sandbox times each sample with its own clock, so the network
+            between the test machine and the provider is not in the number. The sandbox is idle between samples, the way
+            an agent session is between tool calls.
+          </p>
+          <p>
+            For each run, the harness works out how much longer the 95th percentile sample took than the median one. The
+            table ranks providers by the median of that figure across their runs of the last 30 days, and shows each run&apos;s
+            own figure. A provider is listed only when every sample of every run finished. This shows whether a sandbox stays as fast as it started, which
+            depends on what else shares the machine; it does not show speed, which is the typical sample next to it. Each
+            run is one sandbox, at one time, from one location: runs differ, because a provider can place the next sandbox
+            on a busier or quieter machine, and a handful of runs is a small sample.
           </p>
 
           <h2 id="bills">Measured bills</h2>
