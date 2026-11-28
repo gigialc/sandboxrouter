@@ -4,6 +4,12 @@ import { Router, sizeOf, type Size } from "./router.js";
 import { runTask, taskMs, taskUsd, TASKS, type TaskKind, type TaskRun } from "./task.js";
 import type { ProviderId, SandboxSpec } from "./types.js";
 
+/**
+ * Providers whose delete request only schedules the deletion: the adapter then waits until the sandbox is
+ * gone, so their delete time covers the whole teardown. For the others it is the delete request alone.
+ */
+export const KILL_WAITS_UNTIL_GONE: ReadonlySet<ProviderId> = new Set<ProviderId>(["northflank", "blaxel"]);
+
 export interface BenchRow {
   provider: ProviderId;
   runs: number;
@@ -15,6 +21,11 @@ export interface BenchRow {
   medianExecMs?: number;
   /** Paired time from request to first successful command. */
   medianReadyMs?: number;
+  /**
+   * Median time for the delete call to return, over the sandboxes that started. It is the wait the caller
+   * sees: a provider may finish freeing the machine after it answers.
+   */
+  medianKillMs?: number;
   hourlyUsd: number;
   /**
    * Of the failures, how many the provider refused for a limit or quota on the benchmarking account (a rate limit,
@@ -79,6 +90,7 @@ export async function bench(opts: {
     const createMs: number[] = [];
     const execMs: number[] = [];
     const readyMs: number[] = [];
+    const killMs: number[] = [];
     const tasks: TaskRun[] = [];
     const taskReadyMs: number[] = [];
     let createFailures = 0;
@@ -116,10 +128,16 @@ export async function bench(opts: {
           if (LIMITED_ERROR.test(lastError)) limited++;
         }
       } finally {
-        await box?.kill().catch((err) => {
-          cleanupFailures++;
-          log(`${id} cleanup failed: ${(err as Error).message.slice(0, 180)}`);
-        });
+        if (box) {
+          const k0 = performance.now();
+          await box.kill().then(
+            () => killMs.push(Math.max(1, Math.round(performance.now() - k0))),
+            (err) => {
+              cleanupFailures++;
+              log(`${id} cleanup failed: ${(err as Error).message.slice(0, 180)}`);
+            },
+          );
+        }
       }
     }
     const failures = createFailures + commandFailures;
@@ -135,6 +153,7 @@ export async function bench(opts: {
       medianCreateMs: median(createMs),
       medianExecMs: median(execMs),
       medianReadyMs: median(readyMs),
+      ...(killMs.length ? { medianKillMs: median(killMs) } : {}),
       hourlyUsd: hourlyCost(id, shape),
       ...(limited ? { limited } : {}),
       ...(kind ? { taskOk: tasks.length, medianTaskReadyMs: median(taskReadyMs) } : {}),
@@ -179,11 +198,11 @@ export function benchMarkdown(rows: BenchRow[]): string {
       ? `$${taskUsd(r.provider, r.size ?? fittingSpec(r.provider), r.medianTaskReadyMs, r.medianTaskMs, r.medianTaskCpuMs, 1, false, r.medianTaskMaxCoreMs).toFixed(6)}`
       : "n/a";
   const lines = [
-    `| # | Provider | Create (median) | Ready (median) | Exec round trip |${task ? " Task (median) | Est. task cost | Completed |" : ""} $/hr (list, size run) | Ready |`,
-    `|---|---|---|---|---|${task ? "---|---|---|" : ""}---|---|`,
+    `| # | Provider | Create (median) | Ready (median) | Exec round trip | Delete (median) |${task ? " Task (median) | Est. task cost | Completed |" : ""} $/hr (list, size run) | Ready |`,
+    `|---|---|---|---|---|---|${task ? "---|---|---|" : ""}---|---|`,
     ...rows.map(
       (r, i) =>
-        `| ${i + 1} | ${name(r.provider)} | ${ms(r.medianCreateMs)} | ${ms(r.medianReadyMs)} | ${ms(r.medianExecMs)} |${task ? ` ${ms(r.medianTaskMs)} | ${cost(r)} | ${r.taskOk ?? 0}/${r.runs} |` : ""} $${r.hourlyUsd.toFixed(3)} | ${r.runs - r.failures}/${r.runs}${r.limited ? ` (${r.limited} refused)` : ""} |`,
+        `| ${i + 1} | ${name(r.provider)} | ${ms(r.medianCreateMs)} | ${ms(r.medianReadyMs)} | ${ms(r.medianExecMs)} | ${ms(r.medianKillMs)} |${task ? ` ${ms(r.medianTaskMs)} | ${cost(r)} | ${r.taskOk ?? 0}/${r.runs} |` : ""} $${r.hourlyUsd.toFixed(3)} | ${r.runs - r.failures}/${r.runs}${r.limited ? ` (${r.limited} refused)` : ""} |`,
     ),
   ];
   return lines.join("\n");
