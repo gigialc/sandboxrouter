@@ -26,6 +26,17 @@ const report = (rows: BenchRow[], label?: string, date = "2026-11-04T12:00:00.00
 });
 
 describe("leaderboard", () => {
+  it("takes delete time from the newest run that timed it, even when an older run has more samples", () => {
+    const rows = aggregate([
+      report([{ ...row("e2b", 300), runs: 100 }], "a", "2026-11-04T12:00:00.000Z"),
+      report([{ ...row("e2b", 320), medianKillMs: 250 }], "a", "2026-11-10T12:00:00.000Z"),
+      report([{ ...row("e2b", 310), medianKillMs: 180 }], "a", "2026-11-12T12:00:00.000Z"),
+      report([row("maritime", 900)], "a"),
+    ]);
+    expect(rows.find((r) => r.provider === "e2b")).toMatchObject({ medianCreateMs: 300, medianKillMs: 180 });
+    expect(rows.find((r) => r.provider === "maritime")!.medianKillMs).toBeUndefined();
+  });
+
   it("takes the median across locations and sorts by cold start", () => {
     const rows = aggregate([
       report([row("maritime", 900), row("e2b", 300)], "a"),

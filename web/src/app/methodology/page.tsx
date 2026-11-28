@@ -127,6 +127,13 @@ export default function MethodologyPage() {
             successful output. The dashboard lists create and command medians separately to keep older reports comparable.
           </p>
           <p>
+            <strong>Delete</strong> measures how long the delete call takes to return, for every sandbox that started. It is the wait your
+            code sees. A provider may answer first and finish freeing the machine afterwards, so a short delete time does not show that its
+            cleanup is quick, only that it does not make you wait for it. Where a provider&apos;s delete request only schedules the deletion and the
+            sandbox keeps running for a while, the router waits until it is gone, and the row says so: that time covers the whole teardown
+            and is not comparable with the others.
+          </p>
+          <p>
             Times include the network between the test machine and the provider, so where a run happens matters. Each table row
             uses each location&apos;s best-sampled run from its last 30 days (the one with the most runs, newest on a tie), and
             the median across locations when there are several. A run is a snapshot from one machine. New reports separate create,

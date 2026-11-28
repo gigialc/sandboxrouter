@@ -2,6 +2,11 @@
 
 All notable changes. Versions follow [semver](https://semver.org/); while the version is 0.x, a minor bump can change the API.
 
+## Unreleased
+
+### Added
+- **Benchmark: delete time.** `bench` now times the delete call of every sandbox it started and reports the median (`medianKillMs`, "Delete" in the table). The site's start-time table shows it once a report has it. It is the wait the caller sees; a provider may finish cleanup after it answers. Rows where the router waits until the sandbox is gone (Northflank) are marked.
+
 ## 0.18.0 (2026-11-27)
 
 ### Changed

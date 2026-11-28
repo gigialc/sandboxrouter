@@ -5,7 +5,7 @@ import type { PublishedData } from "./recommend.js";
 
 export const PUBLISHED: PublishedData = {
   "schema": 1,
-  "dataThrough": "2026-11-18T22:34:03.877Z",
+  "dataThrough": "2026-11-28T15:05:23.053Z",
   "conditionalStartFees": {
     "boat": {
       "minUsd": 0.03,
@@ -155,6 +155,19 @@ export const PUBLISHED: PublishedData = {
       "hourlyUsd": 0.2168,
       "measuredAt": "2026-11-17T16:19:15.367Z"
     },
+    "morph": {
+      "name": "Morph Cloud",
+      "size": {
+        "vcpu": 2,
+        "memoryGb": 4
+      },
+      "medianCreateMs": 966,
+      "medianReadyMs": 1502,
+      "successRate": 1,
+      "runs": 5,
+      "hourlyUsd": 0.1,
+      "measuredAt": "2026-11-28T15:05:23.053Z"
+    },
     "maritime": {
       "name": "Maritime",
       "size": {
@@ -179,19 +192,6 @@ export const PUBLISHED: PublishedData = {
       "runs": 100,
       "hourlyUsd": 0.1656,
       "measuredAt": "2026-11-18T22:34:03.877Z"
-    },
-    "morph": {
-      "name": "Morph Cloud",
-      "size": {
-        "vcpu": 2,
-        "memoryGb": 4
-      },
-      "medianCreateMs": 1236,
-      "medianReadyMs": 1967,
-      "successRate": 1,
-      "runs": 3,
-      "hourlyUsd": 0.1,
-      "measuredAt": "2026-11-18T17:57:59.751Z"
     },
     "boat": {
       "name": "Boat",
@@ -269,15 +269,15 @@ export const PUBLISHED: PublishedData = {
     "northflank": {
       "name": "Northflank",
       "size": {
-        "vcpu": 0.2,
-        "memoryGb": 0.5
+        "vcpu": 2,
+        "memoryGb": 4
       },
-      "medianCreateMs": 7789,
-      "medianReadyMs": 8191,
+      "medianCreateMs": 5519,
+      "medianReadyMs": 5811,
       "successRate": 1,
-      "runs": 3,
-      "hourlyUsd": 0.0074990000000000005,
-      "measuredAt": "2026-11-18T17:51:44.834Z"
+      "runs": 5,
+      "hourlyUsd": 0.06666,
+      "measuredAt": "2026-11-28T15:05:23.053Z"
     }
   },
   "jobs": {

@@ -5,7 +5,7 @@ import { BILLED_VS_LIST } from "./billing.js";
 import { AGENT_TASK_VERSION } from "./agent-bench.js";
 import { isCurrentTask, TASK_VERSION, taskByVersion, taskUsd, type PhaseMs } from "./task.js";
 import { median } from "./bench-store.js";
-import type { BenchRow } from "./bench.js";
+import { KILL_WAITS_UNTIL_GONE, type BenchRow } from "./bench.js";
 import { sizeOf, type Size } from "./router.js";
 import type { ProviderId, SandboxSpec } from "./types.js";
 
@@ -82,6 +82,10 @@ export interface LeaderRow {
   medianCreateMs?: number;
   medianExecMs?: number;
   medianReadyMs?: number;
+  /** Median time for the delete call to return, from each location's newest run that timed it. */
+  medianKillMs?: number;
+  /** The delete time covers waiting until the sandbox is gone (`KILL_WAITS_UNTIL_GONE`). */
+  killWaitsUntilGone?: boolean;
   successRate: number;
   /** Runs behind the row that the provider was asked to do (refusals for an account limit left out). */
   runs: number;
@@ -110,11 +114,14 @@ export function aggregate(reports: BenchReport[], cohort: Size = DEFAULT_SIZE): 
     if ((newest.get(key) ?? "") < rep.date) newest.set(key, rep.date);
   }
   const MONTH = 30 * 86_400_000;
+  // Delete timing is newer than most reports: take it from each location's newest run that has it.
+  const kills = new Map<string, { row: BenchRow; date: string }>();
   for (const rep of comparable) {
     for (const r of rep.rows) {
       if (!KNOWN.has(r.provider)) continue;
       const key = `${r.provider}\u0000${rep.label ?? ""}`;
       if (Date.parse(newest.get(key)!) - Date.parse(rep.date) > MONTH) continue;
+      if (typeof r.medianKillMs === "number" && rep.date > (kills.get(key)?.date ?? "")) kills.set(key, { row: r, date: rep.date });
       const seen = latest.get(key);
       if (!seen || r.runs > seen.row.runs || (r.runs === seen.row.runs && rep.date > seen.date)) latest.set(key, { row: r, date: rep.date });
     }
@@ -130,6 +137,7 @@ export function aggregate(reports: BenchReport[], cohort: Size = DEFAULT_SIZE): 
     const ok = rs.reduce((n, r) => n + (r.runs - r.failures), 0);
     // Refusals for a limit on the benchmarking account aren't the provider failing: leave them out of the rate.
     const attempted = runs - rs.reduce((n, r) => n + (r.limited ?? 0), 0);
+    const killed = [...kills.values()].filter(({ row }) => row.provider === id && sameSize(row.size ?? sizeOf(id, cohort), size)).map(({ row }) => row.medianKillMs!);
     return {
       provider: id,
       name: CATALOG.find((c) => c.id === id)!.name,
@@ -137,6 +145,7 @@ export function aggregate(reports: BenchReport[], cohort: Size = DEFAULT_SIZE): 
       medianCreateMs: median(rs.map((r) => r.medianCreateMs).filter((n): n is number => typeof n === "number")),
       medianExecMs: median(rs.map((r) => r.medianExecMs).filter((n): n is number => typeof n === "number")),
       medianReadyMs: rs.every((r) => r.medianReadyMs !== undefined) ? median(rs.map((r) => r.medianReadyMs!)) : undefined,
+      ...(killed.length ? { medianKillMs: median(killed), ...(KILL_WAITS_UNTIL_GONE.has(id) ? { killWaitsUntilGone: true } : {}) } : {}),
       successRate: attempted ? ok / attempted : 0,
       runs: attempted,
       hourlyUsd: hourlyCost(id, measured(size)),
