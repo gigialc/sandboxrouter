@@ -3,6 +3,7 @@ import { pageAlternates } from "@/lib/public-pages";
 import { PageHeader, SectionTitle } from "@/components/chrome";
 import { DesktopTable } from "@/components/DesktopTable";
 import { PriceIndex } from "@/components/PriceIndex";
+import { PriceSpread } from "@/components/PriceSpread";
 import { ProviderTable } from "@/components/ProviderTable";
 import { Sources } from "@/components/Sources";
 
@@ -14,7 +15,10 @@ export default function ProvidersPage() {
       <div id="providers" className="scroll-mt-20">
         <PageHeader kicker="Providers" title="What a sandbox costs, everywhere" />
       </div>
-      <div className="mt-8 max-w-3xl">
+      <div className="mt-8 max-w-4xl">
+        <PriceSpread />
+      </div>
+      <div className="mt-12 max-w-3xl">
         <PriceIndex />
       </div>
       <div className="mt-12">

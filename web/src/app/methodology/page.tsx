@@ -17,6 +17,7 @@ const day = (iso: string) => new Date(iso).toLocaleDateString("en-US", { year: "
 const SECTIONS = [
   ["pricing", "Prices"],
   ["index", "The price index"],
+  ["spread", "The price of compute"],
   ["active-cpu", "Providers that bill active CPU"],
   ["check", "The real-account check"],
   ["speed", "Start time"],
@@ -88,6 +89,20 @@ export default function MethodologyPage() {
             and lowest estimated direct-provider cost among tested providers that fit the job. It uses the pricing rules above and
             scales the single-run estimate for 1,000 calls, assuming starts remain within plan allowances. These scenarios use
             direct provider rates. The change shown is since the last recorded value.
+          </p>
+
+          <h2 id="spread">The price of compute</h2>
+          <p>
+            The chart on the Providers page puts every hosted provider on one axis. For each, it takes the list price of a
+            2 vCPU / 4 GB sandbox running for an hour with every core busy and divides it by two: a price per vCPU-hour, each
+            vCPU with its 2 GB of memory. Providers that cannot run that size are left out. The median is across all of them,
+            tested or not, and these are published prices only: no correction from measured bills, no start fees, no
+            minimum charges. The price index above answers what a piece of work costs; this shows how far apart providers are.
+          </p>
+          <p>
+            Each provider&apos;s price is written to a history file whenever it differs from the last entry, in the same change
+            that edits the catalog. An entry can be a provider changing its price, a provider being added, or a correction of
+            ours, so the history is not drawn as a line until entries say which they are.
           </p>
 
           <h2 id="active-cpu">Providers that bill active CPU</h2>

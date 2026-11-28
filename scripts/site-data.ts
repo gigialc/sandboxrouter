@@ -8,7 +8,7 @@ import { loadSteadyReports, steadyTable } from "../src/steady.js";
 import { assistantTable, loadAssistantReports } from "../src/assistant.js";
 import { agentTable, aggregate, burstTable, loadAgentReports, loadBursts, loadReports, taskOutcomes, taskTable } from "../src/leaderboard.js";
 import { TASKS } from "../src/task.js";
-import { priceIndex } from "../src/price-index.js";
+import { priceIndex, priceSpread } from "../src/price-index.js";
 import { computerCatalog } from "../src/computers.js";
 import { CHECK_STEPS } from "../src/check.js";
 import { conformanceTable, liveStatus } from "../src/conformance.js";
@@ -274,6 +274,9 @@ const data = {
   // One conversation of a chat assistant with a code tool: first answer, a file up and down, short calls, a call after idle.
   assistant: assistantTable(loadAssistantReports("results")),
   // Today's price index, and how it has moved (scripts/price-index.json, recorded daily when it changes).
+  // Every hosted provider's list price for the same sandbox today, and how those prices have been recorded over time.
+  priceSpread: priceSpread(),
+  priceHistory: existsSync("scripts/price-history.json") ? JSON.parse(readFileSync("scripts/price-history.json", "utf8")) : [],
   priceIndex: {
     lines: priceIndex(),
     history: existsSync("scripts/price-index.json") ? JSON.parse(readFileSync("scripts/price-index.json", "utf8")) : [],

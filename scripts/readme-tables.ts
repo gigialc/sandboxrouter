@@ -2,7 +2,8 @@
 // Env (credentials) and Compatibility (saved `check --save` runs) in docs/reference.md.
 // Run: node --import tsx scripts/readme-tables.ts           print them
 //      node --import tsx scripts/readme-tables.ts --write   replace them in those files
-import { readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { withTodaysPrices, type PriceHistoryEntry } from "../src/price-index.js";
 import { CATALOG, DEFAULT_MEMORY_GB, DEFAULT_VCPU, accessLabel, hourlyCost, listingOrder, planLabel, unfit } from "../src/catalog.js";
 import { CHECK_STEPS } from "../src/check.js";
 import { conformanceTable, liveStatus } from "../src/conformance.js";
@@ -104,6 +105,13 @@ if (!process.argv.includes("--write")) {
       "",
     ].join("\n"),
   );
+
+  // Every provider's list price at one size, recorded whenever it differs from the last entry: the price
+  // history the site draws. CI fails when a catalog change comes without its entry.
+  const HISTORY = "scripts/price-history.json";
+  const before = existsSync(HISTORY) ? (JSON.parse(readFileSync(HISTORY, "utf8")) as PriceHistoryEntry[]) : [];
+  const after = withTodaysPrices(before, new Date().toISOString().slice(0, 10));
+  if (after !== before) writeFileSync(HISTORY, JSON.stringify(after, null, 2) + "\n");
 
   // Precise metered usage against the list-price prediction, from saved `cost run` + `cost settle`.
   const billed = billedVsList().map((b) => `  ${b.provider}: { ratio: ${b.ratio}, date: "${b.date}" },`);

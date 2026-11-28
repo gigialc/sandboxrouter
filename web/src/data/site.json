@@ -122,7 +122,7 @@
     }
   },
   "version": "0.18.0",
-  "generatedAt": "2026-11-28T18:53:47.902Z",
+  "generatedAt": "2026-11-28T19:24:54.964Z",
   "shapes": [
     "1x2",
     "2x4",
@@ -10036,6 +10036,286 @@
       "sessionUsd": 0.004973948,
       "hourlyUsd": 0.25220016,
       "measuredAt": "2026-11-28T18:53:43.434Z"
+    }
+  ],
+  "priceSpread": {
+    "size": {
+      "vcpu": 2,
+      "memoryGb": 4
+    },
+    "medianVcpuHourUsd": 0.0745,
+    "rows": [
+      {
+        "provider": "agent37",
+        "name": "Agent37",
+        "hourlyUsd": 0.0065,
+        "vcpuHourUsd": 0.00325,
+        "tested": true
+      },
+      {
+        "provider": "instabox",
+        "name": "InstaBox",
+        "hourlyUsd": 0.017,
+        "vcpuHourUsd": 0.0085,
+        "tested": false
+      },
+      {
+        "provider": "openscale",
+        "name": "OpenScale Sandboxes",
+        "hourlyUsd": 0.017,
+        "vcpuHourUsd": 0.0085,
+        "tested": true
+      },
+      {
+        "provider": "boat",
+        "name": "Boat",
+        "hourlyUsd": 0.018,
+        "vcpuHourUsd": 0.009,
+        "tested": true
+      },
+      {
+        "provider": "maritime",
+        "name": "Maritime",
+        "hourlyUsd": 0.022,
+        "vcpuHourUsd": 0.011,
+        "tested": true
+      },
+      {
+        "provider": "runcloud",
+        "name": "Run Cloud",
+        "hourlyUsd": 0.0297,
+        "vcpuHourUsd": 0.01485,
+        "tested": false
+      },
+      {
+        "provider": "koyeb",
+        "name": "Koyeb Sandboxes",
+        "hourlyUsd": 0.0576,
+        "vcpuHourUsd": 0.0288,
+        "tested": false
+      },
+      {
+        "provider": "sail",
+        "name": "Sailboxes (Sail Research)",
+        "hourlyUsd": 0.062,
+        "vcpuHourUsd": 0.031,
+        "tested": true
+      },
+      {
+        "provider": "northflank",
+        "name": "Northflank",
+        "hourlyUsd": 0.0667,
+        "vcpuHourUsd": 0.03335,
+        "tested": true
+      },
+      {
+        "provider": "morph",
+        "name": "Morph Cloud",
+        "hourlyUsd": 0.1,
+        "vcpuHourUsd": 0.05,
+        "tested": true
+      },
+      {
+        "provider": "exedev",
+        "name": "exe.dev",
+        "hourlyUsd": 0.105,
+        "vcpuHourUsd": 0.0525,
+        "tested": false
+      },
+      {
+        "provider": "novita",
+        "name": "Novita AI Agent Sandbox",
+        "hourlyUsd": 0.1166,
+        "vcpuHourUsd": 0.0583,
+        "tested": true
+      },
+      {
+        "provider": "digitalocean",
+        "name": "DigitalOcean Harness Runtime",
+        "hourlyUsd": 0.126,
+        "vcpuHourUsd": 0.063,
+        "tested": false
+      },
+      {
+        "provider": "freestyle",
+        "name": "Freestyle",
+        "hourlyUsd": 0.1336,
+        "vcpuHourUsd": 0.0668,
+        "tested": true
+      },
+      {
+        "provider": "beam",
+        "name": "Beam",
+        "hourlyUsd": 0.14,
+        "vcpuHourUsd": 0.07,
+        "tested": true
+      },
+      {
+        "provider": "codesandbox",
+        "name": "CodeSandbox SDK (Together)",
+        "hourlyUsd": 0.1486,
+        "vcpuHourUsd": 0.0743,
+        "tested": false
+      },
+      {
+        "provider": "dedalus",
+        "name": "Dedalus Machines",
+        "hourlyUsd": 0.149,
+        "vcpuHourUsd": 0.0745,
+        "tested": false
+      },
+      {
+        "provider": "sprites",
+        "name": "Fly.io Sprites",
+        "hourlyUsd": 0.1645,
+        "vcpuHourUsd": 0.08225,
+        "tested": true
+      },
+      {
+        "provider": "blaxel",
+        "name": "Blaxel",
+        "hourlyUsd": 0.1656,
+        "vcpuHourUsd": 0.0828,
+        "tested": true
+      },
+      {
+        "provider": "daytona",
+        "name": "Daytona",
+        "hourlyUsd": 0.1656,
+        "vcpuHourUsd": 0.0828,
+        "tested": true
+      },
+      {
+        "provider": "e2b",
+        "name": "E2B",
+        "hourlyUsd": 0.1656,
+        "vcpuHourUsd": 0.0828,
+        "tested": true
+      },
+      {
+        "provider": "hopx",
+        "name": "HOPX",
+        "hourlyUsd": 0.1656,
+        "vcpuHourUsd": 0.0828,
+        "tested": false
+      },
+      {
+        "provider": "superserve",
+        "name": "Superserve",
+        "hourlyUsd": 0.1656,
+        "vcpuHourUsd": 0.0828,
+        "tested": true
+      },
+      {
+        "provider": "langsmith",
+        "name": "LangSmith Sandboxes",
+        "hourlyUsd": 0.189,
+        "vcpuHourUsd": 0.0945,
+        "tested": false
+      },
+      {
+        "provider": "tensorlake",
+        "name": "Tensorlake",
+        "hourlyUsd": 0.2,
+        "vcpuHourUsd": 0.1,
+        "tested": true
+      },
+      {
+        "provider": "upstash",
+        "name": "Upstash Box",
+        "hourlyUsd": 0.2,
+        "vcpuHourUsd": 0.1,
+        "tested": false
+      },
+      {
+        "provider": "cloudflare",
+        "name": "Cloudflare Sandbox",
+        "hourlyUsd": 0.216,
+        "vcpuHourUsd": 0.108,
+        "tested": true
+      },
+      {
+        "provider": "agentcore",
+        "name": "Amazon Bedrock AgentCore Code Interpreter",
+        "hourlyUsd": 0.2168,
+        "vcpuHourUsd": 0.1084,
+        "tested": true
+      },
+      {
+        "provider": "modal",
+        "name": "Modal",
+        "hourlyUsd": 0.238,
+        "vcpuHourUsd": 0.119,
+        "tested": true
+      },
+      {
+        "provider": "lambda",
+        "name": "AWS Lambda MicroVMs",
+        "hourlyUsd": 0.2522,
+        "vcpuHourUsd": 0.1261,
+        "tested": true
+      },
+      {
+        "provider": "deno",
+        "name": "Deno Sandbox",
+        "hourlyUsd": 0.3,
+        "vcpuHourUsd": 0.15,
+        "tested": false
+      },
+      {
+        "provider": "runloop",
+        "name": "Runloop",
+        "hourlyUsd": 0.3168,
+        "vcpuHourUsd": 0.1584,
+        "tested": false
+      },
+      {
+        "provider": "vercel",
+        "name": "Vercel Sandbox",
+        "hourlyUsd": 0.3408,
+        "vcpuHourUsd": 0.1704,
+        "tested": true
+      }
+    ]
+  },
+  "priceHistory": [
+    {
+      "date": "2026-11-28",
+      "prices": {
+        "agent37": 0.0065,
+        "agentcore": 0.2168,
+        "beam": 0.14,
+        "blaxel": 0.1656,
+        "boat": 0.018,
+        "cloudflare": 0.216,
+        "codesandbox": 0.1486,
+        "daytona": 0.1656,
+        "dedalus": 0.149,
+        "deno": 0.3,
+        "digitalocean": 0.126,
+        "e2b": 0.1656,
+        "exedev": 0.105,
+        "freestyle": 0.1336,
+        "hopx": 0.1656,
+        "instabox": 0.017,
+        "koyeb": 0.0576,
+        "lambda": 0.2522,
+        "langsmith": 0.189,
+        "maritime": 0.022,
+        "modal": 0.238,
+        "morph": 0.1,
+        "northflank": 0.0667,
+        "novita": 0.1166,
+        "openscale": 0.017,
+        "runcloud": 0.0297,
+        "runloop": 0.3168,
+        "sail": 0.062,
+        "sprites": 0.1645,
+        "superserve": 0.1656,
+        "tensorlake": 0.2,
+        "upstash": 0.2,
+        "vercel": 0.3408
+      }
     }
   ],
   "priceIndex": {
